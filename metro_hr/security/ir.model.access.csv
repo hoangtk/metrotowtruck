@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_manager,access_hr_manager,model_hr_employee_holidaycalendar,base.group_hr_manager,1,1,1,1
+access_hr_officer,access_hr_officer,model_hr_employee_holidaycalendar,base.group_hr_user,1,1,0,0
+access_hr_employee,access_hr_employee,model_hr_employee_holidaycalendar,base.group_user,1,0,0,0
+access_hr_manager_salary,access_hr_manager_salary,model_hr_employee_salaryhistory,base.group_hr_manager,1,1,1,1
+access_hr_officer_salary,access_hr_officer_salary,model_hr_employee_salaryhistory,base.group_hr_user,1,1,0,0
+access_hr_employee_salary,access_hr_employee_salary,model_hr_employee_salaryhistory,base.group_user,1,0,0,0

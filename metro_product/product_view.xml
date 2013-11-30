@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<!-- Sequence -->
+		<record id="metro_view_product_sequence_form" model="ir.ui.view">
+			<field name="name">product.sequence.form</field>
+		    <field name="model">product.sequence</field>
+		    <field name="type">form</field>
+		    <field name="arch" type="xml">
+				<form string="Product Sequence">
+					<field name="prefix" select="1"/>
+					<field name="suffix" select="1"/>
+					<field name="separator" select="1"/>
+					<field name="active" select="1"/>
+				</form>
+			</field>
+		</record>
+		
+		<record id="metro_view_product_sequence_tree" model="ir.ui.view">
+			<field name="name">product.sequence.tree</field>
+		    <field name="model">product.sequence</field>
+		    <field name="type">tree</field>
+		    <field name="arch" type="xml">
+				<tree string="Product Sequence">
+					<field name="prefix"/>
+					<field name="suffix"/>
+					<field name="separator"/>
+					<field name="active"/>
+				</tree>
+			</field>
+		</record>
+		
+		<record id="metro_action_product_sequence" model="ir.actions.act_window">
+            <field name="name">Product Sequence</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.sequence</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="metro_view_product_sequence_tree"/>
+        </record>
+		
+
+		<!-- Attribute -->
+		<record id="metro_view_product_attribute_form" model="ir.ui.view">
+			<field name="name">product.attribute.form</field>
+		    <field name="model">product.attribute</field>
+		    <field name="type">form</field>
+		    <field name="arch" type="xml">
+				<form string="Attribute">
+					<field name="name"/>
+				</form>
+			</field>
+		</record>
+		
+		<record id="metro_view_product_attribute_tree" model="ir.ui.view">
+			<field name="name">product.attribute.tree</field>
+			<field name="model">product.attribute</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Attribute">
+					<field name="name"/>
+			    </tree>
+		  </field>
+		</record>
+		
+		<record id="metro_action_product_attribute" model="ir.actions.act_window">
+            <field name="name">Product Attribute</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.attribute</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="metro_view_product_attribute_tree"/>
+        </record>
+
+        
+
+        <!-- Attribute Line  --> 
+        <record id="metro_view_product_attribute_line_form" model="ir.ui.view">
+			<field name="name">product.attribute.line.form</field>
+		    <field name="model">product.attribute.line</field>
+		    <field name="type">form</field>
+		    <field name="arch" type="xml">
+				<form string="Attributes">
+					<field name="attribute_id"/>
+					<field name="attr_value"/>
+				</form>
+			</field>
+		</record>
+		
+		<record id="metro_view_product_attribute_line_tree" model="ir.ui.view">
+			<field name="name">product.attribute.line.tree</field>
+			<field name="model">product.attribute.line</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Attributes">
+					<field name="attribute_id" string="Attribute"/>
+					<field name="attr_value" string="Value"/>
+			    </tree>
+		  </field>
+		</record>
+        
+   <!--     
+       <record id="metro_view_product_attribute_category_tree" model="ir.ui.view">
+			<field name="name">product.attribute.category.tree</field>
+			<field name="model">product.category</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Attributes">
+                    <field name="attribute" string="Attribute"/>
+			    </tree>
+		  </field>
+		</record>
+        
+    -->
+
+ <record id="metro_view_product_attribute_category_form1" model="ir.ui.view">
+			<field name="name">product.attribute.category.form1</field>
+		    <field name="model">product.category</field>
+		    <field name="inherit_id" ref="product.product_category_form_view"/>
+            <field name="arch" type="xml">
+		        <data>
+                    <xpath expr="//group[@name='parent']" position="inside">
+                        <group name="Attribute" string="Attributes" colspan="2" groups="stock.group_stock_manager">
+                            <field name="attribute" string="Attribute" widget="many2many_tags" groups="stock.group_stock_manager"/>
+                        </group>
+                    </xpath>
+                </data>
+			</field>
+</record> 
+        
+
+		<!-- Product  -->
+		<record id="metro_product_product_tree_view" model="ir.ui.view">
+            <field name="name">metro.product.product.tree</field>
+            <field name="model">product.product</field>
+            <field name="type">tree</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+	            <field name="name" position="after">
+	            	<field name="cn_name" string="中国名"/>
+	            </field>
+            </field>
+        </record>
+        
+        <record id="metro_product_manufacturer_form_view" model="ir.ui.view">
+            <field name="name">metro.product.manufacturer.normal.form</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="product_manufacturer.view_product_form_expiry"/>
+            <field name="arch" type="xml">
+                <data>
+                    <group string="Attributes" position="replace">
+                    </group>
+                </data>
+            </field>
+        </record>
+        
+		<record id="metro_product_normal_form_view" model="ir.ui.view">
+            <field name="name">metro.product.normal.form</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+            <data>
+                <field name="categ_id" position="replace">
+                    <field name="categ_id"/>
+                </field>
+                
+				<notebook position="inside">
+            		<page string="Attributes">
+                        <field name="attribute_line" colspan="4" nolabel="1">
+                            <tree string="Attributes" editable="bottom">
+                                <field name="attribute_id" domain="[('category_ids','in',parent.categ_id)]" />
+                                <field name="attr_value"/>
+                            </tree>
+                        </field>
+            		</page>
+            	</notebook>
+
+                <xpath expr="//notebook/page[@string='Information']/group" position="replace">
+
+                    <group>
+                        <group>
+                            <field name="type"/>
+                            <field name="uom_id" on_change="onchange_uom(uom_id,uom_po_id)" groups="product.group_uom"/>
+                            <field name="list_price"/>
+                        </group>
+                        <group>
+                            <group colspan="2" col="3">
+                                <group colspan="2" col="2">
+                                    <field name="default_code"/>
+                                </group>
+                                <group colspan="1" col="1" >
+                                    <button type="object" icon="gtk-execute" name="get_sequence" string=""
+                                    help="Only press this button to create a new part number! 只有按这个按钮来创建一个新的零件编号！"
+									groups="metro.group_metro_base_manager"  />
+                                </group>
+                                <label for="ean13"/>
+                                <div name="ean">
+                                    <field name="ean13" placeholder="e.g. 5901234123457"/>
+                                </div>
+                            </group>
+                        </group>
+                        <group>
+                            <field groups="product.group_product_variant" name="variants"/>
+                            <field name="price_margin" groups="product.group_product_variant"/>
+                            <field name="price_extra" groups="product.group_product_variant"/>
+                        </group>
+                    </group>
+                    
+
+                </xpath>
+   				
+				<!-- Creating a new title block -->
+				<xpath expr="//h1" position="after">
+                  <label for="cn_name" help="您必须包括所有部件的英文名称为！"/>
+                  <field name="cn_name" colspan="4" placeholder="中国名" />
+               </xpath>
+                </data>
+            </field>
+		</record>
+		
+        <record id="metro_product_search_form_view" model="ir.ui.view">
+            <field name="name">metro.product.search.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+            	<field name="name" position="replace">
+            		<field name="name" string="Product" filter_domain="['|','|',('name','ilike',self),('default_code','ilike',self),('cn_name','ilike',self)]"/>
+            	</field>
+            </field>
+        </record>
+        		
+		<menuitem id="metro_menu_product" name="Products" parent="metro.menu_mttl_config" groups="metro.group_metro_base_manager" />
+		<menuitem id="metro_menu_product_sequence" action="metro_action_product_sequence" name="Product Sequence" parent="metro_menu_product"/>
+		<menuitem id="metro_menu_product_attribute_metro" action="metro_action_product_attribute" name="Product Attribute" parent="metro_menu_product"/>
+        <menuitem id="metro_menu_product_attribute_product" action="metro_action_product_attribute" name="Product Attribute" parent="stock.menu_product_in_config_stock"/>
+        <menuitem id="metro_menu_product_attribute_category_metro" action="metro_action_product_attribute" name="Product Attribute Category" parent="metro_menu_product"/>
+      <!--  <menuitem id="metro_menu_product_attribute_category_product" action="metro_action_product_attribute_category" name="Product Attribute Category" parent="stock.menu_product_in_config_stock"/>
+-->	</data>
+</openerp>	

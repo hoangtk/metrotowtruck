@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+
+	<data>
+		<record id="metro_employee_form_view" model="ir.ui.view">
+			<field name="name">metro.view.employee.form</field>
+			<field name="model">hr.employee</field>
+			<field name="inherit_id" ref="hr.view_employee_form"/>
+			<field name="arch" type="xml">
+				<data>
+					<notebook position="inside">
+						<page string="Employment History" groups="base.group_hr_user">
+							<group>
+								<group string="Employment Dates" name="employment_history">
+									<field name="employment_start"/>
+                                    <field name="employment_resigned"/>
+									<field name="employment_finish"/>
+									<field name="active"/>
+								</group>
+
+							</group>
+							<group>
+								<group string="Salary History">
+									<field name="salaryhistory_ids" colspan="4" nolabel="1">
+										<tree string="Salary History" editable="bottom">
+											<field name="date"/>
+											<field name="salary"/>
+											<field name="reason"/>
+										</tree>
+									</field>
+								</group>
+							</group>
+						</page>
+					</notebook>
+					
+					<xpath expr="//notebook/page[@string='HR Settings']/group" position="replace">
+						<group string="" name="active_group">
+							
+						</group>
+					</xpath>
+				</data>
+			</field>
+         </record>
+         
+         <record model="ir.ui.view" id="metro_holiday_calendar">
+            <field name="name">hr_calendar</field>
+            <field name="model">hr.employee.holidaycalendar</field>
+            
+            <field name="arch" type="xml">
+                <calendar string="Holiday Calendar" color="holidaytype" date_start="date_start" date_stop="date_stop">
+                    <field name="name"/>
+                </calendar>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="metro_holiday_calendar_tree">
+            <field name="name">metro_holiday_calendar_tree</field>
+            <field name="model">hr.employee.holidaycalendar</field>
+            <field name="arch" type="xml">
+                <tree string="Calendar">
+                    <field name="name"/>
+                    <field name="date_start" />
+                    <field name="date_stop"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="metro_holiday_calendar_form">
+            <field name="name">metro_holiday_calendar_form</field>
+            <field name="model">hr.employee.holidaycalendar</field>
+            <field name="arch" type="xml">
+                <form string="Create a New Holiday">
+                    <group colspan="1">
+                        <field name="name"/>
+                    </group>
+                    <group>
+                        <field name="date_start" />
+                        <field name="date_stop" />
+                        <field name="holidaytype" colspan="2" />
+                    </group>
+                </form>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="metro_holiday_calendar_action">
+            <field name="name">Metro Holiday Calendar</field>
+            <field name="res_model">hr.employee.holidaycalendar</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar,tree,form</field>
+            <field name="view_id" ref="metro_holiday_calendar"/>
+        </record>
+        
+        <menuitem id="menu_metro_holiday_calendar_main_action"  name="Calendars" parent="metro.mttl_metro" sequence="1" />
+        <menuitem id="menu_metro_holiday_calendar_action" name="Factory Holidays" parent="menu_metro_holiday_calendar_main_action" action="metro_holiday_calendar_action"/>   
+        <menuitem id="menu_metro_hr_holiday_calendar_action" name="Factory Holidays" parent="hr.menu_hr_main" action="metro_holiday_calendar_action"/>   
+        
+	</data>
+</openerp>	
