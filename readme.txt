@@ -4,4 +4,4 @@ multi_image:installed
 change_currency: not install
 boot: not install
 
-test
+testvvv
