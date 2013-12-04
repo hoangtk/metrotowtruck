@@ -1,0 +1,223 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+    <record model="ir.ui.view" id="purchase_order_form_req">
+        <field name="name">purchase.order.form.req</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <field name="validator" position="before">
+                <field name="req_id"/>
+            </field>
+        </field>
+    </record>
+
+<!-- 	 <record model="ir.ui.view" id="purchase_order_search_inherit">
+        <field name="name">purchase.order.list.select.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='approved']" position="after">
+                <filter icon="terp-gtk-jump-to-rtl" string="Requisition" domain="[('requisition_id','!=',False)]"  help="Purchase Orders with requisition"/>
+            </xpath>
+        </field>
+    </record>  -->
+
+    <record model="ir.ui.view" id="view_pur_req_form">
+        <field name="name">pur.req.form</field>
+        <field name="model">pur.req</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Requisition" version="7.0">
+            <header>
+				<button name="req_confirm" states="draft" string="Confirm" type="object" class="oe_highlight"/>
+				<button name="gen_po" states="confirmed" string="Generate PO" type="object" class="oe_highlight"/>
+				<button name="req_done" states="in_purchase" string="In Purchasing" type="object" class="oe_highlight"/>
+				<button name="req_cancel" states="draft,confirmed,in_purchase" string="Cancel" type="object" />
+				
+<!--                 <button name="tender_in_progress" states="draft" string="Send to Suppliers" type="object" class="oe_highlight"/>
+                <button name="tender_reset" states="done,cancel" string="Reset to Draft" type="object" />
+                <button name="tender_done" states="in_progress" string="Purchase Done" type="object" class="oe_highlight"/>
+                <button name="tender_cancel" states="draft,in_progress" string="Cancel Requisition" type="object" /> -->
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_purchase,done"/>
+            </header>
+            <sheet>
+				<div class="oe_title">
+					<h1>
+						<label string="Purchase Requisition "/>
+						<field name="name" class="oe_inline" readonly="1"/>
+					</h1>
+				</div>
+                <group>
+                    <group>
+                        <field name="user_id"/>
+                        <field name="warehouse_id"/>
+                    </group>
+                    <group>
+                        <field name="date_request"/>
+                        <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                    </group>
+                </group>
+                <separator string="Remark"/>     
+                <field name="remark" class="oe_inline" placeholder="Remark..."/>
+                
+                <field name="line_ids">
+                    <tree string="Products" editable="bottom">
+                        <field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)"/>
+                        <field name="product_qty"/>
+                        <field name="product_uom_id" groups="product.group_uom"/>
+                        <field name="date_required"/>
+                        <field name="inv_qty"/>
+                        <field name="req_reason"/>
+                    </tree>
+                    <form string="Products" version="7.0">
+                        <group>
+                            <field name="product_id" />
+                            <field name="product_qty"/>
+                            <field name="product_uom_id" />
+                            <field name="date_required" />
+                            <field name="inv_qty" />
+                            <field name="req_reason" />
+                            <field name="po_lines_ids" />
+                            <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                        </group>
+                    </form>
+                </field>
+                        				             
+<!--                 <notebook>
+                    <page string="Products">
+                        <field name="line_ids">
+                            <tree string="Products" editable="bottom">
+                                <field name="product_id" on_change="onchange_product_id(product_id,product_uom_id)"/>
+                                <field name="product_qty"/>
+                                <field name="product_uom_id" groups="product.group_uom"/>
+                            </tree>
+                            <form string="Products" version="7.0">
+                                <group>
+                                    <field name="product_id" />
+                                    <field name="product_qty"/>
+                                    <field name="product_uom_id" />
+                                    <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                </group>
+                            </form>
+                        </field>
+                        <div class="oe_right oe_button_box" style="margin-top: 10px">
+                            <button name="%(action_pur_req_partner)d" type="action"
+                                string="Request a Quotation" icon="gtk-execute"
+                                attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"/>
+                        </div>
+                        <separator string="Quotations"/>
+                        <field name="purchase_ids" readonly="1">
+                            <tree string="Purchase Order">
+                                <field name="name" string="Reference"/>
+                                <field name="date_order" string="Order Date"/>
+                                <field name="partner_id"/>
+                                <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                <field name="location_id" groups="stock.group_locations"/>
+                                <field name="minimum_planned_date"/>
+                                <field name="origin"/>
+                                <field name="state"/>
+                                <button name="purchase_cancel" states="draft,confirmed,wait_auth" string="Cancel Purchase Order" icon="gtk-cancel"/>
+                                <button name="purchase_confirm" states="draft" string="Confirm Purchase Order" icon="gtk-apply"/>
+                                <button name="purchase_approve" states="confirmed" string="Approved by Supplier" icon="gtk-ok"/>
+                            </tree>
+                        </field>
+                        <separator string="Terms and Conditions"/>
+                        <field name="description"/>
+                    </page>
+                </notebook> -->
+            </sheet>
+            <div class="oe_chatter">
+              <field name="message_follower_ids" widget="mail_followers"/>
+              <field name="message_ids" widget="mail_thread"/>
+            </div> 
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="view_pur_req_tree">
+        <field name="name">pur.req.tree</field>
+        <field name="model">pur.req</field>
+        <field name="arch" type="xml">
+            <tree fonts="bold:message_unread==True" colors="blue:state == 'confirmed';green:state == 'in_purchase';grey:state == 'cancel';" string="Purchase Requisition">
+                <field name="message_unread" invisible="1"/>
+                <field name="name"/>
+                <field name="warehouse_id"/>
+                <field name="user_id"/>
+                <field name="date_request"/>
+                <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                <field name="state"/>
+            </tree>
+      </field>
+    </record>
+
+    <record id="view_pur_req_filter" model="ir.ui.view">
+            <field name="name">pur.req.list.select</field>
+            <field name="model">pur.req</field>
+            <field name="arch" type="xml">
+                <search string="Search Purchase Requisition">
+                    <field name="name" string="Purchase Requisition"/>
+                    <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter icon="terp-camera_test" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                    <filter icon="terp-camera_test" name="in_purchase" string="In Purchasing" domain="[('state','=','in_purchase')]"/>
+                    <filter icon="terp-camera_test" name="done" string="Done" domain="[('state','=','done')]"/>
+                    <separator/>
+                    <filter icon="terp-personal-" string="Cancelled"  domain="[('state','=', 'cancel')]" help="Canceled  Requisition"/>
+                    <field name=warehouse_id />
+                    <field name="user_id" />
+                    <group expand="0" string="Group By...">
+                        <filter string="Requester" icon="terp-personal" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Warehouse" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'warehouse_id'}"/>
+                        <filter string="Requisition Date" icon="terp-go-month" domain="[]" context="{'group_by':'date_request'}"/>
+                        <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
+                    </group>
+                </search>
+            </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="action_pur_req">
+        <field name="name">Purchase Requisitions</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">pur.req</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_pur_req_filter"/>
+    </record>
+
+    <menuitem
+        id="menu_pur_req"
+        sequence="-1"
+        parent="purchase.menu_procurement_management"
+        action="action_pur_req"/>
+
+<!--     <record model="ir.ui.view" id="product_normal_form_view_inherit">
+        <field name="name">product.form.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="procurement.product_form_view_procurement_button"/>
+        <field name="arch" type="xml">
+            <field name="supply_method" position="after">
+                <field name="pur_req"/>
+            </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="procurement_normal_form_view_inherit">
+        <field name="name">procurement.form.inherit</field>
+        <field name="model">procurement.order</field>
+        <field name="inherit_id" ref="procurement.procurement_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='close_move']" position="after">
+                <field name="requisition_id"/>
+            </xpath>
+        </field>
+    </record> -->
+    <act_window
+            domain="[('requisition_id', '=', active_id)]"
+            context="{'default_requisition_id': active_id}"
+            id="act_res_partner_2_purchase_order"
+            name="Purchase orders"
+            res_model="purchase.order"
+            src_model="pur.req"/>
+
+    </data>
+</openerp>
