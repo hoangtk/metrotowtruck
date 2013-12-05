@@ -20,7 +20,7 @@
 #
 ##############################################################################
 {
-    'name': 'Metro Purchase Extension',
+    'name': 'Metro Purchase',
     'version': '1.0',
     'category': 'Metro',
     'description': """
@@ -39,8 +39,10 @@
     'website': 'http://www.metrotowtrucks.com',
     'depends': ["metro", "purchase"],
     'data': [
-        'product_view.xml',
-        'security/ir.model.access.csv',
+        'pur_req_view.xml',
+        'pur_req_workflow.xml',
+        'pur_req_sequence.xml',
+        'wizard/pur_req_po.xml',
     ],
     'test': [],
     'demo': [],

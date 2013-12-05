@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="pur_req" model="workflow">
+            <field name="name">Purchase Requisition Workflow</field>
+            <field name="osv">pur.req</field>
+            <field name="on_create">True</field>
+        </record>
+        <record id="act_draft" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="flow_start">True</field>
+            <field name="name">draft</field>
+        </record>
+        <record id="act_confirmed" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">confirmed</field>
+            <field name="split_mode">OR</field>
+            <field name="kind">function</field>
+            <field name="action">wkf_confirm_req()</field>
+        </record>
+        <record id="act_in_purchase" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">in_purchase</field>
+            <field name="kind">function</field>
+            <field name="action">write({'state':'in_purchase'})</field>
+        </record>
+        <record id="act_done" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">done</field>
+            <field name="kind">function</field>
+            <field name="action">write({'state':'done'})</field>
+            <field name="flow_stop">True</field>
+            <field name="join_mode">AND</field>
+        </record>
+        <record id="act_cancel" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">cancel</field>
+            <field name="kind">function</field>
+            <field name="flow_stop">True</field>
+            <field name="action">wkf_cancel_req()</field>
+        </record>
+        
+ <!--        <record id="act_except_invoice" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">except_invoice</field>
+            <field name="kind">function</field>
+            <field name="action">write({'state':'except_invoice'})</field>
+        </record>
+        <record id="act_except_picking" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">except_picking</field>
+            <field name="kind">function</field>
+            <field name="action">write({'state':'except_picking'})</field>
+        </record>
+        <record id="act_router" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">router</field>
+            <field name="split_mode">OR</field>
+            <field name="kind">function</field>
+            <field name="join_mode">AND</field>
+            <field name="action">wkf_approve_order()</field>
+        </record>
+        <record id="act_invoice" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">invoice</field>
+            <field name="kind">subflow</field>
+            <field name="subflow_id" search="[('osv','=','account.invoice')]" type="int"/>
+            <field name="action">action_invoice_create()</field>
+        </record>
+        <record id="act_invoice_done" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">invoice_done</field>
+            <field name="action">invoice_done()</field>
+            <field name="kind">function</field>
+        </record>
+        <record id="act_invoice_end" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">invoice_end</field>
+        </record>
+        <record id="act_picking" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">picking</field>
+            <field name="kind">subflow</field>
+            <field name="subflow_id" search="[('osv','=','stock.picking')]"/>
+            <field name="action">action_picking_create()</field>
+        </record>
+        <record id="act_picking_done" model="workflow.activity">
+            <field name="wkf_id" ref="pur_req"/>
+            <field name="name">picking_done</field>
+            <field name="action">picking_done()</field>
+            <field name="kind">function</field>
+            <field name="signal_send">subflow.delivery_done</field>
+        </record>
+        -->
+<!-- transition -->
+        <record id="trans_draft_confirmed" model="workflow.transition">
+            <field name="act_from" ref="act_draft"/>
+            <field name="act_to" ref="act_confirmed"/>
+            <field name="signal">pur_req_confirm</field>
+        </record>
+        <record id="trans_confirmed_purchase" model="workflow.transition">
+            <field name="act_from" ref="act_confirmed"/>
+            <field name="act_to" ref="act_in_purchase"/>
+            <field name="signal">pur_req_purchase</field>
+        </record>
+        <record id="trans_purchase_done" model="workflow.transition">
+            <field name="act_from" ref="act_in_purchase"/>
+            <field name="act_to" ref="act_done"/>
+            <field name="signal">pur_req_done</field>
+        </record>
+        <record id="trans_draft_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_draft"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">pur_req_cancel</field>
+        </record>
+        <record id="trans_confirmed_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_confirmed"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">pur_req_cancel</field>
+        </record>                
+        <record id="trans_purchase_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_in_purchase"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">pur_req_cancel</field>
+        </record>
+    </data>
+</openerp>

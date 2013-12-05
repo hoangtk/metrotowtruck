@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>    
+         <act_window name="Generate Purchase Order"
+            res_model="pur.req.po"
+            src_model="pur.req"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="act_pur_req_po"/>
+           
+        <record id="view_stock_return_picking_form" model="ir.ui.view">
+            <field name="name">Requisition Lines</field>
+            <field name="model">pur.req.po</field>
+            <field name="arch" type="xml">
+                <form string="Requisition lines" version="7.0">
+                    <label string="Select supplier and the prodcuts that you want to generate PO."/>
+                    <group>
+                        <field name="partner_id" />
+                        <field name="line_ids">
+                            <tree string="Products" editable="bottom">
+		                        <field name="product_id"/>
+		                        <field name="product_qty"/>
+		                        <field name="product_uom_id"/>
+		                        <field name="date_required"/>
+		                        <field name="inv_qty"/>
+                            </tree>
+                        </field>          
+                    </group>
+                    <footer>
+                        <button name="create_po" string="Create PO" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+    </data>
+</openerp>
