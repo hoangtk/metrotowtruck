@@ -42,6 +42,7 @@
         'pur_req_view.xml',
         'pur_req_workflow.xml',
         'pur_req_sequence.xml',
+        'pur_req_report.xml',
         'wizard/pur_req_po.xml',
     ],
     'test': [],

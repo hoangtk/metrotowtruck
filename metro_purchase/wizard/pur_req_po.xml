@@ -23,6 +23,7 @@
 		                        <field name="product_id"/>
 		                        <field name="product_qty"/>
 		                        <field name="product_uom_id"/>
+		                        <field name="price_unit"/>
 		                        <field name="date_required"/>
 		                        <field name="inv_qty"/>
                             </tree>
@@ -30,6 +31,7 @@
                     </group>
                     <footer>
                         <button name="create_po" string="Create PO" type="object" class="oe_highlight"/>
+                        <button name="create_view_po" string="Create&amp;View PO" type="object" class="oe_highlight"/>
                         or
                         <button string="Cancel" class="oe_link" special="cancel" />
                     </footer>

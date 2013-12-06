@@ -19,4 +19,6 @@
 #
 ##############################################################################
 import pur_req
+import purchase
+import report
 import wizard

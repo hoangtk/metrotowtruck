@@ -30,8 +30,19 @@ import openerp.addons.decimal_precision as dp
 
 class pur_req(osv.osv):
     _name = "pur.req"
-    _description="Purchase Requisition"
+    _description="Purchase Requisitions"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    def _full_gen_po(self, cursor, user, ids, name, arg, context=None):
+        res = {}
+        for req in self.browse(cursor, user, ids, context=context):
+            full_gen_po = True
+            if req.line_ids:
+                for req_line in req.line_ids:
+                    if not req_line.generated_po:
+                        full_gen_po = False
+                        break
+            res[req.id] = full_gen_po
+        return res    
     _columns = {
         'name': fields.char('Requisition#', size=32,required=True),
         'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse',required=True,readonly=True, states={'draft':[('readonly',False)]}),    
@@ -42,7 +53,8 @@ class pur_req(osv.osv):
         'line_ids' : fields.one2many('pur.req.line','req_id','Products to Purchase',readonly=True, states={'draft':[('readonly',False)]}),
         'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True),
-        'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),            
+        'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),      
+        'full_gen_po': fields.function(_full_gen_po, string='All products generated PO', type='boolean', help="It indicates that this requsition's all lines generated PO"),      
     }
     _defaults = {
         'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'pur.req'),
@@ -58,7 +70,7 @@ class pur_req(osv.osv):
             default = {}
         default.update({
             'state':'draft',
-            'purchase_ids':[],
+            'po_ids':[],
             'name': self.pool.get('ir.sequence').get(cr, uid, 'pur.req'),
         })
         return super(pur_req, self).copy(cr, uid, id, default, context)
@@ -100,54 +112,6 @@ class pur_req(osv.osv):
             wf_service.trg_validate(uid, 'pur.req', id, 'pur_req_cancel', cr)
 
         return super(pur_req, self).unlink(cr, uid, unlink_ids, context=context)    
-
-    def make_purchase_order(self, cr, uid, ids, partner_id, context=None):
-        """
-        Create New RFQ for Supplier
-        """
-        if context is None:
-            context = {}
-        assert partner_id, 'Supplier should be specified'
-        purchase_order = self.pool.get('purchase.order')
-        purchase_order_line = self.pool.get('purchase.order.line')
-        res_partner = self.pool.get('res.partner')
-        fiscal_position = self.pool.get('account.fiscal.position')
-        supplier = res_partner.browse(cr, uid, partner_id, context=context)
-        supplier_pricelist = supplier.property_product_pricelist_purchase or False
-        res = {}
-        for requisition in self.browse(cr, uid, ids, context=context):
-            if supplier.id in filter(lambda x: x, [rfq.state <> 'cancel' and rfq.partner_id.id or None for rfq in requisition.purchase_ids]):
-                 raise osv.except_osv(_('Warning!'), _('You have already one %s purchase order for this partner, you must cancel this purchase order to create a new quotation.') % rfq.state)
-            location_id = requisition.warehouse_id.lot_input_id.id
-            purchase_id = purchase_order.create(cr, uid, {
-                        'origin': requisition.name,
-                        'partner_id': supplier.id,
-                        'pricelist_id': supplier_pricelist.id,
-                        'location_id': location_id,
-                        'company_id': requisition.company_id.id,
-                        'fiscal_position': supplier.property_account_position and supplier.property_account_position.id or False,
-                        'requisition_id':requisition.id,
-                        'notes':requisition.description,
-                        'warehouse_id':requisition.warehouse_id.id ,
-            })
-            res[requisition.id] = purchase_id
-            for line in requisition.line_ids:
-                product = line.product_id
-                seller_price, qty, default_uom_po_id, date_planned = self._seller_details(cr, uid, line, supplier, context=context)
-                taxes_ids = product.supplier_taxes_id
-                taxes = fiscal_position.map_tax(cr, uid, supplier.property_account_position, taxes_ids)
-                purchase_order_line.create(cr, uid, {
-                    'order_id': purchase_id,
-                    'name': product.partner_ref,
-                    'product_qty': qty,
-                    'product_id': product.id,
-                    'product_uom': default_uom_po_id,
-                    'price_unit': seller_price,
-                    'date_planned': date_planned,
-                    'taxes_id': [(6, 0, taxes)],
-                }, context=context)
-                
-        return res    
 pur_req()    
 
 class pur_req_line(osv.osv):
@@ -197,6 +161,23 @@ class pur_req_line(osv.osv):
     _defaults = {
         'product_qty': lambda *a: 1.0,
     }
+
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'po_lines_ids':[],
+        })
+        res = super(pur_req_line, self).copy_data(cr, uid, id, default, context)
+        return res    
+#    def copy(self, cr, uid, id, default=None, context=None):
+#        if not default:
+#            default = {}
+#        default.update({
+#            'po_lines_ids':[],
+#        })
+#        return super(pur_req_line, self).copy(cr, uid, id, default, context)
+        
 pur_req_line()
 
 class purchase_order(osv.osv):

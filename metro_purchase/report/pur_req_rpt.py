@@ -24,14 +24,14 @@ from openerp.report import report_sxw
 from openerp.osv import osv
 from openerp import pooler
 
-class requisition(report_sxw.rml_parse):
+class pur_req_rpt(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context):
-        super(requisition, self).__init__(cr, uid, name, context=context)
+        super(pur_req_rpt, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time,
         })
    
-report_sxw.report_sxw('report.purchase.requisition','purchase.requisition','addons/purchase_requisition/report/purchase_requisition.rml',parser=requisition)
+report_sxw.report_sxw('report.pur.req','pur.req','addons/metro_purchase/report/pur_req.rml',parser=pur_req_rpt)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

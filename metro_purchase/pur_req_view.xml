@@ -20,8 +20,10 @@
             <form string="Purchase Requisition" version="7.0">
             <header>
 				<button name="pur_req_confirm" states="draft" string="Confirm" class="oe_highlight"/>
-				<button name="%(act_pur_req_po)d" states="confirmed" string="Generate PO" type="action" class="oe_highlight"/>
-				<button name="pur_req_done" states="in_purchase" string="Done" class="oe_highlight"/>
+				<button name="%(act_pur_req_po)d" string="Generate PO" type="action"
+					attrs="{'invisible': ['&amp;',('state','!=','confirmed'),'|',('state','!=','in_purchase'),('full_gen_po','=',True)]}" class="oe_highlight"/>
+				<button name="pur_req_done" string="Done" 
+					attrs="{'invisible': ['|',('full_gen_po','=',False),('state','!=','in_purchase')]}" class="oe_highlight"/>
 				<button name="pur_req_cancel" states="draft,confirmed,in_purchase" string="Cancel" />
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_purchase,done"/>
             </header>
@@ -36,13 +38,16 @@
                     <group>
                         <field name="user_id"/>
                         <field name="warehouse_id"/>
+						<field name="full_gen_po"/>
                     </group>
                     <group>
                         <field name="date_request"/>
                         <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                     </group>
+                    <group>
+                    </group>
                 </group>
-                
+                 
                 <separator string="Prodcuts"/>
                 <field name="line_ids">
                     <tree string="Products" editable="bottom">
