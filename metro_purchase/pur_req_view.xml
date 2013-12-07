@@ -19,12 +19,12 @@
         <field name="arch" type="xml">
             <form string="Purchase Requisition" version="7.0">
             <header>
-				<button name="pur_req_confirm" states="draft" string="Confirm" class="oe_highlight"/>
-				<button name="%(act_pur_req_po)d" string="Generate PO" type="action"
+				<button name="pur_req_confirm" states="draft" string="Confirm" class="oe_highlight" groups="metro_purchase.group_pur_req_requester"/>
+				<button name="%(act_pur_req_po)d" string="Generate PO" type="action" groups="metro_purchase.group_pur_req_buyer"
 					attrs="{'invisible': ['&amp;',('state','!=','confirmed'),'|',('state','!=','in_purchase'),('full_gen_po','=',True)]}" class="oe_highlight"/>
-				<button name="pur_req_done" string="Done" 
+				<button name="pur_req_done" string="Done"  groups="metro_purchase.group_pur_req_buyer" 
 					attrs="{'invisible': ['|',('full_gen_po','=',False),('state','!=','in_purchase')]}" class="oe_highlight"/>
-				<button name="pur_req_cancel" states="draft,confirmed,in_purchase" string="Cancel" />
+				<button name="pur_req_cancel" states="draft,confirmed,in_purchase" string="Cancel"  groups="metro_purchase.group_pur_req_requester"/>
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_purchase,done"/>
             </header>
             <sheet>
@@ -149,9 +149,10 @@
 
     <menuitem
         id="menu_pur_req"
-        sequence="-1"
+        sequence="9"
         parent="purchase.menu_procurement_management"
-        action="action_pur_req"/>
+        action="action_pur_req"
+        groups="metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_buyer"/>
         
 	<act_window name="Generate PO"
 	   res_model="stock.return.picking"

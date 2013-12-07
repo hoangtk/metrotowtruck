@@ -52,7 +52,7 @@ class pur_req(osv.osv):
         'company_id': fields.many2one('res.company', 'Company', required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'line_ids' : fields.one2many('pur.req.line','req_id','Products to Purchase',readonly=True, states={'draft':[('readonly',False)]}),
         'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
-            'Status', track_visibility='onchange', required=True),
+            'Status', track_visibility='onchange', required=True, groups='metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_buyer'),
         'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),      
         'full_gen_po': fields.function(_full_gen_po, string='All products generated PO', type='boolean', help="It indicates that this requsition's all lines generated PO"),      
     }
@@ -170,14 +170,7 @@ class pur_req_line(osv.osv):
         })
         res = super(pur_req_line, self).copy_data(cr, uid, id, default, context)
         return res    
-#    def copy(self, cr, uid, id, default=None, context=None):
-#        if not default:
-#            default = {}
-#        default.update({
-#            'po_lines_ids':[],
-#        })
-#        return super(pur_req_line, self).copy(cr, uid, id, default, context)
-        
+       
 pur_req_line()
 
 class purchase_order(osv.osv):
@@ -194,50 +187,5 @@ class purchase_order_line(osv.osv):
                 'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition')}   
     
 purchase_order_line()
-    
-#class product_product(osv.osv):
-#    _inherit = 'product.product'
-#
-#    _columns = {
-#        'pur_req': fields.boolean('Purchase Requisition', help="Check this box to generates purchase requisition instead of generating requests for quotation from procurement.")
-#    }
-#    _defaults = {
-#        'pur_req': False
-#    }
-#
-#product_product()
-#
-#class procurement_order(osv.osv):
-#
-#    _inherit = 'procurement.order'
-#    _columns = {
-#        'requisition_id' : fields.many2one('purchase.requisition','Latest Requisition')
-#    }
-#    def make_po(self, cr, uid, ids, context=None):
-#        res = {}
-#        requisition_obj = self.pool.get('purchase.requisition')
-#        warehouse_obj = self.pool.get('stock.warehouse')
-#        procurement = self.browse(cr, uid, ids, context=context)[0]
-#        if procurement.product_id.pur_req:
-#             warehouse_id = warehouse_obj.search(cr, uid, [('company_id', '=', procurement.company_id.id or company.id)], context=context)
-#             res[procurement.id] = requisition_obj.create(cr, uid, 
-#                   {
-#                    'origin': procurement.origin,
-#                    'date_end': procurement.date_planned,
-#                    'warehouse_id':warehouse_id and warehouse_id[0] or False,
-#                    'company_id':procurement.company_id.id,
-#                    'line_ids': [(0,0,{
-#                        'product_id': procurement.product_id.id,
-#                        'product_uom_id': procurement.product_uom.id,
-#                        'product_qty': procurement.product_qty
-#
-#                   })],
-#                })
-#             self.write(cr,uid,[procurement.id],{'state': 'running','requisition_id': res[procurement.id]},context=context)
-#        else:
-#            res = super(procurement_order, self).make_po(cr, uid, ids, context=context)
-#        return res
-
-#procurement_order()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

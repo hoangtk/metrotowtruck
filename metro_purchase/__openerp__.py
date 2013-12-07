@@ -44,6 +44,8 @@
         'pur_req_sequence.xml',
         'pur_req_report.xml',
         'wizard/pur_req_po.xml',
+        'security/pur_req_security.xml',
+        'security/ir.model.access.csv',
     ],
     'test': [],
     'demo': [],
