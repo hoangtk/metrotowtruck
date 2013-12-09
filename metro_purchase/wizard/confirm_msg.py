@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
@@ -15,11 +15,27 @@
 #    GNU Affero General Public License for more details.
 #
 #    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
-import pur_req_po
-import confirm_msg
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+import time
+from openerp.osv import fields, osv
+from openerp.osv.orm import browse_record, browse_null
+from openerp.tools.translate import _
 
+class confirm_msg(osv.osv_memory):
+    _name = "confirm.msg"
+    _description = "Action Confirming Message"
+    _columns = {
+        'message': fields.text('Rejection reason'),
+    }
+
+    def confirm(self, cr, uid, ids, context=None):
+        active_ids = context and context.get('active_ids', [])
+        data =  self.browse(cr, uid, ids, context=context)[0]
+        self.pool.get('purchase.order').action_reject(cr, uid, active_ids, data.message, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+confirm_msg()
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

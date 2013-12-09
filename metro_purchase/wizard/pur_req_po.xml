@@ -10,7 +10,7 @@
             multi="True"
             id="act_pur_req_po"/>
            
-        <record id="view_stock_return_picking_form" model="ir.ui.view">
+        <record id="view_pur_req_po_form" model="ir.ui.view">
             <field name="name">Requisition Lines</field>
             <field name="model">pur.req.po</field>
             <field name="arch" type="xml">

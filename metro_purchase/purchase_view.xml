@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>    
+        <record id="metro_purchase_order_form" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//button[@name='purchase_approve']" position="after" >
+            		<button name="%(act_purchase_reject)d" states="confirmed" string="Reject Order" type="action" class="oe_highlight" groups="purchase.group_purchase_manager"/>
+            	</xpath>            
+                 <xpath expr="//button[@name='purchase_confirm'][2]" position="after" >
+                    <button name="purchase_confirm" states="rejected" string="Confirm Order" class="oe_highlight"/>
+                </xpath>      	
+       		</field>
+        </record>  
+          
+        <record id="metro_purchase_order_tree" model="ir.ui.view">
+            <field name="name">purchase.order.tree</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="/tree" position="attributes">
+                    <attribute name="colors">grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking','rejected')</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="metro_view_purchase_order_filter" model="ir.ui.view">
+            <field name="name">purchase.order.list.select</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//filter[@name='draft']" position="after" >
+            		<filter icon="terp-document-new" name="confirmed" string="Waitting Approval" domain="[('state','=','confirmed')]" help="Purchase orders waitting approval"/>
+            		<filter icon="terp-document-new" name="rejected" string="Rejected" domain="[('state','=','rejected')]" help="Purchase orders been rejected"/>
+            	</xpath>
+            	<xpath expr="//filter[@name='approved']" position="replace" >
+            		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','not in',('draft','cancel','rejected','confirmed'))]" help="Approved purchase orders"/>
+            	</xpath>
+            </field>
+        </record>  
+                
+       <record id="purchase.purchase_rfq" model="ir.actions.act_window">
+            <field name="context">{'search_default_draft': 1}</field>
+            <field name="domain">[('state','in',('draft','sent','confirmed','rejected'))]</field>
+        </record>
+
+        <record id="purchase.purchase_form_action" model="ir.actions.act_window">
+            <field name="domain">[('state','not in',('draft','sent','confirmed','rejected'))]</field>
+        </record>
+
+
+        <record id="metro_purchase_wait_approval" model="ir.actions.act_window">
+            <field name="name">PO Waitting Approval</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="domain">[('state','=','confirmed')]</field>
+            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a request for quotation.
+              </p><p>
+                The quotation contains the history of the discussion/negociation
+                you had with your supplier. Once confirmed, a request for
+                quotation is converted into a purchase order.
+              </p><p>
+                Most propositions of purchase orders are created automatically
+                by OpenERP based on inventory needs.
+              </p>
+            </field>
+        </record>
+        <menuitem action="metro_purchase_wait_approval" id="menu_purchase_wait_approval"
+            parent="purchase.menu_procurement_management"
+            sequence="-100"
+            groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
+    </data>
+</openerp>
