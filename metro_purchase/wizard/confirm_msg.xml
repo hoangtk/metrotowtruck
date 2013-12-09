@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>    
+         <act_window name="Confirm Purchase Order Rejection"
+            res_model="confirm.msg"
+            src_model="purchase.order"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="act_purchase_reject"/>
+           
+        <record id="view_confirm_msg_form" model="ir.ui.view">
+            <field name="name">Confirm Purchase Order Rejection</field>
+            <field name="model">confirm.msg</field>
+            <field name="arch" type="xml">
+                <form string="Confirm Purchase Order Rejection" version="7.0">
+                	<field name="message" placeholder="Rejection reason..."/>
+                    <footer>
+                        <button name="confirm" string="Confirm" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+    </data>
+</openerp>

@@ -30,7 +30,42 @@ import openerp.addons.decimal_precision as dp
 
 class purchase_order(osv.osv):  
     _inherit = "purchase.order"
+    def __init__(self, pool, cr):
+        super(purchase_order,self).__init__(pool,cr)
+    _track = {
+        'state': {
+            'purchase.mt_rfq_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirmed',
+            'purchase.mt_rfq_approved': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved',
+            'metro_purchase.mt_rfq_rejected': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'rejected',
+        },
+    }
 
+    STATE_SELECTION = [
+        ('draft', 'Draft PO'),
+        ('sent', 'RFQ Sent'),
+        ('confirmed', 'Waiting Approval'),
+        ('rejected', 'Rejected'),
+        ('approved', 'Purchase Order'),
+        ('except_picking', 'Shipping Exception'),
+        ('except_invoice', 'Invoice Exception'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled')
+    ]    
+#    STATE_SELECTION = [
+#        ('draft', 'Draft PO'),
+#        ('sent', 'RFQ Sent'),
+#        ('confirmed', 'Waiting Approval'),
+#        ('rejected', 'Rejected'),
+#        ('approved', 'Purchase Order'),
+#        ('except_picking', 'Shipping Exception'),
+#        ('except_invoice', 'Invoice Exception'),
+#        ('done', 'Done'),
+#        ('cancel', 'Cancelled')
+#    ]
+    _columns = {
+                'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
+                'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
+    }
     def new_po(self, cr, uid, pos, context=None):
         """
         Create New RFQ for Supplier
@@ -80,3 +115,10 @@ class purchase_order(osv.osv):
                 line['new_po_line_id'] = new_po_line_id
                 
         return pos
+    def action_reject(self, cr, uid, ids, message, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        self.write(cr,uid,ids,{'state':'rejected','reject_msg':message})
+
+        for (id, name) in self.name_get(cr, uid, ids):
+            wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_reject', cr)
+        return True

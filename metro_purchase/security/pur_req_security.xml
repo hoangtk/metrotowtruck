@@ -33,13 +33,13 @@
         <field name="domain_force">[('user_id', 'in', [user.id])]</field>
         <field name="groups" eval="[(4,ref('metro_purchase.group_pur_req_requester'))]"/>
     </record>
-    <record model="ir.rule" id="pur_req_company">
+    <record model="ir.rule" id="pur_req_company_buyer">
         <field name="name">User can see only Own purchase requisition</field>
         <field name="model_id" ref="model_pur_req"/>
         <field name="domain_force">[('state','!=','draft'),('state','!=','cancel'),'|','|',('company_id','child_of',[user.company_id.id]),('company_id','=',False), ('company_id','in', [c.id for c in user.company_ids])]</field>
         <field name="groups" eval="[(4,ref('metro_purchase.group_pur_req_buyer'))]"/>
     </record>     
-    <record model="ir.rule" id="pur_req_company">
+    <record model="ir.rule" id="pur_req_company_pur_manager">
         <field name="name">User can see only Own purchase requisition</field>
         <field name="model_id" ref="model_pur_req"/>
         <field name="domain_force">['|','|',('company_id','child_of',[user.company_id.id]),('company_id','=',False), ('company_id','in', [c.id for c in user.company_ids])]</field>

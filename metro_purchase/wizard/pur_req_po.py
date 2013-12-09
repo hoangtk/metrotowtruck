@@ -36,7 +36,7 @@ class pur_req_po_line(osv.osv_memory):
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
-        'date_required': fields.date('Date Required'),
+        'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
         'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition')
     }

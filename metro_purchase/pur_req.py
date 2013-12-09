@@ -138,7 +138,7 @@ class pur_req_line(osv.osv):
         'product_id': fields.many2one('product.product', 'Product' ,required=True),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
-        'date_required': fields.date('Date Required'),
+        'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
         'req_reason': fields.char('Purchase reason and use',size=64),
         'company_id': fields.related('req_id','company_id',type='many2one',relation='res.company',String='Company',store=True,readonly=True),
