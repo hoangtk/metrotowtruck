@@ -2,7 +2,7 @@
 <openerp>
     <data>
     <!-- Purchase approve -->
-        <record id="trans_confirmed_router" model="workflow.transition">
+        <record id="purchase.trans_confirmed_router" model="workflow.transition">
             <field name="act_from" ref="purchase.act_confirmed"/>
             <field name="act_to" ref="purchase.act_router"/>
             <field name="signal">purchase_approve</field>

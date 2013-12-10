@@ -153,15 +153,5 @@
         parent="purchase.menu_procurement_management"
         action="action_pur_req"
         groups="metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_buyer"/>
-        
-	<act_window name="Generate PO"
-	   res_model="stock.return.picking"
-	   src_model="stock.picking"
-	   view_mode="form"
-	   target="new"
-	   key2="client_action_multi"
-	   multi="True"
-	   id="act_stock_return_picking"/>        
-        
     </data>
 </openerp>
