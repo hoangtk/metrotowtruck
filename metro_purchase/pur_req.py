@@ -112,6 +112,18 @@ class pur_req(osv.osv):
             wf_service.trg_validate(uid, 'pur.req', id, 'pur_req_cancel', cr)
 
         return super(pur_req, self).unlink(cr, uid, unlink_ids, context=context)    
+    
+    def action_cancel_draft(self, cr, uid, ids, context=None):
+        if not len(ids):
+            return False
+        self.write(cr, uid, ids, {'state':'draft'})
+        wf_service = netsvc.LocalService("workflow")
+        for p_id in ids:
+            # Deleting the existing instance of workflow for requisition
+            wf_service.trg_delete(uid, 'pur.req', p_id, cr)
+            wf_service.trg_create(uid, 'pur.req', p_id, cr)
+        return True
+            
 pur_req()    
 
 class pur_req_line(osv.osv):
@@ -129,10 +141,40 @@ class pur_req_line(osv.osv):
                     if po_line.state != 'cancel':
                         generated_po = True
                         break
-                invoiced = True
             res[req_line.id] = generated_po
         return res
-    
+    def _po_info(self, cr, uid, ids, field_names=None, arg=False, context=None):
+        """ Finds the requisition related PO info.
+        @return: Dictionary of values
+        """
+        if not field_names:
+            field_names = []
+        if context is None:
+            context = {}
+        res = {}
+        for id in ids:
+            res[id] = {}.fromkeys(field_names, 0.0)
+        for f in field_names:
+            if f == 'generated_po':
+                for req_line in self.browse(cr, uid, ids, context=context):
+                    generated_po = False
+                    if req_line.po_lines_ids:
+                        for po_line in req_line.po_lines_ids:
+                            if po_line.state != 'cancel':
+                                generated_po = True
+                                break
+                    res[req_line.id][f] = generated_po 
+            if f == 'po_info':
+                for req_line in self.browse(cr, uid, ids, context=context):
+#                    po_str = None
+                    po_str = 0
+                    if req_line.po_lines_ids:
+                        for po_line in req_line.po_lines_ids:
+                            if po_line.state != 'cancel':
+#                                po_str += ((po_str or '') and ':') + po_line.product_qty + '@' + po_line.order_id.name
+                                po_str = po_line.product_qty
+                    res[req_line.id][f] = po_str 
+        return res    
     _columns = {
         'req_id' : fields.many2one('pur.req','Purchase Requisition', ondelete='cascade'),
         'product_id': fields.many2one('product.product', 'Product' ,required=True),
@@ -140,10 +182,12 @@ class pur_req_line(osv.osv):
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
         'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
-        'req_reason': fields.char('Purchase reason and use',size=64),
+        'req_emp_id': fields.many2one('hr.employee','Employee'),
+        'req_reason': fields.char('Reason and use',size=64),
         'company_id': fields.related('req_id','company_id',type='many2one',relation='res.company',String='Company',store=True,readonly=True),
         'po_lines_ids' : fields.one2many('purchase.order.line','req_line_id','Purchase Order Lines'),
-        'generated_po': fields.function(_generated_po, string='PO Generated', type='boolean', help="It indicates that this products has PO generated"),
+        'generated_po': fields.function(_po_info, multi='po_info', string='PO Generated', type='boolean', help="It indicates that this products has PO generated"),
+        'po_info': fields.function(_po_info, multi='po_info',type='float',string='PO Quantity'),   
     }
     
     
