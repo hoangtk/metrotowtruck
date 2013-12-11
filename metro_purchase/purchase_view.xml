@@ -5,9 +5,12 @@
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
-            <field name="arch" type="xml">
+            <field name="arch" type="xml">            
+            	<xpath expr="//button[@name='purchase_approve']" position="attributes" >
+            		<attribute name="groups">metro_purchase.group_pur_req_manager</attribute>
+            	</xpath>            
             	<xpath expr="//button[@name='purchase_approve']" position="after" >
-            		<button name="%(act_purchase_reject)d" states="confirmed" string="Reject Order" type="action" class="oe_highlight" groups="purchase.group_purchase_manager"/>
+            		<button name="%(act_purchase_reject)d" states="confirmed" string="Reject Order" type="action" class="oe_highlight" groups="metro_purchase.group_pur_req_manager"/>
             	</xpath>            
                  <xpath expr="//button[@name='purchase_confirm'][2]" position="after" >
                     <button name="purchase_confirm" states="rejected" string="Confirm Order" class="oe_highlight"/>
