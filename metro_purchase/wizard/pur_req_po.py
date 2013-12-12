@@ -115,7 +115,7 @@ class pur_req_po(osv.osv_memory):
         for line in data.line_ids:
             po_line = {'product_id':line.product_id.id, 'product_qty':line.product_qty, 'product_uom':line.product_uom_id.id,
                        'req_line_id':line.req_line_id.id,'date_planned':line.date_required,'price_unit':float('%.2f' %line.price_unit),
-                       'name':line.req_reason}
+                       'name':(line.req_reason or '')}
             po_lines.append(po_line);
         po_data['lines']=po_lines
         #call purchase.oder to generate order
