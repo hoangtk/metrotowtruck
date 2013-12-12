@@ -139,7 +139,7 @@
 	            <field name="name" position="after">
 	            	<field name="cn_name" string="中国名"/>
 	            </field>
-	            <field name="name" position="state">
+	            <field name="state" position="after">
 	            	<field name="create_uid"/>
 	            </field>
             </field>
