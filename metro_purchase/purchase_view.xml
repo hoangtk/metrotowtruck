@@ -14,7 +14,10 @@
             	</xpath>            
                  <xpath expr="//button[@name='purchase_confirm'][2]" position="after" >
                     <button name="purchase_confirm" states="rejected" string="Confirm Order" class="oe_highlight"/>
-                </xpath>      	
+                </xpath>         
+                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
+            		<attribute name="editable"></attribute>
+                </xpath>
        		</field>
         </record>  
           

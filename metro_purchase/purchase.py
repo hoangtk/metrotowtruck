@@ -106,7 +106,7 @@ class purchase_order(osv.osv):
                 taxes = fiscal_position.map_tax(cr, uid, supplier.property_account_position, taxes_ids)
                 taxes_id = (6, 0, taxes)
                 
-                line.update({'order_id':new_po_id,'name':product.partner_ref,'taxes_id':taxes_id})
+                line.update({'order_id':new_po_id,'name':product.partner_ref+","+line['name'],'taxes_id':taxes_id})
                 #unit price
                 if not line.has_key('price_unit'):
                     price_unit = seller_price = pricelist_obj.price_get(cr, uid, [pricelist_id], product.id, line['product_qty'], False, {'uom': line['product_uom']})[pricelist_id]

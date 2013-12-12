@@ -38,6 +38,7 @@ class pur_req_po_line(osv.osv_memory):
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
         'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
+        'req_reason': fields.char('Reason and use',size=64),
         'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition')
     }
 
@@ -73,7 +74,8 @@ class pur_req_po(osv.osv_memory):
             for line in req.line_ids:
                 if not line.generated_po:
                     result1.append({'product_id': line.product_id.id, 'product_qty': line.product_qty, 'price_unit':line.product_id.standard_price, 
-                                    'product_uom_id':line.product_uom_id.id, 'date_required': line.date_required,'inv_qty':line.inv_qty,'req_line_id':line.id})
+                                    'product_uom_id':line.product_uom_id.id, 'date_required': line.date_required,'inv_qty':line.inv_qty,
+                                    'req_line_id':line.id, 'req_reason':line.req_reason})
             res.update({'line_ids': result1})
         return res
 
@@ -112,7 +114,8 @@ class pur_req_po(osv.osv_memory):
         po_lines = []
         for line in data.line_ids:
             po_line = {'product_id':line.product_id.id, 'product_qty':line.product_qty, 'product_uom':line.product_uom_id.id,
-                       'req_line_id':line.req_line_id.id,'date_planned':line.date_required,'price_unit':float('%.2f' %line.price_unit)}
+                       'req_line_id':line.req_line_id.id,'date_planned':line.date_required,'price_unit':float('%.2f' %line.price_unit),
+                       'name':line.req_reason}
             po_lines.append(po_line);
         po_data['lines']=po_lines
         #call purchase.oder to generate order

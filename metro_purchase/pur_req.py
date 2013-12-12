@@ -188,6 +188,7 @@ class pur_req_line(osv.osv):
         'po_lines_ids' : fields.one2many('purchase.order.line','req_line_id','Purchase Order Lines'),
         'generated_po': fields.function(_po_info, multi='po_info', string='PO Generated', type='boolean', help="It indicates that this products has PO generated"),
         'po_info': fields.function(_po_info, multi='po_info',type='float',string='PO Quantity'),   
+        'req_ticket_no': fields.char('Requisition Ticket#', size=10)
     }
     
     
