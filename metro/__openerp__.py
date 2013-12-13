@@ -26,6 +26,7 @@
     #web
     "js": ["static/src/js/metro.js"],
     'qweb' : ["static/src/xml/lang_switch.xml"],
-    'css' : ["static/src/css/lang_switch.css"],    
+    'css' : ["static/src/css/lang_switch.css",
+             "static/src/css/metro.css",],    
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

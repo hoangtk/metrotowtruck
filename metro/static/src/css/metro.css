@@ -1,0 +1,4 @@
+.openerp .oe_list_content > tbody > tr > td[data-field='state']
+{
+  white-space: nowrap ; 
+}
