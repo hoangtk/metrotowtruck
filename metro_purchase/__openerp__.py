@@ -49,6 +49,7 @@
         'purchase_workflow.xml',
         'purchase_view.xml',
         'purchase_data.xml',
+        'purchase_report.xml',
         'pur_req_view.xml',
     ],
     'test': [],
