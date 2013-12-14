@@ -562,3 +562,28 @@ msgstr "采购申请"
 #: model:res.groups,name:metro_purchase.group_pur_req_manager
 msgid "Manager"
 msgstr "经理"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Purchase Order Confirmation N°"
+msgstr "采购合同"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Order Date:"
+msgstr "订单日期:"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Tel.:"
+msgstr "电话:"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Fax:"
+msgstr "传真:"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Products"
+msgstr "产品"
