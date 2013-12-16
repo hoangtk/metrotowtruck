@@ -17,6 +17,11 @@
                 </xpath>         
                  <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
+                </xpath>         
+                 <xpath expr="//field[@name='payment_term_id']" position="replace" >
+                </xpath>       
+                 <xpath expr="//field[@name='pricelist_id']" position="after" >
+                	<field name="payment_term_id" widget="selection"/>
                 </xpath>
        		</field>
         </record>  
