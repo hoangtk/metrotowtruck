@@ -141,6 +141,7 @@
 	            </field>
 	            <field name="state" position="after">
 	            	<field name="create_uid"/>
+	            	<field name="create_date"/>
 	            </field>
             </field>
         </record>
@@ -204,10 +205,16 @@
                                 </div>
                             </group>
                         </group>
+                    </group>
+                    <group>
                         <group>
                             <field groups="product.group_product_variant" name="variants"/>
                             <field name="price_margin" groups="product.group_product_variant"/>
                             <field name="price_extra" groups="product.group_product_variant"/>
+                        </group>
+                        <group>
+                            <field name="create_uid"/>
+                            <field name="create_date"/>
                         </group>
                     </group>
                     
