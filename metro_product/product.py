@@ -110,7 +110,8 @@ class product_product(osv.osv):
 	_columns = {
 		'attribute_line' : fields.one2many('product.attribute.line', 'product_id','Attributes'),
 		'cn_name': fields.char(string=u'Chinese Name', size=128),
-		'create_uid':  fields.many2one('res.users', 'Creator')
+		'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 	}
 	_defaults = {
 		'default_code': generate_seq,
