@@ -10,11 +10,14 @@
             		<attribute name="groups">metro_purchase.group_pur_req_manager</attribute>
             	</xpath>            
             	<xpath expr="//button[@name='purchase_approve']" position="after" >
-            		<button name="%(act_purchase_reject)d" states="confirmed" string="Reject Order" type="action" class="oe_highlight" groups="metro_purchase.group_pur_req_manager"/>
+            		<button name="%(act_purchase_reject)d" states="confirmed" string="Reject Order" type="action" groups="metro_purchase.group_pur_req_manager"/>
             	</xpath>            
                  <xpath expr="//button[@name='purchase_confirm'][2]" position="after" >
                     <button name="purchase_confirm" states="rejected" string="Confirm Order" class="oe_highlight"/>
-                </xpath>         
+                </xpath>            
+                 <xpath expr="//button[@name='action_cancel']" position="attributes" >
+                 	<attribute name="states">approved,except_picking,except_invoice,rejected</attribute>
+                </xpath>
                  <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
                 </xpath>         
@@ -22,7 +25,22 @@
                 </xpath>       
                  <xpath expr="//field[@name='pricelist_id']" position="after" >
                 	<field name="payment_term_id" widget="selection"/>
-                </xpath>
+                </xpath>       
+                 <xpath expr="//field[@name='pricelist_id']" position="after" >
+                	<field name="payment_term_id" widget="selection"/>
+                </xpath>     
+                 <xpath expr="//sheet/div" position="after" >
+                 	<group style="color:red">
+                		<field name="reject_msg" states="rejected"/>
+                	</group>
+                </xpath>       
+                 <xpath expr="//field[@name='company_id']" position="after" >
+                	<field name="create_uid"/>
+                	<field name="create_date"/>
+                </xpath>       
+                 <xpath expr="//tree/field[@name='price_subtotal']" position="after" >
+                	<field name="state"/>
+                </xpath>  
        		</field>
         </record>  
           
@@ -68,7 +86,7 @@
             <field name="res_model">purchase.order</field>
             <field name="domain">[('state','=','confirmed')]</field>
             <field name="view_mode">tree,form,graph,calendar</field>
-            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="search_view_id" ref="metro_view_purchase_order_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a request for quotation.
@@ -93,7 +111,7 @@
             <field name="name">po.line.full.tree</field>
             <field name="model">purchase.order.line</field>
             <field name="arch" type="xml">
-                <tree colors="grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking','rejected')" string="Purchase Order Line">
+                <tree colors="grey:state=='cancel';blue:state in ('confirmed');red:state in ('rejected')" string="Purchase Order Line">
                     <field name="order_id"/>
                     <field name="partner_id" string="Supplier" />
                     <field name="date_order" />
@@ -101,11 +119,11 @@
                     <field name="name"/>
                     <field name="date_planned"/>
 	                <field name="product_qty"/>
-                    <field name="product_uom" groups="product.group_uom"/>
                     <field name="price_unit"/>
-                    <field name="taxes_id"/>
                     <field name="price_subtotal"/>
-                    <field name="state"/>                 
+                    <field name="state"/>
+                    <field name="create_uid"/> 
+                    <field name="create_date"/>                  
                 </tree>
             </field>
         </record>
@@ -113,54 +131,109 @@
             <field name="name">po.line.full.form</field>
             <field name="model">purchase.order.line</field>
             <field name="arch" type="xml">
-                <form string="Purchase Order Line" version="7.0">
+                <form string="Purchase Order Line" version="7.0">  
+	                <header>
+	                    <button name="action_confirm" states="draft,rejected" string="Confirm" type="object" class="oe_highlight"/>
+	                    <button name="action_approve" states="confirmed" string="Approve" type="object" class="oe_highlight" groups="metro_purchase.group_pur_req_manager"/>
+	                    <button name="%(act_purchase_line_reject)d" states="confirmed" string="Reject" type="action" groups="metro_purchase.group_pur_req_manager"/>
+	                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done" statusbar_colors='{"confirmed":"blue"}' readonly="1"/>
+	                </header>
                     <sheet>
+                    	<group style="color: red">        	
+	                        <field name="reject_msg" states="rejected"/>
+                    	</group>
                         <group>
                             <group>
-			                    <field name="order_id"/>
-			                    <field name="date_order" />
+			                    <field name="order_id" readonly="1"/>
+			                    <field name="date_order" readonly="1"/>
                             </group>
                             <group>
-			                    <field name="partner_id" string="Supplier" />
+			                    <field name="partner_id" string="Supplier" readonly="1"/>
                             </group>
                         </group>
                         <group>
                             <group>
-                                <field name="product_id" on_change="onchange_product_id(parent.pricelist_id,product_id,0,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)"/>
+                    			<label for="product_id"/>
+                    			<div>
+                    				<field name="image_medium" widget="image" class="oe_avatar oe_left" readonly="1"/>
+                                	<field name="product_id" readonly="1"/>
+                                </div>
+                            </group>
+                            <group>
                                 <label for="product_qty"/>
                                 <div>
-                                    <field name="product_qty" on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" class="oe_inline"/>
-                                    <field name="product_uom" groups="product.group_uom" on_change="onchange_product_uom(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id, parent.date_order,parent.fiscal_position,date_planned,name,price_unit,context)" class="oe_inline"/>
+                                    <field name="product_qty" class="oe_inline" attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'confirmed')]}"/>
+                                    <field name="product_uom" class="oe_inline" readonly="1"/>
                                 </div>
-                                <field name="price_unit"/>
+                                <field name="price_unit" readonly="1"/>
+                                <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" readonly="1"/>
                     			<field name="price_subtotal"/>
-                            </group>
-                            <group>
-                                <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
-                                <field name="date_planned" widget="date"/>
-                                <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting"/>
-                                <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                                <button string="Purchasing History" name="%(act_pur_history)d" type="action"/>
+                                <button string="Purchasing History" name="%(act_single_product)d" type="action"/>
                             </group>
                         </group>
+                 		<group>
+                			<field name="change_log" readonly="1"/>
+                		</group>                        
+                        <group>
+                            <group>
+                                <field name="date_planned" widget="date" readonly="1"/>
+                                <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting" readonly="1"/>
+                                <field name="company_id" groups="base.group_multi_company" widget="selection" readonly="1"/>
+                                <field name="create_uid"/>
+                                <field name="create_date"/>
+                            </group>                            
+	                 		<group>
+	                			<field name="name"/>
+	                		</group>
+	                	</group>
+						<!-- <field name="product_id" context="{'form_view_ref':'metro_product.metro_product_normal_form_view'}"/> -->
+						<!-- <field name="product_id" widget="one2many" mode="tree"/> -->						
                         <notebook>
-                        <page string="Notes">
-                            <field name="name"/>
-                        </page><page string="Invoices and Receptions">
-                            <field name="invoice_lines"/>
-                            <field name="move_ids"/>
-                        </page>
+	                        <page string="Invoices and Receptions">
+	                            <field name="invoice_lines"/>
+	                            <field name="move_ids"/>
+	                        </page>
                         </notebook>
                     </sheet>
                 </form>
             </field>
-        </record>                    
+        </record>            
+       <record id="view_po_line_full_filter" model="ir.ui.view">
+            <field name="name">po.line.full.search</field>
+            <field name="model">purchase.order.line</field>
+            <field name="arch" type="xml">
+                <search string="Search Purchase Order Line">
+                    <field name="name" string="PO Lines"/>
+                    <filter icon="terp-document-new" name="draft" string="Quotations" domain="[('state','=','draft')]" help="Purchase order lines which are in draft state"/>
+            		<filter icon="terp-document-new" name="confirmed" string="Waitting Approval" domain="[('state','=','confirmed')]" help="Purchase order lines waitting approval"/>
+            		<filter icon="terp-document-new" name="rejected" string="Rejected" domain="[('state','=','rejected')]" help="Purchase order lines been rejected"/>
+                    <filter icon="terp-check" name="approved" string="Approved&amp;Done" domain="[('state','in',('approved','done'))]" help="Approved and Done purchase order lines"/>
+                    <separator/>
+                    <filter icon="terp-emblem-important" name="cancelled" string="Cancelled" domain="[('state','=','cancel')]" help="Purchase order lines which are cancelled"/>                    
+                    <field name="order_id"/>
+                    <field name="partner_id"/>
+                    <field name="product_id"/>
+                    <field name="create_uid"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Order" icon="terp-partner" domain="[]" context="{'group_by':'order_id'}"/>
+                        <filter string="Supplier" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Product" icon="terp-partner" domain="[]" context="{'group_by':'product_id'}"/>
+                        <filter string="Order Date" icon="terp-go-month" domain="[]" context="{'group_by':'date_order'}"/>
+                        <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
+                        <filter string="Scheduled Date" icon="terp-go-month" domain="[]" context="{'group_by':'date_planned'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>                
         <record model="ir.actions.act_window" id="metro_po_line_full_action">
             <field name="name">PO By Lines</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order.line</field>
             <!-- <field name="domain">[('state','=','confirmed')]</field> -->
+            <field name="context">{'search_default_confirmed': 1}</field>
             <field name="view_mode">tree,form</field>
-            <!-- <field name="search_view_id" ref="purchase.view_purchase_order_filter"/> -->
+            <field name="search_view_id" ref="view_po_line_full_filter"/>
         </record>        
         <record model="ir.actions.act_window.view" id="action_po_line_full_tree">
             <field name="view_mode">tree</field>
@@ -176,6 +249,14 @@
             parent="purchase.menu_procurement_management"
             sequence="-101"
             groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
-                    
+            
+        <record model="ir.actions.act_window" id="act_single_product">
+            <field name="name">Product's Information</field>
+            <field name="res_model">product.product</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="domain">[('id','=',active_id.product_id]</field>
+        </record>                            
     </data>
 </openerp>

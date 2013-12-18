@@ -33,8 +33,9 @@ class confirm_msg(osv.osv_memory):
 
     def confirm(self, cr, uid, ids, context=None):
         active_ids = context and context.get('active_ids', [])
+        active_model = context and context.get('active_model', [])
         data =  self.browse(cr, uid, ids, context=context)[0]
-        self.pool.get('purchase.order').action_reject(cr, uid, active_ids, data.message, context=context)
+        self.pool.get(active_model).action_reject(cr, uid, active_ids, data.message, context=context)
         return {'type': 'ir.actions.act_window_close'}
 
 confirm_msg()

@@ -40,9 +40,11 @@
     'depends': ["metro", "purchase"],
     'data': [
         'wizard/pur_req_po.xml',
-        'wizard/confirm_msg.xml',        
+        'wizard/confirm_msg.xml',
+        'wizard/pur_history.xml',           
         'security/pur_req_security.xml',
         'security/ir.model.access.csv',
+        'change_log_view.xml',
         'pur_req_workflow.xml',
         'pur_req_sequence.xml',
         'pur_req_report.xml',

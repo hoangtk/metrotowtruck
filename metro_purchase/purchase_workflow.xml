@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+            
     <!-- Purchase approve -->
         <record id="purchase.trans_confirmed_router" model="workflow.transition">
             <field name="act_from" ref="purchase.act_confirmed"/>
             <field name="act_to" ref="purchase.act_router"/>
             <field name="signal">purchase_approve</field>
+        </record>
+        
+    <!-- Purchase done -->
+        <record id="purchase.act_done" model="workflow.activity">
+            <field name="action">wkf_done()</field>
         </record>
         
     <!-- Procurement -->

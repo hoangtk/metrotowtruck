@@ -50,21 +50,13 @@ class purchase_order(osv.osv):
         ('except_invoice', 'Invoice Exception'),
         ('done', 'Done'),
         ('cancel', 'Cancelled')
-    ]    
-#    STATE_SELECTION = [
-#        ('draft', 'Draft PO'),
-#        ('sent', 'RFQ Sent'),
-#        ('confirmed', 'Waiting Approval'),
-#        ('rejected', 'Rejected'),
-#        ('approved', 'Purchase Order'),
-#        ('except_picking', 'Shipping Exception'),
-#        ('except_invoice', 'Invoice Exception'),
-#        ('done', 'Done'),
-#        ('cancel', 'Cancelled')
-#    ]
+    ] 
+
     _columns = {
-                'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
-                'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
+        'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
+        'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
     }
     def new_po(self, cr, uid, pos, context=None):
         """
@@ -115,10 +107,148 @@ class purchase_order(osv.osv):
                 line['new_po_line_id'] = new_po_line_id
                 
         return pos
+    def _get_lines(self,cr,uid,ids,states=None,context=None):
+        todo = []
+        for po in self.browse(cr, uid, ids, context=context):
+            if not po.order_line:
+                continue
+            for line in po.order_line:
+                if states == None or line.state in states:
+                    todo.append(line.id)
+        return todo
+        
+    def wkf_confirm_order(self, cr, uid, ids, context=None):
+        todo = []
+        for po in self.browse(cr, uid, ids, context=context):
+            if not po.order_line:
+                raise osv.except_osv(_('Error!'),_('You cannot confirm a purchase order without any purchase order line.'))
+            for line in po.order_line:
+                if line.state=='draft' or line.state=='rejected':
+                    todo.append(line.id)        
+        self.pool.get('purchase.order.line').write(cr, uid, todo, {'state':'confirmed'},context)
+        for id in ids:
+            self.write(cr, uid, [id], {'state' : 'confirmed', 'validator' : uid})
+        return True    
+    
+    def wkf_approve_order(self, cr, uid, ids, context=None):                    
+#        lines = self._get_lines(cr,uid,ids,['confirmed','rejected'],context=context)
+        lines = []
+        for po in self.browse(cr, uid, ids, context=context):
+            for line in po.order_line:
+                if line.state=='rejected':
+                    raise osv.except_osv(_('Error!'),_('You cannot approve a purchase order with rejected purchase order lines.'))
+                if line.state=='confirmed':
+                    lines.append(line.id)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'approved'},context)
+        self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
+        return True
+    
+    def wkf_done(self, cr, uid, ids, context=None):  
+        lines = self._get_lines(cr,uid,ids,['approved'],context=context)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'done'},context)
+        self.write(cr, uid, ids, {'state': 'done'})
+        
     def action_reject(self, cr, uid, ids, message, context=None):
+#        lines = self._get_lines(cr,uid,ids,['confirmed'],context=context)
+        lines = []
+        for po in self.browse(cr, uid, ids, context=context):
+            for line in po.order_line:
+                if line.state=='approved':
+                    raise osv.except_osv(_('Error!'),_('You cannot reject a purchase order with approved purchase order lines.'))
+                if line.state=='confirmed':
+                    lines.append(line.id)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'rejected'},context)         
         wf_service = netsvc.LocalService("workflow")
         self.write(cr,uid,ids,{'state':'rejected','reject_msg':message})
 
         for (id, name) in self.name_get(cr, uid, ids):
             wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_reject', cr)
         return True
+    def action_cancel(self, cr, uid, ids, context=None):
+        resu = super(purchase_order,self).action_cancel(cr,uid,ids,context)
+        lines = self._get_lines(cr,uid,ids,context=context)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'cancel'},context)
+        return resu
+    def action_cancel_draft(self, cr, uid, ids, context=None):
+        resu = super(purchase_order,self).action_cancel_draft(cr,uid,ids,context)
+        lines = self._get_lines(cr,uid,ids,context=context)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'draft'},context)
+        return resu
+            
+        
+class purchase_order_line(osv.osv):  
+    _name = "purchase.order.line"
+    _inherit = 'purchase.order.line' 
+
+    STATE_SELECTION = [
+        ('draft', 'Draft'),
+        ('confirmed', 'Waiting Approval'),
+        ('rejected', 'Rejected'),
+        ('approved', 'Approved'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled')
+    ]
+
+    _columns = {
+        'state': fields.selection(STATE_SELECTION, 'Status', readonly=True),
+        'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
+        'create_uid':  fields.many2one('res.users', 'Creator', select=True, readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
+        'change_log': fields.one2many('change.log.po.line','res_id','Quantity Changing')
+    }  
+    def _is_po_update(self,cr,uid,po,state,context=None):
+        po_update = True
+        for line in po.order_line:
+            if line.state!=state:
+                po_update = False
+                break
+        return po_update
+
+    def action_confirm(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'confirmed'}, context=context)
+        wf_service = netsvc.LocalService("workflow")
+        #update po's state
+        po_line_obj = self.browse(cr,uid,ids[0],context=context)
+        po = po_line_obj.order_id
+        is_po_update = self._is_po_update(cr,uid,po,'confirmed',context=context)
+        if is_po_update:
+            wf_service.trg_validate(uid, 'purchase.order', po.id, 'purchase_confirm', cr)
+        return True 
+            
+    def action_approve(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state': 'approved'}, context=context)
+        wf_service = netsvc.LocalService("workflow")
+        #update po's state
+        po_line_obj = self.browse(cr,uid,ids[0],context=context)
+        po = po_line_obj.order_id
+        is_po_update = self._is_po_update(cr,uid,po,'approved',context=context)
+        if is_po_update:
+            wf_service.trg_validate(uid, 'purchase.order', po.id, 'purchase_approve', cr)
+        return True   
+    
+    def action_reject(self, cr, uid, ids, message, context=None):
+        self.write(cr, uid, ids, {'state': 'rejected','reject_msg':message}, context=context)
+        wf_service = netsvc.LocalService("workflow")
+        #update po's state
+        po_line_obj = self.browse(cr,uid,ids[0],context=context)
+        po = po_line_obj.order_id
+        is_po_update = self._is_po_update(cr,uid,po,'rejected',context=context)
+        if is_po_update:
+            self.pool.get("purchase.order").action_reject(cr,uid,[po.id],"All lines are rejected",context=context)
+        return True     
+    
+    def write(self, cr, uid, ids, vals, context=None):
+        if not ids:
+            return True
+        id = ids[0]
+        po_line = self.browse(cr,uid,id,context=context)
+        value_old = po_line.product_qty
+        resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)
+        field_name = 'product_qty';
+        if vals.has_key(field_name):
+            log_obj = self.pool.get('change.log.po.line')
+            log_vals = {'res_id':id,'filed_name':field_name,'value_old':value_old,'value_new':vals[field_name]}
+            log_obj.create(cr,uid,log_vals,context=context)
+        return resu;
+        
