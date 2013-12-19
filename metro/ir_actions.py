@@ -54,11 +54,10 @@ class actions_server(osv.osv):
     _inherit = "ir.actions.server"
     _columns = {
         'email_cc': fields.char('CC Address', size=512),
-#        'email_bcc': fields.char('BCC Address', size=512, help="Expression that returns the email address to bcc. Can be based on the same values as for the condition field.\n"
-#                                                             "Example: object.invoice_address_id.email, or 'me@example.com'"),
-#        'email_reply_to': fields.char('Reploy To Address', size=512, help="Expression that returns the email address to reply to. Can be based on the same values as for the condition field.\n"
-#                                                             "Example: object.invoice_address_id.email, or 'me@example.com'"),
-#        'email_subtype': fields.selection([('plain','Plain'),('html','Html')], 'Content Type', readonly=True, help="The contenct type of the email", select=True),                
+        'email_bcc': fields.char('BCC Address', size=512, help="Expression that returns the email address to bcc. Can be based on the same values as for the condition field.\n"
+                                                             "Example: object.invoice_address_id.email, or 'me@example.com'"),
+        'email_reply_to': fields.char('Reploy To Address', size=512, help="Expression that returns the email address to reply to. Can be based on the same values as for the condition field.\n"
+                                                             "Example: object.invoice_address_id.email, or 'me@example.com'"),
+        'email_subtype': fields.selection([('plain','Plain'),('html','Html')], 'Content Type', help="The contenct type of the email", select=True),                
     }
 actions_server()  
-             

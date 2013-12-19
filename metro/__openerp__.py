@@ -16,7 +16,7 @@
     'depends': ['base'],
     'init_xml': [],
     'data' : [
-#       "ir_actions.xml",
+       "ir_actions_view.xml",
        "metro_menu.xml",
 	   "security/metro.xml",
     ],
