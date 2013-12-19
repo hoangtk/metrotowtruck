@@ -197,6 +197,7 @@ class purchase_order_line(osv.osv):
         'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
         'change_log': fields.one2many('change.log.po.line','res_id','Quantity Changing')
     }  
+    _order = "order_id desc"
     def _is_po_update(self,cr,uid,po,state,context=None):
         po_update = True
         for line in po.order_line:
@@ -245,10 +246,19 @@ class purchase_order_line(osv.osv):
         po_line = self.browse(cr,uid,id,context=context)
         value_old = po_line.product_qty
         resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)
-        field_name = 'product_qty';
-        if vals.has_key(field_name):
-            log_obj = self.pool.get('change.log.po.line')
-            log_vals = {'res_id':id,'filed_name':field_name,'value_old':value_old,'value_new':vals[field_name]}
-            log_obj.create(cr,uid,log_vals,context=context)
+        #only when orders confirmed, then record the quantity changing log
+        if po_line.state != 'draft':
+            field_name = 'product_qty';
+            if vals.has_key(field_name):
+                log_obj = self.pool.get('change.log.po.line')
+                log_vals = {'res_id':id,'filed_name':field_name,'value_old':value_old,'value_new':vals[field_name]}
+                log_obj.create(cr,uid,log_vals,context=context)
         return resu;
-        
+    def unlink(self, cr, uid, ids, context=None):
+        #only the draft,canceled can be deleted
+        lines = self.browse(cr,uid,ids,context=context)
+        for line in lines:
+            if line.state != 'draft' and line.state != 'cancel':
+                raise osv.except_osv(_('Error'), _('Only the lines with draft and canceled can be deleted!'))            
+        return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
+                    
