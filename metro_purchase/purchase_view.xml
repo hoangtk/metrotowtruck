@@ -31,7 +31,7 @@
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
                  	<group style="color:red">
-                		<field name="reject_msg" states="rejected"/>
+                		<field name="reject_msg" states="rejected" readonly="1"/>
                 	</group>
                 </xpath>       
                  <xpath expr="//field[@name='company_id']" position="after" >
@@ -140,7 +140,7 @@
 	                </header>
                     <sheet>
                     	<group style="color: red">        	
-	                        <field name="reject_msg" states="rejected"/>
+	                        <field name="reject_msg" states="rejected" readonly="1"/>
                     	</group>
                         <group>
                             <group>
@@ -156,20 +156,19 @@
                     			<label for="product_id"/>
                     			<div>
                     				<field name="image_medium" widget="image" class="oe_avatar oe_left" readonly="1"/>
-                                	<field name="product_id" readonly="1"/>
+                                	<field name="product_id"  readonly="1"/>
                                 </div>
                             </group>
                             <group>
                                 <label for="product_qty"/>
                                 <div>
-                                    <field name="product_qty" class="oe_inline" attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'confirmed')]}"/>
-                                    <field name="product_uom" class="oe_inline" readonly="1"/>
+                                    <field name="product_qty" class="oe_inline" attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'confirmed'),('state','!=', 'rejected')]}"/>
+                                    <field name="product_uom" class="oe_inline" attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
                                 </div>
-                                <field name="price_unit" readonly="1"/>
-                                <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]" readonly="1"/>
+                                <field name="price_unit"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
+                                <field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
                     			<field name="price_subtotal"/>
                                 <button string="Purchasing History" name="%(act_pur_history)d" type="action"/>
-                                <button string="Purchasing History" name="%(act_single_product)d" type="action"/>
                             </group>
                         </group>
                  		<group>
@@ -177,9 +176,9 @@
                 		</group>                        
                         <group>
                             <group>
-                                <field name="date_planned" widget="date" readonly="1"/>
-                                <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting" readonly="1"/>
-                                <field name="company_id" groups="base.group_multi_company" widget="selection" readonly="1"/>
+                                <field name="date_planned" widget="date"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
+                                <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
+                                <field name="company_id" groups="base.group_multi_company" widget="selection"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
                                 <field name="create_uid"/>
                                 <field name="create_date"/>
                             </group>                            
@@ -250,13 +249,13 @@
             sequence="-101"
             groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
             
-        <record model="ir.actions.act_window" id="act_single_product">
+<!--         <record model="ir.actions.act_window" id="act_single_product">
             <field name="name">Product's Information</field>
             <field name="res_model">product.product</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
             <field name="domain">[('id','=',active_id.product_id]</field>
-        </record>                            
+        </record>     -->                        
     </data>
 </openerp>
