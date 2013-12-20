@@ -57,6 +57,7 @@ class purchase_order(osv.osv):
         'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True)
     }
     def new_po(self, cr, uid, pos, context=None):
         """
@@ -127,7 +128,7 @@ class purchase_order(osv.osv):
                     todo.append(line.id)        
         self.pool.get('purchase.order.line').write(cr, uid, todo, {'state':'confirmed'},context)
         for id in ids:
-            self.write(cr, uid, [id], {'state' : 'confirmed', 'validator' : uid})
+            self.write(cr, uid, [id], {'state' : 'confirmed', 'validator' : uid, 'inform_type':'1'})
         return True    
     
     def wkf_approve_order(self, cr, uid, ids, context=None):                    
@@ -140,7 +141,7 @@ class purchase_order(osv.osv):
                 if line.state=='confirmed':
                     lines.append(line.id)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'approved'},context)
-        self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
+        self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context), 'inform_type':'3'})
         return True
     
     def wkf_done(self, cr, uid, ids, context=None):  
@@ -159,7 +160,7 @@ class purchase_order(osv.osv):
                     lines.append(line.id)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'rejected'},context)         
         wf_service = netsvc.LocalService("workflow")
-        self.write(cr,uid,ids,{'state':'rejected','reject_msg':message})
+        self.write(cr,uid,ids,{'state':'rejected','reject_msg':message, 'inform_type':'2'})
 
         for (id, name) in self.name_get(cr, uid, ids):
             wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_reject', cr)
@@ -195,7 +196,8 @@ class purchase_order_line(osv.osv):
         'create_uid':  fields.many2one('res.users', 'Creator', select=True, readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
-        'change_log': fields.one2many('change.log.po.line','res_id','Quantity Changing')
+        'change_log': fields.one2many('change.log.po.line','res_id','Quantity Changing'),
+        'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
     }  
     _order = "order_id desc"
     def _is_po_update(self,cr,uid,po,state,context=None):
@@ -208,13 +210,15 @@ class purchase_order_line(osv.osv):
 
     def action_confirm(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state': 'confirmed'}, context=context)
+        self.write(cr, uid, ids, {'inform_type': '1'}, context=context)
         wf_service = netsvc.LocalService("workflow")
         #update po's state
         po_line_obj = self.browse(cr,uid,ids[0],context=context)
         po = po_line_obj.order_id
         is_po_update = self._is_po_update(cr,uid,po,'confirmed',context=context)
         if is_po_update:
-            wf_service.trg_validate(uid, 'purchase.order', po.id, 'purchase_confirm', cr)
+            wf_service.trg_validate(uid, 'purchase.order', po.id, 'purchase_confirm', cr)            
+            
         return True 
             
     def action_approve(self, cr, uid, ids, context=None):
@@ -230,6 +234,7 @@ class purchase_order_line(osv.osv):
     
     def action_reject(self, cr, uid, ids, message, context=None):
         self.write(cr, uid, ids, {'state': 'rejected','reject_msg':message}, context=context)
+        self.write(cr, uid, ids, {'inform_type': '2'}, context=context)
         wf_service = netsvc.LocalService("workflow")
         #update po's state
         po_line_obj = self.browse(cr,uid,ids[0],context=context)
@@ -261,4 +266,3 @@ class purchase_order_line(osv.osv):
             if line.state != 'draft' and line.state != 'cancel':
                 raise osv.except_osv(_('Error'), _('Only the lines with draft and canceled can be deleted!'))            
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
-                    
