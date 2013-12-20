@@ -263,6 +263,6 @@ class purchase_order_line(osv.osv):
         #only the draft,canceled can be deleted
         lines = self.browse(cr,uid,ids,context=context)
         for line in lines:
-            if line.state != 'draft' and line.state != 'cancel':
-                raise osv.except_osv(_('Error'), _('Only the lines with draft and canceled can be deleted!'))            
+            if line.state != 'draft' and line.state != 'cancel' and line.state != 'rejected':
+                raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled and rejected can be deleted!'))            
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
