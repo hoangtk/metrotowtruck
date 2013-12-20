@@ -64,6 +64,10 @@
             	<xpath expr="//filter[@name='approved']" position="replace" >
             		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','not in',('draft','cancel','rejected','confirmed'))]" help="Approved purchase orders"/>
             	</xpath>
+            	<xpath expr="//filter[@name='exception']" position="before" >
+            		<separator/>
+            		<filter icon="terp-emblem-important" name="cancelled" string="Cancelled" domain="[('state','=','cancel')]" help="Purchase orders which are cancelled"/>
+            	</xpath>
             </field>
         </record>
         
@@ -73,9 +77,10 @@
         </record>
 
         <record id="purchase.purchase_form_action" model="ir.actions.act_window">
-            <field name="domain">[('state','not in',('draft','sent','confirmed','rejected'))]</field>
+            <!-- <field name="domain">[('state','not in',('draft','sent','confirmed','rejected'))]</field> -->
+            <field name="domain"></field>
         </record>
-
+<!-- 
 
         <record id="metro_purchase_wait_approval" model="ir.actions.act_window">
             <field name="name">PO Waitting Approval</field>
@@ -102,7 +107,7 @@
             sequence="-100"
             groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
-
+ -->
 <!-- PO Line View -->
         <record id="metro_po_line_full_tree" model="ir.ui.view">
             <field name="name">po.line.full.tree</field>
@@ -204,7 +209,7 @@
                     <filter icon="terp-document-new" name="draft" string="Quotations" domain="[('state','=','draft')]" help="Purchase order lines which are in draft state"/>
             		<filter icon="terp-document-new" name="confirmed" string="Waitting Approval" domain="[('state','=','confirmed')]" help="Purchase order lines waitting approval"/>
             		<filter icon="terp-document-new" name="rejected" string="Rejected" domain="[('state','=','rejected')]" help="Purchase order lines been rejected"/>
-                    <filter icon="terp-check" name="approved" string="Approved&amp;Done" domain="[('state','in',('approved','done'))]" help="Approved and Done purchase order lines"/>
+                    <filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','not in',('draft','cancel','rejected','confirmed'))]" help="Approved purchase order lines"/>
                     <separator/>
                     <filter icon="terp-emblem-important" name="cancelled" string="Cancelled" domain="[('state','=','cancel')]" help="Purchase order lines which are cancelled"/>                    
                     <field name="order_id"/>
@@ -223,7 +228,7 @@
             </field>
         </record>                
         <record model="ir.actions.act_window" id="metro_po_line_full_action">
-            <field name="name">PO By Lines</field>
+            <field name="name">Purchase Products</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order.line</field>
             <!-- <field name="domain">[('state','=','confirmed')]</field> -->
@@ -243,7 +248,7 @@
         </record>                
         <menuitem action="metro_po_line_full_action" id="menu_po_line_full"
             parent="purchase.menu_procurement_management"
-            sequence="-101"
+            sequence="5"
             groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
             
 <!--         <record model="ir.actions.act_window" id="act_single_product">

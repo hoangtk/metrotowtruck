@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-20 08:53+0000\n"
-"PO-Revision-Date: 2013-12-20 17:02+0800\n"
+"POT-Creation-Date: 2013-12-20 09:20+0000\n"
+"PO-Revision-Date: 2013-12-20 17:22+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -15,11 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
 "X-Generator: Poedit 1.5.7\n"
-
-#. module: metro_purchase
-#: view:purchase.order.line:0
-msgid "Approved and Done purchase order lines"
-msgstr "批准和完成的采购订单产品"
 
 #. module: metro_purchase
 #: help:pur.req,full_gen_po:0
@@ -77,19 +72,14 @@ msgid "Quotation Detail"
 msgstr "询价单明细"
 
 #. module: metro_purchase
-#: view:purchase.order.line:0
-msgid "Approved&Done"
-msgstr "批准&完成"
-
-#. module: metro_purchase
 #: model:res.groups,name:metro_purchase.group_pur_req_buyer
 msgid "Buyer"
 msgstr "采购员"
 
 #. module: metro_purchase
-#: view:pur.history:0
-msgid "History"
-msgstr "历史"
+#: view:purchase.order:0
+msgid "Purchase orders which are cancelled"
+msgstr "取消的采购订单"
 
 #. module: metro_purchase
 #: field:pur.history.line,price_subtotal:0
@@ -133,9 +123,9 @@ msgstr "产品"
 
 #. module: metro_purchase
 #: selection:pur.history.line,state:0 view:pur.req:0 selection:pur.req,state:0
-#: view:purchase.order.line:0
+#: view:purchase.order:0 view:purchase.order.line:0
 msgid "Cancelled"
-msgstr "取消"
+msgstr "已取消"
 
 #. module: metro_purchase
 #: help:pur.req,message_unread:0
@@ -513,7 +503,7 @@ msgid "UoM"
 msgstr "单位"
 
 #. module: metro_purchase
-#: view:purchase.order:0
+#: view:purchase.order:0 view:purchase.order.line:0
 msgid "Purchase Orders"
 msgstr "采购订单"
 
@@ -521,6 +511,11 @@ msgstr "采购订单"
 #: view:purchase.order:0 view:purchase.order.line:0
 msgid "Waitting Approval"
 msgstr "等待审批"
+
+#. module: metro_purchase
+#: view:pur.history:0
+msgid "History"
+msgstr "历史"
 
 #. module: metro_purchase
 #: field:pur.req,po_ids:0
@@ -566,6 +561,11 @@ msgstr "单价"
 #: field:pur.req.line,po_lines_ids:0
 msgid "Purchase Order Lines"
 msgstr "采购单行"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Approved purchase order lines"
+msgstr "批准的采购订单"
 
 #. module: metro_purchase
 #: field:pur.req.line,req_reason:0 field:pur.req.po.line,req_reason:0
