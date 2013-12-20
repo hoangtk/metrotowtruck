@@ -720,3 +720,30 @@ msgstr "产品采购历史"
 #: model:ir.model,name:metro_purchase.model_pur_req_po
 msgid "Requisition's Purchase Order"
 msgstr "请购单相关采购单"
+
+##################added manually - begin ######################
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Purchase Order Confirmation N°"
+msgstr "采购合同"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Order Date:"
+msgstr "订单日期:"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Tel.:"
+msgstr "电话:"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Fax:"
+msgstr "传真:"
+
+#. module: metro_purchase
+#: report:purchase.order:0
+msgid "Products"
+msgstr "产品"
+##################added manually - end ######################
