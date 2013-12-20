@@ -23,7 +23,7 @@
 {
     'name': 'Metro Warranty',
     'version': '0.04',
-    'category': 'Tools',
+    'category': 'Metro',
     'description': """
     This module adds warranty related details.
     

@@ -21,7 +21,7 @@
 {
     'name': 'Metro Attachment',
     'version': '1.0',
-    'category': 'General',
+    'category': 'Metro',
     'sequence': 500,
     'description': """
     Add default products to sales order

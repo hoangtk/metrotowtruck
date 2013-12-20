@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Metro',
+    'name': 'Metro Accounts',
     'version': '1.0',
     'category': 'Metro',
     'sequence': 14,

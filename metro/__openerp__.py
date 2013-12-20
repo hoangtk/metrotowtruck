@@ -3,6 +3,7 @@
 {
     'name': 'Metro',
     'version': '1.0',
+    'category': 'Metro',
     "sequence": 14,
     'complexity': "easy",
     'description': """
@@ -11,8 +12,8 @@
         Metro Modules.
     
     """,
-    'author': 'PY Solutions',
-    'website': 'http://www.pysolutions.com',
+    'author': 'Metro Tower Trucks',
+    'website': 'http://www.metrotowtrucks.com',
     'depends': ['base'],
     'init_xml': [],
     'data' : [
@@ -23,7 +24,6 @@
     'installable': True,
     'auto_install': False,
     'application': True,
-    
     #web
     "js": ["static/src/js/metro.js"],
     'qweb' : ["static/src/xml/lang_switch.xml"],

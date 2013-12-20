@@ -23,7 +23,7 @@
 {
     'name': 'Metro Defect',
     'version': '0.01',
-    'category': 'Tools',
+    'category': 'Metro',
     'description': """
     This module adds defect related details.
     

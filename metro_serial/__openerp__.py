@@ -3,6 +3,7 @@
 {
     'name': 'Metro Serial',
     'version': '1.0',
+    'category': 'Metro',
     "sequence": 14,
     'complexity': "easy",
     'description': """

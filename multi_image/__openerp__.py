@@ -22,7 +22,8 @@
 
 {
     "name" : "Multi Image",
-    "version" : "",
+    "version" : "1.0",
+    'category': 'Metro',
     "author" : "Serpent Consulting Services Pvt. Ltd.",
     "category": 'Image',
     'complexity': "easy",

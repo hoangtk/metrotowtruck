@@ -23,7 +23,7 @@
 {
     'name': 'Metro Shipping',
     'version': '1.0',
-    'category': 'Tools',
+    'category': 'Metro',
     'description': """
     The point of this module is to track our shipments.  We ship from China and Canada at this time. 
     We will sometimes ship containers (like 40HC or 20GP) and other times we ship using

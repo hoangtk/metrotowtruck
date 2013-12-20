@@ -1,5 +1,5 @@
 {
-    'name': 'Metro_sale',
+    'name': 'Metro Sale',
     'version': '1.0',
     'category': 'Metro',
     'sequence': 14,

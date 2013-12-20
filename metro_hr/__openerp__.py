@@ -20,7 +20,7 @@
 #
 ##############################################################################
 {
-    'name': 'Metro HR Extension',
+    'name': 'Metro HR',
     'version': '1.0',
     'category': 'Metro',
     'description': """

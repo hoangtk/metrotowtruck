@@ -20,7 +20,7 @@
 #
 ##############################################################################
 {
-    'name': 'Metro Product Extension',
+    'name': 'Metro Product',
     'version': '1.0',
     'category': 'Metro',
     'description': """

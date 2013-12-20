@@ -25,9 +25,6 @@
                 </xpath>       
                  <xpath expr="//field[@name='pricelist_id']" position="after" >
                 	<field name="payment_term_id" widget="selection"/>
-                </xpath>       
-                 <xpath expr="//field[@name='pricelist_id']" position="after" >
-                	<field name="payment_term_id" widget="selection"/>
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
                  	<group style="color:red">
