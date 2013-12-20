@@ -3,3 +3,4 @@ access_pur_req,pur.req,model_pur_req,metro_purchase.group_pur_req_requester,1,1,
 access_pur_req_line_purchase_user,pur.req.line,model_pur_req_line,metro_purchase.group_pur_req_requester,1,1,1,1
 access_pur_req_manager,pur.req manager,model_pur_req,metro_purchase.group_pur_req_buyer,1,1,0,0
 access_pur_req_line_manager,pur.req.line manager,model_pur_req_line,metro_purchase.group_pur_req_buyer,1,0,0,0
+access_change_log_po_line,change.log.po.line,model_change_log_po_line,,1,1,1,1

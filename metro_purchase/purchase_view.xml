@@ -135,7 +135,7 @@
             <field name="arch" type="xml">
                 <form string="Purchase Order Line" version="7.0">  
 	                <header>
-	                    <button name="action_confirm" states="draft,rejected" string="Confirm" type="object" class="oe_highlight"/>
+	                    <button name="action_confirm" states="rejected" string="Confirm" type="object" class="oe_highlight"/>
 	                    <button name="action_approve" states="confirmed" string="Approve" type="object" class="oe_highlight" groups="metro_purchase.group_pur_req_manager"/>
 	                    <button name="%(act_purchase_line_reject)d" states="confirmed" string="Reject" type="action" groups="metro_purchase.group_pur_req_manager"/>
 	                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done" statusbar_colors='{"confirmed":"blue"}' readonly="1"/>
@@ -232,7 +232,7 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">purchase.order.line</field>
             <!-- <field name="domain">[('state','=','confirmed')]</field> -->
-            <field name="context">{'search_default_confirmed': 1}</field>
+            <!-- <field name="context">{'search_default_confirmed': 1}</field> -->
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_po_line_full_filter"/>
         </record>        
@@ -248,7 +248,7 @@
         </record>                
         <menuitem action="metro_po_line_full_action" id="menu_po_line_full"
             parent="purchase.menu_procurement_management"
-            sequence="5"
+            sequence="7"
             groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
             
 <!--         <record model="ir.actions.act_window" id="act_single_product">
