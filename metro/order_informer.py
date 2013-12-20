@@ -77,7 +77,8 @@ class order_informer(osv.osv_memory):
             group_ids = group_obj.search(cr,uid,[('category_id','=', group_cate_id),('name','=','Manager')],context=context)
             group = group_obj.browse(cr,uid,group_ids,context=context)[0]
             for user in group.users:
-                email_to.append(user.email)
+                if user.email: 
+                    email_to.append(user.email)
             #sending po emails            
             msg = ir_mail_server.build_email(email_from, email_to, email_subject, email_body,
                                              email_cc = email_cc, subtype = 'html')
