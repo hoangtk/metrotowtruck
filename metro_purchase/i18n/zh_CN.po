@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-12 07:40+0000\n"
-"PO-Revision-Date: 2013-12-12 15:41+0800\n"
+"POT-Creation-Date: 2013-12-20 08:53+0000\n"
+"PO-Revision-Date: 2013-12-20 17:02+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,14 +17,24 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 
 #. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Approved and Done purchase order lines"
+msgstr "批准和完成的采购订单产品"
+
+#. module: metro_purchase
 #: help:pur.req,full_gen_po:0
 msgid "It indicates that this requsition's all lines generated PO"
 msgstr "是否所有请购的产品已经生成PO"
 
 #. module: metro_purchase
-#: view:pur.req:0
+#: view:pur.req:0 view:purchase.order.line:0
 msgid "Group By..."
 msgstr "分组..."
+
+#. module: metro_purchase
+#: field:change.log.po.line,value_old:0
+msgid "Old Value"
+msgstr "旧值"
 
 #. module: metro_purchase
 #: field:pur.req.line,generated_po:0
@@ -35,6 +45,11 @@ msgstr "已生成PO"
 #: report:pur.req:0
 msgid "Product Detail"
 msgstr "产品明细"
+
+#. module: metro_purchase
+#: field:purchase.order.line,change_log:0
+msgid "Quantity Changing"
+msgstr "数量变化"
 
 #. module: metro_purchase
 #: view:pur.req.po:0
@@ -62,9 +77,29 @@ msgid "Quotation Detail"
 msgstr "询价单明细"
 
 #. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Approved&Done"
+msgstr "批准&完成"
+
+#. module: metro_purchase
 #: model:res.groups,name:metro_purchase.group_pur_req_buyer
 msgid "Buyer"
 msgstr "采购员"
+
+#. module: metro_purchase
+#: view:pur.history:0
+msgid "History"
+msgstr "历史"
+
+#. module: metro_purchase
+#: field:pur.history.line,price_subtotal:0
+msgid "Subtotal"
+msgstr "小计"
+
+#. module: metro_purchase
+#: selection:pur.history.line,state:0
+msgid "Approved"
+msgstr "已批准"
 
 #. module: metro_purchase
 #: view:pur.req:0
@@ -82,9 +117,9 @@ msgid "Remark"
 msgstr "备注"
 
 #. module: metro_purchase
-#: view:confirm.msg:0
-msgid "Rejection reason..."
-msgstr "拒绝原因..."
+#: field:pur.req,message_ids:0
+msgid "Messages"
+msgstr "消息"
 
 #. module: metro_purchase
 #: model:ir.model,name:metro_purchase.model_purchase_order view:pur.req:0
@@ -97,7 +132,8 @@ msgid "Products"
 msgstr "产品"
 
 #. module: metro_purchase
-#: view:pur.req:0 selection:pur.req,state:0
+#: selection:pur.history.line,state:0 view:pur.req:0 selection:pur.req,state:0
+#: view:purchase.order.line:0
 msgid "Cancelled"
 msgstr "取消"
 
@@ -107,9 +143,19 @@ msgid "If checked new messages require your attention."
 msgstr "If checked new messages require your attention."
 
 #. module: metro_purchase
+#: field:pur.history,line_ids:0 view:purchase.order.line:0
+msgid "PO Lines"
+msgstr "采购产品明细"
+
+#. module: metro_purchase
 #: view:pur.req.po:0
 msgid "Requisition lines"
 msgstr "申请行"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Invoices and Receptions"
+msgstr "发票和入库单"
 
 #. module: metro_purchase
 #: view:pur.req:0
@@ -131,18 +177,12 @@ msgid "Rejection reason"
 msgstr "拒绝原因"
 
 #. module: metro_purchase
-#: model:ir.actions.act_window,name:metro_purchase.metro_purchase_wait_approval
-#: model:ir.ui.menu,name:metro_purchase.menu_purchase_wait_approval
-msgid "PO Waitting Approval"
-msgstr "采购单-待批准"
-
-#. module: metro_purchase
 #: view:pur.req:0 selection:pur.req,state:0
 msgid "Confirmed"
 msgstr "已确认"
 
 #. module: metro_purchase
-#: view:confirm.msg:0 view:pur.req:0
+#: view:confirm.msg:0 view:pur.req:0 view:purchase.order.line:0
 msgid "Confirm"
 msgstr "确认"
 
@@ -152,7 +192,13 @@ msgid "Requester:"
 msgstr "申请人:"
 
 #. module: metro_purchase
-#: report:pur.req:0 field:pur.req.po,partner_id:0
+#: view:purchase.order.line:0
+msgid "Search Purchase Order Line"
+msgstr "查找采购产品明细"
+
+#. module: metro_purchase
+#: field:pur.history.line,partner_id:0 report:pur.req:0
+#: field:pur.req.po,partner_id:0 view:purchase.order.line:0
 msgid "Supplier"
 msgstr "供应商"
 
@@ -188,9 +234,14 @@ msgid "Purchase Requisition"
 msgstr "采购申请"
 
 #. module: metro_purchase
-#: field:pur.req,name:0
-msgid "Requisition#"
-msgstr "请购单号"
+#: view:change.log.po.line:0
+msgid "Change Log of PO Lines"
+msgstr "采购产品明细的修改记录"
+
+#. module: metro_purchase
+#: field:purchase.order,create_date:0 field:purchase.order.line,create_date:0
+msgid "Creation Date"
+msgstr "创建日期"
 
 #. module: metro_purchase
 #: report:pur.req:0 field:pur.req.line,date_required:0
@@ -199,7 +250,8 @@ msgid "Date Required"
 msgstr "需求日期"
 
 #. module: metro_purchase
-#: view:purchase.order:0
+#: selection:pur.history.line,state:0 view:purchase.order:0
+#: view:purchase.order.line:0
 msgid "Rejected"
 msgstr "已拒绝"
 
@@ -214,19 +266,48 @@ msgid "Confirm Order"
 msgstr "确认订单"
 
 #. module: metro_purchase
+#: field:pur.history.line,order_id:0 field:pur.history.line,order_line_id:0
 #: report:pur.req:0
 msgid "Order Reference"
 msgstr "引用单号"
 
 #. module: metro_purchase
-#: view:pur.req:0
+#: field:pur.history.line,state:0 view:pur.req:0 field:pur.req,state:0
+#: view:purchase.order.line:0
+msgid "Status"
+msgstr "状态"
+
+#. module: metro_purchase
+#: field:pur.history.line,date_order:0 view:pur.req:0
+#: view:purchase.order.line:0
 msgid "Order Date"
 msgstr "下单日期"
 
 #. module: metro_purchase
-#: field:purchase.order,reject_msg:0
+#: model:ir.model,name:metro_purchase.model_change_log_po_line
+msgid "change.log.po.line"
+msgstr "change.log.po.line"
+
+#. module: metro_purchase
+#: model:ir.actions.act_window,name:metro_purchase.metro_po_line_full_action
+#: model:ir.ui.menu,name:metro_purchase.menu_po_line_full
+msgid "Purchase Products"
+msgstr "采购产品"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Purchase order lines waitting approval"
+msgstr "等待审批的采购产品明细"
+
+#. module: metro_purchase
+#: field:purchase.order,reject_msg:0 field:purchase.order.line,reject_msg:0
 msgid "Rejection Message"
 msgstr "拒绝信息"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Purchase order lines which are in draft state"
+msgstr "草稿状态的采购产品明细"
 
 #. module: metro_purchase
 #: view:pur.req.po:0
@@ -234,14 +315,24 @@ msgid "Create PO"
 msgstr "创建采购单"
 
 #. module: metro_purchase
+#: view:pur.history:0 view:purchase.order.line:0
+msgid "Purchasing History"
+msgstr "采购历史"
+
+#. module: metro_purchase
 #: view:pur.req:0 field:pur.req.po,line_ids:0
 msgid "Prodcuts"
 msgstr "产品"
 
 #. module: metro_purchase
-#: view:confirm.msg:0 view:pur.req.po:0
-msgid "or"
-msgstr "或"
+#: selection:pur.history.line,state:0
+msgid "Waiting Approval"
+msgstr "等待审批"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Purchase order lines been rejected"
+msgstr "被拒绝的采购产品明细"
 
 #. module: metro_purchase
 #: view:confirm.msg:0
@@ -250,12 +341,14 @@ msgid "Confirm Purchase Order Rejection"
 msgstr "确认拒绝采购单"
 
 #. module: metro_purchase
-#: field:pur.req.line,product_uom_id:0 field:pur.req.po.line,product_uom_id:0
+#: field:pur.history.line,product_uom:0 field:pur.req.line,product_uom_id:0
+#: field:pur.req.po.line,product_uom_id:0
 msgid "Product Unit of Measure"
 msgstr "单位"
 
 #. module: metro_purchase
 #: model:ir.model,name:metro_purchase.model_purchase_order_line
+#: view:purchase.order.line:0
 msgid "Purchase Order Line"
 msgstr "采购订单明细"
 
@@ -265,7 +358,12 @@ msgid "All products generated PO"
 msgstr "生成PO完毕"
 
 #. module: metro_purchase
-#: view:pur.req:0
+#: field:change.log.po.line,field_name:0
+msgid "Field Name"
+msgstr "字段名"
+
+#. module: metro_purchase
+#: selection:pur.history.line,state:0 view:pur.req:0
 msgid "Draft"
 msgstr "草稿"
 
@@ -275,24 +373,39 @@ msgid "Generate Purchase Order"
 msgstr "生成采购单"
 
 #. module: metro_purchase
-#: view:pur.req:0 field:pur.req,state:0
-msgid "Status"
-msgstr "状态"
+#: view:purchase.order.line:0
+msgid "Reject"
+msgstr "拒绝"
 
 #. module: metro_purchase
-#: field:pur.req.line,company_id:0
+#: view:purchase.order.line:0
+msgid "Purchase order lines which are cancelled"
+msgstr "取消的采购产品明细"
+
+#. module: metro_purchase
+#: field:pur.req.line,company_id:0 field:purchase.order.line,image_medium:0
 msgid "unknown"
 msgstr "未知"
 
 #. module: metro_purchase
-#: model:ir.model,name:metro_purchase.model_pur_req_po
-msgid "Requisition's Purchase Order"
-msgstr "请购单相关采购单"
+#: field:purchase.order,inform_type:0 field:purchase.order.line,inform_type:0
+msgid "Informer Type"
+msgstr "通知类型"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Order"
+msgstr "订单"
 
 #. module: metro_purchase
 #: field:pur.req,message_is_follower:0
 msgid "Is a Follower"
 msgstr "Is a Follower"
+
+#. module: metro_purchase
+#: field:change.log.po.line,create_uid:0
+msgid "User"
+msgstr "用户"
 
 #. module: metro_purchase
 #: view:purchase.order:0
@@ -324,7 +437,17 @@ msgid "Summary"
 msgstr "总计"
 
 #. module: metro_purchase
-#: view:pur.req:0
+#: model:ir.actions.act_window,name:metro_purchase.act_purchase_line_reject
+msgid "Confirm Purchase Order Line Rejection"
+msgstr "确认拒绝采购产品明细"
+
+#. module: metro_purchase
+#: field:change.log.po.line,create_date:0
+msgid "Time"
+msgstr "时间"
+
+#. module: metro_purchase
+#: view:pur.req:0 view:purchase.order.line:0
 msgid "Quotations"
 msgstr "询价单"
 
@@ -334,9 +457,15 @@ msgid "Requisition Ticket#"
 msgstr "纸质请购单号"
 
 #. module: metro_purchase
-#: field:pur.req.line,product_qty:0 field:pur.req.po.line,product_qty:0
+#: field:pur.history.line,product_qty:0 field:pur.req.line,product_qty:0
+#: field:pur.req.po.line,product_qty:0
 msgid "Quantity"
 msgstr "数量"
+
+#. module: metro_purchase
+#: field:purchase.order.line,create_uid:0
+msgid "Creator"
+msgstr "创建人"
 
 #. module: metro_purchase
 #: view:pur.req:0 field:pur.req,warehouse_id:0
@@ -354,7 +483,12 @@ msgid "Qty"
 msgstr "数量"
 
 #. module: metro_purchase
-#: view:pur.req:0
+#: field:change.log.po.line,res_id:0
+msgid "PO Line"
+msgstr "采购订单行"
+
+#. module: metro_purchase
+#: selection:pur.history.line,state:0 view:pur.req:0
 msgid "Done"
 msgstr "完成"
 
@@ -379,39 +513,12 @@ msgid "UoM"
 msgstr "单位"
 
 #. module: metro_purchase
-#: model:ir.actions.act_window,help:metro_purchase.metro_purchase_wait_approval
-msgid ""
-"<p class=\"oe_view_nocontent_create\">\n"
-"                Click to create a request for quotation.\n"
-"              </p><p>\n"
-"                The quotation contains the history of the discussion/"
-"negociation\n"
-"                you had with your supplier. Once confirmed, a request for\n"
-"                quotation is converted into a purchase order.\n"
-"              </p><p>\n"
-"                Most propositions of purchase orders are created "
-"automatically\n"
-"                by OpenERP based on inventory needs.\n"
-"              </p>\n"
-"            "
-msgstr ""
-"<p class=\"oe_view_nocontent_create\">\n"
-"                单击创建询价单\n"
-"              </p><p>\n"
-"                报价单包括了你和供应商讨论与价格的历史。  \n"
-"                一旦确定，询价单被转换成为采购订单.\n"
-"              </p><p>\n"
-"                根据库存的需要，采购订单的更多事务将被被自动创建。\n"
-"              </p>\n"
-"            "
-
-#. module: metro_purchase
 #: view:purchase.order:0
 msgid "Purchase Orders"
 msgstr "采购订单"
 
 #. module: metro_purchase
-#: view:purchase.order:0
+#: view:purchase.order:0 view:purchase.order.line:0
 msgid "Waitting Approval"
 msgstr "等待审批"
 
@@ -426,7 +533,7 @@ msgid "Reques Date:"
 msgstr "请购日期:"
 
 #. module: metro_purchase
-#: field:pur.req.po.line,wizard_id:0
+#: field:pur.history.line,wizard_id:0 field:pur.req.po.line,wizard_id:0
 msgid "Wizard"
 msgstr "向导"
 
@@ -451,7 +558,7 @@ msgid "Purchase Done"
 msgstr "采购完毕"
 
 #. module: metro_purchase
-#: field:pur.req.po.line,price_unit:0
+#: field:pur.history.line,price_unit:0 field:pur.req.po.line,price_unit:0
 msgid "Unit Price"
 msgstr "单价"
 
@@ -461,7 +568,7 @@ msgid "Purchase Order Lines"
 msgstr "采购单行"
 
 #. module: metro_purchase
-#: field:pur.req.line,req_reason:0
+#: field:pur.req.line,req_reason:0 field:pur.req.po.line,req_reason:0
 msgid "Reason and use"
 msgstr "原因和用途"
 
@@ -471,15 +578,31 @@ msgid "Purchase Requisition Line"
 msgstr "采购申请明细"
 
 #. module: metro_purchase
-#: report:pur.req:0 field:pur.req.line,product_id:0
-#: field:pur.req.po.line,product_id:0
+#: view:purchase.order.line:0
+msgid "Scheduled Date"
+msgstr "预期日期"
+
+#. module: metro_purchase
+#: field:pur.history,product_id:0 report:pur.req:0
+#: field:pur.req.line,product_id:0 field:pur.req.po.line,product_id:0
+#: view:purchase.order.line:0
 msgid "Product"
 msgstr "产品"
+
+#. module: metro_purchase
+#: model:ir.actions.act_window,name:metro_purchase.act_pur_history
+msgid "Product's Purchasing History"
+msgstr "产品采购历史"
 
 #. module: metro_purchase
 #: help:pur.req.line,generated_po:0
 msgid "It indicates that this products has PO generated"
 msgstr "表示产品已经生成采购单"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "approved,except_picking,except_invoice,rejected"
+msgstr "approved,except_picking,except_invoice,rejected"
 
 #. module: metro_purchase
 #: view:pur.req:0 field:pur.req,user_id:0
@@ -519,9 +642,9 @@ msgid "Purchase orders been rejected"
 msgstr "采购单被拒绝"
 
 #. module: metro_purchase
-#: field:pur.req,message_ids:0
-msgid "Messages"
-msgstr "Messages"
+#: view:confirm.msg:0
+msgid "Rejection reason..."
+msgstr "拒绝原因..."
 
 #. module: metro_purchase
 #: report:pur.req:0
@@ -544,6 +667,11 @@ msgid "PO Quantity"
 msgstr "采购数量"
 
 #. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Approve"
+msgstr "批准"
+
+#. module: metro_purchase
 #: help:pur.req,message_ids:0
 msgid "Messages and communication history"
 msgstr "Messages and communication history"
@@ -554,9 +682,29 @@ msgid "Purchase for Requisitions"
 msgstr "采购请购"
 
 #. module: metro_purchase
+#: model:ir.model,name:metro_purchase.model_pur_history_line
+msgid "Product's purchasing history line"
+msgstr "产品采购历史明细"
+
+#. module: metro_purchase
+#: field:change.log.po.line,value_new:0
+msgid "New Value"
+msgstr "新值"
+
+#. module: metro_purchase
+#: field:pur.req,name:0
+msgid "Requisition#"
+msgstr "请购单号"
+
+#. module: metro_purchase
 #: view:pur.req:0
 msgid "Purchase Requisition "
 msgstr "采购申请"
+
+#. module: metro_purchase
+#: view:confirm.msg:0 view:pur.req.po:0
+msgid "or"
+msgstr "或"
 
 #. module: metro_purchase
 #: model:res.groups,name:metro_purchase.group_pur_req_manager
@@ -564,26 +712,11 @@ msgid "Manager"
 msgstr "经理"
 
 #. module: metro_purchase
-#: report:purchase.order:0
-msgid "Purchase Order Confirmation N°"
-msgstr "采购合同"
+#: model:ir.model,name:metro_purchase.model_pur_history
+msgid "Product's purchasing history"
+msgstr "产品采购历史"
 
 #. module: metro_purchase
-#: report:purchase.order:0
-msgid "Order Date:"
-msgstr "订单日期:"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Tel.:"
-msgstr "电话:"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Fax:"
-msgstr "传真:"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Products"
-msgstr "产品"
+#: model:ir.model,name:metro_purchase.model_pur_req_po
+msgid "Requisition's Purchase Order"
+msgstr "请购单相关采购单"
