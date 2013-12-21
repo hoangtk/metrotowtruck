@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-20 09:20+0000\n"
-"PO-Revision-Date: 2013-12-20 17:22+0800\n"
+"POT-Creation-Date: 2013-12-21 00:23+0000\n"
+"PO-Revision-Date: 2013-12-21 08:25+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -251,6 +251,12 @@ msgid "Purchase Reason"
 msgstr "采购原因"
 
 #. module: metro_purchase
+#: field:pur.history.line,product_qty:0 field:pur.req.line,product_qty:0
+#: field:pur.req.po.line,product_qty:0
+msgid "Quantity"
+msgstr "数量"
+
+#. module: metro_purchase
 #: view:purchase.order:0
 msgid "Confirm Order"
 msgstr "确认订单"
@@ -373,6 +379,11 @@ msgid "Purchase order lines which are cancelled"
 msgstr "取消的采购产品明细"
 
 #. module: metro_purchase
+#: field:purchase.order.line,po_notes:0
+msgid "Terms and Conditions"
+msgstr "合同条款"
+
+#. module: metro_purchase
 #: field:pur.req.line,company_id:0 field:purchase.order.line,image_medium:0
 msgid "unknown"
 msgstr "未知"
@@ -447,10 +458,9 @@ msgid "Requisition Ticket#"
 msgstr "纸质请购单号"
 
 #. module: metro_purchase
-#: field:pur.history.line,product_qty:0 field:pur.req.line,product_qty:0
-#: field:pur.req.po.line,product_qty:0
-msgid "Quantity"
-msgstr "数量"
+#: view:pur.history:0
+msgid "History"
+msgstr "历史"
 
 #. module: metro_purchase
 #: field:purchase.order.line,create_uid:0
@@ -511,11 +521,6 @@ msgstr "采购订单"
 #: view:purchase.order:0 view:purchase.order.line:0
 msgid "Waitting Approval"
 msgstr "等待审批"
-
-#. module: metro_purchase
-#: view:pur.history:0
-msgid "History"
-msgstr "历史"
 
 #. module: metro_purchase
 #: field:pur.req,po_ids:0
@@ -697,6 +702,11 @@ msgid "Requisition#"
 msgstr "请购单号"
 
 #. module: metro_purchase
+#: field:purchase.order.line,payment_term_id:0
+msgid "Payment Term"
+msgstr "支付条款"
+
+#. module: metro_purchase
 #: view:pur.req:0
 msgid "Purchase Requisition "
 msgstr "采购申请"
@@ -721,7 +731,32 @@ msgstr "产品采购历史"
 msgid "Requisition's Purchase Order"
 msgstr "请购单相关采购单"
 
-##################added manually - begin ######################
+#==================added manually - begin ==================#
+#. module: metro_purchase
+#: field:purchase.order,notes:0
+msgid "Terms and Conditions"
+msgstr "合同条款"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Approve"
+msgstr "批准"
+
+#. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "Approve"
+msgstr "批准"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Send by Email"
+msgstr "发邮件"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Cancel Order"
+msgstr "取消"
+
 #. module: metro_purchase
 #: report:purchase.order:0
 msgid "Purchase Order Confirmation N°"
@@ -746,4 +781,3 @@ msgstr "传真:"
 #: report:purchase.order:0
 msgid "Products"
 msgstr "产品"
-##################added manually - end ######################

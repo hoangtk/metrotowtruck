@@ -191,6 +191,8 @@ class purchase_order_line(osv.osv):
     ]
 
     _columns = {
+        'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
+        'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
         'state': fields.selection(STATE_SELECTION, 'Status', readonly=True),
         'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
         'create_uid':  fields.many2one('res.users', 'Creator', select=True, readonly=True),

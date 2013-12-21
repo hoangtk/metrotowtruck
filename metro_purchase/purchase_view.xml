@@ -148,11 +148,15 @@
                             <group>
 			                    <field name="order_id" readonly="1"/>
 			                    <field name="date_order" readonly="1"/>
+			                    <field name="payment_term_id" readonly="1"/>
                             </group>
                             <group>
 			                    <field name="partner_id" string="Supplier" readonly="1"/>
                             </group>
                         </group>
+                 		<group>
+                			<field name="po_notes" readonly="1"/>
+                		</group>                         
                         <group>
                             <group>
                     			<label for="product_id"/>
