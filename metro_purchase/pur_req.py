@@ -221,7 +221,7 @@ pur_req_line()
 class purchase_order(osv.osv):
     _inherit = "purchase.order"
     _columns = {
-        'req_id' : fields.many2one('pur.req','Purchase Requisition')
+        'req_id' : fields.many2one('pur.req','Purchase Requisition',readonly=True)
     }
 
 purchase_order()
@@ -229,7 +229,7 @@ purchase_order()
 class purchase_order_line(osv.osv):    
     _inherit = "purchase.order.line"
     _columns = {
-                'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition')}   
+                'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition',readonly=True)}   
     
 purchase_order_line()
 
