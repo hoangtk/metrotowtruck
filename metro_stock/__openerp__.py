@@ -38,6 +38,7 @@
     'website': 'http://www.metrotowtrucks.com',
     'depends': ["metro", "metro_purchase","metro_sale","stock"],
     'data': [
+        'security/ir.model.access.csv',
         'stock_view.xml',
         'stock_sequence.xml',        
     ],

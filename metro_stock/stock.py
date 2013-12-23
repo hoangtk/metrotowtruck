@@ -37,7 +37,8 @@ class material_request(osv.osv):
     _description = "Material Request"
 
     _columns = {
-        'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request')], 'Shipping Type', required=True, select=True, help="Shipping type specify, goods coming in or going out."),                
+        'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], 
+                                 'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
         
@@ -45,6 +46,7 @@ class material_request(osv.osv):
     _defaults = {
         'type': 'mr',
         'move_type': 'one',
+        'state': 'creating',
     }
 
     def check_access_rights(self, cr, uid, operation, raise_exception=True):
@@ -66,46 +68,91 @@ class material_request(osv.osv):
         return self.pool.get('stock.picking')._workflow_signal(cr, uid, ids, signal, context=context)
         
     def create(self, cr, uid, vals, context=None):
-        if vals.get('name','/')=='/':
-            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'material.request') or '/'
+        vals['state'] = 'draft'
+        if not vals.get('name') or vals.get('name','/')=='/':
+            if vals['type'] == 'mrr':
+                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'material.request.return') or '/'
+            else:
+                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'material.request') or '/'
+                
         order =  super(material_request, self).create(cr, uid, vals, context=context)
         return order
+#    def default_get(self, cr, uid, fields_list, context=None):
+#        resu = super(material_request,self).default_get(cr, uid, fields_list, context)
+#        return resu
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
-        new_args = []
-        for arg in args:
-            fld_name = arg[0]
-            if fld_name == 'date':
-                fld_operator = arg[1]
-                fld_val = arg[2]
-                fld = self._columns.get(fld_name)
-                #['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
-                if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
-                    time_start = [fld_name,'>=',fld_val]
-                    time_obj = datetime.datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
-                    time_obj += relativedelta(days=1)
-                    time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
-                    new_args.append(time_start)
-                    new_args.append(time_end)
-                else:
-                    new_args.append(arg)
-            else:
-                new_args.append(arg)
-        return super(material_request,self).search(cr, user, new_args, offset, limit, order, context, count)  
+        new_args = deal_args(self,args)
+        return super(material_request,self).search(cr, user, new_args, offset, limit, order, context, count)    
+             
+#class material_return(osv.osv):
+#    _name = "material.return"
+#    _inherit = "material.request"
+#    _description = "Material Return"
+#    _defaults = {
+#        'type': 'mrr',
+#        'move_type': 'one',
+#    }
+#    def view_init(self, cr, uid, fields_list, context=None):
+#        """Override this method to do specific things when a view on the object is opened."""
+#        pass
+#    def _get_default_form_view(self, cr, user, context=None):
+#        resu = super(material_return,self)._get_default_form_view(cr,user, context)
+#        return resu            
+#    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+#        resu = super(material_return,self).fields_view_get(cr, user, view_id, view_type, context, toolbar, submenu)
+#        return resu            
+        
 class material_request_line(osv.osv):
     _name = "material.request.line"
     _inherit = "stock.move"
     _table = "stock_move"
     _description = "Material Request Line"
     _columns = {
-        'picking_id': fields.many2one('material.request', 'Reference', select=True,states={'done': [('readonly', True)]}),
+        'picking_id': fields.many2one('material.request', 'MR#', select=True,states={'done': [('readonly', True)]}),
         'mr_emp_id': fields.many2one('hr.employee','Employee'),
         'mr_sale_prod_id': fields.char('Sale Product ID',size=8),
         'mr_notes': fields.text('Reason and use'),
         'mr_dept_id': fields.related('picking_id','mr_dept_id',string='Department',type='many2one',relation='hr.department',select=True),
-        'mr_date_order': fields.related('picking_id','date',string='Request Date',type='datetime'),
+        'mr_date_order': fields.related('picking_id','date',string='Order Date',type='datetime'),
         'pick_type': fields.related('picking_id','type',string='Picking Type',type='char'),
     }
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(material_request_line,self).default_get(cr, uid, fields_list, context)
+        #material_request.type: mr or mrr
+        req_type = context.get('req_type')
+        if not req_type:
+            req_type = 'mr'
+        loc_stock_id = None
+        loc_prod_id = None
+        #get the default stock location
+        cr.execute('select c.id \n'+
+                    'from res_users a  \n'+
+                    'left join stock_warehouse b on a.company_id = b.company_id  \n'+
+                    'left join stock_location c on b.lot_stock_id = c.id \n'
+                    'where a.id = %s', (uid,))
+        loc_src = cr.fetchone()
+        if loc_src:
+           loc_stock_id = loc_src[0]           
+        #get the default production location
+        loc_obj = self.pool.get('stock.location')
+        prod_loc_ids = loc_obj.search(cr,uid,[('usage','=','production')],context=context)
+        if prod_loc_ids and prod_loc_ids[0]:
+            prod_loc = loc_obj.browse(cr,uid,prod_loc_ids[0],context=context)
+            loc_prod_id = prod_loc.id
+        #set the locations by the request type
+        if req_type == 'mr':
+           if loc_stock_id:
+               resu.update({'location_id':loc_stock_id})
+           if loc_prod_id:
+               resu.update({'location_dest_id':loc_prod_id})
+        if req_type == 'mrr':
+           if loc_prod_id:
+               resu.update({'location_id':loc_prod_id})
+           if loc_stock_id:
+               resu.update({'location_dest_id':loc_stock_id})                  
+           
+        return resu
     def onchange_product_id(self, cr, uid, ids, prod_id=False, loc_id=False,
                             loc_dest_id=False, ):
         """ On change of product id, if finds UoM, UoS, quantity and UoS quantity.
@@ -153,52 +200,61 @@ class material_request_line(osv.osv):
         #override in order to fire the workflow signal on given stock.picking workflow instance
         #instead of it's own workflow (which is not existing)
         return self.pool.get('stock.move')._workflow_signal(cr, uid, ids, signal, context=context)    
-    
+
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        return super(material_request_line,self).search(cr, user, new_args, offset, limit, order, context, count)   
+        
 class stock_move(osv.osv):
     _inherit = "stock.move" 
     _columns = {   
-        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request')], string='Shipping Type'),
+        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], string='Shipping Type'),
     }
-#class stock_picking(osv.osv):
-#    _inherit = "stock.picking" 
-#    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
-#        #deal the datetime field query
-#        new_args = []
-#        for arg in args:
-#            fld_name = arg[0]
-#            fld_operator = arg[1]
-#            fld_val = arg[2]
-#            fld = self._columns.get(fld_name)
-#            #['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
-#            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
-#                time_start = [fld_name,'>=',fld_val]
-#                time_obj = datetime.datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
-#                time_obj += relativedelta(days=1)
-#                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
-#                new_args.append(time_start)
-#                new_args.append(time_end)
-#            else:
-#                new_args.append(arg)
-#        return super(stock_picking,self).search(cr, user, new_args, offset, limit, order, context, count)    
-#class stock_partial_picking(stock_partial_picking.stock_partial_picking):
-#    
-#    def default_get(self, cr, uid, fields, context=None):
-#        if context is None: context = {}
-#        res = super(stock_partial_picking, self).default_get(cr, uid, fields, context=context)
-#        picking_ids = context.get('active_ids', [])
-#        active_model = context.get('active_model')
-#
-#        if not picking_ids or len(picking_ids) != 1:
-#            # Partial Picking Processing may only be done for one picking at a time
-#            return res
-#        assert active_model in ('stock.picking', 'stock.picking.in', 'stock.picking.out', 'material.request'), 'Bad context propagation'
-#        picking_id, = picking_ids
-#        if 'picking_id' in fields:
-#            res.update(picking_id=picking_id)
-#        if 'move_ids' in fields:
-#            picking = self.pool.get('stock.picking').browse(cr, uid, picking_id, context=context)
-#            moves = [self._partial_move_for(cr, uid, m) for m in picking.move_lines if m.state not in ('done','cancel')]
-#            res.update(move_ids=moves)
-#        if 'date' in fields:
-#            res.update(date=time.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
-#        return res    
+
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        return super(stock_move,self).search(cr, user, new_args, offset, limit, order, context, count)  
+
+ 
+class stock_picking(osv.osv):
+    _inherit = "stock.picking"   
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        return super(stock_picking,self).search(cr, user, new_args, offset, limit, order, context, count) 
+class stock_picking_out(osv.osv):
+    _inherit = "stock.picking.out"   
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        return super(stock_picking_out,self).search(cr, user, new_args, offset, limit, order, context, count)    
+class stock_picking_in(osv.osv):
+    _inherit = "stock.picking.in"   
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        return super(stock_picking_in,self).search(cr, user, new_args, offset, limit, order, context, count)     
+           
+def deal_args(obj,args):  
+    new_args = []
+    for arg in args:
+        fld_name = arg[0]
+        if fld_name == 'date':
+            fld_operator = arg[1]
+            fld_val = arg[2]
+            fld = obj._columns.get(fld_name)
+            #['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
+                time_start = [fld_name,'>=',fld_val]
+                time_obj = datetime.datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+                time_obj += relativedelta(days=1)
+                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+                new_args.append(time_start)
+                new_args.append(time_end)
+            else:
+                new_args.append(arg)
+        else:
+            new_args.append(arg)    
+    return new_args
