@@ -46,7 +46,6 @@ class material_request(osv.osv):
     }
     _defaults = {
         'type': 'mr',
-        'move_type': 'one',
         'state': 'creating',
     }
 
