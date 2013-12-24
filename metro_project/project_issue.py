@@ -20,9 +20,10 @@
 #
 ##############################################################################
 from openerp.osv import fields,osv
+from openerp.addons.base_status.base_stage import base_stage
 
 
-class project_issue(osv.osv):
+class project_issue(base_stage, osv.osv):
     _inherit = "project.issue"
     _columns = {
         'create_by': fields.many2one('res.users', 'Created By'),
