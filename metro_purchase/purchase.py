@@ -59,8 +59,12 @@ class purchase_order(osv.osv):
         'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
-        'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True)
+        'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
+        'is_sent_supplier': fields.boolean('Sent to Supplier', select=True),
     }
+    _defaults = {
+        'is_sent_supplier': False,
+    }    
     def new_po(self, cr, uid, pos, context=None):
         """
         Create New RFQ for Supplier

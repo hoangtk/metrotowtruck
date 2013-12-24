@@ -770,15 +770,40 @@ msgstr "库存调拨"
 ########################manual########################
 #. module: stock
 #: view:stock.picking:0
-msgid "确认并处理"
-msgstr ""
+msgid "Confirm & Transfer"
+msgstr "确认并处理"
+
+#. module: stock
+#: view:stock.picking.in:0
+msgid "Confirm & Receive"
+msgstr "确认并入库"
 
 #. module: stock
 #: view:stock.picking:0
-msgid "取消调拨"
-msgstr ""
+msgid "Cancel Transfer"
+msgstr "取消调拨"
 
 #. module: stock
 #: view:stock.move:0
-msgid "全部处理"
-msgstr ""
+msgid "Process Entirely"
+msgstr "全部处理"
+
+#. module: stock
+#: view:stock.picking:0
+msgid "Reverse Transfer"
+msgstr "反向调拨"
+
+#. module: stock
+#: field:stock.picking,origin:0
+#: field:stock.picking.in,origin:0
+#: field:stock.picking.out,origin:0
+msgid "Source Document"
+msgstr "源单据"
+
+#. module: metro_stock
+#: field:material.request,create_uid:0
+#: field:material.request.line,create_uid:0
+#: field:stock.picking,create_uid:0
+#: field:stock.move,create_uid:0
+msgid "Creator"
+msgstr "创建人"

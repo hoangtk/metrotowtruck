@@ -781,3 +781,18 @@ msgstr "传真:"
 #: report:purchase.order:0
 msgid "Products"
 msgstr "产品"
+
+#. module: metro_purchase
+#: field:purchase.order,is_sent_supplier:0
+msgid "Sent to Supplier"
+msgstr "已发送"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Sent to Supplier"
+msgstr "已发送"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Not Sent to Supplier"
+msgstr "未发送"

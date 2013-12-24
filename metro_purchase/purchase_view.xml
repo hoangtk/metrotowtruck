@@ -25,6 +25,7 @@
                 </xpath>       
                  <xpath expr="//field[@name='pricelist_id']" position="after" >
                 	<field name="payment_term_id" widget="selection"/>
+                	<field name="is_sent_supplier"/>
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
                  	<group style="color:red">
@@ -49,6 +50,9 @@
                 <xpath expr="/tree" position="attributes">
                     <attribute name="colors">grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking','rejected')</attribute>
                 </xpath>
+                <field name="state" position="before">
+                	<field name="is_sent_supplier"/>
+                </field>
             </field>
         </record>
         
@@ -63,8 +67,10 @@
             	</xpath>
             	<xpath expr="//filter[@name='approved']" position="replace" >
             		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','not in',('draft','cancel','rejected','confirmed'))]" help="Approved purchase orders"/>
-            	</xpath>
+            	</xpath>            	
             	<xpath expr="//filter[@name='exception']" position="before" >
+					<filter icon="terp-emblem-important" name="is_sent" string="Sent to Supplier" domain="[('is_sent_supplier','=',True)]"/>
+					<filter icon="terp-emblem-important" name="not_sent" string="Not Sent to Supplier" domain="[('is_sent_supplier','!=',True)]"/>
             		<separator/>
             		<filter icon="terp-emblem-important" name="cancelled" string="Cancelled" domain="[('state','=','cancel')]" help="Purchase orders which are cancelled"/>
             	</xpath>
@@ -219,7 +225,7 @@
                     <field name="order_id"/>
                     <field name="partner_id"/>
                     <field name="product_id"/>
-                    <field name="create_uid"/>
+                    <field name="create_uid"/>                   
                     <group expand="0" string="Group By...">
                         <filter string="Order" icon="terp-partner" domain="[]" context="{'group_by':'order_id'}"/>
                         <filter string="Supplier" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>

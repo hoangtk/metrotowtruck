@@ -41,6 +41,7 @@ class material_request(osv.osv):
                                  'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         
     }
     _defaults = {
@@ -116,6 +117,7 @@ class material_request_line(osv.osv):
         'mr_dept_id': fields.related('picking_id','mr_dept_id',string='Department',type='many2one',relation='hr.department',select=True),
         'mr_date_order': fields.related('picking_id','date',string='Order Date',type='datetime'),
         'pick_type': fields.related('picking_id','type',string='Picking Type',type='char'),
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(material_request_line,self).default_get(cr, uid, fields_list, context)
@@ -210,6 +212,7 @@ class stock_move(osv.osv):
     _inherit = "stock.move" 
     _columns = {   
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], string='Shipping Type'),
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -219,7 +222,10 @@ class stock_move(osv.osv):
 
  
 class stock_picking(osv.osv):
-    _inherit = "stock.picking"   
+    _inherit = "stock.picking" 
+    _columns = {   
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+    }  
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
