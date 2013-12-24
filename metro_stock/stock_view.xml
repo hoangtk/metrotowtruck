@@ -37,6 +37,9 @@
                 </xpath>
                 <xpath expr="//field[@name='origin']" position="replace">
                 </xpath>
+                <xpath expr="//button[@string='Reverse Transfer']" position="replace">
+                </xpath>
+                
             </field>
         </record>
         <record id="view_material_request_search" model="ir.ui.view">
