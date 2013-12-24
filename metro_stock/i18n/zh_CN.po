@@ -330,7 +330,7 @@ msgstr "均价币种"
 #. module: metro_stock
 #: field:material.request,move_lines:0
 msgid "Request Products"
-msgstr "申请产品"
+msgstr "领料产品"
 
 #. module: metro_stock
 #: view:material.request:0 view:material.request.line:0
