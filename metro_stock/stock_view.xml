@@ -271,7 +271,7 @@
         	<field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_material_request_line_tree"/>
             <field name="search_view_id" ref="view_material_request_line_search"/>
-            <field name="domain">[('picking_id.type','=','mr')]</field>
+            <field name="domain">['|',('picking_id.type','=','mr'),('picking_id.type','=','mrr')]</field>
         </record>
         
         <record model="ir.actions.act_window.view" id="action_material_request_line_tree">
