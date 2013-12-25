@@ -22,10 +22,19 @@
             		<attribute name="editable"></attribute>
                 </xpath>         
                  <xpath expr="//field[@name='payment_term_id']" position="replace" >
-                </xpath>       
+                </xpath> 
+                 <xpath expr="//field[@name='shipped']" position="replace" >
+                </xpath> 
+                 <xpath expr="//field[@name='invoiced']" position="replace" >
+                </xpath>                                       
                  <xpath expr="//field[@name='pricelist_id']" position="after" >
                 	<field name="payment_term_id" widget="selection"/>
+                	<field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
                 	<field name="is_sent_supplier"/>
+                    <!-- <field name="invoiced_rate" readonly="1"/> -->
+                	<field name="invoiced"/>
+                	<field name="amount_paid"/>
+                	<field name="paid_done"/>
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
                  	<group style="color:red">
@@ -38,7 +47,25 @@
                 </xpath>       
                  <xpath expr="//tree/field[@name='price_subtotal']" position="after" >
                 	<field name="state"/>
-                </xpath>  
+                </xpath>     
+                 <xpath expr="//field[@name='location_id']" position="replace" >
+                </xpath>    
+                 <xpath expr="//field[@name='warehouse_id']" position="after" >
+                	<field name="location_id" groups="stock.group_locations"/> 
+                    <!-- <field name="shipped_rate" readonly="1"/> -->
+                    <field name="shipped"/>
+                </xpath>    
+                 <xpath expr="//page[@string='Incoming Shipments &amp; Invoices']" position="inside" >
+					<separator string="Incoming Shipments"/>
+                	<field name="picking_ids"/>  
+                 	<separator string="Invoices"/>
+                	<field name="invoice_ids"/>
+                </xpath>     
+                 <xpath expr="//field[@name='partner_ref']" position="replace" >
+                </xpath>     
+                 <xpath expr="//field[@name='minimum_planned_date']" position="after" >
+                 	<field name="partner_ref"/>
+                </xpath>
        		</field>
         </record>  
           

@@ -27,7 +27,7 @@ from openerp import netsvc
 from openerp.osv import fields,osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-
+from openerp.addons.purchase import purchase
 class purchase_order(osv.osv):  
     _inherit = "purchase.order"
     def __init__(self, pool, cr):
@@ -52,6 +52,30 @@ class purchase_order(osv.osv):
         ('cancel', 'Cancelled')
     ] 
 
+    def _pay_info(self, cr, uid, ids, field_names=None, arg=False, context=None):
+        """ Finds the payment mount and set the paid flag
+        @return: Dictionary of values
+        """
+        if not field_names:
+            field_names = []
+        if context is None:
+            context = {}
+        res = {}
+        for id in ids:
+            res[id] = {}.fromkeys(field_names, 0.0)
+
+        for purchase in self.browse(cr, uid, ids, context=context):
+            tot = 0.0
+            for invoice in purchase.invoice_ids:
+                if invoice.state not in ('draft','cancel'):
+                    tot += invoice.residual
+            for f in field_names:
+                if f == 'amount_paid':
+                    res[purchase.id][f] = purchase.amount_total - tot
+                if f == 'paid_done':
+                    res[purchase.id][f] = (purchase.amount_total == tot)
+        return res
+        
     _columns = {
         'warehouse_id': fields.many2one('stock.warehouse', 'Destination Warehouse',states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),                
         'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
@@ -61,6 +85,11 @@ class purchase_order(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
         'is_sent_supplier': fields.boolean('Sent to Supplier', select=True),
+        'taxes_id': fields.many2many('account.tax', 'po_tax', 'po_id', 'tax_id', 'Taxes', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
+        'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
+        'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
+        'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='float', readonly=True),
+                
     }
     _defaults = {
         'is_sent_supplier': False,
@@ -274,3 +303,4 @@ class purchase_order_line(osv.osv):
             if line.state != 'draft' and line.state != 'cancel' and line.state != 'rejected':
                 raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled and rejected can be deleted!'))            
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
+
