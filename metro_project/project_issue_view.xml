@@ -43,7 +43,16 @@
                 <xpath expr="//field[@name='task_id']" position="attributes">
                 	<attribute name="invisible">1</attribute>
                 </xpath>
-                
+                <xpath expr="//page[@string='Extra Info']" position="before">
+                     <page string="Messages">
+		                <!-- <div class="oe_chatter"> -->
+		                    <!-- <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/> -->
+		                    <field name="message_ids" widget="mail_thread"/>
+		                <!-- </div> -->
+                     </page>   
+                </xpath> 
+                <xpath expr="//div[@class='oe_chatter']" position="replace">
+                </xpath>     
             </field>
         </record>               
     </data>

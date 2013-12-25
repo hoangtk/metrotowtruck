@@ -2,3 +2,9 @@
 {
   white-space: nowrap ; 
 }
+
+.openerp .oe_record_thread{
+    display: block;
+    margin-left: 16px;
+    margin-right: 16px;
+}
