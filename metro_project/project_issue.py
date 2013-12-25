@@ -34,4 +34,5 @@ class project_issue(base_stage, osv.osv):
     _defaults = {
         'database': 'metro_prod',
         'database_test': 'metro_uat',
+        'create_by': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
     }
