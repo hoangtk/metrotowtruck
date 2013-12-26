@@ -66,14 +66,16 @@ class purchase_order(osv.osv):
 
         for purchase in self.browse(cr, uid, ids, context=context):
             tot = 0.0
+            paid = 0.0
+            inv_paid = 0.0
             for invoice in purchase.invoice_ids:
                 if invoice.state not in ('draft','cancel'):
-                    tot += invoice.residual
+                    inv_paid += (invoice.amount_total - invoice.residual)
             for f in field_names:
                 if f == 'amount_paid':
-                    res[purchase.id][f] = purchase.amount_total - tot
+                    res[purchase.id][f] = inv_paid
                 if f == 'paid_done':
-                    res[purchase.id][f] = (purchase.amount_total == tot)
+                    res[purchase.id][f] = (purchase.amount_total == inv_paid)
         return res
         
     _columns = {
