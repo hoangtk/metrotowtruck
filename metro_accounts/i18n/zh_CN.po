@@ -19,4 +19,4 @@ msgstr ""
 #. module: metro_accounts
 #: field:account.voucher,supplier_receipt_number:0
 msgid "Supplier Receipt Number"
-msgstr "税"
+msgstr "供应商发票号"
