@@ -34,7 +34,7 @@
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
                 	<field name="amount_paid"/>
-                	<field name="paid_done"/>
+                	<!-- <field name="paid_done"/> -->
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
                  	<group style="color:red">

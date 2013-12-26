@@ -19,7 +19,7 @@ report_sxw.report_sxw(
 class account_voucher(osv.osv):
     _inherit = "account.voucher"
     _columns={
-              'supplier_invoice_number': fields.char('Supplier Invoice Number', size=64, help="The reference of this invoice as provided by the supplier."),              
+              'supplier_receipt_number': fields.char('Supplier Receipt Number', size=64, help="The reference of this invoice as provided by the supplier."),              
     }
 r=account_voucher()
     
