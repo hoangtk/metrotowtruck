@@ -792,6 +792,16 @@ msgstr "已发送"
 msgid "Sent to Supplier"
 msgstr "已发送"
 
+#. module: purchase
+#: field:purchase.order,amount_paid:0
+msgid "Unpaid Amount"
+msgstr "已付金额"
+
+#. module: purchase
+#: field:purchase.order,taxes_id:0
+msgid "Taxes"
+msgstr "税"
+
 #. module: metro_purchase
 #: view:purchase.order:0
 msgid "Not Sent to Supplier"
@@ -800,12 +810,12 @@ msgstr "未发送"
 #. module: purchase
 #: field:purchase.order,invoiced:0
 msgid "Invoice Received"
-msgstr "已开票"
+msgstr "已开凭据"
 
 #. module: purchase
 #: help:purchase.order,invoiced:0
 msgid "It indicates that an invoice is open"
-msgstr "这表明发票已开并确认"
+msgstr "这表明凭据已开并确认"
 
 #. module: purchase
 #: selection:purchase.order,state:0
