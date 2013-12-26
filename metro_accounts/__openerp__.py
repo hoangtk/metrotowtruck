@@ -16,6 +16,7 @@
     'data':[
        "account_invoice_metro.xml",
        "account_voucher_view.xml",
+       "account_invoice_view.xml",
         ],
     'demo': [],
     'test': [],
