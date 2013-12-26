@@ -82,6 +82,11 @@
                 </xpath>
                 <field name="state" position="before">
                 	<field name="is_sent_supplier"/>
+                	<field name="invoiced"/>
+                	<field name="shipped"/>
+                </field>
+                <field name="amount_total" position="after">
+                	<field name="amount_paid"/>
                 </field>
             </field>
         </record>
