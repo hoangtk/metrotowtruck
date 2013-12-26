@@ -88,7 +88,7 @@ class purchase_order(osv.osv):
         'taxes_id': fields.many2many('account.tax', 'po_tax', 'po_id', 'tax_id', 'Taxes', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
-        'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='float', readonly=True),
+        'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
                 
     }
     _defaults = {
@@ -303,4 +303,24 @@ class purchase_order_line(osv.osv):
             if line.state != 'draft' and line.state != 'cancel' and line.state != 'rejected':
                 raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled and rejected can be deleted!'))            
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
+    
+    def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+            partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+            name=False, price_unit=False, context=None):
+        """
+        onchange handler of product_id.
+        """
+        res = super(purchase_order_line,self).onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+                                partner_id, date_order, fiscal_position_id, date_planned,name, price_unit, context)
+        if not product_id or context is None or res['value'].get('taxes_id') or not context.get('po_taxes_id')[0][2]: 
+            return res
 
+        # - determine taxes_id when purchase_header has taxes_id and produt has not own taxes setting
+        account_fiscal_position = self.pool.get('account.fiscal.position')
+        account_tax = self.pool.get('account.tax')
+        taxes = account_tax.browse(cr, uid, context['po_taxes_id'][0][2])
+        fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
+        taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+        res['value'].update({'taxes_id': taxes_ids})
+
+        return res

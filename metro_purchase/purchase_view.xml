@@ -66,6 +66,9 @@
                  <xpath expr="//field[@name='minimum_planned_date']" position="after" >
                  	<field name="partner_ref"/>
                 </xpath>
+                <field name="order_line" position="attributes">
+                	<attribute name="context">{'po_taxes_id':taxes_id}</attribute>             	
+                </field>
        		</field>
         </record>  
           
