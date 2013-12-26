@@ -794,7 +794,7 @@ msgstr "已发送"
 
 #. module: purchase
 #: field:purchase.order,amount_paid:0
-msgid "Unpaid Amount"
+msgid "Paid Amount"
 msgstr "已付金额"
 
 #. module: purchase
