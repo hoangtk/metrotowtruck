@@ -11,10 +11,11 @@
     'website': 'PY Solutions',
     'images': [],
     'depends': [
-        'account',
+        'account','purchase',
     ],
     'data':[
        "account_invoice_metro.xml",
+       "account_voucher_view.xml",
         ],
     'demo': [],
     'test': [],

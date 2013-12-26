@@ -796,3 +796,18 @@ msgstr "已发送"
 #: view:purchase.order:0
 msgid "Not Sent to Supplier"
 msgstr "未发送"
+
+#. module: purchase
+#: field:purchase.order,invoiced:0
+msgid "Invoice Received"
+msgstr "已开票"
+
+#. module: purchase
+#: help:purchase.order,invoiced:0
+msgid "It indicates that an invoice is open"
+msgstr "这表明发票已开并确认"
+
+#. module: purchase
+#: selection:purchase.order,state:0
+msgid "Draft PO"
+msgstr "草稿"
