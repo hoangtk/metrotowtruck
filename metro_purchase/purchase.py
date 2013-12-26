@@ -324,3 +324,9 @@ class purchase_order_line(osv.osv):
         res['value'].update({'taxes_id': taxes_ids})
 
         return res
+    
+class product_template(osv.Model):
+    _inherit = 'product.template'
+    _columns = {
+        'name': fields.char('Name', size=128, required=True, translate=False, select=True),
+    }

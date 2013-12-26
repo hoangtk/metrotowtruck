@@ -17,6 +17,11 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 
 #. module: metro_accounts
-#: field:account.voucher,supplier_receipt_number:0
-msgid "Supplier Receipt Number"
-msgstr "供应商发票号"
+#: field:account.voucher,receipt_number:0
+msgid "Receipt Number"
+msgstr "发票号"
+
+#. module: account
+#: view:account.invoice:0
+msgid "Ask Refund"
+msgstr "退款"
