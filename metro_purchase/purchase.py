@@ -91,6 +91,8 @@ class purchase_order(osv.osv):
         'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
         'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
+#        'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
+#        'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
                 
     }
     _defaults = {
@@ -212,6 +214,95 @@ class purchase_order(osv.osv):
         lines = self._get_lines(cr,uid,ids,context=context)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'draft'},context)
         return resu
+    
+    def _get_inv_pay_acc_id(self,cr,uid,order):
+        property_obj = self.pool.get('ir.property')
+        pay_acc = property_obj.get(cr, uid, 'property_account_payable', 'res.partner', 
+                                      res_id = 'res.partner,%d'%order.partner_id.id, context = {'force_company':order.company_id.id})
+        if not pay_acc:
+            pay_acc = property_obj.get(cr, uid, 'property_account_payable', 'res.partner', context = {'force_company':order.company_id.id})
+        if not pay_acc:
+            raise osv.except_osv(_('Error!'), 
+                _('Define account payable for this company: "%s" (id:%d).') % (order.company_id.name, order.company_id.id))
+        return pay_acc.id
+                            
+    def _get_inv_line_exp_acc_id(self,cr,uid,order,po_line):  
+        property_obj = self.pool.get('ir.property')
+        acc = None
+        if po_line.product_id:
+            acc = property_obj.get(cr, uid, 'property_account_expense', 'product.template', 
+                              res_id = 'product.template,%d'%po_line.product_id.id, context = {'force_company':order.company_id.id})
+            if not acc:
+                acc = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category', 
+                                  res_id = 'product.category,%d'%po_line.product_id.categ_id.id, context = {'force_company':order.company_id.id})
+        if not acc:
+            acc = property_obj.get(cr, uid, 'property_account_expense', 'product.template', 
+                              context = {'force_company':order.company_id.id})                                
+        if not acc:
+            acc = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category', 
+                                   context = {'force_company':order.company_id.id})
+        if not acc:
+                raise osv.except_osv(_('Error!'),
+                        _('Define purchase journal for this company: "%s" (id:%d).') % (order.company_id.name, order.company_id.id))
+        return acc.id
+                                                        
+    def action_invoice_create(self, cr, uid, ids, context=None):
+        """Generates invoice for given ids of purchase orders and links that invoice ID to purchase order.
+        :param ids: list of ids of purchase orders.
+        :return: ID of created invoice.
+        :rtype: int
+        """
+        res = False
+
+        journal_obj = self.pool.get('account.journal')
+        inv_obj = self.pool.get('account.invoice')
+        inv_line_obj = self.pool.get('account.invoice.line')
+        fiscal_obj = self.pool.get('account.fiscal.position')
+
+        for order in self.browse(cr, uid, ids, context=context):
+            pay_acc_id = self._get_inv_pay_acc_id(cr,uid,order)                
+            journal_ids = journal_obj.search(cr, uid, [('type', '=','purchase'),('company_id', '=', order.company_id.id)], limit=1)
+            if not journal_ids:
+                raise osv.except_osv(_('Error!'),
+                    _('Define purchase journal for this company: "%s" (id:%d).') % (order.company_id.name, order.company_id.id))
+
+            # generate invoice line correspond to PO line and link that to created invoice (inv_id) and PO line
+            inv_lines = []
+            for po_line in order.order_line:
+                acc_id = self._get_inv_line_exp_acc_id(cr,uid,order,po_line)
+                fpos = order.fiscal_position or False
+                acc_id = fiscal_obj.map_account(cr, uid, fpos, acc_id)
+
+                inv_line_data = self._prepare_inv_line(cr, uid, acc_id, po_line, context=context)
+                inv_line_id = inv_line_obj.create(cr, uid, inv_line_data, context=context)
+                inv_lines.append(inv_line_id)
+
+                po_line.write({'invoiced':True, 'invoice_lines': [(4, inv_line_id)]}, context=context)
+
+            # get invoice data and create invoice
+            inv_data = {
+                'name': order.partner_ref or order.name,
+                'reference': order.partner_ref or order.name,
+                'account_id': pay_acc_id,
+                'type': 'in_invoice',
+                'partner_id': order.partner_id.id,
+                'currency_id': order.pricelist_id.currency_id.id,
+                'journal_id': len(journal_ids) and journal_ids[0] or False,
+                'invoice_line': [(6, 0, inv_lines)],
+                'origin': order.name,
+                'fiscal_position': order.fiscal_position.id or False,
+                'payment_term': order.payment_term_id.id or False,
+                'company_id': order.company_id.id,
+            }
+            inv_id = inv_obj.create(cr, uid, inv_data, context=context)
+
+            # compute the invoice
+            inv_obj.button_compute(cr, uid, [inv_id], context=context, set_total=True)
+
+            # Link this new invoice to related purchase order
+            order.write({'invoice_ids': [(4, inv_id)]}, context=context)
+            res = inv_id
+        return res    
             
         
 class purchase_order_line(osv.osv):  
