@@ -821,3 +821,38 @@ msgstr "这表明凭据已开并确认"
 #: selection:purchase.order,state:0
 msgid "Draft PO"
 msgstr "草稿"
+
+#. module: metro_purchase
+#: field:purchase.order,has_freight:0
+msgid "Has Freight"
+msgstr "含运费"
+
+#. module: metro_purchase
+#: field:purchase.order,amount_freight:0
+msgid "Freight"
+msgstr "运费"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Taxes:"
+msgstr "税:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Has Freight:"
+msgstr "含运费:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Freight:"
+msgstr "运费:"
+
+#. module: metro_purchase
+#: code:general:0
+msgid "bool_True"
+msgstr "是"
+
+#. module: metro_purchase
+#: code:general:0
+msgid "bool_False"
+msgstr "否"

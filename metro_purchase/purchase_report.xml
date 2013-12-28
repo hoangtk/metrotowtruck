@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <report auto="False" id="purchase.report_purchase_order" model="purchase.order"
-                name="purchase.order" rml="metro_purchase/report/purchase_order.rml"
+        <report auto="False" id="report_purchase_order_metro" model="purchase.order"
+                name="purchase.order.metro" rml="metro_purchase/report/purchase_order.rml"
                 usage="default" string="Purchase Order"/>        
     </data>
 </openerp>

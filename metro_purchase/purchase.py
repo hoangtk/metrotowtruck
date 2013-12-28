@@ -19,9 +19,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import time
+import datetime
 from openerp import netsvc
 
 from openerp.osv import fields,osv
@@ -92,8 +92,8 @@ class purchase_order(osv.osv):
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
         'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
         'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
-#        'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
-#        'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
+        'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
+        'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
                 
     }
     _defaults = {
@@ -304,6 +304,10 @@ class purchase_order(osv.osv):
             order.write({'invoice_ids': [(4, inv_id)]}, context=context)
             res = inv_id
         return res    
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)    
+        return super(purchase_order,self).search(cr, user, new_args, offset, limit, order, context, count)       
             
         
 class purchase_order_line(osv.osv):  
@@ -418,9 +422,60 @@ class purchase_order_line(osv.osv):
         res['value'].update({'taxes_id': taxes_ids})
 
         return res
+
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        return super(purchase_order_line,self).search(cr, user, new_args, offset, limit, order, context, count)
     
-class product_template(osv.Model):
-    _inherit = 'product.template'
-    _columns = {
-        'name': fields.char('Name', size=128, required=True, translate=False, select=True),
-    }
+import time
+from openerp.report import report_sxw
+from openerp.osv import osv
+from openerp import pooler
+
+#redefine the purchase PDF report to new rml
+from openerp.addons.purchase.report.order import order
+from openerp.report import report_sxw
+
+class metro_pur_order(order):
+    def __init__(self, cr, uid, name, context):
+        super(order, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({'get_taxes_name':self._get_tax_name})
+        self.localcontext.update({'get_boolean_name':self._get_boolean_name})
+    #get the taxes name             
+    def _get_tax_name(self,taxes_id):
+        names = ''
+        for tax in taxes_id:
+            names += ", " + tax.name
+        if names != '': 
+            names = names[2:]
+        return names      
+    def _get_boolean_name(self,bool_val):
+#        def _get_source(self, cr, uid, name, types, lang, source=None):
+        bool_name = self.pool.get("ir.translation")._get_source(self.cr, self.uid, None, 'code', self.localcontext['lang'], 'bool_' + str(bool_val))
+        return bool_name
+            
+report_sxw.report_sxw('report.purchase.order.metro','purchase.order','addons/metro_purchase/report/order.rml',parser=metro_pur_order)
+
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
+def deal_args(obj,args):  
+    new_args = []
+    for arg in args:
+        fld_name = arg[0]
+        if fld_name == 'create_date' or fld_name == 'write_date':
+            fld_operator = arg[1]
+            fld_val = arg[2]
+            fld = obj._columns.get(fld_name)
+            #['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
+                time_start = [fld_name,'>=',fld_val]
+                time_obj = datetime.datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+                time_obj += relativedelta(days=1)
+                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+                new_args.append(time_start)
+                new_args.append(time_end)
+            else:
+                new_args.append(arg)
+        else:
+            new_args.append(arg)    
+    return new_args
