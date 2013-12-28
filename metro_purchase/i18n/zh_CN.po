@@ -758,31 +758,6 @@ msgid "Cancel Order"
 msgstr "取消"
 
 #. module: metro_purchase
-#: report:purchase.order:0
-msgid "Purchase Order Confirmation N°"
-msgstr "采购合同"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Order Date:"
-msgstr "订单日期:"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Tel.:"
-msgstr "电话:"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Fax:"
-msgstr "传真:"
-
-#. module: metro_purchase
-#: report:purchase.order:0
-msgid "Products"
-msgstr "产品"
-
-#. module: metro_purchase
 #: field:purchase.order,is_sent_supplier:0
 msgid "Sent to Supplier"
 msgstr "已发送"
@@ -824,13 +799,24 @@ msgstr "草稿"
 
 #. module: metro_purchase
 #: field:purchase.order,has_freight:0
+#: field:purchase.order.line,has_freight:0
 msgid "Has Freight"
 msgstr "含运费"
 
 #. module: metro_purchase
-#: field:purchase.order,amount_freight:0
-msgid "Freight"
-msgstr "运费"
+#: field:purchase.order,receipt_number:0
+msgid "Receipt Number"
+msgstr "发票号"
+
+#. module: metro_purchase
+#: field:purchase.order,is_sent_supplier:0
+msgid "Sent to Supplier"
+msgstr "已发送"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Payment Term:"
+msgstr "支付条款:"
 
 #. module: metro_purchase
 #: report:purchase.order.metro:0
@@ -846,6 +832,84 @@ msgstr "含运费:"
 #: report:purchase.order.metro:0
 msgid "Freight:"
 msgstr "运费:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Tel.:"
+msgstr "电话:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Fax:"
+msgstr "传真:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Products"
+msgstr "产品"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Taxes"
+msgstr "税"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Shipping address :"
+msgstr "运货地址:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Date Req."
+msgstr "要求日期"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Total :"
+msgstr "合计:"
+
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Order Date:"
+msgstr "订单日期:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Taxes :"
+msgstr "税:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+#: report:purchase.quotation:0
+msgid "Qty"
+msgstr "数量"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Unit Price"
+msgstr "单价"
+
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Net Total :"
+msgstr "净合计:"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Net Price"
+msgstr "净价"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Description"
+msgstr "说明"
+
+#. module: metro_purchase
+#: report:purchase.order.metro:0
+msgid "Purchase Order Confirmation N°"
+msgstr "采购合同"
 
 #. module: metro_purchase
 #: code:general:0

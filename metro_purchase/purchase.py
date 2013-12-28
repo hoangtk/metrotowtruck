@@ -94,6 +94,7 @@ class purchase_order(osv.osv):
         'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
+        'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),
                 
     }
     _defaults = {
@@ -333,6 +334,9 @@ class purchase_order_line(osv.osv):
         'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
         'change_log': fields.one2many('change.log.po.line','res_id','Quantity Changing'),
         'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
+        'has_freight': fields.related('order_id','has_freight',string='Has Freight', type="boolean", readonly=True),
+        'amount_freight': fields.related('order_id','amount_freight',string='Freight', type='float', readonly=True),
+        
     }  
     _order = "order_id desc"
     def _is_po_update(self,cr,uid,po,state,context=None):

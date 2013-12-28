@@ -263,8 +263,11 @@
     <para style="terp_default_8">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="121.0,89.0,319.0" repeatRows="1" style="Table2">
+    <blockTable colWidths="164.0,121.0,118.0,126.0" repeatRows="1" style="Table2">
       <tr>
+        <td>
+          <para style="P9">Payment Term:[[o.payment_term_id.name]]</para>
+        </td>
         <td>
           <para style="P9">Taxes:[[get_taxes_name(o.taxes_id)]]</para>
         </td>

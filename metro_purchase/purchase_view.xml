@@ -30,12 +30,12 @@
                  <xpath expr="//field[@name='pricelist_id']" position="after" >
                 	<field name="payment_term_id" widget="selection"/>
                 	<field name="taxes_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
-                	<field name="has_freight"/>
-                	<field name="amount_freight"/>
                 	<field name="is_sent_supplier"/>
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
                 	<field name="amount_paid"/>
+                	<field name="receipt_number"/>
+                	<field name="create_uid"/>
                 	<!-- <field name="paid_done"/> -->
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
@@ -44,7 +44,8 @@
                 	</group>
                 </xpath>       
                  <xpath expr="//field[@name='company_id']" position="after" >
-                	<field name="create_uid"/>
+                	<field name="has_freight"/>
+                	<field name="amount_freight"/>
                 	<field name="create_date"/>
                 </xpath>       
                  <xpath expr="//tree/field[@name='price_subtotal']" position="after" >
@@ -85,6 +86,7 @@
                 <field name="state" position="before">
                 	<field name="is_sent_supplier"/>
                 	<field name="invoiced"/>
+                	<field name="receipt_number"/>
                 	<field name="shipped"/>
                 	<field name="create_uid"/>
                 	<field name="create_date" widget="date"/>
@@ -198,9 +200,11 @@
 			                    <field name="order_id" readonly="1"/>
 			                    <field name="date_order" readonly="1"/>
 			                    <field name="payment_term_id" readonly="1"/>
+			                    <field name="has_freight" readonly="1"/>
                             </group>
                             <group>
 			                    <field name="partner_id" string="Supplier" readonly="1"/>
+			                    <field name="amount_freight" readonly="1"/>
                             </group>
                         </group>
                  		<group>
