@@ -34,6 +34,8 @@
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
                 	<field name="amount_paid"/>
+                	<field name="receipt_number"/>
+                	<field name="create_uid"/>
                 	<!-- <field name="paid_done"/> -->
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
@@ -42,7 +44,8 @@
                 	</group>
                 </xpath>       
                  <xpath expr="//field[@name='company_id']" position="after" >
-                	<field name="create_uid"/>
+                	<field name="has_freight"/>
+                	<field name="amount_freight"/>
                 	<field name="create_date"/>
                 </xpath>       
                  <xpath expr="//tree/field[@name='price_subtotal']" position="after" >
@@ -83,8 +86,10 @@
                 <field name="state" position="before">
                 	<field name="is_sent_supplier"/>
                 	<field name="invoiced"/>
+                	<field name="receipt_number"/>
                 	<field name="shipped"/>
                 	<field name="create_uid"/>
+                	<field name="create_date" widget="date"/>
                 </field>
                 <field name="amount_total" position="after">
                 	<field name="amount_paid"/>
@@ -110,6 +115,10 @@
             		<separator/>
             		<filter icon="terp-emblem-important" name="cancelled" string="Cancelled" domain="[('state','=','cancel')]" help="Purchase orders which are cancelled"/>
             	</xpath>
+                <field name="create_uid" position="after">
+                	<field name="date_order"/>
+                	<field name="create_date"/>
+                </field>
             </field>
         </record>
         
@@ -167,7 +176,7 @@
                     <field name="price_subtotal"/>
                     <field name="state"/>
                     <field name="create_uid"/> 
-                    <field name="create_date"/>                  
+                    <field name="create_date" widget="date"/>                  
                 </tree>
             </field>
         </record>
@@ -191,9 +200,11 @@
 			                    <field name="order_id" readonly="1"/>
 			                    <field name="date_order" readonly="1"/>
 			                    <field name="payment_term_id" readonly="1"/>
+			                    <field name="has_freight" readonly="1"/>
                             </group>
                             <group>
 			                    <field name="partner_id" string="Supplier" readonly="1"/>
+			                    <field name="amount_freight" readonly="1"/>
                             </group>
                         </group>
                  		<group>
@@ -261,7 +272,8 @@
                     <field name="order_id"/>
                     <field name="partner_id"/>
                     <field name="product_id"/>
-                    <field name="create_uid"/>                   
+                    <field name="create_uid"/>
+                    <field name="create_date"/>                   
                     <group expand="0" string="Group By...">
                         <filter string="Order" icon="terp-partner" domain="[]" context="{'group_by':'order_id'}"/>
                         <filter string="Supplier" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>

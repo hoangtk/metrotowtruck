@@ -237,6 +237,8 @@
             <field name="arch" type="xml">
             	<field name="name" position="replace">
             		<field name="name" string="Product" filter_domain="['|','|',('name','ilike',self),('default_code','ilike',self),('cn_name','ilike',self)]"/>
+            		<field name="create_uid"/>
+            		<field name="create_date"/>
             	</field>
             </field>
         </record>
