@@ -23,7 +23,7 @@ import re
 from osv import fields, osv
 import tools
 from tools.translate import _
-
+from openerp.addons.metro_purchase.purchase import deal_args
 class product_sequence(osv.osv):
 	_name = "product.sequence"
 	_rec_name = "prefix"
@@ -216,7 +216,18 @@ class product_product(osv.osv):
 						  }
 				result.append(_name_get(mydict))
 		return result	
+	
+	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+		#deal the 'date' datetime field query
+		new_args = deal_args(self,args)
+		return super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
+		
 product_product()
-
+	
+class product_template(osv.Model):
+	_inherit = 'product.template'
+	_columns = {
+		'name': fields.char('Name', size=128, required=True, translate=False, select=True),
+	}
 
 
