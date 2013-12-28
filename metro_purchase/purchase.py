@@ -91,6 +91,7 @@ class purchase_order(osv.osv):
         'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
         'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
+        'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
 #        'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
 #        'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
                 
