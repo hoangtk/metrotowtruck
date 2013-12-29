@@ -8,8 +8,9 @@
             rml="metro_accounts/account_invoice_metro.rml" 
             string="Invoice (Metro)"
             header="True"
-            />
-                
+            attachment=""
+            attachment_use="False"
+            />                     
      </data>
 </openerp>
                 
