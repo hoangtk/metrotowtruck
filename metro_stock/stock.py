@@ -241,7 +241,21 @@ class stock_picking_in(osv.osv):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(stock_picking_in,self).search(cr, user, new_args, offset, limit, order, context, count)     
-           
+
+class stock_inventory(osv.osv):
+    _inherit = "stock.inventory"
+    def unlink(self, cr, uid, ids, context=None):
+        inventories = self.read(cr, uid, ids, ['state'], context=context)
+        unlink_ids = []
+        for s in inventories:
+            if s['state'] in ['draft','cancel']:
+                unlink_ids.append(s['id'])
+            else:
+                raise osv.except_osv(_('Invalid Action!'), _('Only the physical inventory orders with Draft or Cancelled state can be delete!'))
+
+        return super(stock_inventory, self).unlink(cr, uid, unlink_ids, context=context)
+    
+               
 def deal_args(obj,args):  
     new_args = []
     for arg in args:

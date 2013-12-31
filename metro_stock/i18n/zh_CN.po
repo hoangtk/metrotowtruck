@@ -906,6 +906,11 @@ msgstr "当前库存"
 msgid "Warehouse Address :"
 msgstr "仓库地址"
 
+#. module: stock
+#: view:stock.fill.inventory:0
+msgid "Import the current inventory"
+msgstr "导入现有库存"
+
 #. module: metro_stock
 #: code:addons/metro_stock/wizard/stock_import_inventory.py:0
 msgid "Import Inventory Result"
@@ -915,3 +920,8 @@ msgstr "导入盘点库存结果"
 #: code:addons/metro_stock/wizard/stock_import_inventory.py:0
 msgid "System can not find this product"
 msgstr "系统找不到此产品"
+
+#. module: metro_stock
+#: code:addons/metro_stock/wizard/stock_import_inventory.py:0
+msgid "Only the physical inventory orders with Draft or Cancelled state can be delete!"
+msgstr "只有草稿和取消的盘点单可以删除!"
