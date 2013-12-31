@@ -39,6 +39,7 @@
     'depends': ["metro", "metro_purchase","metro_sale","stock"],
     'data': [
         'security/ir.model.access.csv',
+        'wizard/stock_import_inventory_view.xml',        
         'stock_view.xml',
         'stock_sequence.xml',        
     ],

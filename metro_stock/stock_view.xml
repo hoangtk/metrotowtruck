@@ -318,5 +318,28 @@
                 </field>
             </field>
         </record>
+
+<!-- stock physical inventory -->        
+
+        <record id="metro_view_inventory_form" model="ir.ui.view">
+            <field name="name">metro.stock.inventory.form</field>
+            <field name="model">stock.inventory</field>
+            <field name="inherit_id" ref="stock.view_inventory_form"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//button[@string='Fill Inventory']" position="attributes">
+            		<attribute name="states">draft</attribute>           	
+            	</xpath>
+            	<xpath expr="//button[@string='Fill Inventory']" position="after">
+					<button name="%(action_view_stock_import_inventory)d" string="Import Inventory" states="draft" type="action" />           	
+            	</xpath>
+            	<xpath expr="//page[@string='Posted Inventory']//field[@name='state']" position="attributes">
+            		<attribute name="invisible">False</attribute>            	
+            	</xpath>
+            	<field name="move_ids" position="attributes">
+            		<attribute name="readonly">True</attribute>
+            	</field>
+            </field>
+        </record>
+        
     </data>
 </openerp>
