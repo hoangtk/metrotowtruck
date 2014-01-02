@@ -203,7 +203,7 @@ class purchase_order(osv.osv):
     def wkf_done(self, cr, uid, ids, context=None):
         #check the receipt number field
         order = self.browse(cr,uid,ids[0],context=context)
-        if order.receipt_number and order.receipt_number != '':
+        if order.amount_tax <= 0 or (order.receipt_number and order.receipt_number != ''):
             #only when get the receipt, then upadte status to 'done'
             #update lines to 'done'  
             lines = self._get_lines(cr,uid,ids,['approved'],context=context)
