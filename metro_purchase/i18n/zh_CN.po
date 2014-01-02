@@ -920,3 +920,8 @@ msgstr "是"
 #: code:general:0
 msgid "bool_False"
 msgstr "否"
+
+#. module: metro_purchase
+#: selection:purchase.order,state:0
+msgid "Waitting Receipt"
+msgstr "等待发票"

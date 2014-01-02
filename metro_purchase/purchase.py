@@ -48,9 +48,23 @@ class purchase_order(osv.osv):
         ('approved', 'Purchase Order'),
         ('except_picking', 'Shipping Exception'),
         ('except_invoice', 'Invoice Exception'),
+        ('wait_receipt', 'Waitting Receipt'),
         ('done', 'Done'),
         ('cancel', 'Cancelled')
     ] 
+    
+    def _invoiced_rate(self, cursor, user, ids, name, arg, context=None):
+        res = {}
+        for purchase in self.browse(cursor, user, ids, context=context):
+            tot = 0.0
+            for invoice in purchase.invoice_ids:
+                if invoice.state not in ('draft','cancel'):
+                    tot += invoice.amount_total
+            if purchase.amount_total:
+                res[purchase.id] = tot * 100.0 / purchase.amount_total
+            else:
+                res[purchase.id] = 0.0
+        return res    
 
     def _pay_info(self, cr, uid, ids, field_names=None, arg=False, context=None):
         """ Finds the payment mount and set the paid flag
@@ -89,6 +103,7 @@ class purchase_order(osv.osv):
         'is_sent_supplier': fields.boolean('Sent to Supplier', select=True),
         'taxes_id': fields.many2many('account.tax', 'po_tax', 'po_id', 'tax_id', 'Taxes', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
+        'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced', type='float'),
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
         'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
         'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
@@ -185,11 +200,33 @@ class purchase_order(osv.osv):
         self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context), 'inform_type':'3'})
         return True
     
-    def wkf_done(self, cr, uid, ids, context=None):  
-        lines = self._get_lines(cr,uid,ids,['approved'],context=context)
-        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'done'},context)
-        self.write(cr, uid, ids, {'state': 'done'})
-        
+    def wkf_done(self, cr, uid, ids, context=None):
+        #check the receipt number field
+        order = self.browse(cr,uid,ids[0],context=context)
+        if order.receipt_number and order.receipt_number != '':
+            #only when get the receipt, then upadte status to 'done'
+            #update lines to 'done'  
+            lines = self._get_lines(cr,uid,ids,['approved'],context=context)
+            self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'done'},context)
+            self.write(cr, uid, ids, {'state': 'done'})
+        else:
+            #update status to 'waiting receipt'
+            self.write(cr, uid, ids, {'state': 'wait_receipt'})       
+            
+    def write(self, cr, user, ids, vals, context=None):
+        if vals.get('receipt_number') and vals.get('receipt_number') != '':
+            #if the state is 'wait_receipt' then update the state to done when user entered the receipt_number
+            order = self.browse(cr,user,ids[0],context=context)
+            if order.state == 'wait_receipt':
+                vals.update({'state':'done'})
+        return super(purchase_order,self).write(cr,user,ids,vals,context=context)      
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'receipt_number':None,
+        })
+        return super(purchase_order, self).copy(cr, uid, id, default, context)        
     def action_reject(self, cr, uid, ids, message, context=None):
 #        lines = self._get_lines(cr,uid,ids,['confirmed'],context=context)
         lines = []
@@ -308,8 +345,7 @@ class purchase_order(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)    
-        return super(purchase_order,self).search(cr, user, new_args, offset, limit, order, context, count)       
-            
+        return super(purchase_order,self).search(cr, user, new_args, offset, limit, order, context, count)  
         
 class purchase_order_line(osv.osv):  
     _name = "purchase.order.line"
