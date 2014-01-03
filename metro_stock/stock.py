@@ -255,6 +255,12 @@ class stock_inventory(osv.osv):
 
         return super(stock_inventory, self).unlink(cr, uid, unlink_ids, context=context)
     
+class stock_inventory_line(osv.osv):
+    _inherit = "stock.inventory.line"
+    _columns = {   
+        'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
+    }
+               
                
 def deal_args(obj,args):  
     new_args = []

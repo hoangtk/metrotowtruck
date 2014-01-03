@@ -338,8 +338,48 @@
             	<field name="move_ids" position="attributes">
             		<attribute name="readonly">True</attribute>
             	</field>
+            	<xpath expr="//page[@string='General Information']//tree/field[@name='product_id']" position="after">
+            		<field name="image_medium" widget="image"/>            	
+            	</xpath>
             </field>
         </record>
-        
+
+        <record id="metro_stock_inventory_line_tree" model="ir.ui.view">
+            <field name="name">metro.stock.inventory.line.tree</field>
+            <field name="model">stock.inventory.line</field>
+            <field name="inherit_id" ref="stock.stock_inventory_line_tree"/>
+            <field name="arch" type="xml">
+            	 <xpath expr="/tree" position="attributes">
+            	 	<attribute name="editable">bottom</attribute>
+            	 </xpath>
+                 <field name="product_id" position="before">
+                 	<field name="inventory_id"/>
+                 	<field name="image_medium" widget="image"/>
+                 </field>
+            </field>
+        </record>
+         <record id="metro_view_inventory_line_filter" model="ir.ui.view">
+            <field name="name">stock.inventory.line.filter</field>
+            <field name="model">stock.inventory.line</field>
+            <field name="arch" type="xml">
+                <search string="Search Inventory">
+                    <field name="product_id" string="Product"/>
+                    <field name="inventory_id" string="Inventory Reference"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Inventory Reference" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'inventory_id'}"/>
+                    </group>
+                </search>
+
+            </field>
+        </record>        
+        <record id="action_inventory_line_tree" model="ir.actions.act_window">
+            <field name="name">Physical Inventory Lines</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">stock.inventory.line</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="metro_stock_inventory_line_tree"/>
+            <field name="search_view_id" ref="metro_view_inventory_line_filter"/>
+        </record>
+        <menuitem action="action_inventory_line_tree" id="menu_action_inventory_line" parent="stock.menu_stock_inventory_control" sequence="31"/>        
     </data>
 </openerp>
