@@ -180,47 +180,23 @@
                         </field>
             		</page>
             	</notebook>
-
-                <xpath expr="//notebook/page[@string='Information']/group" position="replace">
-
-                    <group>
-                        <group>
-                            <field name="type"/>
-                            <field name="uom_id" on_change="onchange_uom(uom_id,uom_po_id)" groups="product.group_uom"/>
-                            <field name="list_price"/>
-                        </group>
-                        <group>
-                            <group colspan="2" col="3">
-                                <group colspan="2" col="2">
-                                    <field name="default_code"/>
-                                </group>
-                                <group colspan="1" col="1" >
-                                    <button type="object" icon="gtk-execute" name="get_sequence" string=""
+            	
+                <field name="default_code" position="replace">
+                    <label for="default_code"/>
+                    <div>
+                        <field name="default_code" class="oe_inline"/> 
+                        <button type="object" icon="gtk-execute" name="get_sequence" string=""
                                     help="Only press this button to create a new part number! 只有按这个按钮来创建一个新的零件编号！"
 									groups="metro.group_metro_base_manager"  />
-                                </group>
-                                <label for="ean13"/>
-                                <div name="ean">
-                                    <field name="ean13" placeholder="e.g. 5901234123457"/>
-                                </div>
-                            </group>
-                        </group>
-                    </group>
-                    <group>
-                        <group>
-                            <field groups="product.group_product_variant" name="variants"/>
-                            <field name="price_margin" groups="product.group_product_variant"/>
-                            <field name="price_extra" groups="product.group_product_variant"/>
-                        </group>
-                        <group>
-                            <field name="create_uid"/>
-                            <field name="create_date"/>
-                        </group>
-                    </group>
-                    
-
+                    </div>
+                </field>
+                <xpath expr="//page[@string='Information']/group/group[3]" position="after">
+                     <group>
+                         <field name="create_uid"/>
+                         <field name="create_date"/>
+                     </group>
                 </xpath>
-   				
+		 
 				<!-- Creating a new title block -->
 				<xpath expr="//h1" position="after">
                   <label for="cn_name" help="您必须包括所有部件的英文名称为！"/>

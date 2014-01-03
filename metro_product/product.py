@@ -221,7 +221,13 @@ class product_product(osv.osv):
 		#deal the 'date' datetime field query
 		new_args = deal_args(self,args)
 		return super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
-		
+	def copy(self, cr, uid, id, default=None, context=None):
+		if not default:
+			default = {}
+		default.update({
+			'default_code':self.generate_seq(cr, uid),
+		})
+		return super(product_product, self).copy(cr, uid, id, default, context)		
 product_product()
 	
 class product_template(osv.Model):
