@@ -45,7 +45,7 @@
     ],
     'test': [],
     'demo': [],
-    "js": ["static/src/js/metro_stock.js"],
+#    "js": ["static/src/js/metro_stock.js"],
     'installable': True,
     'auto_install': False,
     'application': True,

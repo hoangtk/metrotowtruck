@@ -259,9 +259,32 @@ class stock_inventory_line(osv.osv):
     _inherit = "stock.inventory.line"
     _columns = {   
         'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
+        'state': fields.related('inventory_id','state',type='selection',selection=(('draft', 'Draft'), ('cancel','Cancelled'), ('confirm','Confirmed'), ('done', 'Done')),
+                                string='Status',readonly=True),
     }
-               
-               
+#stock physical inventroy move
+#class stock_inventory_move(osv.osv):
+#    _name = "stock.inventory.move"
+##    _table = "stock_inventory_move_rel"
+#    _table = "stock_move"
+#    _columns = {   
+#        'inventory_id': fields.many2one('stock.inventory','Inventory Referance'),
+#        'inventory_state': fields.related('inventory_id','Inventory State',type='selection',selection=(('draft', 'Draft'), ('cancel','Cancelled'), ('confirm','Confirmed'), ('done', 'Done')),
+#                                string='Status',readonly=True),
+#        'move_id': fields.many2one('stock.move','Inventory Referance'),
+#        'product_id': fields.related('move_id','product_id',type='many2one',relation="product.product",String="Product",readonly=True,),
+#        'product_qty': fields.related('move_id','product_qty',type='float',String="Quantity",readonly=True,),
+#        'location_id': fields.related('move_id','location_id',type='many2one',relation="stock.location",String="Source Location",readonly=True,),
+#        'location_dest_id': fields.related('move_id','location_dest_id',type='many2one',relation="stock.location",String="Destination Location",readonly=True,),
+#        'state': fields.related('move_id','state',type='selection',selection=[('draft', 'New'),
+#                                   ('cancel', 'Cancelled'),
+#                                   ('waiting', 'Waiting Another Move'),
+#                                   ('confirmed', 'Waiting Availability'),
+#                                   ('assigned', 'Available'),
+#                                   ('done', 'Done'),
+#                                   ],String="Destination Location",readonly=True,),
+#    }
+           
 def deal_args(obj,args):  
     new_args = []
     for arg in args:

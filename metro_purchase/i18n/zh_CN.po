@@ -798,6 +798,12 @@ msgid "Draft PO"
 msgstr "草稿"
 
 #. module: metro_purchase
+#: field:purchase.order,amount_freight:0
+#: field:purchase.order.line,amount_freight:0
+msgid "Freight"
+msgstr "运费"
+
+#. module: metro_purchase
 #: field:purchase.order,has_freight:0
 #: field:purchase.order.line,has_freight:0
 msgid "Has Freight"

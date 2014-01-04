@@ -32,6 +32,7 @@ class pur_req(osv.osv):
     _name = "pur.req"
     _description="Purchase Requisitions"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _order = "name desc"
     def _full_gen_po(self, cursor, user, ids, name, arg, context=None):
         res = {}
         for req in self.browse(cursor, user, ids, context=context):
