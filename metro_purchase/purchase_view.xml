@@ -81,7 +81,8 @@
             <field name="inherit_id" ref="purchase.purchase_order_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="/tree" position="attributes">
-                    <attribute name="colors">grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking','rejected')</attribute>
+                    <attribute name="colors">grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking','rejected');green:state=='done'</attribute>
+                    <attribute name="fonts">bold:state=='done'</attribute>
                 </xpath>
                 <field name="state" position="before">
                 	<field name="is_sent_supplier"/>
