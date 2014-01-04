@@ -218,7 +218,18 @@
             	</field>
             </field>
         </record>
-        		
+<!-- add cn name to kanban view -->        		
+        <record model="ir.ui.view" id="metro_product_kanban_view">
+            <field name="name">Product Kanban</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_kanban_view"/>
+            <field name="arch" type="xml">
+            	<field name="name" position="after">
+            		<field name="cn_name"/>
+            	</field>
+            </field>		
+		</record>
+		                    		
 		<menuitem id="metro_menu_product" name="Products" parent="metro.menu_mttl_config" groups="metro.group_metro_base_manager" />
 		<menuitem id="metro_menu_product_sequence" action="metro_action_product_sequence" name="Product Sequence" parent="metro_menu_product"/>
 		<menuitem id="metro_menu_product_attribute_metro" action="metro_action_product_attribute" name="Product Attribute" parent="metro_menu_product"/>
