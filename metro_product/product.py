@@ -251,6 +251,15 @@ class product_product(osv.osv):
 			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],'副本'),
 		})
 		return super(product_product, self).copy(cr, uid, id, default, context)		
+#	def onchange_name(self, cr, uid, ids, value, context):
+#		prods = self.search(cr, uid, [('name', 'like', value),('id','not in',ids)])
+#		if prods:
+#			for prod in prods
+#			
+#		res = {}
+#		res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
+#		return res
+		
 product_product()
 	
 class product_template(osv.Model):

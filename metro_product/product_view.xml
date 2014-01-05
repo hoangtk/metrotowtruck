@@ -200,8 +200,13 @@
 				<!-- Creating a new title block -->
 				<xpath expr="//h1" position="after">
                   <label for="cn_name" help="您必须包括所有部件的英文名称为！"/>
-                  <field name="cn_name" colspan="4" placeholder="中国名" />
+                  <field name="cn_name" colspan="4" placeholder="中国名"/>
                </xpath>
+<!--                
+               <field name="name" position="attributes">
+               		<attribute name="on_change">onchange_name(name,context)</attribute>
+               </field>
+                -->
                 </data>
             </field>
 		</record>
