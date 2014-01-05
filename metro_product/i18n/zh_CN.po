@@ -25,3 +25,13 @@ msgstr "创建人"
 #: field:product.product,create_date:0
 msgid "Creation Date"
 msgstr "创建时间"
+
+#. module: metro_product
+#: code:addons/metro_product/product.py:0
+msgid "Product Chinese Name must be unique!"
+msgstr "产品中文名称重复!"
+
+#. module: metro_product
+#: code:addons/metro_product/product.py:0
+msgid "Product Name must be unique!"
+msgstr "产品名称重复!"

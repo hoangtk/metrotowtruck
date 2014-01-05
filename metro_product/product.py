@@ -116,23 +116,45 @@ class product_product(osv.osv):
 	_defaults = {
 		'default_code': generate_seq,
 	}
-    
+	_sql_constraints = [
+		('cn_name', 'unique (cn_name)', _('Product Chinese Name must be unique!'))
+	]    
+	def _check_write_vals(self,cr,uid,vals,ids=None,context=None):
+		if vals.get('default_code') and vals['default_code']:
+			vals['default_code'] = vals['default_code'].strip()
+			if ids:
+				product_id = self.search(cr, uid, [('default_code', '=', vals['default_code']),('id','not in',ids)])
+			else:
+				product_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
+			if product_id:
+				raise osv.except_osv(_('Error!'), _('Reference must be unique!'))
+		if vals.get('cn_name'):
+			vals['cn_name'] = vals['cn_name'].strip()
+			if ids:
+				product_id = self.search(cr, uid, [('cn_name', '=', vals['cn_name']),('id','not in',ids)])
+			else:
+				product_id = self.search(cr, uid, [('cn_name', '=', vals['cn_name'])])
+			if product_id:
+				raise osv.except_osv(_('Error!'), _('Product Chinese Name must be unique!'))
+		if vals.get('name'):
+			vals['name'] = vals['name'].strip()
+			if ids:
+				product_id = self.search(cr, uid, [('name', '=', vals['name']),('id','not in',ids)])
+			else:
+				product_id = self.search(cr, uid, [('name', '=', vals['name'])])
+			if product_id:
+				raise osv.except_osv(_('Error!'), _('Product Name must be unique!'))	
+		return True	
 	def create(self, cr, uid, vals, context=None):
 		if context is None:
 			context = {}
-		if vals.get('default_code') and vals['default_code']:
-			product_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
-			if product_id:
-				raise osv.except_osv(_('Warning !'), _('Reference must be unique!'))
+		self._check_write_vals(cr,uid,vals,context=context)
 		return super(product_product, self).create(cr, uid, vals, context)
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		if context is None:
 			context = {}
-		if vals.get('default_code') and vals['default_code']:
-			product_id = self.search(cr, uid, [('default_code', '=', vals['default_code'])])
-			if product_id:
-				raise osv.except_osv(_('Warning !'), _('Reference must be unique!'))
+		self._check_write_vals(cr,uid,vals,ids=ids,context=context)
 		return super(product_product, self).write(cr, uid, ids, vals, context=context)
 	
 	def get_sequence(self, cr, uid, ids, context=None):
@@ -226,6 +248,7 @@ class product_product(osv.osv):
 			default = {}
 		default.update({
 			'default_code':self.generate_seq(cr, uid),
+			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],'副本'),
 		})
 		return super(product_product, self).copy(cr, uid, id, default, context)		
 product_product()
@@ -235,5 +258,8 @@ class product_template(osv.Model):
 	_columns = {
 		'name': fields.char('Name', size=128, required=True, translate=False, select=True),
 	}
+	_sql_constraints = [
+		('name', 'unique (name)', _('Product Name must be unique!'))
+	] 
 
 
