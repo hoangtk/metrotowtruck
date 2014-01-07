@@ -494,8 +494,8 @@ class metro_pur_order(order):
 #        def _get_source(self, cr, uid, name, types, lang, source=None):
         bool_name = self.pool.get("ir.translation")._get_source(self.cr, self.uid, None, 'code', self.localcontext['lang'], 'bool_' + str(bool_val))
         return bool_name
-            
-report_sxw.report_sxw('report.purchase.order.metro','purchase.order','addons/metro_purchase/report/order.rml',parser=metro_pur_order)
+          
+report_sxw.report_sxw('report.purchase.order.metro','purchase.order','addons/metro_purchase/report/purchase_order.rml',parser=metro_pur_order)
 
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 def deal_args(obj,args):  

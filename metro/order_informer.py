@@ -20,6 +20,7 @@
 #
 ##############################################################################
 import logging
+import base64
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -28,6 +29,7 @@ from socket import gethostname
 
 from openerp.osv import fields,osv
 from openerp.tools.config import config
+from openerp.addons.base.ir.ir_config_parameter import ir_config_parameter
 
 _logger = logging.getLogger(__name__)
 
@@ -36,190 +38,153 @@ class order_informer(osv.osv_memory):
     def inform(self,cr,uid,order_type,context=None):
         if order_type == "purchase.order":
             return self._inform_po(cr,uid,)
-    def _inform_po(self,cr,uid,context=None):
-        po_obj = self.pool.get("purchase.order")   
-        ir_mail_server = self.pool.get('ir.mail_server')
-        
-        email_from = config['email_from']
-        email_to = []
-        email_cc = []
+    #get object ids, email subject & body, object creator emails
+    def _get_body_subject(self,cr,uid,model,inform_type,email_tmpl_name,context=None):
+        email_msg = None
+        data_obj = self.pool.get(model)
+        obj_ids = data_obj.search(cr,uid,[('inform_type','=',inform_type)],context=context)
+        email_contacted_subject = ""
         email_subject = ""
         email_body = ""
+        email_attachments = []
+        email_creators = []
+        email_tmpl_obj = self.pool.get('email.template')
+        email_tmpl = email_tmpl_obj.search(cr,uid,[('name','=',email_tmpl_name)])[0]
+        if obj_ids and len(obj_ids) > 0:
+            objs = data_obj.browse(cr,uid,obj_ids,context=context)
+            for obj in objs:
+                if obj.partner_id:
+                    obj.partner_id.lang='en_US'
+                #get the values by template
+                vals = email_tmpl_obj.generate_email(cr,uid,email_tmpl,obj.id,context=context)
+                #use the 'email_recipients' as the the subject template that sent at last
+                email_subject += vals['subject'] + ","
+                email_contacted_subject = vals['email_recipients']
+                email_body += vals['body']
+                #decode the encoded the attachments
+                for name,attachment in vals['attachments']:
+                    email_attachments.append((name,base64.b64decode(attachment)))
+                #add the creator email list
+                try:
+                    email_creators.index(obj.create_uid.email)
+                except Exception:
+                    if obj.create_uid.email:
+                        email_creators.append(obj.create_uid.email)
+            #replace the name
+            email_subject = email_contacted_subject.replace('$list_names$', email_subject[:(len(email_subject)-1)])
+            
+        return obj_ids, email_subject, email_body, email_creators, email_attachments
+    
+    def _get_group_id_emails(self,cr,uid,group_ids,context):
+            #get the group user's addresses by group id
+            emails = []
+            group_obj = self.pool.get("res.groups")
+            if isinstance(group_ids, (int, long)):
+                group_ids = [group_ids]
+            groups = group_obj.browse(cr,uid,group_ids,context=context)
+            for group in groups:
+                for user in group.users:
+                    if user.email: 
+                        emails.append(user.email)
+            return emails
+    def _get_group_cata_name_emails(self,cr,uid,cata_name,group_name,context):
+            #get the group user's addresses by group category and group name
+            group_obj = self.pool.get("res.groups")
+            group_cate_id = self.pool.get("ir.module.category").search(cr,uid,[("name","=",cata_name)])[0]
+            if not group_cate_id:
+                return False            
+            group_ids = group_obj.search(cr,uid,[('category_id','=', group_cate_id),('name','=',group_name)],context=context)
+            if not group_ids:
+                return False
+            return self._get_group_id_emails(cr,uid,group_ids[0],context)
+                                        
+                        
+    def _send_emails(self,cr,uid,msgs,context):
+        ir_mail_server = self.pool.get('ir.mail_server')                        
+        for msg in msgs:
+            #set email
+            email_msg = ir_mail_server.build_email(msg['from'], msg['to'], msg['subject'], msg['body'],email_cc=msg['cc'], attachments=msg['attachments'], subtype=msg['subtype'])
+            res_email = ir_mail_server.send_email(cr, uid, email_msg)
+            if res_email:
+                _logger.info('Email successfully sent to: %s, model:%s, ids:%s' %(msg['to'],msg['model'],msg['model_ids']))
+                #update object inform_type
+                self.pool.get(msg['model']).write(cr,uid,msg['model_ids'],{'inform_type':msg['inform_type_new']},context=context);
+            else:
+                _logger.warning('Failed to send email to: %s', msg['to'])                
+    def _inform_po(self,cr,uid,context=None):
+        po_obj = self.pool.get("purchase.order")   
         
+        email_from = config['email_from']
+        email_msgs = []
+        approver_emails = self._get_group_cata_name_emails(cr,uid,"Purchase Requisition",'Manager',context)
         '''
         1.PO Order:inform_type 
-            1:draft/reject-->confirmed
-            2:confirmed-->rejected
-            3:confirmed-->approved
+            1):confirmed: waitting approval
+            2):rejected
+            3):approved
         '''
         #waitting for approval
         email_to = []
         email_cc = []
         email_subject = ""
         email_body = ""
-        po_ids = po_obj.search(cr,uid,[('inform_type','=','1')],context=context)
-        if po_ids and len(po_ids) > 0:
-            pos = po_obj.browse(cr,uid,po_ids,context=context)
-            for po in pos:
-                email_subject += po.name + ","
-                email_body += '<h3>' + po.name + " with supplier " + po.partner_id.name + "</h3><br/>"
-                #add the creator email cc list
-                try:
-                    email_cc.index(po.create_uid.email)
-                except Exception:
-                    if po.create_uid.email:
-                        email_cc.append(po.create_uid.email)
-            email_subject += " need your approval"                
-            #get the to addresses
-            email_to = []
-            group_obj = self.pool.get("res.groups")
-            group_cate_id = self.pool.get("ir.module.category").search(cr,uid,[("name","=","Purchase Requisition")])[0]            
-            group_ids = group_obj.search(cr,uid,[('category_id','=', group_cate_id),('name','=','Manager')],context=context)
-            group = group_obj.browse(cr,uid,group_ids,context=context)[0]
-            for user in group.users:
-                if user.email: 
-                    email_to.append(user.email)
-            #sending po emails            
-            msg = ir_mail_server.build_email(email_from, email_to, email_subject, email_body,
-                                             email_cc = email_cc, subtype = 'html')
-            res_email = ir_mail_server.send_email(cr, uid, msg)
-            if res_email:
-                _logger.info('Email successfully sent to: %s', email_to)
-                po_obj.write(cr,uid,po_ids,{'inform_type':''},context=context);
-            else:
-                _logger.warning('Failed to send email to: %s', email_to)     
-
-
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order','1','po_wait_approval',context = context)
+        if len(obj_ids) > 0:
+            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
+        
         #rejected
         email_to = []
         email_cc = []
         email_subject = ""
         email_body = ""
-        po_ids = po_obj.search(cr,uid,[('inform_type','=','2')],context=context)
-        if po_ids and len(po_ids) > 0:
-            pos = po_obj.browse(cr,uid,po_ids,context=context)
-            for po in pos:
-                email_subject += po.name + ","
-                email_body += "<h3>" + po.name + " with supplier " + po.partner_id.name + "</h3><br/>"
-                email_body += "<h3>Rejection Reason: " + po.reject_msg + "</h3><br/>"
-                #add the creator email to list
-                try:
-                    email_to.index(po.create_uid.email)
-                except Exception:
-                    if po.create_uid.email:
-                        email_to.append(po.create_uid.email)
-            email_subject += " were rejected"
-            #sending po emails            
-            msg = ir_mail_server.build_email(email_from, email_to, email_subject, email_body,
-                                             email_cc = email_cc, subtype = 'html')
-            res_email = ir_mail_server.send_email(cr, uid, msg)
-            if res_email:
-                _logger.info('Email successfully sent to: %s', email_to)
-                po_obj.write(cr,uid,po_ids,{'inform_type':''},context=context);
-            else:
-                _logger.warning('Failed to send email to: %s', email_to)    
-            
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','2','po_rejected',context = context)
+        if len(email_to) > 0:
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
         #approved
         email_to = []
         email_cc = []
         email_subject = ""
         email_body = ""
-        po_ids = po_obj.search(cr,uid,[('inform_type','=','3')],context=context)
-        if po_ids and len(po_ids) > 0:
-            pos = po_obj.browse(cr,uid,po_ids,context=context)
-            for po in pos:
-                email_subject += po.name + ","
-                email_body += "<h3>" + po.name + " with supplier " + po.partner_id.name + "</h3><br/>"
-                #add the creator email to list
-                try:
-                    email_to.index(po.create_uid.email)
-                except Exception:
-                    if po.create_uid.email:
-                        email_to.append(po.create_uid.email)
-            email_subject += " were approved"
-            #sending po emails            
-            msg = ir_mail_server.build_email(email_from, email_to, email_subject, email_body,
-                                             email_cc = email_cc, subtype = 'html')
-            res_email = ir_mail_server.send_email(cr, uid, msg)
-            if res_email:
-                _logger.info('Email successfully sent to: %s', email_to)
-                po_obj.write(cr,uid,po_ids,{'inform_type':''},context=context);
-            else:
-                _logger.warning('Failed to send email to: %s', email_to)
-                 
+        email_creators = []
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','3','po_approved',context = context)
+        if len(email_to) > 0:
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
+        
         '''
-        2.PO Order Line:inform_type
-            1:confirmed-->rejected
-            2:rejected-->confirmed
+        1.PO Order Line:inform_type 
+            1):confirmed: waitting approval
+            2):rejected
         '''
         #waitting for approval
         email_to = []
         email_cc = []
         email_subject = ""
         email_body = ""
-        po_line_obj = self.pool.get("purchase.order.line")     
-        po_line_ids = po_line_obj.search(cr,uid,[('inform_type','=','1')],context=context)
-        if po_line_ids and len(po_line_ids) > 0:
-            po_lines = po_line_obj.browse(cr,uid,po_line_ids,context=context)
-            for po_line in po_lines:
-                email_subject += po_line.order_id.name + ", " + po_line.product_id.name + ";"
-                email_body += '<h3>' + po_line.order_id.name + ", " + po_line.product_id.name + "</h3><br/>"
-                #add the creator email cc list
-                try:
-                    email_cc.index(po_line.create_uid.email)
-                except Exception:
-                    if po_line.create_uid.email:
-                        email_cc.append(po_line.create_uid.email)
-            email_subject += " need your approval"                
-            #get the to addresses
-            email_to = []
-            group_obj = self.pool.get("res.groups")
-            group_cate_id = self.pool.get("ir.module.category").search(cr,uid,[("name","=","Purchase Requisition")])[0]            
-            group_ids = group_obj.search(cr,uid,[('category_id','=', group_cate_id),('name','=','Manager')],context=context)
-            group = group_obj.browse(cr,uid,group_ids,context=context)[0]
-            for user in group.users:
-                if user.email: 
-                    email_to.append(user.email)
-            #sending po emails            
-            msg = ir_mail_server.build_email(email_from, email_to, email_subject, email_body,
-                                             email_cc = email_cc, subtype = 'html')
-            res_email = ir_mail_server.send_email(cr, uid, msg)
-            if res_email:
-                _logger.info('Email successfully sent to: %s', email_to)
-                po_line_obj.write(cr,uid,po_line_ids,{'inform_type':''},context=context);
-            else:
-                _logger.warning('Failed to send email to: %s', email_to)     
-
-
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order.line','1','po_line_wait_approval',context = context)
+        if obj_ids:
+            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+                               'model':'purchase.order.line','model_ids':obj_ids,'inform_type_new':''})
+        
         #rejected
         email_to = []
         email_cc = []
         email_subject = ""
         email_body = ""
-        po_line_ids = po_line_obj.search(cr,uid,[('inform_type','=','2')],context=context)
-        if po_line_ids and len(po_line_ids) > 0:
-            po_lines = po_line_obj.browse(cr,uid,po_line_ids,context=context)
-            for po_line in po_lines:
-                email_subject += po_line.order_id.name + ", " + po_line.product_id.name + ";"
-                email_body += '<h3>' + po_line.order_id.name + ", " + po_line.product_id.name + "</h3><br/>"
-                email_body += "<h3>Rejection Reason: " + po_line.reject_msg + "</h3><br/>"
-                #add the creator email to list
-                try:
-                    email_to.index(po_line.create_uid.email)
-                except Exception:
-                    if po_line.create_uid.email:
-                        email_to.append(po_line.create_uid.email)
-            email_subject += " were rejected"   
-            #sending po emails            
-            msg = ir_mail_server.build_email(email_from, email_to, email_subject, email_body,
-                                             email_cc = email_cc, subtype = 'html')
-            res_email = ir_mail_server.send_email(cr, uid, msg)
-            if res_email:
-                _logger.info('Email successfully sent to: %s', email_to)
-                po_line_obj.write(cr,uid,po_line_ids,{'inform_type':''},context=context);
-            else:
-                _logger.warning('Failed to send email to: %s', email_to)     
-                                 
-        return True    
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order.line','2','po_line_rejected',context = context)
+        if len(email_to) > 0:
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+                           'model':'purchase.order.line','model_ids':obj_ids,'inform_type_new':''})
+        
+        #send all emails at last
+        self._send_emails(cr,uid,email_msgs,context)
+        return True 
 
 order_informer()  

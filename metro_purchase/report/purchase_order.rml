@@ -144,7 +144,7 @@
     <blockTable colWidths="262.0,8.0,264.0" style="Tableau1">
       <tr>
         <td>
-          <para style="P1">Purchase Order Confirmation N° [[ o.name ]]</para>
+          <para style="P1">Purchase Order [[ o.name ]]</para>
           <para style="P2">
             <font color="white"> </font>
           </para>

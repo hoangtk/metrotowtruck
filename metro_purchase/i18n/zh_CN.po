@@ -914,7 +914,7 @@ msgstr "说明"
 
 #. module: metro_purchase
 #: report:purchase.order.metro:0
-msgid "Purchase Order Confirmation N°"
+msgid "Purchase Order"
 msgstr "采购合同"
 
 #. module: metro_purchase
