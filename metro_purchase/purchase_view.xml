@@ -72,6 +72,12 @@
                 <field name="order_line" position="attributes">
                 	<attribute name="context">{'po_taxes_id':taxes_id}</attribute>             	
                 </field>
+                <field name="notes" position="replace">
+                	<label for="notes"/>
+                	<field name="notes" placeholder="Terms and conditions..."/>
+                	<label for="comments"/>
+					<field name="comments" placeholder="Comments..."/>                	             	
+                </field>
        		</field>
         </record>  
           
@@ -81,8 +87,8 @@
             <field name="inherit_id" ref="purchase.purchase_order_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="/tree" position="attributes">
-                    <attribute name="colors">grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking','rejected');green:state=='done'</attribute>
-                    <attribute name="fonts">bold:state=='done'</attribute>
+                    <attribute name="colors"><![CDATA[red:state in ('except_invoice','except_picking','rejected') or (not shipped and state not in ('cancel', 'done') and current_date > minimum_planned_date);grey:state=='cancel';blue:state in ('wait','confirmed');green:state=='done']]></attribute>
+                    <attribute name="fonts"><![CDATA[bold:state=='done' or (not shipped and state not in ('cancel', 'done') and current_date > minimum_planned_date)]]></attribute>
                 </xpath>
                 <field name="state" position="before">
                 	<field name="is_sent_supplier"/>

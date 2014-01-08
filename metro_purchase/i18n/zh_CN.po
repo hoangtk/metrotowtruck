@@ -931,3 +931,8 @@ msgstr "否"
 #: selection:purchase.order,state:0
 msgid "Waitting Receipt"
 msgstr "等待发票"
+
+#. module: purchase
+#: field:purchase.order,comments:0
+msgid "Comments"
+msgstr "备注"

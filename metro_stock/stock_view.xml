@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>    
+    <data>      
+        <record id="metro_view_picking_in_tree" model="ir.ui.view">
+            <field name="name">metro.stock.picking.in.tree</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="/tree" position="attributes">
+                    <attribute name="colors"><![CDATA[red:state not in ('cancel', 'done') and current_date > min_date;blue:state == 'draft';grey:state == 'cancel']]></attribute>
+                    <attribute name="fonts"><![CDATA[bold:state not in ('cancel', 'done') and current_date > min_date]]></attribute>
+                </xpath>
+            </field>
+        </record>   
+<!-- Material Request -->    
         <record id="view_material_request_tree" model="ir.ui.view">
             <field name="name">material.request.tree</field>
             <field name="model">material.request</field>

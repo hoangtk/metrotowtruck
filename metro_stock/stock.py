@@ -219,28 +219,85 @@ class stock_move(osv.osv):
         new_args = deal_args(self,args)
         return super(stock_move,self).search(cr, user, new_args, offset, limit, order, context, count)  
 
- 
+
+
+from openerp.addons.stock import stock_picking as stock_picking_super
+      
+def _set_minimum_date(self, cr, uid, ids, name, value, arg, context=None):
+    """ Calculates planned date if it is less than 'value'.
+    @param name: Name of field
+    @param value: Value of field
+    @param arg: User defined argument
+    @return: True or False
+    """
+    if not value:
+        return False
+    if isinstance(ids, (int, long)):
+        ids = [ids]
+    for pick in self.browse(cr, uid, ids, context=context):
+        sql_str = """update stock_move set
+                date_expected='%s'
+            where
+                picking_id=%s """ % (value, pick.id)
+        if pick.min_date:
+            sql_str += " and (date_expected='" + pick.min_date + "' or date_expected<'" + value + "')"
+        cr.execute(sql_str)
+    return True
+
+def _set_maximum_date(self, cr, uid, ids, name, value, arg, context=None):
+    """ Calculates planned date if it is greater than 'value'.
+    @param name: Name of field
+    @param value: Value of field
+    @param arg: User defined argument
+    @return: True or False
+    """
+    if not value:
+        return False
+    if isinstance(ids, (int, long)):
+        ids = [ids]
+    for pick in self.browse(cr, uid, ids, context=context):
+        sql_str = """update stock_move set
+                date_expected='%s'
+            where
+                picking_id=%d """ % (value, pick.id)
+        if pick.max_date:
+            sql_str += " and (date_expected='" + pick.max_date + "' or date_expected>'" + value + "')"
+        cr.execute(sql_str)
+    return True   
+     
 class stock_picking(osv.osv):
     _inherit = "stock.picking" 
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
-    }  
+    }      
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
-        return super(stock_picking,self).search(cr, user, new_args, offset, limit, order, context, count) 
+        return super(stock_picking,self).search(cr, user, new_args, offset, limit, order, context, count)
+    _order = 'name desc'  
+   
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
-        return super(stock_picking_out,self).search(cr, user, new_args, offset, limit, order, context, count)    
+        return super(stock_picking_out,self).search(cr, user, new_args, offset, limit, order, context, count)  
+    _order = 'name desc'      
 class stock_picking_in(osv.osv):
-    _inherit = "stock.picking.in"   
+    _inherit = "stock.picking.in"
+ 
+    _columns = {   
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'min_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date",
+                 store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"), 
+        'max_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_maximum_date, multi="min_max_date",
+                 store=True, type='datetime', string='Max. Expected Date', select=2),                       
+    }     
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
-        return super(stock_picking_in,self).search(cr, user, new_args, offset, limit, order, context, count)     
+        return super(stock_picking_in,self).search(cr, user, new_args, offset, limit, order, context, count)   
+    _order = 'name desc'      
 
 class stock_inventory(osv.osv):
     _inherit = "stock.inventory"

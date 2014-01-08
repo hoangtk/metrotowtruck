@@ -110,7 +110,7 @@ class purchase_order(osv.osv):
         'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),
-                
+        'comments': fields.text('Comments'),        
     }
     _defaults = {
         'is_sent_supplier': False,
@@ -144,6 +144,8 @@ class purchase_order(osv.osv):
             if not po_data.has_key('company_id'):
                 company_id = self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.order', context=context)
                 po_data['company_id'] = company_id
+            #add the default value of notes
+            po_data.update(purchase_order.default_get(cr,uid,['notes'],context=context))
             new_po_id = purchase_order.create(cr, uid, po_data)
             #assign the new po id to po data, then the caller call get the new po's info
             po_data['new_po_id'] = new_po_id
@@ -219,6 +221,17 @@ class purchase_order(osv.osv):
             order = self.browse(cr,user,ids[0],context=context)
             if order.state == 'wait_receipt':
                 vals.update({'state':'done'})
+        #if user changed the expected plan date, then update the associated pickings
+        if vals.get('minimum_planned_date') and vals.get('minimum_planned_date') != '':
+            order = self.browse(cr,user,ids[0],context=context)
+            if order.picking_ids:
+                pick_ids = []
+                for pick in order.picking_ids:
+                    if pick.state != 'cancel' and pick.state !='done':
+                        pick_ids.append(pick.id)
+                self.pool.get('stock.picking.in').write(cr,user,pick_ids,{'min_date':vals.get('minimum_planned_date')})
+            
+            
         return super(purchase_order,self).write(cr,user,ids,vals,context=context)      
     def copy(self, cr, uid, id, default=None, context=None):
         if not default:
