@@ -39,8 +39,7 @@ class order_informer(osv.osv_memory):
         if order_type == "purchase.order":
             return self._inform_po(cr,uid,)
     #get object ids, email subject & body, object creator emails
-    def _get_body_subject(self,cr,uid,model,inform_type,email_tmpl_name,context=None):
-        email_msg = None
+    def _get_body_subject(self,cr,uid,model,inform_type,email_tmpl_name,body_header_key=False,body_footer_key=False,context=None):
         data_obj = self.pool.get(model)
         obj_ids = data_obj.search(cr,uid,[('inform_type','=',inform_type)],context=context)
         email_contacted_subject = ""
@@ -72,6 +71,14 @@ class order_informer(osv.osv_memory):
                         email_creators.append(obj.create_uid.email)
             #replace the name
             email_subject = email_contacted_subject.replace('$list_names$', email_subject[:(len(email_subject)-1)])
+            #add the header and footer to email body
+            config_parameter = self.pool.get('ir.config_parameter')
+            body_header = body_header_key and config_parameter.get_param(cr, uid, body_header_key, context=context)
+            if body_header:
+                email_body = body_header + email_body
+            body_footer = body_footer_key and config_parameter.get_param(cr, uid, body_footer_key, context=context)
+            if body_footer:
+                email_body += body_footer 
             
         return obj_ids, email_subject, email_body, email_creators, email_attachments
     
@@ -103,7 +110,7 @@ class order_informer(osv.osv_memory):
         ir_mail_server = self.pool.get('ir.mail_server')                        
         for msg in msgs:
             #set email
-            email_msg = ir_mail_server.build_email(msg['from'], msg['to'], msg['subject'], msg['body'],email_cc=msg['cc'], attachments=msg['attachments'], subtype=msg['subtype'])
+            email_msg = ir_mail_server.build_email(msg['from'], msg['to'], msg['subject'], msg['body'],email_cc=msg['cc'], attachments=msg.get('attachments'), subtype=msg['subtype'])
             res_email = ir_mail_server.send_email(cr, uid, email_msg)
             if res_email:
                 _logger.info('Email successfully sent to: %s, model:%s, ids:%s' %(msg['to'],msg['model'],msg['model_ids']))
@@ -116,7 +123,16 @@ class order_informer(osv.osv_memory):
         
         email_from = config['email_from']
         email_msgs = []
-        approver_emails = self._get_group_cata_name_emails(cr,uid,"Purchase Requisition",'Manager',context)
+        #get the approvers emails
+        group_cata_name = 'Purchase Requisition';
+        group_name = 'Manager'
+        approver_group_full_name = self.pool.get('ir.config_parameter').get_param(cr, uid, 'OI_group_po_approve', context=context)
+        if approver_group_full_name:
+            info = approver_group_full_name.split('/')
+            if len(info) == 2:
+                group_cata_name = info[0].strip()
+                group_name = info[1].strip()
+        approver_emails = self._get_group_cata_name_emails(cr,uid,group_cata_name,group_name,context)
         '''
         1.PO Order:inform_type 
             1):confirmed: waitting approval
@@ -129,7 +145,7 @@ class order_informer(osv.osv_memory):
         email_subject = ""
         email_body = ""
         #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order','1','po_wait_approval',context = context)
+        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order','1','OI_po_wait_approval','OI_header_po_wait_approval','OI_erp_signature',context = context)
         if len(obj_ids) > 0:
             email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                            'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
@@ -140,9 +156,9 @@ class order_informer(osv.osv_memory):
         email_subject = ""
         email_body = ""
         #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','2','po_rejected',context = context)
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','2','OI_po_rejected','OI_header_po_rejected','OI_erp_signature',context = context)
         if len(email_to) > 0:
-            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                            'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
         #approved
         email_to = []
@@ -151,9 +167,9 @@ class order_informer(osv.osv_memory):
         email_body = ""
         email_creators = []
         #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','3','po_approved',context = context)
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','3','OI_po_approved','OI_header_po_approved','OI_erp_signature',context = context)
         if len(email_to) > 0:
-            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                            'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
         
         '''
@@ -167,9 +183,9 @@ class order_informer(osv.osv_memory):
         email_subject = ""
         email_body = ""
         #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order.line','1','po_line_wait_approval',context = context)
+        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order.line','1','OI_po_line_wait_approval','OI_header_po_line_wait_approval','OI_erp_signature',context = context)
         if obj_ids:
-            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                                'model':'purchase.order.line','model_ids':obj_ids,'inform_type_new':''})
         
         #rejected
@@ -178,9 +194,9 @@ class order_informer(osv.osv_memory):
         email_subject = ""
         email_body = ""
         #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order.line','2','po_line_rejected',context = context)
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order.line','2','OI_po_line_rejected','OI_header_po_line_rejected','OI_erp_signature',context = context)
         if len(email_to) > 0:
-            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html',
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                            'model':'purchase.order.line','model_ids':obj_ids,'inform_type_new':''})
         
         #send all emails at last

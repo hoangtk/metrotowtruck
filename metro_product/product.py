@@ -116,9 +116,9 @@ class product_product(osv.osv):
 	_defaults = {
 		'default_code': generate_seq,
 	}
-	_sql_constraints = [
-		('cn_name', 'unique (cn_name)', _('Product Chinese Name must be unique!'))
-	]    
+#	_sql_constraints = [
+#		('cn_name', 'unique (cn_name)', _('Product Chinese Name must be unique!'))
+#	]    
 	def _check_write_vals(self,cr,uid,vals,ids=None,context=None):
 		if vals.get('default_code') and vals['default_code']:
 			vals['default_code'] = vals['default_code'].strip()
@@ -267,8 +267,8 @@ class product_template(osv.Model):
 	_columns = {
 		'name': fields.char('Name', size=128, required=True, translate=False, select=True),
 	}
-	_sql_constraints = [
-		('name', 'unique (name)', _('Product Name must be unique!'))
-	] 
+#	_sql_constraints = [
+#		('name', 'unique (name)', _('Product Name must be unique!'))
+#	] 
 
 
