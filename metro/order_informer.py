@@ -52,10 +52,17 @@ class order_informer(osv.osv_memory):
         if obj_ids and len(obj_ids) > 0:
             objs = data_obj.browse(cr,uid,obj_ids,context=context)
             for obj in objs:
-                if obj.partner_id:
-                    obj.partner_id.lang='en_US'
+                update_partner_lang= False
+                partner_lang = ''
+                if obj.partner_id and obj.partner_id.lang != 'en_US':
+                    partner_lang = obj.partner_id.lang
+                    self.pool.get('res.partner').write(cr,uid,obj.partner_id.id,{'lang':'en_US'})
+                    update_partner_lang = True
                 #get the values by template
                 vals = email_tmpl_obj.generate_email(cr,uid,email_tmpl,obj.id,context=context)
+                #restore the partner language
+                if update_partner_lang:
+                    self.pool.get('res.partner').write(cr,uid,obj.partner_id.id,{'lang':partner_lang})
                 #use the 'email_recipients' as the the subject template that sent at last
                 email_subject += vals['subject'] + ","
                 email_contacted_subject = vals['email_recipients']
