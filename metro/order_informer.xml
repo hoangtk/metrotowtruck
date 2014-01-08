@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
-    <!-- <data noupdate="1"> -->
-	<data>    
+    <data noupdate="1">
 <!-- purchase order email template -->
         <record id="OI_po_wait_approval" model="email.template">
             <field name="name">OI_po_wait_approval</field>
