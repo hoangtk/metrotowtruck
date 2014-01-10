@@ -157,7 +157,16 @@ class purchase_order(osv.osv):
                 taxes = fiscal_position.map_tax(cr, uid, supplier.property_account_position, taxes_ids)
                 taxes_id = (6, 0, taxes)
                 
-                line.update({'order_id':new_po_id,'name':product.partner_ref,'taxes_id':taxes_id})
+                line.update({'order_id':new_po_id,'taxes_id':taxes_id})
+                
+                #set the line description
+                name = product.name
+                if product.description_purchase:
+                    name += '\n' + product.description_purchase
+                if line.get('name'):
+                    name += '\n' + line.get('name')      
+                line.update({'name': name})    
+                       
                 #unit price
                 if not line.has_key('price_unit'):
                     price_unit = seller_price = pricelist_obj.price_get(cr, uid, [pricelist_id], product.id, line['product_qty'], False, {'uom': line['product_uom']})[pricelist_id]
@@ -372,7 +381,17 @@ class purchase_order_line(osv.osv):
         ('done', 'Done'),
         ('cancel', 'Cancelled')
     ]
-
+    def _calc_seller(self, cr, uid, ids, fields, arg, context=None):
+        result = {}
+        for product in self.browse(cr, uid, ids, context=context):
+            main_supplier = self._get_main_product_supplier(cr, uid, product, context=context)
+            result[product.id] = {
+                'seller_info_id': main_supplier and main_supplier.id or False,
+                'seller_delay': main_supplier.delay if main_supplier else 1,
+                'seller_qty': main_supplier and main_supplier.qty or 0.0,
+                'seller_id': main_supplier and main_supplier.name.id or False
+            }
+        return result
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -385,7 +404,22 @@ class purchase_order_line(osv.osv):
         'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
         'has_freight': fields.related('order_id','has_freight',string='Has Freight', type="boolean", readonly=True),
         'amount_freight': fields.related('order_id','amount_freight',string='Freight', type='float', readonly=True),
-        
+#        'prod_name_supplier': fields.char('Supplier Product Name', size=128, required=True),
+#        'product_code': fields.related('product_id', 'product_code',type='char', string='Supplier Product Code'),
+#        'delay' : fields.related('product_id', required=True),
+#        
+#        
+#        'seller_info_id': fields.function(_calc_seller, type='many2one', relation="product.supplierinfo", string="Supplier Info", multi="seller_info"),
+#        'seller_delay': fields.function(_calc_seller, type='integer', string='Supplier Lead Time', multi="seller_info", help="This is the average delay in days between the purchase order confirmation and the reception of goods for this product and for the default supplier. It is used by the scheduler to order requests based on reordering delays."),
+#        'seller_qty': fields.function(_calc_seller, type='float', string='Supplier Quantity', multi="seller_info", help="This is minimum quantity to purchase from Main Supplier."),
+#        'seller_id': fields.function(_calc_seller, type='many2one', relation="res.partner", string='Main Supplier', help="Main Supplier who has highest priority in Supplier List.", multi="seller_info"),
+#        
+#        'min_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date",
+#                 store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"), 
+#        'max_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_maximum_date, multi="min_max_date",
+#                 store=True, type='datetime', string='Max. Expected Date', select=2),     
+#                        
+                
     }  
     _order = "order_id desc"
     def _is_po_update(self,cr,uid,po,state,context=None):

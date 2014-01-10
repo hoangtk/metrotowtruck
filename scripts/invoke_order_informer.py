@@ -2,15 +2,22 @@
 import sys, getopt
 import xmlrpclib
     
-host = 'localhost'
+host = '10.1.4.14'
 port = '9069'
-dbname = 'metro_develop'
+dbname = 'metro_po141'
 username = 'erpadmin'
-pwd = 'develop'
+pwd = 'erp123'
+
+#host = '10.0.1.119'
+#port = '9069'
+##dbname = 'metro_production'
+#dbname = 'metro_uat'
+#username = 'erpadmin'
+#pwd = 'erp123-test'
         
-if dbname == 'metro_production':
-    print('Can not perform operation on this database')
-    sys.exit(0)
+#if dbname == 'metro_production':
+#    print('Can not perform operation on this database')
+#    sys.exit(0)
             
 try:
     sock_common = xmlrpclib.ServerProxy ('http://%s:%s/xmlrpc/common'%(host,port))
@@ -26,7 +33,6 @@ except Exception as e:
     
 def main():
     sock.execute(dbname, uid, pwd, 'order.informer', 'inform', 'purchase.order')
-
     # for the email template testing begin
 #    tmpl_ids = sock.execute(dbname, uid, pwd, 'email.template', 'search', [('name','=','Purchase Order - Waitting Approval')])
 #    vals = sock.execute(dbname, uid, pwd, 'email.template', 'generate_email',tmpl_ids[0],107)

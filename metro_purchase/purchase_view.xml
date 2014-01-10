@@ -17,8 +17,12 @@
                 </xpath>            
                  <xpath expr="//button[@name='action_cancel']" position="attributes" >
                  	<attribute name="states">approved,except_picking,except_invoice,rejected</attribute>
-                </xpath>
-                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
+                </xpath>             
+                <xpath expr="//button[@name='picking_ok']" position="replace" >
+                </xpath>             
+                <xpath expr="//button[@name='invoice_ok']" position="replace" >
+                </xpath>            
+                <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
                 </xpath>         
                  <xpath expr="//field[@name='payment_term_id']" position="replace" >
@@ -77,7 +81,7 @@
                 	<field name="notes" placeholder="Terms and conditions..."/>
                 	<label for="comments"/>
 					<field name="comments" placeholder="Comments..."/>                	             	
-                </field>
+                </field>            
        		</field>
         </record>  
           

@@ -134,7 +134,7 @@
             <field name="value"><![CDATA[
 <p/>
 <div>
-<a href="http://erp:8069http://erp:8069/?db=metro_production">Metro OpenERP System</a> &nbsp;&nbsp;
+<a href="http://erp:8069/?db=metro_production">Metro OpenERP System</a> &nbsp;&nbsp;
 Contact: <a href="mailto:ncoad@metrospv.com">Nicholas Coad</a> &nbsp;&nbsp;<a href="mailto:john.wang@metrospv.com">John Wang</a>
 </div>
 <div><a href="http://www.metrotowtrucks.com" target="_blank">http://www.metrotowtrucks.com</a></div>
