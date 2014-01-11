@@ -281,7 +281,14 @@ class stock_picking_out(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
-        return super(stock_picking_out,self).search(cr, user, new_args, offset, limit, order, context, count)  
+        return super(stock_picking_out,self).search(cr, user, new_args, offset, limit, order, context, count)
+    _columns = {   
+        'message_ids': fields.one2many('mail.message', 'res_id',
+            domain=lambda self: [('model', '=', 'stock.picking')],
+            auto_join=True,
+            string='Messages',
+            help="Messages and communication history"),                   
+    }            
     _order = 'name desc'      
 class stock_picking_in(osv.osv):
     _inherit = "stock.picking.in"
@@ -291,7 +298,12 @@ class stock_picking_in(osv.osv):
         'min_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date",
                  store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"), 
         'max_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_maximum_date, multi="min_max_date",
-                 store=True, type='datetime', string='Max. Expected Date', select=2),                       
+                 store=True, type='datetime', string='Max. Expected Date', select=2),
+        'message_ids': fields.one2many('mail.message', 'res_id',
+            domain=lambda self: [('model', '=', 'stock.picking')],
+            auto_join=True,
+            string='Messages',
+            help="Messages and communication history"),                          
     }     
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
