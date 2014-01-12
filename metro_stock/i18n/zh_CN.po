@@ -925,3 +925,8 @@ msgstr "系统找不到此产品"
 #: code:addons/metro_stock/wizard/stock_import_inventory.py:0
 msgid "Only the physical inventory orders with Draft or Cancelled state can be delete!"
 msgstr "只有草稿和取消的盘点单可以删除!"
+
+#. module: metro_stock
+#: field:stock.move,supplier_prod_name:0
+msgid "Supplier Product Name"
+msgstr "供应商产品名称"

@@ -936,3 +936,18 @@ msgstr "等待发票"
 #: field:purchase.order,comments:0
 msgid "Comments"
 msgstr "备注"
+
+#. module: metro_purchase
+#: field:purchase.order.line,supplier_prod_name:0
+msgid "Supplier Product Name"
+msgstr "供应商产品名称"
+
+#. module: metro_purchase
+#: field:purchase.order.line,supplier_prod_code:0
+msgid "Supplier Product Code"
+msgstr "供应商产品代码"
+
+#. module: metro_purchase
+#: field:purchase.order.line,supplier_delay:0
+msgid "Supplier Lead Time"
+msgstr "供应商送货周期"

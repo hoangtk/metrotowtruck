@@ -81,9 +81,35 @@
                 	<field name="notes" placeholder="Terms and conditions..."/>
                 	<label for="comments"/>
 					<field name="comments" placeholder="Comments..."/>                	             	
-                </field>            
+                </field>         
+                 <xpath expr="//tree/field[@name='name']" position="after" >
+                	<field name="supplier_prod_name"/>
+                </xpath>           
        		</field>
         </record>  
+          
+        <record id="metro_purchase_order_line_form" model="ir.ui.view">
+            <field name="name">metro.purchase.order.line.form</field>
+            <field name="model">purchase.order.line</field>
+            <field name="inherit_id" ref="purchase.purchase_order_line_form"/>
+            <field name="arch" type="xml">
+            	<notebook position="before">
+                     <group>
+	                     <group>
+	                         <field name="supplier_prod_id" readonly="0" invisible="1"/>
+	                         <field name="supplier_prod_name" readonly="0" />
+	                         <field name="supplier_prod_code" readonly="0" />
+	                     </group>   
+	                     <group>
+	                         <field name="supplier_delay" on_change = "onchange_lead('supplier_delay',supplier_delay,parent.date_order,context)" readonly="0" />
+	                     </group>	                              	
+                     </group>            	
+            	</notebook>
+            	<field name="date_planned" position="attributes">            	
+            		<attribute name="on_change">onchange_lead('date_planned',date_planned,parent.date_order,context)</attribute>
+            	</field>
+            </field>
+        </record>
           
         <record id="metro_purchase_order_tree" model="ir.ui.view">
             <field name="name">purchase.order.tree</field>
@@ -180,6 +206,7 @@
                     <field name="partner_id" string="Supplier" />
                     <field name="date_order" />
                     <field name="product_id"/>
+                    <field name="supplier_prod_name"/>
                     <field name="name"/>
                     <field name="date_planned"/>
 	                <field name="product_qty"/>
@@ -243,10 +270,22 @@
                         </group>
                  		<group>
                 			<field name="change_log" readonly="1"/>
-                		</group>                        
+                		</group>  
+                		             
+                        <group>
+	                    	 <group>
+		                         <field name="supplier_prod_id" readonly="0" invisible="1"/>
+		                         <field name="supplier_prod_name" readonly="0" />
+		                         <field name="supplier_prod_code" readonly="0" />
+		                     </group>   
+		                     <group>
+		                         <field name="supplier_delay" on_change = "onchange_lead('supplier_delay',supplier_delay,date_order,context)" readonly="0" />
+		                     </group>
+	                    </group>   
+	                     
                         <group>
                             <group>
-                                <field name="date_planned" widget="date"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
+                                <field name="date_planned" widget="date"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"  on_change = "onchange_lead('date_planned',date_planned,date_order,context)"/>
                                 <field name="account_analytic_id" colspan="2" groups="purchase.group_analytic_accounting"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
                                 <field name="company_id" groups="base.group_multi_company" widget="selection"  attrs="{'readonly': [('state','!=', 'draft'),('state','!=', 'rejected')]}"/>
                                 <field name="create_uid"/>

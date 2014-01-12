@@ -456,6 +456,7 @@
         </record>
         <menuitem action="action_inventory_move_tree" id="menu_inventory_move_tree" parent="stock.menu_stock_inventory_control" sequence="32"/>
 	-->
+<!-- add the messages to internal move -->	
         <record id="metro_view_picking_form" model="ir.ui.view">
             <field name="name">metro.stock.picking.form</field>
             <field name="model">stock.picking</field>
@@ -469,5 +470,61 @@
                 </xpath>
         	</field>        
 		</record>
+<!-- add the supplier product name -->		
+        <record id="metro_view_move_picking_tree" model="ir.ui.view">
+            <field name="name">metro.stock.move.tree</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_picking_tree"/>	
+            <field name="arch" type="xml">
+            	<field name="product_id" position="after">
+            		<field name="supplier_prod_name"/>
+            	</field>
+        	</field>        
+		</record>		
+		
+        <record id="metro_view_move_picking_form" model="ir.ui.view">
+            <field name="name">metro.stock.move.form</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_picking_form"/>	
+            <field name="arch" type="xml">
+            	<field name="product_id" position="after">
+            		<field name="supplier_prod_name"/>
+            	</field>
+            </field>
+        </record>		
+        
+        <record id="metro_view_move_tree_reception_picking" model="ir.ui.view">
+            <field name="name">metro.stock.move.tree2</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_tree_reception_picking"/>	
+            <field name="arch" type="xml">
+            	<field name="product_id" position="after">
+            		<field name="supplier_prod_name"/>
+            	</field>
+            </field>
+        </record>		
+                
+        <record id="metro_view_move_form" model="ir.ui.view">
+            <field name="name">metro.stock.move.form</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_form"/>	
+            <field name="arch" type="xml">
+            	<field name="product_id" position="after">
+            		<field name="supplier_prod_name"/>
+            	</field>
+            </field>
+        </record> 
+        
+        <record id="metro_view_move_search" model="ir.ui.view">
+            <field name="name">metro.stock.move.search</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_search"/>	
+            <field name="arch" type="xml">
+            	<field name="product_id" position="after">
+            		<field name="supplier_prod_name"/>
+            		<field name="origin"/>
+            	</field>
+            </field>
+        </record> 
     </data>
 </openerp>

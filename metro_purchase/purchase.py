@@ -23,7 +23,7 @@ from dateutil.relativedelta import relativedelta
 import time
 import datetime
 from openerp import netsvc
-
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP
 from openerp.osv import fields,osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
@@ -381,16 +381,27 @@ class purchase_order_line(osv.osv):
         ('done', 'Done'),
         ('cancel', 'Cancelled')
     ]
-    def _calc_seller(self, cr, uid, ids, fields, arg, context=None):
+        
+    def _get_supp_prod(self, cr, uid, ids, fields, arg, context=None):
         result = {}
-        for product in self.browse(cr, uid, ids, context=context):
-            main_supplier = self._get_main_product_supplier(cr, uid, product, context=context)
-            result[product.id] = {
-                'seller_info_id': main_supplier and main_supplier.id or False,
-                'seller_delay': main_supplier.delay if main_supplier else 1,
-                'seller_qty': main_supplier and main_supplier.qty or 0.0,
-                'seller_id': main_supplier and main_supplier.name.id or False
+        for line in self.browse(cr,uid,ids,context=context):
+            result[line.id] = {
+                'supplier_prod_id': False,  
+                'supplier_prod_name': '',
+                'supplier_prod_code': '',
+                'supplier_delay': 1,
             }
+            for seller_info in line.product_id.seller_ids:
+                if seller_info.name == line.partner_id:
+                    #found the product supplier info
+                    result[line.id].update({
+                        'supplier_prod_id': seller_info.id,                    
+                        'supplier_prod_name': seller_info.product_name,
+                        'supplier_prod_code': seller_info.product_code,
+                        'supplier_delay': seller_info.delay,
+                        
+                    })
+                    break
         return result
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
@@ -404,24 +415,15 @@ class purchase_order_line(osv.osv):
         'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
         'has_freight': fields.related('order_id','has_freight',string='Has Freight', type="boolean", readonly=True),
         'amount_freight': fields.related('order_id','amount_freight',string='Freight', type='float', readonly=True),
-#        'prod_name_supplier': fields.char('Supplier Product Name', size=128, required=True),
-#        'product_code': fields.related('product_id', 'product_code',type='char', string='Supplier Product Code'),
-#        'delay' : fields.related('product_id', required=True),
-#        
-#        
-#        'seller_info_id': fields.function(_calc_seller, type='many2one', relation="product.supplierinfo", string="Supplier Info", multi="seller_info"),
-#        'seller_delay': fields.function(_calc_seller, type='integer', string='Supplier Lead Time', multi="seller_info", help="This is the average delay in days between the purchase order confirmation and the reception of goods for this product and for the default supplier. It is used by the scheduler to order requests based on reordering delays."),
-#        'seller_qty': fields.function(_calc_seller, type='float', string='Supplier Quantity', multi="seller_info", help="This is minimum quantity to purchase from Main Supplier."),
-#        'seller_id': fields.function(_calc_seller, type='many2one', relation="res.partner", string='Main Supplier', help="Main Supplier who has highest priority in Supplier List.", multi="seller_info"),
-#        
-#        'min_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date",
-#                 store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"), 
-#        'max_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_maximum_date, multi="min_max_date",
-#                 store=True, type='datetime', string='Max. Expected Date', select=2),     
-#                        
-                
+        'supplier_prod_id': fields.function(_get_supp_prod, type='integer', string='Supplier Product ID', multi="seller_info"),
+        'supplier_prod_name': fields.function(_get_supp_prod, type='char', string='Supplier Product Name', required=True, multi="seller_info", store=True),
+        'supplier_prod_code': fields.function(_get_supp_prod, type='char', string='Supplier Product Code', multi="seller_info"),
+        'supplier_delay' : fields.function(_get_supp_prod, type='integer', string='Supplier Lead Time', multi="seller_info"),
     }  
     _order = "order_id desc"
+    _defaults = {
+        'supplier_delay': lambda *a: 1,
+    }    
     def _is_po_update(self,cr,uid,po,state,context=None):
         po_update = True
         for line in po.order_line:
@@ -465,7 +467,38 @@ class purchase_order_line(osv.osv):
         if is_po_update:
             self.pool.get("purchase.order").action_reject(cr,uid,[po.id],"All lines are rejected",context=context)
         return True     
-    
+    #write the product supplier information
+    def _update_prod_supplier(self,cr,uid,ids,vals,context=None):
+        if vals.has_key('supplier_prod_name') or vals.has_key('supplier_prod_code') or vals.has_key('supplier_delay'):
+            prod_supp_obj = self.pool.get('product.supplierinfo')
+            new_vals = {'min_qty':1}
+            if vals.has_key('supplier_prod_name'):
+                new_vals.update({'product_name':vals['supplier_prod_name']})
+            if vals.has_key('supplier_prod_code'):
+                new_vals.update({'product_code':vals['supplier_prod_code']})
+            if vals.has_key('supplier_delay'):
+                new_vals.update({'delay':vals['supplier_delay']})
+            #for the metro_currency module, set the currency
+            if ids:
+                #from order line update
+                for line in self.browse(cr,uid,ids,context=context):
+                    new_vals.update({'name':line.partner_id.id,'product_id':line.product_id.id,'currency':line.order_id.pricelist_id.currency_id.id})
+                    if line.supplier_prod_id:
+                        #update the prodcut supplier info
+                        prod_supp_obj.write(cr,uid,line.supplier_prod_id,new_vals,context=context)
+                    else:
+                        supplier_prod_id = prod_supp_obj.create(cr,uid,new_vals,context=context)     
+            else:
+                # from order line create
+                po = self.pool.get('purchase.order').browse(cr,uid,vals['order_id'])
+                new_vals.update({'name':po.partner_id.id,'product_id':vals['product_id'],'currency':po.pricelist_id.currency_id.id})
+                prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',new_vals['product_id']),('name','=',new_vals['name'])])
+                if prod_supp_ids and len(prod_supp_ids) > 0:
+                    #update the prodcut supplier info
+                    prod_supp_obj.write(cr,uid,prod_supp_ids[0],new_vals,context=context)
+                else:
+                    supplier_prod_id = prod_supp_obj.create(cr,uid,new_vals,context=context)     
+                
     def write(self, cr, uid, ids, vals, context=None):
         if not ids:
             return True
@@ -480,7 +513,14 @@ class purchase_order_line(osv.osv):
                 log_obj = self.pool.get('change.log.po.line')
                 log_vals = {'res_id':id,'filed_name':field_name,'value_old':value_old,'value_new':vals[field_name]}
                 log_obj.create(cr,uid,log_vals,context=context)
-        return resu;
+        #update product supplier info
+        self._update_prod_supplier(cr, uid, ids, vals, context)
+        return resu
+    def create(self, cr, user, vals, context=None):
+        resu = super(purchase_order_line,self).create(cr, user, vals, context=context)
+        #update product supplier info
+        self._update_prod_supplier(cr, user, [], vals, context)      
+        return resu  
     def unlink(self, cr, uid, ids, context=None):
         #only the draft,canceled can be deleted
         lines = self.browse(cr,uid,ids,context=context)
@@ -497,19 +537,43 @@ class purchase_order_line(osv.osv):
         """
         res = super(purchase_order_line,self).onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
                                 partner_id, date_order, fiscal_position_id, date_planned,name, price_unit, context)
-        if not product_id or context is None or res['value'].get('taxes_id') or not context.get('po_taxes_id')[0][2]: 
-            return res
+        if product_id and context is not None and not res['value'].get('taxes_id') and context.get('po_taxes_id')[0][2]: 
+            # - determine taxes_id when purchase_header has taxes_id and produt has not own taxes setting
+            account_fiscal_position = self.pool.get('account.fiscal.position')
+            account_tax = self.pool.get('account.tax')
+            taxes = account_tax.browse(cr, uid, context['po_taxes_id'][0][2])
+            fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
+            taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+            res['value'].update({'taxes_id': taxes_ids})
 
-        # - determine taxes_id when purchase_header has taxes_id and produt has not own taxes setting
-        account_fiscal_position = self.pool.get('account.fiscal.position')
-        account_tax = self.pool.get('account.tax')
-        taxes = account_tax.browse(cr, uid, context['po_taxes_id'][0][2])
-        fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
-        taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
-        res['value'].update({'taxes_id': taxes_ids})
-
+        # update the product supplier info
+        prod_supp_obj = self.pool.get('product.supplierinfo')
+        prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',product_id),('name','=',partner_id)])
+        if prod_supp_ids and len(prod_supp_ids) > 0:
+            prod_supp = prod_supp_obj.browse(cr,uid,prod_supp_ids[0],context=context)
+            res['value'].update({'supplier_prod_id': prod_supp.id,
+                                'supplier_prod_name': prod_supp.product_name,
+                                'supplier_prod_code': prod_supp.product_code,
+                                'supplier_delay' : prod_supp.delay})
+        else:
+            res['value'].update({'supplier_prod_id': False,
+                                'supplier_prod_name': '',
+                                'supplier_prod_code': '',
+                                'supplier_delay' : 1})
+            
         return res
 
+    def onchange_lead(self, cr, uid, ids, change_type, changes_value, date_order, context=None):
+        res = {'value':{}}
+        if change_type == 'date_planned':
+            supplier_delay = datetime.datetime.strptime(changes_value, DEFAULT_SERVER_DATE_FORMAT) - datetime.datetime.strptime(date_order, DEFAULT_SERVER_DATE_FORMAT)
+            res['value']={'supplier_delay':supplier_delay.days}
+        if change_type == 'supplier_delay':
+            date_planned = datetime.datetime.strptime(date_order, DEFAULT_SERVER_DATE_FORMAT) + relativedelta(days=changes_value)
+            date_planned = datetime.datetime.strftime(date_planned,DEFAULT_SERVER_DATE_FORMAT)
+            print res['value']
+            res['value'].update({'date_planned':date_planned})
+        return res
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)

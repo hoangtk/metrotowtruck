@@ -241,5 +241,19 @@
         <menuitem id="metro_menu_product_attribute_product" action="metro_action_product_attribute" name="Product Attribute" parent="stock.menu_product_in_config_stock"/>
         <menuitem id="metro_menu_product_attribute_category_metro" action="metro_action_product_attribute" name="Product Attribute Category" parent="metro_menu_product"/>
       <!--  <menuitem id="metro_menu_product_attribute_category_product" action="metro_action_product_attribute_category" name="Product Attribute Category" parent="stock.menu_product_in_config_stock"/>
--->	</data>
+-->	
+
+<!--  add supplier product name and code to the supplier product info tree list -->	
+        <record model="ir.ui.view" id="product_supplierinfo_tree_view">
+            <field name="name">product.supplierinfo.tree.view</field>
+            <field name="model">product.supplierinfo</field>
+            <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+            <field name="arch" type="xml">
+            	<field name="name" position="after">
+            		<field name="product_name"/>
+            		<field name="product_code"/>
+            	</field>
+            </field>		
+		</record>
+	</data>		
 </openerp>	
