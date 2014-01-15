@@ -122,7 +122,7 @@ msgid "Products"
 msgstr "产品"
 
 #. module: metro_purchase
-#: selection:pur.history.line,state:0 view:pur.req:0 selection:pur.req,state:0 selection:pur.req.line,state:0
+#: selection:pur.history.line,state:0 view:pur.req:0 selection:pur.req,state:0 selection:pur.req.line,order_state:0
 #: view:purchase.order:0 view:purchase.order.line:0
 msgid "Cancelled"
 msgstr "已取消"
@@ -167,7 +167,7 @@ msgid "Rejection reason"
 msgstr "拒绝原因"
 
 #. module: metro_purchase
-#: view:pur.req:0 selection:pur.req,state:0 selection:pur.req.line,state:0
+#: view:pur.req:0 selection:pur.req,state:0 selection:pur.req.line,order_state:0
 msgid "Confirmed"
 msgstr "已确认"
 
@@ -209,7 +209,7 @@ msgid "Expected"
 msgstr "预计日期"
 
 #. module: metro_purchase
-#: selection:pur.req,state:0 selection:pur.req.line,state:0
+#: selection:pur.req,state:0 selection:pur.req.line,order_state:0
 msgid "New"
 msgstr "草稿"
 
@@ -554,7 +554,7 @@ msgid "Employee"
 msgstr "员工"
 
 #. module: metro_purchase
-#: selection:pur.req,state:0 selection:pur.req.line,state:0
+#: selection:pur.req,state:0 selection:pur.req.line,order_state:0
 msgid "Purchase Done"
 msgstr "采购完毕"
 
@@ -659,7 +659,7 @@ msgid "Date Ordered"
 msgstr "下单日期"
 
 #. module: metro_purchase
-#: view:pur.req:0 selection:pur.req,state:0 selection:pur.req.line,state:0
+#: view:pur.req:0 selection:pur.req,state:0 selection:pur.req.line,order_state:0
 msgid "In Purchasing"
 msgstr "采购中"
 

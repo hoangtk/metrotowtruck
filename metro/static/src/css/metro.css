@@ -2,7 +2,10 @@
 {
   white-space: nowrap ; 
 }
-
+.openerp .oe_list_content > tbody > tr > td[data-field='order_state']
+{
+  white-space: nowrap ; 
+}
 .openerp .oe_record_thread{
     display: block;
     margin-left: 16px;
