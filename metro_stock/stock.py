@@ -212,7 +212,7 @@ class stock_move(osv.osv):
     _columns = {   
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], string='Shipping Type'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
-        'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True),
+        'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True,store=True),
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):

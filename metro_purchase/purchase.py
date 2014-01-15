@@ -416,7 +416,7 @@ class purchase_order_line(osv.osv):
         'has_freight': fields.related('order_id','has_freight',string='Has Freight', type="boolean", readonly=True),
         'amount_freight': fields.related('order_id','amount_freight',string='Freight', type='float', readonly=True),
         'supplier_prod_id': fields.function(_get_supp_prod, type='integer', string='Supplier Product ID', multi="seller_info"),
-        'supplier_prod_name': fields.function(_get_supp_prod, type='char', string='Supplier Product Name', required=True, multi="seller_info", store=True),
+        'supplier_prod_name': fields.function(_get_supp_prod, type='char', string='Supplier Product Name', required=True, multi="seller_info"),
         'supplier_prod_code': fields.function(_get_supp_prod, type='char', string='Supplier Product Code', multi="seller_info"),
         'supplier_delay' : fields.function(_get_supp_prod, type='integer', string='Supplier Lead Time', multi="seller_info"),
     }  

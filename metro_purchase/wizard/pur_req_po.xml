@@ -15,17 +15,22 @@
             <field name="model">pur.req.po</field>
             <field name="arch" type="xml">
                 <form string="Requisition lines" version="7.0">
-                    <label string="Select supplier and the prodcuts that you want to generate PO."/>
+                    <separator string="Select supplier and the prodcuts that you want to generate PO."/>
                     <group>
-                        <field name="partner_id" />
+                        <field name="partner_id" on_change="onchange_partner(partner_id,line_ids,context)"/>
                         <field name="line_ids">
                             <tree string="Products" editable="bottom">
 		                        <field name="product_id"/>
 		                        <field name="product_qty"/>
 		                        <field name="product_uom_id"/>
 		                        <field name="price_unit"/>
-		                        <field name="date_required"/>
+		                        <field name="date_required" on_change = "onchange_lead('date_required',date_required,context)"/>
+		                        <field name="req_reason"/>
 		                        <field name="inv_qty"/>
+		                        <field name="supplier_prod_id" invisible="1"/>
+		                        <field name="supplier_prod_name"/>
+		                        <field name="supplier_prod_code"/>
+		                        <field name="supplier_delay" on_change = "onchange_lead('supplier_delay',supplier_delay,context)"/>
                             </tree>
                         </field>          
                     </group>
