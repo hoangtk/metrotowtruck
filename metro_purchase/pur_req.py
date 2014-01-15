@@ -186,10 +186,16 @@ class pur_req_line(osv.osv):
         'req_emp_id': fields.many2one('hr.employee','Employee'),
         'req_reason': fields.char('Reason and use',size=64),
         'company_id': fields.related('req_id','company_id',type='many2one',relation='res.company',String='Company',store=True,readonly=True),
-        'po_lines_ids' : fields.one2many('purchase.order.line','req_line_id','Purchase Order Lines'),
+        'po_lines_ids' : fields.one2many('purchase.order.line','req_line_id','Purchase Order Lines',readonly=True),
         'generated_po': fields.function(_po_info, multi='po_info', string='PO Generated', type='boolean', help="It indicates that this products has PO generated"),
-        'po_info': fields.function(_po_info, multi='po_info',type='float',string='PO Quantity'),   
-        'req_ticket_no': fields.char('Requisition Ticket#', size=10)
+        'po_info': fields.function(_po_info, multi='po_info',type='float',string='PO Quantity',readonly=True),   
+        'req_ticket_no': fields.char('Requisition Ticket#', size=10),
+        'order_warehouse_id': fields.related('req_id','warehouse_id',type='many2one',relation='stock.warehouse',string='Warehouse',readonly=True),
+        'order_user_id': fields.related('req_id','user_id',type='many2one',relation='res.users',string='Requester',readonly=True),
+        'order_date_request': fields.related('req_id','date_request',type='datetime',string='Requisition Date',readonly=True),
+        'order_state': fields.related('req_id', 'state', type='selection',string='Status',readonly=True,
+                                      selection=[('draft','New'),('confirmed','Confirmed'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
+                
     }
     
     
