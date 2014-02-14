@@ -18,7 +18,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import base
-import product
-import hr
-import sale
+from openerp.osv import fields, osv
+
+
+class sale_order(osv.osv):
+    _inherit = "sale.order"
+    _columns = {
+        'attachment_lines': fields.one2many('ir.attachment', 'sale_order_id',
+                                            'Attachment'),
+    }
+sale_order()

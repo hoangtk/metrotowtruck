@@ -35,6 +35,7 @@
         'base/ir_attachment_view.xml',
         'product/product_view.xml',
         'hr/hr_view.xml',
+        'sale/sale_view.xml',
     ],
     'installable': True,
     'active': False,

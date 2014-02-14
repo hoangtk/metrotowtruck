@@ -34,6 +34,7 @@ class ir_attachment(osv.osv):
     _columns = {
         'product_id': fields.many2one('product.product', 'Product'),
         'employee_id': fields.many2one('hr.employee', 'Employee'),
+        'sale_order_id': fields.many2one('sale.order', 'Sale Order'),
         'attach_type_id': fields.many2one('ir.attachment.type',
                                           'Attachment Type'),
     }
@@ -60,6 +61,10 @@ class ir_attachment(osv.osv):
         if vals.get('employee_id'):
             vals['res_id'] = vals['employee_id']
             vals['res_model'] = 'hr.employee'
+        if vals.get('sale_order_id'):
+            vals['res_id'] = vals['sale_order_id']
+            vals['res_model'] = 'sale.order'            
+            
         return super(ir_attachment, self).create(cr, uid, vals, context)
 
 ir_attachment()

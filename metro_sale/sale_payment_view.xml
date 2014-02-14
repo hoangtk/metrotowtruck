@@ -25,11 +25,6 @@
 				<xpath expr="//field[@name='pricelist_id']" position="after">
 					<!-- <field name="state" readonly="0"/> -->
 				</xpath>
-				<!-- add the attachments page -->
-                <page name="automation_information" position="before">
-                    <page name="attachments" string="Attachments">
-                    </page>
-                </page>
                 <!-- replace the  automation_information tab-->
                 <page name="automation_information" position="replace">
                     <page name="sale_payments" string="Payments">
