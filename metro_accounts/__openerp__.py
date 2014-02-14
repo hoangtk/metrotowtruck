@@ -11,7 +11,7 @@
     'website': 'PY Solutions',
     'images': [],
     'depends': [
-        'account','purchase',
+        'account','purchase','account_voucher'
     ],
     'data':[
        "account_invoice_metro.xml",
