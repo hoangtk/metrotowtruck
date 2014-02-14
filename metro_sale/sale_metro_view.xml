@@ -1,7 +1,7 @@
 <openerp>
     <data>
     
-<!--        <record id="sales_orders_view_form" model="ir.ui.view">
+       <record id="sales_orders_view_form" model="ir.ui.view">
         <field name="name">sales.orders.view.form</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
@@ -10,7 +10,7 @@
                 <field name="checkbox"/>
             </field>
          </field>
-       </record> -->  
+       </record>  
        
         <record id="invoice_view_form" model="ir.ui.view">
         <field name="name">invoice.view.form</field>

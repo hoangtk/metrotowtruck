@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#    Copyright (C) 2010 OpenERP s.a. (<http://openerp.com>).
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,34 +18,29 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro Sale',
-    'version': '1.0',
-    'category': 'Metro',
-    'description': """
-    
-        Metro Sale Extension:  
-        
-        1.Add Sales Payment function
-        
-        (Ported to OpenERP v 7.0 by Metro Tower Trucks.
-        
-        """,
-        
-        
-    'author': 'Metro Tower Trucks',
-    'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "sale", "sale_stock", "sale_quick_payment"],
-    'data': [
-        'sale_metro_view.xml',
-        'sale_payment_view.xml',
-        'sale_workflow.xml',
-        'sale_report.xml',
-    ],
-    'test': [],
-    'demo': [],
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-}
+
+import time
+
+from openerp.report import report_sxw
+
+class sale_agreement(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context=None):
+        super(sale_agreement, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time, 
+            'show_discount':self._show_discount,
+        })
+
+    def _show_discount(self, uid, context=None):
+        cr = self.cr
+        try: 
+            group_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'group_discount_per_so_line')[1]
+        except:
+            return False
+        return group_id in [x.id for x in self.pool.get('res.users').browse(cr, uid, uid, context=context).groups_id]
+            
+
+report_sxw.report_sxw('report.sale.agreement', 'sale.order', 'addons/metro_sale/report/sale_agreement.rml', parser=sale_agreement, header="external")
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+

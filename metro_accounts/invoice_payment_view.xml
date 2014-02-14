@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record id="invoice_payment_form" model="ir.ui.view">
+            <field name="name">invoice.payment.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+            	<field name="payment_ids" position="after">
+                    <group name="sale_payments" string="Sale Advance Payments" colspan="4">
+                        <field name="sale_payment_ids" nolabel="1">
+                            <tree string="Payment">
+                                <field name="name"/>
+                                <field name="journal_id" string="Payment Method"/>
+                                <field name="credit" string="Paid Amount"/>
+                                <field name="date" string="Date"/>
+                                <field name="amount_residual"/>
+                                <field name="reconcile_id"/>
+                                <field name="reconcile_partial_id"/>
+                            </tree>
+                        </field>
+                    </group>
+            	</field>
+<!--             	<xpath expr="//button[@name='invoice_pay_customer'][2]" position="after">
+            		<button name="reconcile_sale_payment" string="Reconcile Advance Payments" type="object"
+            		attrs="{'invisible': [('state','!=','open')]}" groups="base.group_user"/>/>
+            	</xpath> -->
+            </field>
+        </record>       
+    </data>
+</openerp>

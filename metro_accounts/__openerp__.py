@@ -17,6 +17,7 @@
        "account_invoice_metro.xml",
        "account_voucher_view.xml",
        "account_invoice_view.xml",
+       "invoice_payment_view.xml",
         ],
     'demo': [],
     'test': [],

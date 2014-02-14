@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#    Copyright (C) 2010 OpenERP s.a. (<http://openerp.com>).
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,34 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro Sale',
-    'version': '1.0',
-    'category': 'Metro',
-    'description': """
-    
-        Metro Sale Extension:  
-        
-        1.Add Sales Payment function
-        
-        (Ported to OpenERP v 7.0 by Metro Tower Trucks.
-        
-        """,
-        
-        
-    'author': 'Metro Tower Trucks',
-    'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "sale", "sale_stock", "sale_quick_payment"],
-    'data': [
-        'sale_metro_view.xml',
-        'sale_payment_view.xml',
-        'sale_workflow.xml',
-        'sale_report.xml',
-    ],
-    'test': [],
-    'demo': [],
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-}
+
+import sale_agreement
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

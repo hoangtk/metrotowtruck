@@ -19,6 +19,9 @@
 					<attribute name="string">Apply Payments</attribute>
 					<attribute name="states">agreed</attribute>
 				</xpath>
+				<xpath expr="//button[@string='Apply Payments']" position="after">
+					<button name="print_agreement" string="Print Agreement" type="object" states="agreed" groups="base.group_user"/>
+				</xpath>
 				<xpath expr="//field[@name='pricelist_id']" position="after">
 					<!-- <field name="state" readonly="0"/> -->
 				</xpath>
@@ -30,21 +33,17 @@
                 <!-- replace the  automation_information tab-->
                 <page name="automation_information" position="replace">
                     <page name="sale_payments" string="Payments">
-                         <!--<group name="payment_information" colspan="4">
-                            <field name="payment_method_id"
-                              on_change="onchange_payment_method_id(payment_method_id)"/>
-                        </group> -->
 	                    <group name="payments" colspan="4">
-	                        <field name="payment_ids" nolabel="1" readonly="1">
-	                            <tree string="Payment">
+	                        <field name="payment_moves" nolabel="1" widget="one2many_list">
+	                            <tree string="Payment Moves" create="false" edit="false" delete="true">
 	                                <field name="name"/>
 	                                <field name="journal_id" string="Payment Method"/>
-	                                <field name="credit" string="Paid Amount"/>
+	                                <field name="amount" string="Paid Amount"/>
 	                                <field name="date" string="Date"/>
-	                                <!-- <field name="partner_id"/> -->
-	                                <!-- <field name="debit"/> -->
+	                                <!-- this field is required since the above fields defined the 'states' in the account_move field definition  -->
+	                                <field name="state"/>
 	                            </tree>
-	                        </field>
+	                        </field> 	                                      
 	                    </group>                        
                     </page>
                 </page>
@@ -63,7 +62,7 @@
                 </button>
 				<!-- remove the exception list in sale_exceptions.view_order_form -->
 				<xpath expr="//group[@name='exception']" position="replace">
-				</xpath>	
+				</xpath>					
 			</field>
 		</record>  
 		<!-- remove the useless fields and add the payment data to sale order tree from sale_payment_method-->
