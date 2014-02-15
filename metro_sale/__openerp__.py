@@ -36,7 +36,7 @@
         
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "sale", "sale_stock", "sale_quick_payment"],
+    'depends': ["metro", "sale", "sale_stock", "sale_quick_payment", "sale_exceptions"],
     'data': [
         'sale_metro_view.xml',
         'sale_payment_view.xml',

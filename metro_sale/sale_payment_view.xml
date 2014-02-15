@@ -56,14 +56,30 @@
 				<!-- remove the  button 'View Automatic Payment' from sale_payment_method-->
                 <button name="action_view_payments" position="replace">
                 </button>
-				<!-- remove the exception list in sale_exceptions.view_order_form -->
-				<xpath expr="//group[@name='exception']" position="replace">
-				</xpath>
                 <button name="button_dummy" position="attributes">
                 	<attribute name='states'>draft,sent,agreed</attribute>
                 </button>				
 			</field>
 		</record>  
+        <record id="metro_view_order_form_exception" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_exceptions.view_order_form"/>
+            <field name="arch" type="xml">
+				<!-- remove the exception list in sale_exceptions.view_order_form -->
+				<xpath expr="//group[@name='exception']" position="replace">
+				</xpath>				
+			</field>
+		</record>
+        <record id="metro_view_order_tree_exception" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_exceptions.view_order_tree"/>
+            <field name="arch" type="xml">
+            	<field name="main_exception_id" position="replace">
+            	</field>
+            </field>
+        </record>		
 		<!-- remove the useless fields and add the payment data to sale order tree from sale_payment_method-->
         <record id="metro_view_order_tree" model="ir.ui.view">
             <field name="name">sale.order.tree</field>
@@ -71,8 +87,6 @@
             <field name="inherit_id" ref="sale_payment_method.sale_order_view_tree"/>
             <field name="arch" type="xml">
             	<field name="payment_method_id" position="replace">
-            	</field>
-            	<field name="main_exception_id" position="replace">
             	</field>
                 <field name="state" position="before">
                     <field name="amount_paid" string="Total Paid"/>
