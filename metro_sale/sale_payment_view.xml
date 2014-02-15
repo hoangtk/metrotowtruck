@@ -4,13 +4,14 @@
 			<field name="name">metro.sales.orders.view.form</field>
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale_quick_payment.sale_order_view_form" />
-			<field name="arch" type="xml">
-				<xpath expr="//button[@name='action_button_confirm'][1]" position="replace">
+			<field name="arch" type="xml">				
+<!-- 				<xpath expr="//field[@name='state']" position="attributes">
+					<attribute name="statusbar_visible">draft,done</attribute>
+				</xpath> -->
+				<xpath expr="//button[@name='action_button_confirm'][1]" position="before">
 	                <button name="order_agree" states="draft" string="Sales Agreement" groups="base.group_user"/>
 	                <button name="order_agree" states="sent" string="Sales Agreement" class="oe_highlight" groups="base.group_user"/>
 	                <button name="action_button_confirm" states="agreed" string="Confirm Sale" class="oe_highlight" type="object" groups="base.group_user"/>					
-				</xpath>
-				<xpath expr="//button[@name='action_button_confirm'][2]" position="replace">
 				</xpath>
 				<xpath expr="//button[@name='cancel']" position="after">
 					<button name="cancel_agree" states="agreed" string="Cancel Agreement" groups="base.group_user"/>
@@ -57,7 +58,10 @@
                 </button>
 				<!-- remove the exception list in sale_exceptions.view_order_form -->
 				<xpath expr="//group[@name='exception']" position="replace">
-				</xpath>					
+				</xpath>
+                <button name="button_dummy" position="attributes">
+                	<attribute name='states'>draft,sent,agreed</attribute>
+                </button>				
 			</field>
 		</record>  
 		<!-- remove the useless fields and add the payment data to sale order tree from sale_payment_method-->
@@ -96,7 +100,6 @@
 			<field name="inherit_id" ref="sale_quick_payment.pay_sale_order_view" />
             <field name="arch" type="xml">
             	<field name="description" position="attributes">
-            		<attribute name="string">Name</attribute>
             		<attribute name="required">1</attribute>
             	</field>
             	<field name="journal_id" position="attributes">
@@ -107,6 +110,13 @@
             	<field name="date" position="attributes">
             		<attribute name="widget">date</attribute>
             	</field>
+				<xpath expr="//footer" position="replace">
+                    <footer>
+                        <button string="Pay" name="pay_sale_order" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+				</xpath>                    
             </field>
         </record>
         	

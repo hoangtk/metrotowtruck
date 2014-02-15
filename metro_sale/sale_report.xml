@@ -2,7 +2,10 @@
 <openerp>
     <data>
         <report auto="False" id="report_sale_agreement" model="sale.order" name="sale.agreement"
-                rml="metro_sale/report/sale_agreement.rml" string="Agreement"
-                usage="default"/>
+               rml="metro_sale/report/sale_agreement.rml" string="Sales Agreement"/>
+               
+		<record id="report_sale_agreement" model="ir.actions.report.xml">
+			<field name="download_filename">SalesOrder</field>
+		</record>
     </data>
 </openerp>

@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from osv import fields,osv
+from osv import fields,osv,orm
 
 class sale_order(osv.osv):
     _inherit="sale.order"    
@@ -92,3 +92,29 @@ class account_move(osv.osv):
         #execute the delete action
         result = super(account_move, self).unlink(cr, uid, ids, context=context)
         return result
+    
+class pay_sale_order(orm.TransientModel):
+    _inherit = 'pay.sale.order'       
+    _columns = {
+        'amount_max': fields.float('Max Amount'),
+    }
+    def _get_amount(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        if context.get('active_id'):
+            sale_obj = self.pool.get('sale.order')
+            order = sale_obj.browse(cr, uid, context['active_id'],
+                                    context=context)
+            return order.residual
+        return False    
+    _defaults = {
+        'amount': 0,
+        'amount_max':_get_amount,
+    }    
+    def _check_amount(self, cr, uid, ids, context=None):
+        for pay in self.browse(cr, uid, ids, context=context):
+            if pay.amount <= 0 or pay.amount > pay.amount_max:
+                return False
+        return True
+    _constraints = [(_check_amount, 'Pay amount only can be between zero and the balance.', ['amount'])]
+        

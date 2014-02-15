@@ -8,6 +8,7 @@ class SaleOrder(osv.osv):
     _columns={
         'checkbox':fields.boolean("Include Payment Information"),
     }
+    _defaults={'checkbox':True}
 SaleOrder()
 
 

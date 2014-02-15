@@ -48,14 +48,32 @@ def metro_rpt_index(self, req, action, token):
     report_mimetype = self.TYPES_MAPPING.get(
         report_struct['format'], 'octet-stream')
     file_name = action.get('name', 'report')
+    ''' comment by john 02/15/2014, to use new logic to get the file name
     if 'name' not in action:
         reports = req.session.model('ir.actions.report.xml')
         res_id = reports.search([('report_name', '=', action['report_name']),],
                                 0, False, False, context)
         if len(res_id) > 0:
+            #changed by johnw @02/15/2014, use the 'download_filename' field
             file_name = reports.read(res_id[0], ['name'], context)['name']
         else:
             file_name = action['report_name']
+    '''     
+    #new logic to get file name from ir_act_report_xml.download_filename
+    #begin
+    reports = req.session.model('ir.actions.report.xml')
+    res_id = reports.search([('report_name', '=', action['report_name']),],
+                            0, False, False, context)
+    if len(res_id) > 0:
+        names = reports.read(res_id[0], ['name','download_filename'], context)
+        if names['download_filename']:
+            file_name = names['download_filename']
+        else:
+            file_name = names['name']
+    else:
+        file_name = action['report_name']
+    #end
+                          
     #add the object name to the file name, by johnw, 2013/12/29
     try:
         #only print the name when print one record
@@ -63,7 +81,7 @@ def metro_rpt_index(self, req, action, token):
             model_obj = req.session.model(context['active_model'])
             model_rec_name = model_obj.name_get(context['active_ids'],context)[0][1]            
             if model_rec_name:
-                file_name = '%s-%s' % (file_name, model_rec_name)
+                file_name = '%s_%s' % (file_name, model_rec_name)
     except Exception:
         pass
     
@@ -76,4 +94,12 @@ def metro_rpt_index(self, req, action, token):
              ('Content-Length', len(report))],
          cookies={'fileToken': token})
         
-WebReports.index = metro_rpt_index        
+WebReports.index = metro_rpt_index
+
+from osv import fields,osv,orm    
+class ir_action_report_xml(osv.osv):
+    _name="ir.actions.report.xml"
+    _inherit ="ir.actions.report.xml"
+    _columns={
+        'download_filename' : fields.char('Download File Name',size=64),
+    }

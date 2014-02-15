@@ -9,12 +9,12 @@
             <field name="action">write({'state':'agreed'})</field>
         </record>
         <!-- Transistion -->
-        <record id="sale.trans_draft_router" model="workflow.transition">
+        <record id="sale.trans_draft_agree" model="workflow.transition">
             <field name="act_from" ref="sale.act_draft"/>
             <field name="act_to" ref="act_agree"/>
             <field name="signal">order_agree</field>
         </record>
-        <record id="sale.trans_sent_router" model="workflow.transition">
+        <record id="sale.trans_sent_agree" model="workflow.transition">
             <field name="act_from" ref="sale.act_sent"/>
             <field name="act_to" ref="act_agree"/>
             <field name="signal">order_agree</field>
