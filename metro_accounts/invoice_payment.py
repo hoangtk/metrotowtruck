@@ -26,9 +26,10 @@ class account_invoice(osv.osv):
         #auto reconcile the invoices
         reconcile_ids = []
         for inv in self.browse(cr,uid,ids,context):
-            if inv.auto_reconcile_sale_pay:
+            if inv.journal_id.type == 'sale' and inv.auto_reconcile_sale_pay:
                 reconcile_ids.append(inv.id)
-        self.reconcile_sale_payment(cr, uid, reconcile_ids, context)
+        if len(reconcile_ids) > 0:
+            self.reconcile_sale_payment(cr, uid, reconcile_ids, context)
         return res    
     
     def reconcile_sale_payment(self, cr, uid, ids, context=None):
@@ -47,7 +48,7 @@ class account_invoice(osv.osv):
                         inv_reconciled = True
                     rec_ids.append(mv_ln.id)
                     break
-            if inv_reconciled:
+            if inv_reconciled or len(rec_ids) == 0:
                 continue
             #add the advance sale payment move lines
             for pay in inv.sale_payment_ids:

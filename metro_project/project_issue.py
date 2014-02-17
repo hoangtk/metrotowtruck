@@ -29,7 +29,10 @@ class project_issue(base_stage, osv.osv):
         'create_by': fields.many2one('res.users', 'Created By'),
         'database':fields.selection([('metro_prod', 'Metro Production'),('metro_uat', 'Metro UAT'),],'Database'),
         'database_test':fields.selection([('metro_prod', 'Metro Production'),('metro_uat', 'Metro UAT'),],'Testing Database'),
-        'type':fields.selection([('defect', 'Defect'),('change_request', 'Change Request'),('feature_request', 'Feature Request'),],'Type')
+        'type':fields.selection([('defect', 'Defect'),('change_request', 'Change Request'),('feature_request', 'Feature Request'),],'Type'),
+        'multi_images': fields.text("Multi Images"),
+        'attachment_lines': fields.one2many('ir.attachment', 'project_issue_id',
+                                            'Attachment'),        
     }
     _defaults = {
         'database': 'metro_prod',
