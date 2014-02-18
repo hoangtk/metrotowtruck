@@ -70,20 +70,16 @@
             <field name="model">hr.employee.holidaycalendar</field>
             <field name="arch" type="xml">
                 <form string="Create a New Holiday">
-                    <group colspan="1">
-                        <field name="name"/>
-                    </group>
-                    <group>
-                        <field name="date_start" />
-                        <field name="date_stop" />
-                        <field name="holidaytype" colspan="2" />
-                    </group>
+                    <field name="name"/>
+                    <field name="holidaytype"/>
+                    <field name="date_start" />
+                    <field name="date_stop" />
                 </form>
             </field>
         </record>
         
         <record model="ir.actions.act_window" id="metro_holiday_calendar_action">
-            <field name="name">Metro Holiday Calendar</field>
+            <field name="name">Factory Holidays</field>
             <field name="res_model">hr.employee.holidaycalendar</field>
             <field name="view_type">form</field>
             <field name="view_mode">calendar,tree,form</field>
@@ -91,8 +87,7 @@
         </record>
         
         <menuitem id="menu_metro_holiday_calendar_main_action"  name="Calendars" parent="metro.mttl_metro" sequence="1" />
-        <menuitem id="menu_metro_holiday_calendar_action" name="Factory Holidays" parent="menu_metro_holiday_calendar_main_action" action="metro_holiday_calendar_action"/>   
-        <menuitem id="menu_metro_hr_holiday_calendar_action" name="Factory Holidays" parent="hr.menu_hr_main" action="metro_holiday_calendar_action"/>   
-        
+        <menuitem id="menu_metro_holiday_calendar_action" parent="menu_metro_holiday_calendar_main_action" action="metro_holiday_calendar_action" sequence="1"/>   
+        <menuitem id="menu_metro_hr_holiday_calendar_action" parent="hr.menu_hr_main" action="metro_holiday_calendar_action"/>
 	</data>
 </openerp>	

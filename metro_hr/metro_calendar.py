@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#    Copyright (C) 2010 OpenERP s.a. (<http://openerp.com>).
+#    Copyright (C) 2004-TODAY OpenERP S.A. <http://www.openerp.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,32 +18,21 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro HR',
-    'version': '1.0',
-    'category': 'Metro',
-    'description': """
-    
-        Metro HR Extension:  
-        
-        """,
-        
-        
-    'author': 'PureThrottle Inc.',
-    'maintainer': 'PureThrottle Inc.',
-    'website': 'http://www.purethrottle.com/',
-    'depends': ["metro", "hr"],
-    'init_xml': [],
-    'update_xml': [
-        'security/ir.model.access.csv',
-        'hr_view.xml',
-        'metro_calendar_view.xml',
-    ],
-    'demo_xml': [],
-    'test': [],
-    'installable': True,
-    'auto_install': False,
-    'active': False,
-	'sequence': 150,
-}
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+from osv import fields, osv
+
+class exhibit_calendar(osv.osv):
+    _name = "exhibit.calendar"
+    _description = "Exhibition Calendar"
+    _columns  = {
+        'name': fields.char('Exhibition Name', size=512, required=True),
+        'date_start':fields.date('Start date', required=True),
+        'date_stop':fields.date('Stop date', required=False),
+        'exhibit_type_id': fields.many2one('exhibit.type','Exhibition Type'),
+        }
+class exhibit_type(osv.osv):
+    _name = "exhibit.type"
+    _description = "Exhibition Type"
+    _columns = {
+        'name': fields.char('Name', size=256),
+    }
