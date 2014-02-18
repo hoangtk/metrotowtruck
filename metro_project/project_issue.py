@@ -39,3 +39,23 @@ class project_issue(base_stage, osv.osv):
         'database_test': 'metro_uat',
         'create_by': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
     }
+    def message_post(self, cr, uid, thread_id, body='', subject=None, type='notification',
+                        subtype=None, parent_id=False, attachments=None, context=None,
+                        content_subtype='html', **kwargs):
+        """ 
+            Add the the assigned and creator to the receipts
+        """
+        
+        if isinstance(thread_id, (list, tuple)):
+            thread_id = thread_id[0]
+        if thread_id:
+            user_ids = kwargs['partner_ids'] if kwargs.get('partner_ids') else []
+            issue = self.browse(cr,uid,thread_id,context)
+            if issue.user_id:
+                user_ids.append(issue.user_id.partner_id.id)
+            if issue.create_by:
+                user_ids.append(issue.create_by.partner_id.id)
+            kwargs['partner_ids'] = user_ids
+        return super(project_issue, self).message_post(cr, uid, thread_id, body, subject, type,
+                        subtype, parent_id, attachments, context,
+                        content_subtype, **kwargs)    
