@@ -126,18 +126,24 @@
 		    <field name="name">req.line.req.tree</field>
 		    <field name="model">material.request.line</field>
 		    <field name="arch" type="xml">	
-                <tree string="Stock Moves">
-                    <field name="product_id"/>
-                    <field name="product_qty" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)"/>
+                <tree string="Stock Moves" editable="bottom">
+	                <field name="name" invisible="1"/>
+                    <field name="product_id" on_change="onchange_product_id(product_id,location_id,location_dest_id)"/>
+                    <field name="product_qty"/>
                     <field name="product_uom" string="Unit of Measure" groups="product.group_uom"/>
+                    <field name="product_uos_qty"  invisible="1"/>
+                    <field name="product_uos"  invisible="1"/>     
+					<field name="price_unit"/> 
+					<field name="price_subtotal"/>
+					<field name="price_currency_id" invisible="1"/>	                                       
 		            <field name="mr_emp_id"/>
 		            <field name="mr_sale_prod_id"/>
 		            <field name="mr_notes"/>
-                    <field name="location_id" groups="stock.group_locations"/>
+                    <field name="location_id" groups="stock.group_locations" invisible="1"/>
                     <field name="location_dest_id" groups="stock.group_locations"  invisible="1"/>
-                    <field name="create_uid"/>
-                    <field name="create_date"/>
-                    <field name="state"/>
+                    <field name="create_uid" invisible="1"/>
+                    <field name="create_date" invisible="1"/>
+                    <field name="state"/>        
                </tree>
 		    </field>
 		</record>
@@ -167,6 +173,8 @@
 	                        </div>
 	                        <field name="product_uos_qty" invisible="1" on_change="onchange_uos_quantity(product_id, product_uos_qty, product_uos, product_uom)" class="oe_inline"/>
 	                        <field name="product_uos" invisible="1" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)" class="oe_inline"/>
+							<field name="price_unit"/>
+							<field name="price_currency_id" invisible="1"/>
 							<field name="mr_emp_id"/>
 							<field name="mr_sale_prod_id"/>                       
 	                    </group>
@@ -194,6 +202,9 @@
                     <field name="product_id" on_change="onchange_product_id(product_id,location_id,location_dest_id, False)"/>
                     <field name="product_qty" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)"/>
                     <field name="product_uom" string="Unit of Measure" groups="product.group_uom"/>
+					<field name="price_unit"/> 
+					<field name="price_subtotal"/>
+					<field name="price_currency_id" invisible="1"/>	 
                     <field name="mr_emp_id"/>
                     <field name="mr_sale_prod_id"/>
                     <field name="mr_notes"/>
@@ -225,6 +236,8 @@
 	                        </div>
 	                        <field name="product_uos_qty" invisible="1" on_change="onchange_uos_quantity(product_id, product_uos_qty, product_uos, product_uom)" class="oe_inline"/>
 	                        <field name="product_uos" invisible="1" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)" class="oe_inline"/>
+							<field name="price_unit"/>
+							<field name="price_currency_id" invisible="1"/>	                        
 							<field name="mr_emp_id"/>
 							<field name="mr_sale_prod_id"/>                       
 	                    </group>
@@ -262,8 +275,9 @@
                     <separator/>
                     <filter icon="terp-go-today" string="Today" domain="[('date','&lt;=',time.strftime('%%Y-%%m-%%d 23:59:59')),('date','&gt;=',time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Orders processed Today or planned for Today"/>
                     <field name="product_id"/>
-                    <field name="mr_dept_id" string="Department"  filter_domain="[('picking_id.mr_dept_id','ilike',self)]"/>
-                    <field name="mr_emp_id" string="Employee"  filter_domain="[('mr_emp_id','ilike',self)]"/>
+                    <field name="mr_dept_id"/>
+                    <field name="mr_emp_id"  filter_domain="[('mr_emp_id','ilike',self)]"/>
+                    <field name="mr_sale_prod_id"/>
                     <group expand="0" string="Group By...">
                         <filter string="Department" name="by_dept" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'mr_dept_id'}"/>
                         <filter string="Employee" name="by_emp" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'mr_emp_id'}"/>                        

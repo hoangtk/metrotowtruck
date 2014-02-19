@@ -930,3 +930,8 @@ msgstr "只有草稿和取消的盘点单可以删除!"
 #: field:stock.move,supplier_prod_name:0
 msgid "Supplier Product Name"
 msgstr "供应商产品名称"
+
+#. module: metro_stock
+#: field:material.request.line,price_subtotal:0
+msgid "Subtotal"
+msgstr "小计"

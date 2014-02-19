@@ -102,21 +102,27 @@ class material_request(osv.osv):
 #    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
 #        resu = super(material_return,self).fields_view_get(cr, user, view_id, view_type, context, toolbar, submenu)
 #        return resu            
-        
+                
 class material_request_line(osv.osv):
     _name = "material.request.line"
     _inherit = "stock.move"
     _table = "stock_move"
     _description = "Material Request Line"
+    def _amount_line(self, cr, uid, ids, prop, arg, context=None):
+        res = {}
+        for line in self.browse(cr, uid, ids, context=context):
+            res[line.id] = line.product_qty * line.price_unit
+        return res    
     _columns = {
         'picking_id': fields.many2one('material.request', 'MR#', select=True,states={'done': [('readonly', True)]}),
         'mr_emp_id': fields.many2one('hr.employee','Employee'),
-        'mr_sale_prod_id': fields.char('Sale Product ID',size=8),
+        'mr_sale_prod_id': fields.many2one('sale.product','Sale Product ID'),
         'mr_notes': fields.text('Reason and use'),
         'mr_dept_id': fields.related('picking_id','mr_dept_id',string='Department',type='many2one',relation='hr.department',select=True),
         'mr_date_order': fields.related('picking_id','date',string='Order Date',type='datetime'),
         'pick_type': fields.related('picking_id','type',string='Picking Type',type='char'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(material_request_line,self).default_get(cr, uid, fields_list, context)
@@ -183,6 +189,22 @@ class material_request_line(osv.osv):
             result['location_id'] = loc_id
         if loc_dest_id:
             result['location_dest_id'] = loc_dest_id
+            
+        #update the price_unit the and price_currency_id
+        #default is the product's cost price
+        price_unit = product.standard_price
+        price_currency_id = None
+        #get the final purchase price
+        move_obj = self.pool.get('stock.move')
+        #get the final purchase price
+        move_ids = move_obj.search(cr,uid,[('product_id','=',prod_id),('state','=','done'),('type','=','in')],limit=1,order='create_date desc')
+        if move_ids:
+            move_price = move_obj.read(cr,uid,move_ids[0],['price_unit','price_currency_id'],context=ctx)
+            price_unit = move_price['price_unit']
+            price_currency_id = move_price['price_currency_id']
+        result['price_unit'] = price_unit
+        result['price_currency_id'] = price_currency_id
+        
         return {'value': result}
     def check_access_rights(self, cr, uid, operation, raise_exception=True):
         #override in order to redirect the check of acces rights on the stock.picking object
