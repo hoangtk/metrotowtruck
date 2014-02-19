@@ -38,6 +38,7 @@
     'website': 'http://www.metrotowtrucks.com',
     'depends': ["metro", "sale", "sale_stock", "sale_quick_payment", "sale_exceptions"],
     'data': [
+        'security/ir.model.access.csv',
         'sale_metro_view.xml',
         'sale_payment_view.xml',
         'sale_workflow.xml',
