@@ -26,8 +26,8 @@ class exhibit_calendar(osv.osv):
     _description = "Exhibition Calendar"
     _columns  = {
         'name': fields.char('Exhibition Name', size=512, required=True),
-        'date_start':fields.datetime('Start date', required=True),
-        'date_stop':fields.datetime('Stop date', required=False),
+        'date_start':fields.date('Start date', required=True),
+        'date_stop':fields.date('Stop date', required=False),
         'exhibit_type_id': fields.many2one('exhibit.type','Exhibition Type'),
         }
 class exhibit_type(osv.osv):
