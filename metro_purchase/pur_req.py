@@ -205,15 +205,44 @@ class pur_req_line(osv.osv):
         @return:  Dictionary of changed values
         """
         value = {'product_uom_id': '', 'inv_qty': ''}
+        res = {}
         if product_id:
             prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-            value = {'product_uom_id': prod.uom_id.id,'product_qty':1.0,'inv_qty':prod.qty_available}
-        return {'value': value}
+            value = {'product_qty':1.0,'inv_qty':prod.qty_available}
+            uom = prod.uom_po_id or prod.uom_id
+            value.update({'product_uom_id': uom.id})
+            # - set a domain on product_uom
+            domain = {'product_uom_id': [('category_id','=',uom.category_id.id)]}
+        res['domain'] = domain
+        res['value'] = value
+        return res
 
     _defaults = {
         'product_qty': lambda *a: 1.0,
     }
+    
+    def onchange_product_uom(self, cr, uid, ids, product_id, uom_id, context=None):
+        """
+        onchange handler of product_uom.
+        """
+        res = {}
+        if not uom_id:
+            return {'value': {'product_uom_id' : False}}
+        # - check that uom and product uom belong to the same category
+        product = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+        prod_uom = product.uom_po_id or product.uom_id
+        uom = self.pool.get('product.uom').browse(cr, uid, uom_id, context = context)
+        if prod_uom.category_id.id != uom.category_id.id:
+            if self._check_product_uom_group(cr, uid, context=context):
+                res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
+            uom_id = prod_uom.id
 
+        res['value'] = {'product_uom_id': uom_id}
+        return res
+    def _check_product_uom_group(self, cr, uid, context=None):
+        group_uom = self.pool.get('ir.model.data').get_object(cr, uid, 'product', 'group_uom')
+        res = [user for user in group_uom.users if user.id == uid]
+        return len(res) and True or False
     def copy_data(self, cr, uid, id, default=None, context=None):
         if not default:
             default = {}

@@ -52,10 +52,10 @@
                 <separator string="Prodcuts"/>
                 <field name="line_ids">
                     <tree string="Products">
-                        <field name="product_id" on_change="onchange_product_id(product_id)"/>
+                        <field name="product_id" on_change="onchange_product_id(product_id,contexxt)"/>
                         <field name="product_qty"/>
                         <field name="po_info" />
-                        <field name="product_uom_id"/>
+                        <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
                         <field name="date_required"/>
                         <field name="inv_qty"/>
                         <field name="req_emp_id"/>
@@ -68,7 +68,7 @@
                        		<field name="product_id" on_change="onchange_product_id(product_id)"/>
                             <field name="product_qty"/>
                         	<field name="po_info" />
-                            <field name="product_uom_id" />
+                            <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
                             <field name="date_required" />
                             <field name="inv_qty" />
                         	<field name="req_emp_id"/>
