@@ -112,9 +112,12 @@ class product_product(osv.osv):
 		'cn_name': fields.char(string=u'Chinese Name', size=128),
 		'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+		'safe_qty': fields.float('Minimal Inventory'),
+		'safe_warn': fields.boolean('Warn Inventory'),
 	}
 	_defaults = {
 		'default_code': generate_seq,
+		'safe_warn': True,
 	}
 #	_sql_constraints = [
 #		('cn_name', 'unique (cn_name)', _('Product Chinese Name must be unique!'))
@@ -242,7 +245,18 @@ class product_product(osv.osv):
 	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
 		#deal the 'date' datetime field query
 		new_args = deal_args(self,args)
-		return super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
+		#get the search result		
+		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
+		#add the available restriction
+		if context.get('inv_warn_restrict'):
+			qtys = self.read(cr,user,ids,['virtual_available','safe_qty'],context=context)
+#			list: [{'product_tmpl_id': 10, 'virtual_available': -255.0, 'id': 10}, {'product_tmpl_id': 26, 'virtual_available': 0.0, 'id': 26}, {'product_tmpl_id': 35, 'virtual_available': 600.0, 'id': 35}]
+			new_ids = []
+			for qty in qtys:
+				if qty['virtual_available'] < qty['safe_qty']:
+					new_ids.append(qty['id'])	
+			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)							
+		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
 		if not default:
 			default = {}
@@ -261,14 +275,7 @@ class product_product(osv.osv):
 #		return res
 		
 product_product()
-	
-class product_template(osv.Model):
-	_inherit = 'product.template'
-	_columns = {
-		'name': fields.char('Name', size=128, required=True, translate=False, select=True),
-	}
+
 #	_sql_constraints = [
 #		('name', 'unique (name)', _('Product Name must be unique!'))
 #	] 
-
-

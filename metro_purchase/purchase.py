@@ -391,6 +391,8 @@ class purchase_order_line(osv.osv):
                 'supplier_prod_code': '',
                 'supplier_delay': 1,
             }
+            if not line.product_id or not line.product_id.seller_ids:
+                continue
             for seller_info in line.product_id.seller_ids:
                 if seller_info.name == line.partner_id:
                     #found the product supplier info
