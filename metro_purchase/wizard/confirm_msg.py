@@ -37,6 +37,11 @@ class confirm_msg(osv.osv_memory):
         data =  self.browse(cr, uid, ids, context=context)[0]
         self.pool.get(active_model).action_reject(cr, uid, active_ids, data.message, context=context)
         return {'type': 'ir.actions.act_window_close'}
-
+    def reject_changing(self, cr, uid, ids, context=None):
+        active_ids = context and context.get('active_ids', [])
+        active_model = context and context.get('active_model', [])
+        data =  self.browse(cr, uid, ids, context=context)[0]
+        self.pool.get(active_model).button_to_changing_rejected(cr, uid, active_ids, data.message, context=context)
+        return {'type': 'ir.actions.act_window_close'}
 confirm_msg()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

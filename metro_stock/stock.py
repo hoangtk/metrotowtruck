@@ -242,8 +242,6 @@ class stock_move(osv.osv):
         new_args = deal_args(self,args)
         return super(stock_move,self).search(cr, user, new_args, offset, limit, order, context, count)  
 
-
-
 from openerp.addons.stock import stock_picking as stock_picking_super
       
 def _set_minimum_date(self, cr, uid, ids, name, value, arg, context=None):
@@ -298,7 +296,19 @@ class stock_picking(osv.osv):
         new_args = deal_args(self,args)
         return super(stock_picking,self).search(cr, user, new_args, offset, limit, order, context, count)
     _order = 'name desc'  
-   
+
+    def action_done(self, cr, uid, ids, context=None):
+        """Changes picking state to done.
+        
+        This method is called at the end of the workflow by the activity "done".
+        @return: True
+        """
+        po_obj = self.pool.get('purchase.order')
+        for pick in self.browse(cr,uid,ids,context):
+            if pick.purchase_id and pick.type=='out':
+                po_obj.write(cr,uid,[pick.purchase_id.id],{'shipped':False})
+        return super(stock_picking,self).action_done(cr,uid,ids,context)
+       
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -312,7 +322,8 @@ class stock_picking_out(osv.osv):
             string='Messages',
             help="Messages and communication history"),                   
     }            
-    _order = 'name desc'      
+    _order = 'name desc'  
+            
 class stock_picking_in(osv.osv):
     _inherit = "stock.picking.in"
  
