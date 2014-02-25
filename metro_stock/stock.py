@@ -305,8 +305,25 @@ class stock_picking(osv.osv):
         """
         po_obj = self.pool.get('purchase.order')
         for pick in self.browse(cr,uid,ids,context):
-            if pick.purchase_id and pick.type=='out':
-                po_obj.write(cr,uid,[pick.purchase_id.id],{'shipped':False})
+            if pick.purchase_id:
+                #if this is purchase return, then set the related purchase order shipped to False
+                if pick.type=='out':
+                    po_obj.write(cr,uid,[pick.purchase_id.id],{'shipped':False})
+                #if this is related to a PO and need to create invoices after picking, then auto generate the invoie and valid the invoice.
+                if pick.type=='in' and pick.invoice_state == '2binvoiced':
+                    inv_create_obj = self.pool.get("stock.invoice.onshipping")
+                    if not context:
+                        context = {}
+                    context.update({'active_model':'stock.picking.in','active_ids':[pick.id],'active_id':pick.id})
+                    journal_id = inv_create_obj._get_journal(cr,uid,context)
+                    inv_create_id = inv_create_obj.create(cr,uid,{'journal_id':journal_id},context)
+                    pick_inv_ids = inv_create_obj.create_invoice(cr,uid,[inv_create_id],context)
+                    invoice_ids = pick_inv_ids.values()
+                    wf_service = netsvc.LocalService("workflow")
+                    for invoice_id in invoice_ids:
+                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)
+                            
+            
         return super(stock_picking,self).action_done(cr,uid,ids,context)
        
 class stock_picking_out(osv.osv):
