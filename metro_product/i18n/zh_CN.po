@@ -35,3 +35,17 @@ msgstr "产品中文名称重复!"
 #: code:addons/metro_product/product.py:0
 msgid "Product Name must be unique!"
 msgstr "产品名称重复!"
+
+#. module: metro_product
+#: field:product.product,safe_qty:0
+msgid "Minimal Inventory"
+msgstr "最小库存"
+
+#. module: metro_product
+#: field:product.product,safe_warn:0
+msgid "Warn Inventory"
+msgstr "库存报警"
+
+#: model:ir.ui.menu,name:metro_product.menu_product_inventory_warning
+msgid "Inventory Warning"
+msgstr "库存报警"
