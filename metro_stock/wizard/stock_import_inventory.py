@@ -115,7 +115,7 @@ class stock_import_inventory(osv.osv_memory):
             product_id = None
             if id_idx < 0 or not row_data[id_idx] or row_data[id_idx] == '':
                 #if there is no id data, then use default_code to get product id
-                ids = prod_obj.search(cr,uid,[('default_code','=',row_data[code_idx])])
+                ids = prod_obj.search(cr,uid,[('default_code','=',row_data[code_idx])],context=context)
                 if not ids or len(ids) == 0:
                     #if system can not find the product info, then set the import fail flag and message to false
                     error_rows.append({'row':i+1,'default_code':row_data[code_idx],'msg':_('System can not find this product')})
