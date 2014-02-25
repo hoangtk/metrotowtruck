@@ -102,25 +102,25 @@
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
                 </field>   
                 <field name="partner_id" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>                
                 <field name="pricelist_id" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>      
                 <field name="date_order" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
                 </field>      
                 <field name="warehouse_id" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>       
                 <field name="location_id" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>     
                 <field name="company_id" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>    
                 <field name="fiscal_position" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>
        		</field>
         </record>  

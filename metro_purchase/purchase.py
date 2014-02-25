@@ -682,11 +682,18 @@ class purchase_order_line(osv.osv):
                 log_obj.create(cr,uid,log_vals,context=context)
         #update product supplier info
         self._update_prod_supplier(cr, uid, ids, vals, context)
+        #if price_unit changed then update it to product_product.standard_price
+        if vals.has_key('price_unit'):
+            self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'standard_price':vals['price_unit']},context=context)
+            
         return resu
     def create(self, cr, user, vals, context=None):
         resu = super(purchase_order_line,self).create(cr, user, vals, context=context)
         #update product supplier info
-        self._update_prod_supplier(cr, user, [], vals, context)      
+        self._update_prod_supplier(cr, user, [], vals, context)
+        #if price_unit changed then update it to product_product.standard_price
+        if vals.has_key('price_unit'):
+            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':vals['price_unit']},context=context)        
         return resu  
     def unlink(self, cr, uid, ids, context=None):
         #only the draft,canceled can be deleted
