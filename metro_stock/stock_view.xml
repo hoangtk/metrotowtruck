@@ -331,6 +331,7 @@
             <field name="arch" type="xml">
                 <field name="stock_journal_id" position="before">
                 	<field name="date"/>
+                	<field name="partner_id"/>
                 </field>
             </field>
         </record>
@@ -341,6 +342,7 @@
             <field name="arch" type="xml">
                 <field name="stock_journal_id" position="before">
                 	<field name="date"/>
+                	<field name="partner_id"/>
                 </field>
             </field>
         </record>

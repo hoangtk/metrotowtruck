@@ -16,7 +16,7 @@
                     <button name="purchase_confirm" states="rejected" string="Confirm Order" class="oe_highlight"/>
                 </xpath>            
                  <xpath expr="//button[@name='action_cancel']" position="attributes" >
-                 	<attribute name="states">approved,except_picking,except_invoice,rejected</attribute>
+                 	<attribute name="states">approved,except_picking,except_invoice,rejected,changing,changing_rejected</attribute>
                 </xpath>             
                 <xpath expr="//button[@name='picking_ok']" position="replace" >
                 </xpath>             
@@ -44,7 +44,7 @@
                 </xpath>     
                  <xpath expr="//sheet/div" position="after" >
                  	<group style="color:red">
-                		<field name="reject_msg" states="rejected" readonly="1"/>
+                		<field name="reject_msg" states="rejected,changing_rejected" readonly="1"/>
                 	</group>
                 </xpath>       
                  <xpath expr="//field[@name='company_id']" position="after" >
@@ -84,7 +84,44 @@
                 </field>         
                  <xpath expr="//tree/field[@name='name']" position="after" >
                 	<field name="supplier_prod_name"/>
-                </xpath>           
+                </xpath>      
+<!-- purchase changing after approved -->                          
+                <xpath expr="//button[@name='action_cancel']" position="after" >
+                 	<button name="button_to_changing" states="approved,except_picking,except_invoice" string="Change" type="object"/>
+                 	<button name="button_to_changing_confirmed" states="changing,changing_rejected" string="Confirm Chaning" type="object"/>
+                 	<button name="%(act_purchase_changing_reject)d" states="changing_confirmed" string="Reject Changing" type="action" groups="metro_purchase.group_pur_req_manager"/>
+                 	<button name="button_to_changing_approved" states="changing_confirmed" string="Approve Changing" type="object" groups="metro_purchase.group_pur_req_manager"/>
+                 	<button name="button_manual_done" states="approved" string="Manual Done" type="object"/>
+                </xpath>     
+                <xpath expr="//tree/field[@name='product_qty']" position="after">
+                	<field name="receive_qty"/>
+                	<field name="return_qty"/>
+                </xpath>
+                <!-- set fields readonly --> 
+                <field name="order_line" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                </field>   
+                <field name="partner_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>                
+                <field name="pricelist_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>      
+                <field name="date_order" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
+                </field>      
+                <field name="warehouse_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>       
+                <field name="location_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>     
+                <field name="company_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>    
+                <field name="fiscal_position" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>
        		</field>
         </record>  
           
@@ -108,6 +145,19 @@
             	<field name="date_planned" position="attributes">            	
             		<attribute name="on_change">onchange_lead('date_planned',date_planned,parent.date_order,context)</attribute>
             	</field>
+            	<field name="taxes_id" position="attributes">
+            		<attribute name="attrs">{'readonly':[('can_change_price','=',False)]}</attribute>
+            	</field>
+                <field name="price_unit" position="before">
+            		<field name="can_change_price" invisible="1"/>
+            		<field name="can_change_product" invisible="1"/>
+                </field>
+                <field name="price_unit" position="attributes">
+                	<attribute name="attrs">{'readonly':[('can_change_price','=',False)]}</attribute>
+                </field> 
+                <field name="product_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('can_change_product','=',False)]}</attribute>
+                </field>                             	
             </field>
         </record>
           

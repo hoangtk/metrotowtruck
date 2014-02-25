@@ -46,6 +46,9 @@ class purchase_order(osv.osv):
         ('confirmed', 'Waiting Approval'),
         ('rejected', 'Rejected'),
         ('approved', 'Purchase Order'),
+        ('changing', 'In Changing'),
+        ('changing_confirmed', 'Changing Waiting Approval'),
+        ('changing_rejected', 'Changing Rejected'),
         ('except_picking', 'Shipping Exception'),
         ('except_invoice', 'Invoice Exception'),
         ('wait_receipt', 'Waitting Receipt'),
@@ -93,8 +96,7 @@ class purchase_order(osv.osv):
         return res
         
     _columns = {
-        'warehouse_id': fields.many2one('stock.warehouse', 'Destination Warehouse',states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),                
-        'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
+        'warehouse_id': fields.many2one('stock.warehouse', 'Destination Warehouse',states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),            
         'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
         'reject_msg': fields.text('Rejection Message', track_visibility='onchange'),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
@@ -106,7 +108,6 @@ class purchase_order(osv.osv):
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced', type='float'),
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
         'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
-        'order_line': fields.one2many('purchase.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),
@@ -367,8 +368,118 @@ class purchase_order(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)    
-        return super(purchase_order,self).search(cr, user, new_args, offset, limit, order, context, count)  
+        return super(purchase_order,self).search(cr, user, new_args, offset, limit, order, context, count)
+    
+    def _update_po_lines(self,cr,uid,ids,values,context=None):
+        pos = self.browse(cr,uid,ids,context)
+        #update order lines
+        line_ids = []
+        for po in pos:
+            lines = po.order_line
+            for line in lines:
+                if line.state != 'cancel':
+                    line_ids.append(line.id)
+        self.pool.get('purchase.order.line').write(cr,uid,line_ids,values)
+          
+    def button_to_changing(self, cr, uid, ids, context=None):
+        assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        wf_service = netsvc.LocalService("workflow")
+        for purchase in self.browse(cr, uid, ids, context=context):
+            for pick in purchase.picking_ids:
+                if pick.state not in ('draft','cancel','done'):
+                    raise osv.except_osv(
+                        _('Unable to change this purchase order.'),
+                        _('First cancel all receptions not in draft/cancel/done related to this purchase order.'))
+            for pick in purchase.picking_ids:
+                if pick.state == 'draft':
+                    wf_service.trg_validate(uid, 'stock.picking', pick.id, 'button_cancel', cr)
+            for inv in purchase.invoice_ids:
+                if inv and inv.state not in ('cancel','draft','paid'):
+                    raise osv.except_osv(
+                        _('Unable to change this purchase order.'),
+                        _('You must first cancel all invoices in draft/cancel/done related to this purchase order.'))
+                if inv.state == 'draft':
+                    wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
+                            
+        self.write(cr,uid,ids,{'state':'changing'},context)
+        self._update_po_lines(cr,uid,ids,{'state':'changing'})        
         
+    def button_to_changing_confirmed(self, cr, uid, ids, context=None):
+        assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        self.write(cr,uid,ids,{'state':'changing_confirmed','inform_type':'1'},context)
+        self._update_po_lines(cr,uid,ids,{'state':'changing_confirmed'},context)
+        
+    def button_to_changing_rejected(self, cr, uid, ids, reject_msg, context=None):
+        assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        self.write(cr,uid,ids,{'state':'changing_rejected','reject_msg':reject_msg,'inform_type':'2'},context)
+        self._update_po_lines(cr,uid,ids,{'state':'changing_rejected'},context)
+        
+    def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
+        if not picking_id:
+            picking_id = self.pool.get('stock.picking').create(cr, uid, self._prepare_order_picking(cr, uid, order, context=context))
+        todo_moves = []
+        stock_move = self.pool.get('stock.move')
+        wf_service = netsvc.LocalService("workflow")
+        for order_line in order_lines:
+            if not order_line.product_id:
+                continue
+#            if order_line.product_id.type in ('product', 'consu'):
+            move_qty = order_line.product_qty
+            if order_line.move_ids:
+                #get all the valid move picking quantity of this purchase order line
+                for move in order_line.move_ids:
+                    if move.state != 'cancel':
+                        if move.type == 'in':
+                            move_qty -= move.product_qty
+                        if move.type == 'out':
+                            move_qty += move.product_qty
+            if order_line.product_id.type in ('product', 'consu') and move_qty > 0:
+                order_line.product_qty = move_qty 
+                move = stock_move.create(cr, uid, self._prepare_order_line_move(cr, uid, order, order_line, picking_id, context=context))
+                if order_line.move_dest_id:
+                    order_line.move_dest_id.write({'location_id': order.location_id.id})
+                todo_moves.append(move)
+        if len(todo_moves) > 0:
+            stock_move.action_confirm(cr, uid, todo_moves)
+            stock_move.force_assign(cr, uid, todo_moves)
+            wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
+            return [picking_id]
+        else:
+            self.pool.get('stock.picking').unlink(cr,uid,[picking_id],context)
+            return []
+            
+    def button_to_changing_approved(self, cr, uid, ids, context=None):
+        assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        id = ids[0]
+        #if po shipped, and there are unreceived quantiy, then set the shipped to False
+        po = self.browse(cr,uid,id,context)
+        shipped = po.shipped
+        if po.shipped:
+            for line in po.order_line:
+                if line.product_qty > line.receive_qty - line.return_qty:
+                    shipped = False
+                    break
+        self.write(cr,uid,ids,{'shipped':shipped, 'state':'approved','inform_type':'3'},context)
+        self._update_po_lines(cr,uid,ids,{'state':'approved'},context)   
+        if not shipped:
+           self.action_picking_create(cr,uid,ids,context) 
+    def view_picking(self, cr, uid, ids, context=None):
+        #create the picking for unshipped orders
+        for po in self.read(cr,uid,ids,['shipped']):
+            if not po['shipped']:
+                self.action_picking_create(cr,uid,ids,context) 
+        return super(purchase_order,self).view_picking(cr, uid, ids, context)      
+    
+    def button_manual_done(self, cr, uid, ids, context=None):
+        assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        self.write(cr,uid,ids,{'state':'done'},context)
+        self._update_po_lines(cr,uid,ids,{'state':'done'},context)   
+        
+#    def __init__(self, pool, cr):
+#        self._columns['partner_id'].states.update({'changing':[('readonly',True)]})
+#        print self._columns['partner_id'].states
+#        return super(purchase_order,self).__init__(pool,cr)
+          
 class purchase_order_line(osv.osv):  
     _name = "purchase.order.line"
     _inherit = 'purchase.order.line' 
@@ -378,6 +489,9 @@ class purchase_order_line(osv.osv):
         ('confirmed', 'Waiting Approval'),
         ('rejected', 'Rejected'),
         ('approved', 'Approved'),
+        ('changing', 'In Changing'),
+        ('changing_confirmed', 'Changing Waiting Approval'),
+        ('changing_rejected', 'Changing Rejected'),
         ('done', 'Done'),
         ('cancel', 'Cancelled')
     ]
@@ -405,6 +519,38 @@ class purchase_order_line(osv.osv):
                     })
                     break
         return result
+    def _get_rec_info(self, cr, uid, ids, fields, args, context=None):
+        result = {}
+        for id in ids:
+            result[id] = {'receive_qty':0,'return_qty':0,'can_change_price':True,'can_change_product':True}
+        for line in self.browse(cr,uid,ids,context=context):
+            rec_qty = 0
+            return_qty = 0
+            can_change_price = True
+            can_change_product = True
+            if line.move_ids:
+                can_change_product = False
+                for move in line.move_ids:
+                    if move.state == 'done':
+                        if move.type == 'in':
+                            rec_qty += move.product_qty
+                        if move.type == 'out':
+                            return_qty += move.product_qty
+                        #if there are products received then can not change price
+                        if rec_qty - return_qty > 0:
+                            can_change_price = False
+            if line.invoice_lines:
+                can_change_product = False
+                if can_change_price:
+                    for inv_line in line.invoice_lines:
+                        #if there are invoices no canceld, then can not change price
+                        if inv_line.invoice_id.state != 'cancel':
+                            can_change_price = False
+                            break
+            
+            result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
+        return result
+            
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -421,10 +567,18 @@ class purchase_order_line(osv.osv):
         'supplier_prod_name': fields.function(_get_supp_prod, type='char', string='Supplier Product Name', required=True, multi="seller_info"),
         'supplier_prod_code': fields.function(_get_supp_prod, type='char', string='Supplier Product Code', multi="seller_info"),
         'supplier_delay' : fields.function(_get_supp_prod, type='integer', string='Supplier Lead Time', multi="seller_info"),
+        'receive_qty' : fields.function(_get_rec_info, type='integer', string='Received Quantity', multi="rec_info"),
+        'return_qty' : fields.function(_get_rec_info, type='integer', string='Returned Quantity', multi="rec_info"),
+        'can_change_price' : fields.function(_get_rec_info, type='boolean', string='Can Change Price', multi="rec_info"),
+        'can_change_product' : fields.function(_get_rec_info, type='boolean', string='Can Change Product', multi="rec_info"),
     }  
     _order = "order_id desc"
     _defaults = {
         'supplier_delay': lambda *a: 1,
+        'receive_qty': 0,
+        'return_qty': 0,
+        'can_change_price': True,
+        'can_change_product': True,
     }    
     def _is_po_update(self,cr,uid,po,state,context=None):
         po_update = True
@@ -500,12 +654,23 @@ class purchase_order_line(osv.osv):
                     prod_supp_obj.write(cr,uid,prod_supp_ids[0],new_vals,context=context)
                 else:
                     supplier_prod_id = prod_supp_obj.create(cr,uid,new_vals,context=context)     
-                
+          
     def write(self, cr, uid, ids, vals, context=None):
         if not ids:
             return True
         id = ids[0]
         po_line = self.browse(cr,uid,id,context=context)
+        #check under the 'changing' status
+        if po_line.state == 'changing':
+            #changed quantity can not less than the received quantity
+            if vals.has_key('product_qty') and vals['product_qty'] <  po_line.receive_qty - po_line.return_qty:
+                raise osv.except_osv(_('Error!'),
+                                     _('The order quantity(%s) of %s can not be less than the received quantity(%s).')%(vals['product_qty'],po_line.product_id.name,po_line.receive_qty - po_line.return_qty))     
+            #changed unir prie can not be do when there are uncanceled pickings or invoices
+            if vals.has_key('price_unit') and not po_line.can_change_price:
+                raise osv.except_osv(_('Error!'),
+                                     _('The price of %s can not be change since there are related existing uncanceled pickings or invoices.')%(po_line.product_id.name))     
+        
         value_old = po_line.product_qty
         resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)
         #only when orders confirmed, then record the quantity changing log
@@ -517,20 +682,30 @@ class purchase_order_line(osv.osv):
                 log_obj.create(cr,uid,log_vals,context=context)
         #update product supplier info
         self._update_prod_supplier(cr, uid, ids, vals, context)
+        #if price_unit changed then update it to product_product.standard_price
+        if vals.has_key('price_unit'):
+            self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'standard_price':vals['price_unit']},context=context)
+            
         return resu
     def create(self, cr, user, vals, context=None):
         resu = super(purchase_order_line,self).create(cr, user, vals, context=context)
         #update product supplier info
-        self._update_prod_supplier(cr, user, [], vals, context)      
+        self._update_prod_supplier(cr, user, [], vals, context)
+        #if price_unit changed then update it to product_product.standard_price
+        if vals.has_key('price_unit'):
+            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':vals['price_unit']},context=context)        
         return resu  
     def unlink(self, cr, uid, ids, context=None):
         #only the draft,canceled can be deleted
         lines = self.browse(cr,uid,ids,context=context)
         for line in lines:
-            if line.state != 'draft' and line.state != 'cancel' and line.state != 'rejected':
-                raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled and rejected can be deleted!'))            
+            if line.state != 'draft' and line.state != 'cancel' and line.state != 'rejected' and line.state != 'changing' and line.state != 'changing_rejected':
+                raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled, rejected, changing, changing rejected can be deleted!\n%s'%line.product_id.name))
+            if line.move_ids or line.invoice_ids:
+                raise osv.except_osv(_('Error'), _('Can not delete the lines with picking or invoice lines!\n%s'%line.product_id.name))
+            
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
-    
+        
     def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
             name=False, price_unit=False, context=None):
@@ -632,3 +807,98 @@ def deal_args(obj,args):
         else:
             new_args.append(arg)    
     return new_args
+
+from openerp.addons.purchase.purchase import purchase_order_line as oe_po_line
+def metro_po_line_onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+        partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+        name=False, price_unit=False, context=None):
+    """
+    onchange handler of product_id.
+    """
+    if context is None:
+        context = {}
+
+    res = {'value': {'price_unit': price_unit or 0.0, 'name': name or '', 'product_uom' : uom_id or False}}
+    if not product_id:
+        return res
+
+    product_product = self.pool.get('product.product')
+    product_uom = self.pool.get('product.uom')
+    res_partner = self.pool.get('res.partner')
+    product_supplierinfo = self.pool.get('product.supplierinfo')
+    product_pricelist = self.pool.get('product.pricelist')
+    account_fiscal_position = self.pool.get('account.fiscal.position')
+    account_tax = self.pool.get('account.tax')
+
+    # - check for the presence of partner_id and pricelist_id
+    #if not partner_id:
+    #    raise osv.except_osv(_('No Partner!'), _('Select a partner in purchase order to choose a product.'))
+    #if not pricelist_id:
+    #    raise osv.except_osv(_('No Pricelist !'), _('Select a price list in the purchase order form before choosing a product.'))
+
+    # - determine name and notes based on product in partner lang.
+    context_partner = context.copy()
+    if partner_id:
+        lang = res_partner.browse(cr, uid, partner_id).lang
+        context_partner.update( {'lang': lang, 'partner_id': partner_id} )
+    product = product_product.browse(cr, uid, product_id, context=context_partner)
+    name = product.name
+    if product.description_purchase:
+        name += '\n' + product.description_purchase
+    res['value'].update({'name': name})
+
+    # - set a domain on product_uom
+    res['domain'] = {'product_uom': [('category_id','=',product.uom_id.category_id.id)]}
+
+    # - check that uom and product uom belong to the same category
+    product_uom_po_id = product.uom_po_id.id
+    if not uom_id:
+        uom_id = product_uom_po_id
+
+    if product.uom_id.category_id.id != product_uom.browse(cr, uid, uom_id, context=context).category_id.id:
+        if self._check_product_uom_group(cr, uid, context=context):
+            res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
+        uom_id = product_uom_po_id
+
+    res['value'].update({'product_uom': uom_id})
+
+    # - determine product_qty and date_planned based on seller info
+    if not date_order:
+        date_order = fields.date.context_today(self,cr,uid,context=context)
+
+
+    supplierinfo = False
+    for supplier in product.seller_ids:
+        if partner_id and (supplier.name.id == partner_id):
+            supplierinfo = supplier
+            if supplierinfo.product_uom.id != uom_id:
+                res['warning'] = {'title': _('Warning!'), 'message': _('The selected supplier only sells this product by %s') % supplierinfo.product_uom.name }
+            min_qty = product_uom._compute_qty(cr, uid, supplierinfo.product_uom.id, supplierinfo.min_qty, to_uom_id=uom_id)
+            if (qty or 0.0) < min_qty: # If the supplier quantity is greater than entered from user, set minimal.
+                if qty:
+                    res['warning'] = {'title': _('Warning!'), 'message': _('The selected supplier has a minimal quantity set to %s %s, you should not purchase less.') % (supplierinfo.min_qty, supplierinfo.product_uom.name)}
+                qty = min_qty
+    dt = self._get_date_planned(cr, uid, supplierinfo, date_order, context=context).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+    qty = qty or 1.0
+    res['value'].update({'date_planned': date_planned or dt})
+    if qty:
+        res['value'].update({'product_qty': qty})
+
+    # - determine price_unit and taxes_id
+    #only change the price when the price_unir parameter has not value, by john wang, 2014/02/25
+    if not price_unit or price_unit == 0:
+        if pricelist_id:
+            price = product_pricelist.price_get(cr, uid, [pricelist_id],
+                    product.id, qty or 1.0, partner_id or False, {'uom': uom_id, 'date': date_order})[pricelist_id]
+        else:
+            price = product.standard_price
+    else:
+        price = price_unit
+        
+    taxes = account_tax.browse(cr, uid, map(lambda x: x.id, product.supplier_taxes_id))
+    fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
+    taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+    res['value'].update({'price_unit': price, 'taxes_id': taxes_ids})
+
+    return res
+oe_po_line.onchange_product_id = metro_po_line_onchange_product_id    
