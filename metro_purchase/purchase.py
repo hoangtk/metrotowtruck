@@ -701,7 +701,7 @@ class purchase_order_line(osv.osv):
         for line in lines:
             if line.state != 'draft' and line.state != 'cancel' and line.state != 'rejected' and line.state != 'changing' and line.state != 'changing_rejected':
                 raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled, rejected, changing, changing rejected can be deleted!\n%s'%line.product_id.name))
-            if line.move_ids or line.invoice_ids:
+            if (line.move_ids and line.move_ids) or (line.invoice_lines and line.invoice_lines):
                 raise osv.except_osv(_('Error'), _('Can not delete the lines with picking or invoice lines!\n%s'%line.product_id.name))
             
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
@@ -709,6 +709,8 @@ class purchase_order_line(osv.osv):
     def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
             name=False, price_unit=False, context=None):
+        if not context:
+            context = {}
         """
         onchange handler of product_id.
         """
@@ -724,19 +726,20 @@ class purchase_order_line(osv.osv):
             res['value'].update({'taxes_id': taxes_ids})
 
         # update the product supplier info
-        prod_supp_obj = self.pool.get('product.supplierinfo')
-        prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',product_id),('name','=',partner_id)])
-        if prod_supp_ids and len(prod_supp_ids) > 0:
-            prod_supp = prod_supp_obj.browse(cr,uid,prod_supp_ids[0],context=context)
-            res['value'].update({'supplier_prod_id': prod_supp.id,
-                                'supplier_prod_name': prod_supp.product_name,
-                                'supplier_prod_code': prod_supp.product_code,
-                                'supplier_delay' : prod_supp.delay})
-        else:
-            res['value'].update({'supplier_prod_id': False,
-                                'supplier_prod_name': '',
-                                'supplier_prod_code': '',
-                                'supplier_delay' : 1})
+        if not context.get('supplier_prod_id'):
+            prod_supp_obj = self.pool.get('product.supplierinfo')
+            prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',product_id),('name','=',partner_id)])
+            if prod_supp_ids and len(prod_supp_ids) > 0:
+                prod_supp = prod_supp_obj.browse(cr,uid,prod_supp_ids[0],context=context)
+                res['value'].update({'supplier_prod_id': prod_supp.id,
+                                    'supplier_prod_name': context.get('supplier_prod_name') or prod_supp.product_name,
+                                    'supplier_prod_code': context.get('supplier_prod_code') or prod_supp.product_code,
+                                    'supplier_delay' :context.get('supplier_delay') or  prod_supp.delay})
+            else:
+                res['value'].update({'supplier_prod_id': False,
+                                    'supplier_prod_name': context.get('supplier_prod_name') or '',
+                                    'supplier_prod_code': context.get('supplier_prod_code') or '',
+                                    'supplier_delay' : context.get('supplier_delay') or 1})
             
         return res
 

@@ -157,7 +157,10 @@
                 </field> 
                 <field name="product_id" position="attributes">
                 	<attribute name="attrs">{'readonly':[('can_change_product','=',False)]}</attribute>
-                </field>                             	
+                </field>
+                <field name="product_qty"  position="attributes">
+                	<attribute name="context">{'supplier_prod_id':supplier_prod_id,'supplier_prod_name':supplier_prod_name,'supplier_prod_code':supplier_prod_code,'supplier_delay':supplier_delay}</attribute>
+                </field>
             </field>
         </record>
           
