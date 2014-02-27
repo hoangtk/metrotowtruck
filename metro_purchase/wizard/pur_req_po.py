@@ -42,10 +42,10 @@ class pur_req_po_line(osv.osv_memory):
         'inv_qty': fields.float('Inventory'),
         'req_reason': fields.char('Reason and use',size=64),
         'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition'),
-        'supplier_prod_id': fields.integer(string='Supplier Product ID'),
-        'supplier_prod_name': fields.char(string='Supplier Product Name', required=False),
-        'supplier_prod_code': fields.char(string='Supplier Product Code'),
-        'supplier_delay' : fields.integer(string='Supplier Lead Time'),        
+        'supplier_prod_id': fields.integer(string='Supplier Product ID', required=False),
+        'supplier_prod_name': fields.char(string='Supplier Product Name', required=True),
+        'supplier_prod_code': fields.char(string='Supplier Product Code', required=False),
+        'supplier_delay' : fields.integer(string='Supplier Lead Time', required=False),        
     }
     
     def onchange_lead(self, cr, uid, ids, change_type, changes_value, context=None):
@@ -61,6 +61,62 @@ class pur_req_po_line(osv.osv_memory):
             res['value'].update({'date_required':date_required})
         return res    
 
+    #write the product supplier information
+    def _update_prod_supplier(self,cr,uid,ids,vals,context=None):
+        if vals.has_key('supplier_prod_name') or vals.has_key('supplier_prod_code') or vals.has_key('supplier_delay'):
+            prod_supp_obj = self.pool.get('product.supplierinfo')
+            new_vals = {'min_qty':1}
+            if vals.has_key('supplier_prod_name'):
+                new_vals.update({'product_name':vals['supplier_prod_name']})
+            if vals.has_key('supplier_prod_code'):
+                new_vals.update({'product_code':vals['supplier_prod_code']})
+            if vals.has_key('supplier_delay'):
+                new_vals.update({'delay':vals['supplier_delay']})
+            #for the metro_currency module, set the currency
+            user = self.pool.get("res.users").browse(cr,uid,uid,context=context)
+            if ids:
+                #from order line update
+                for line in self.browse(cr,uid,ids,context=context):
+                    new_vals.update({'name':line.wizard_id.partner_id.id,'product_id':line.product_id.id,'currency':user.company_id.currency_id.id})
+                    if line.supplier_prod_id:
+                        #update the prodcut supplier info
+                        prod_supp_obj.write(cr,uid,line.supplier_prod_id,new_vals,context=context)
+                    else:
+                        supplier_prod_id = prod_supp_obj.create(cr,uid,new_vals,context=context)     
+            else:
+                # from order line create
+                po = self.pool.get('pur.req.po').browse(cr,uid,vals['wizard_id'])
+                new_vals.update({'name':po.partner_id.id,'product_id':vals['product_id'],'currency':user.company_id.currency_id.id})
+                prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',new_vals['product_id']),('name','=',new_vals['name'])])
+                if prod_supp_ids and len(prod_supp_ids) > 0:
+                    #update the prodcut supplier info
+                    prod_supp_obj.write(cr,uid,prod_supp_ids[0],new_vals,context=context)
+                else:
+                    supplier_prod_id = prod_supp_obj.create(cr,uid,new_vals,context=context)  
+                    
+    def create(self, cr, user, vals, context=None):
+        #check the product supplier info
+        if not vals.has_key('supplier_prod_name') or vals['supplier_prod_name'] == '':
+            product_name = self.pool.get("product.product").read(cr,user,[vals['product_id']],['name'],context=context)[0]['name']
+            raise osv.except_osv(_('Error!'),
+                                 _('The product supplier name is required to product .\n %s'%product_name))     
+
+        resu = super(pur_req_po_line,self).create(cr, user, vals, context=context)
+        #update product supplier info
+        self._update_prod_supplier(cr, user, [], vals, context)
+        #if price_unit changed then update it to product_product.standard_price
+        if vals.has_key('price_unit'):
+            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':vals['price_unit']},context=context)        
+        return resu 
+                        
+    def write(self, cr, uid, ids, vals, context=None):
+        if not ids:
+            return True
+        #update product supplier info
+        self._update_prod_supplier(cr, uid, ids, vals, context)
+        #if price_unit changed then update it to product_product.standard_price
+        if vals.has_key('price_unit'):
+            self.pool.get('product.product').write(cr,uid,[pur_req_po_line.product_id.id],{'standard_price':vals['price_unit']},context=context)                    
 pur_req_po_line()
 
 
