@@ -31,6 +31,7 @@
       <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="6,-1" stop="6,-1"/>
       <blockTopPadding length="1"/>
       <blockBottomPadding length="1"/>
       <blockLeftPadding length="1"/>
@@ -45,6 +46,7 @@
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="4,-1" stop="4,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="5,-1" stop="5,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="6,-1" stop="6,-1"/>
       <blockTopPadding length="1"/>
       <blockBottomPadding length="1"/>
       <blockLeftPadding length="1"/>
@@ -169,8 +171,11 @@
     <para style="terp_default_9">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="253.0,47.0,64.0,60.0,48.0,62.0" repeatRows="1" style="Table_Header_Pur_ord_Line">
+    <blockTable colWidths="21.0,232.0,39.0,62.0,70.0,48.0,62.0" repeatRows="1" style="Table_Header_Pur_ord_Line">
       <tr>
+        <td>
+          <para style="terp_tblheader_Details">No.</para>
+        </td>
         <td>
           <para style="terp_tblheader_Details">Products</para>
         </td>
@@ -193,8 +198,11 @@
     </blockTable>
     <section>
       <para style="terp_default_8">[[repeatIn(o.order_line,'line')]]</para>
-      <blockTable colWidths="251.0,47.0,64.0,60.0,48.0,63.0" style="Table_Order_Pur_line_Content">
+      <blockTable colWidths="20.0,232.0,39.0,63.0,70.0,48.0,62.0" style="Table_Order_Pur_line_Content">
         <tr>
+          <td>
+            <para style="terp_default_9">[[line.idx]]</para>
+          </td>
           <td>
             <para style="terp_default_9">[[ line.name ]],[[line.product_id.cn_name]]</para>
           </td>
