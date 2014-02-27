@@ -99,6 +99,7 @@ class shipment_shipment(osv.osv):
     
     def _get_tracking_link(self, cr, uid, ids, name, args, context=None):
         res = {}
+                
         shipment_data = self.browse(cr, uid, ids[0], context=context)
         if shipment_data.shipment_type_id.web_tracking_link:
             if shipment_data.shipment_type_id.tracking_auto:
@@ -110,8 +111,9 @@ class shipment_shipment(osv.osv):
             else:
                 tracking_name = shipment_data.shipment_type_id.web_tracking_link
                 res[shipment_data.id] = tracking_name
-        else:
-            res[shipment_data.id] = ''
+        else:            
+            cr.execute('select tracking_link from shipment_shipment where id=%s', (shipment_data.id,))
+            res[shipment_data.id] = cr.fetchone()[0]
         return res
     
     def _set_tracking_link(self, cr, uid, ids, name, value, arg, context=None):
