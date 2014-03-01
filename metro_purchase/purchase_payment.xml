@@ -18,19 +18,21 @@
                       string="Register Payments"
                       type="action" states="approved"/>
                 </button>
-                <notebook position="inside">
-                    <group name="payments" string="Payments" colspan="4">
-                        <field name="payment_ids" nolabel="1">
-                            <tree string="Payment">
-                                <field name="date"/>
-                                <field name="journal_id"/>
-                                <field name="partner_id"/>
-                                <field name="debit"/>
-                                <field name="credit"/>
-                            </tree>
-                        </field>
-                    </group>
-                </notebook>
+                <page string="Incoming Shipments &amp; Invoices" position="after">
+                	<page string="Pre Payments"> 
+	                    <group name="payments" string="Payments" colspan="4">
+	                        <field name="payment_ids" nolabel="1">
+	                            <tree string="Payment">
+	                                <field name="date"/>
+	                                <field name="journal_id"/>
+	                                <field name="partner_id"/>
+	                                <field name="debit"/>
+	                                <field name="credit"/>
+	                            </tree>
+	                        </field>
+	                    </group>
+                    </page>
+                </page>
             </field>
         </record>
     </data>

@@ -41,7 +41,8 @@
     'data': [
         'wizard/pur_req_po.xml',
         'wizard/confirm_msg.xml',
-        'wizard/pur_history.xml',           
+        'wizard/pur_history.xml',    
+        'wizard/pay_po.xml',       
         'security/pur_req_security.xml',
         'security/ir.model.access.csv',
         'change_log_view.xml',
@@ -54,8 +55,6 @@
         'purchase_report.xml',
         'pur_req_view.xml',
         'purchase_payment.xml',
-        'wizard/confirm_msg.xml',
-        'wizard/pay_po.xml',
     ],
     'test': [],
     'demo': [],
