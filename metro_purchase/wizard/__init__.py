@@ -22,5 +22,6 @@
 import pur_req_po
 import confirm_msg
 import pur_history
+import pay_po
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
