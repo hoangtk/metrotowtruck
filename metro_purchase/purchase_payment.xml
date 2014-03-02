@@ -16,23 +16,31 @@
                 <button name="purchase_approve" position="after">
                   <button name="%(open_pay_po)d"
                       string="Register Payments"
-                      type="action" states="approved"/>
+                      type="action" states="approved" groups="account.group_account_invoice"/>
                 </button>
                 <page string="Incoming Shipments &amp; Invoices" position="after">
                 	<page string="Pre Payments"> 
 	                    <group name="payments" string="Payments" colspan="4">
 	                        <field name="payment_ids" nolabel="1">
 	                            <tree string="Payment">
-	                                <field name="date"/>
-	                                <field name="journal_id"/>
-	                                <field name="partner_id"/>
-	                                <field name="debit"/>
-	                                <field name="credit"/>
+	                                <field name="name" string="Description"/>
+	                                <field name="journal_id" string="Payment Method"/>
+	                                <field name="debit" string="Paid Amount"/>
+	                                <field name="date" string="Date"/>
 	                            </tree>
 	                        </field>
 	                    </group>
                     </page>
                 </page>
+               	<field name="amount_tax" position="after">
+               		<field name="amount_paid" widget='monetary' options="{'currency_field': 'currency_id'}" string="Total Paid"/>
+               	</field>                    
+               	<field name="amount_total" position="after">
+                    <div class="oe_subtotal_footer_separator oe_inline">
+                        <label for="residual"/>
+                    </div>
+               		<field name="residual" nolabel="1" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+               	</field>     
             </field>
         </record>
     </data>

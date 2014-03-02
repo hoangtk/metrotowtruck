@@ -43,19 +43,6 @@ class purchase_order(osv.osv):
         so_obj = self.pool.get('sale.order')
         return so_obj._get_order(cr, uid, ids, context=context)
 
-    def _get_amount(self, cr, uid, ids, fields, args, context=None):
-        res = {}
-        for order in self.browse(cr, uid, ids, context=context):
-            #TODO add support when payment is linked to many order
-            paid_amount = 0
-            for line in order.payment_ids:    
-                paid_amount += line.debit - line.credit
-            res[order.id] = {
-                    'amount_paid': paid_amount, 
-                    'residual': order.amount_total - paid_amount,
-                    }
-        return res
-
     def _pay_info(self, cr, uid, ids, field_names=None, arg=False, context=None):
         """ Finds the payment mount and set the paid flag
         @return: Dictionary of values
@@ -74,7 +61,13 @@ class purchase_order(osv.osv):
             #check the prepaymenys
             for line in purchase.payment_ids:    
 #                pre_paid += line.debit - line.credit
-                pre_paid += line.amount_residual
+                if not line.reconcile_id:
+                    if not line.reconcile_partial_id:
+                        pre_paid += line.amount_residual
+                    else:
+                        #if move is partial reconciled, then only the amount_residual is negative then this line is also need more lines to reconcile it
+                        if line.amount_residual > 0:
+                             pre_paid += line.amount_residual
                 
             #check the invoice paid            
             for invoice in purchase.invoice_ids:

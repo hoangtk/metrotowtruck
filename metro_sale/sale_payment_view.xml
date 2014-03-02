@@ -32,7 +32,7 @@
 	                    <group name="payments" colspan="4">
 	                        <field name="payment_moves" nolabel="1" widget="one2many_list">
 	                            <tree string="Payment Moves" create="false" edit="false" delete="true">
-	                                <field name="name"/>
+	                                <field name="name" string="Description"/>
 	                                <field name="journal_id" string="Payment Method"/>
 	                                <field name="amount" string="Paid Amount"/>
 	                                <field name="date" string="Date"/>

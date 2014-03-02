@@ -37,7 +37,7 @@
                 	<field name="is_sent_supplier"/>
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
-                	<field name="amount_paid"/>
+                	<!-- <field name="amount_paid"/> -->
                 	<field name="receipt_number"/>
                 	<field name="create_uid"/>
                 	<!-- <field name="paid_done"/> -->
