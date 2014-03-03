@@ -15,21 +15,32 @@
             <field name="arch" type="xml">            	            
                 <button name="purchase_approve" position="after">
                   <button name="%(open_pay_po)d"
-                      string="Register Payments"
+                      string="Apply Advance Payments"
                       type="action" states="approved" groups="account.group_account_invoice"/>
                 </button>
                 <page string="Incoming Shipments &amp; Invoices" position="after">
-                	<page string="Pre Payments"> 
-	                    <group name="payments" string="Payments" colspan="4">
-	                        <field name="payment_ids" nolabel="1">
-	                            <tree string="Payment">
+                	<page string="Payments"> 
+                		<group name="advance_payments" string="Advance Payments" colspan="4">
+	                        <field name="payment_moves" nolabel="1" widget="one2many_list">
+	                            <tree string="Advance Payments">
+	                                <field name="name" string="Description"/>
+	                                <field name="journal_id" string="Payment Method"/>
+	                                <field name="amount" string="Paid Amount"/>
+	                                <field name="date" string="Date"/>
+	                                <field name="state"/>
+	                            </tree>
+	                        </field>
+                        </group>
+                		<group name="invoice_payments" string="Invoice Payments" colspan="4">
+	                        <field name="inv_pay_ids" nolabel="1">
+	                            <tree string="Invoice Payments">
 	                                <field name="name" string="Description"/>
 	                                <field name="journal_id" string="Payment Method"/>
 	                                <field name="debit" string="Paid Amount"/>
 	                                <field name="date" string="Date"/>
 	                            </tree>
 	                        </field>
-	                    </group>
+                        </group>
                     </page>
                 </page>
                	<field name="amount_tax" position="after">

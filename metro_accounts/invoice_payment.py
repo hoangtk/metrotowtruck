@@ -22,7 +22,30 @@ class account_invoice(osv.osv):
                 for payment in order.payment_ids:
                     payments.append(payment.id)
             result[invoice.id] = payments
-        return result       
+        return result 
+
+    def _compute_lines(self, cr, uid, ids, name, args, context=None):
+        result = {}
+        for invoice in self.browse(cr, uid, ids, context=context):
+            src = []
+            lines = []
+            if invoice.move_id:
+                for m in invoice.move_id.line_id:
+                    temp_lines = []
+                    if m.reconcile_id:
+                        #only include the account move with cash/bank journal
+                        temp_lines = map(lambda x: not (x.purchase_ids or x.sale_ids) and x.id, m.reconcile_id.line_id)
+                    elif m.reconcile_partial_id:
+                        #only include the account move with cash/bank journal
+                        temp_lines = map(lambda x: not (x.purchase_ids or x.sale_ids) and x.id, m.reconcile_partial_id.line_partial_ids)
+#                    lines += [x for x in temp_lines if x not in lines]
+                    lines += [x for x in temp_lines if (x and x not in lines)]
+                    src.append(m.id)
+
+            lines = filter(lambda x: x not in src, lines)
+            
+            result[invoice.id] = lines
+        return result          
     _columns={
         'sale_ids': fields.many2many('sale.order', 'sale_order_invoice_rel', 'invoice_id', 'order_id', 'Sale Orders', readonly=True,),
         'sale_payment_ids': fields.function(_sale_payments, relation='account.move.line', type="many2many", string='Sale Payments'),
@@ -30,6 +53,8 @@ class account_invoice(osv.osv):
         'purchase_ids': fields.many2many('purchase.order', 'purchase_invoice_rel', 'invoice_id', 'purchase_id', 'Purchase Orders', readonly=True,),
         'purchase_payment_ids': fields.function(_purchase_payments, relation='account.move.line', type="many2many", string='Purchase Payments'),
         'auto_reconcile_purchase_pay': fields.boolean('Auto Reconcile Purchase Payment',help='Auto reconcile the purchase order payments when valid the invoice'),
+        #the invoice payment ids
+        'payment_ids': fields.function(_compute_lines, relation='account.move.line', type="many2many", string='Payments'),
     }
     _defaults={'auto_reconcile_sale_pay':True,'auto_reconcile_purchase_pay':True}
     
@@ -115,7 +140,7 @@ class account_invoice(osv.osv):
         date = fields.datetime.now()
         period_id = period_obj.find(cr, uid, dt=date, context=context)[0]
         period = period_obj.browse(cr, uid, period_id, context=context)
-        move_name = inv.name + ' Prepayment Auto Reconciliation'
+        move_name = inv.name + ' Advance Payments Auto Reconciliation'
         move_vals = {'name': move_name,
                 'journal_id': journal.id,
                 'date': date,

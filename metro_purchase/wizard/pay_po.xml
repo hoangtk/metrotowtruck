@@ -22,7 +22,7 @@
         </record>
 
         <record id="open_pay_po" model="ir.actions.act_window">
-            <field name="name">Pay Sale Order</field>
+            <field name="name">Advance Purchase Payment</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">pay.po</field>
             <field name="view_type">form</field>

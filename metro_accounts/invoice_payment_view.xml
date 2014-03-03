@@ -49,9 +49,9 @@
                             <tree string="Payment">
                                 <field name="name"/>
                                 <field name="journal_id" string="Payment Method"/>
-                                <field name="credit" string="Paid Amount"/>
+                                <field name="debit" string="Paid Amount"/>
                                 <field name="date" string="Date"/>
-                                <!-- <field name="amount_residual"/> -->
+                                <field name="amount_residual"/>
                                 <field name="reconcile_id"/>
                                 <field name="reconcile_partial_id"/>
                             </tree>

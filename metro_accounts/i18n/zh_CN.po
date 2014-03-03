@@ -25,3 +25,74 @@ msgstr "发票号"
 #: view:account.invoice:0
 msgid "Ask Refund"
 msgstr "退款"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Sale Advance Payments"
+msgstr "销售预付款"
+
+#. module: metro_purchase
+#: field:purchase.order,amount_paid:0
+msgid "Amount Paid"
+msgstr "已付"
+
+
+#. module: metro_accounts
+#: field:account.invoice,auto_reconcile_purchase_pay:0
+msgid "Auto Reconcile Purchase Payment"
+msgstr "自动核销预付款"
+
+#. module: metro_accounts
+#: field:account.invoice,auto_reconcile_sale_pay:0
+msgid "Auto Reconcile Sale Payment"
+msgstr "自动核销预付款"
+
+#. module: metro_accounts
+#: help:account.invoice,auto_reconcile_purchase_pay:0
+msgid "Auto reconcile the purchase order payments when valid the invoice"
+msgstr "Auto reconcile the purchase order payments when valid the invoice"
+
+#. module: metro_accounts
+#: help:account.invoice,auto_reconcile_sale_pay:0
+msgid "Auto reconcile the sale order payments when valid the invoice"
+msgstr "Auto reconcile the sale order payments when valid the invoice"
+
+#. modules: metro_accounts
+#: view:account.invoice:0
+msgid "Date"
+msgstr "日期"
+
+#. modules: metro_accounts
+#: view:account.invoice:0
+msgid "Paid Amount"
+msgstr "金额"
+
+#. module: metro_accounts
+#: field:account.invoice,purchase_payment_ids:0
+msgid "Purchase Payments"
+msgstr "采购预付款"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Reconcile Advance Payments"
+msgstr "核销预付款"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Sale Advance Payments"
+msgstr "销售预付款"
+
+#. module: metro_accounts
+#: field:account.invoice,sale_payment_ids:0
+msgid "Sale Payments"
+msgstr "销售预付款"
+
+#. modules: metro_accounts
+#: view:account.invoice:0
+msgid "Payment Method"
+msgstr "付款方式"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Purchase Advance Payments"
+msgstr "采购预付款"
