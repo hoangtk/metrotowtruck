@@ -262,6 +262,11 @@ msgstr "拒绝原因"
 msgid "Paid Amount"
 msgstr "已付金额"
 
+#. modules: metro_purchase
+#: view:account.invoice:0
+msgid "Paid Amount"
+msgstr "金额"
+
 #. module: metro_purchase
 #: report:purchase.order.metro:0
 msgid "Net Price"
@@ -734,7 +739,10 @@ msgid "Canceled  Requisition"
 msgstr "取消申请"
 
 #. module: metro_purchase
-#: view:confirm.msg:0 view:pur.req:0 view:pur.req.po:0
+#: view:confirm.msg:0
+#: view:pay.po:0
+#: view:pur.req:0
+#: view:pur.req.po:0
 msgid "Cancel"
 msgstr "取消"
 
@@ -1300,3 +1308,99 @@ msgstr "变更被拒绝"
 #: selection:purchase.order.line,state:0
 msgid "Approved"
 msgstr "已批准"
+
+#. module: metro_purchase
+#: model:ir.actions.act_window,name:metro_purchase.open_pay_po
+msgid "Advance Purchase Payment"
+msgstr "采购预付款"
+
+#. module: metro_purchase
+#: field:pay.po,amount_max:0
+msgid "Max Amount"
+msgstr "最大金额"
+
+#. module: metro_purchase
+#: field:pay.po,amount:0
+msgid "Amount"
+msgstr "金额"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Apply Advance Payments"
+msgstr "登记预付款"
+
+#. module: metro_purchase
+#: field:purchase.order,residual:0
+msgid "Balance"
+msgstr "余额"
+
+#. module: metro_purchase
+#: field:purchase.order.line,can_change_price:0
+msgid "Can Change Price"
+msgstr "允许改价格"
+
+#. module: metro_purchase
+#: field:purchase.order.line,can_change_product:0
+msgid "Can Change Product"
+msgstr "允许改产品"
+
+
+#. module: metro_purchase
+#: field:pay.po,description:0
+#: view:purchase.order:0
+msgid "Description"
+msgstr "描述"
+
+#. modules: metro_purchase
+#: view:purchase.order:0
+msgid "Date"
+msgstr "日期"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+#: field:purchase.order,inv_pay_ids:0
+msgid "Invoice Payments"
+msgstr "凭据付款"
+
+#. module: metro_purchase
+#: constraint:pay.po:0
+msgid "Pay amount only can be between zero and the balance."
+msgstr "付款金额只能介于零和余额之间."
+
+#. modules: metro_purchase
+#: field:pay.po,journal_id:0
+#: view:purchase.order:0
+msgid "Payment Method"
+msgstr "付款方式"
+
+#. module: metro_purchase
+#: field:purchase.order,payment_moves:0
+msgid "Payment Moves"
+msgstr "付款凭证"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Total Paid"
+msgstr "已付"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Payments"
+msgstr "付款"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+#: field:purchase.order,payment_ids:0
+msgid "Advance Payments"
+msgstr "预付款"
+
+
+#. module: metro_purchase
+#: view:pay.po:0
+msgid "Pay"
+msgstr "付款"
+
+#. module: metro_purchase
+#: field:pay.po,date:0
+msgid "付款日期"
+msgstr "付款日期"

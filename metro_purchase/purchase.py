@@ -68,32 +68,6 @@ class purchase_order(osv.osv):
             else:
                 res[purchase.id] = 0.0
         return res    
-
-    def _pay_info(self, cr, uid, ids, field_names=None, arg=False, context=None):
-        """ Finds the payment mount and set the paid flag
-        @return: Dictionary of values
-        """
-        if not field_names:
-            field_names = []
-        if context is None:
-            context = {}
-        res = {}
-        for id in ids:
-            res[id] = {}.fromkeys(field_names, 0.0)
-
-        for purchase in self.browse(cr, uid, ids, context=context):
-            tot = 0.0
-            paid = 0.0
-            inv_paid = 0.0
-            for invoice in purchase.invoice_ids:
-                if invoice.state not in ('draft','cancel'):
-                    inv_paid += (invoice.amount_total - invoice.residual)
-            for f in field_names:
-                if f == 'amount_paid':
-                    res[purchase.id][f] = inv_paid
-                if f == 'paid_done':
-                    res[purchase.id][f] = (purchase.amount_total == inv_paid)
-        return res
         
     _columns = {
         'warehouse_id': fields.many2one('stock.warehouse', 'Destination Warehouse',states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),            
@@ -106,8 +80,6 @@ class purchase_order(osv.osv):
         'taxes_id': fields.many2many('account.tax', 'po_tax', 'po_id', 'tax_id', 'Taxes', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced', type='float'),
-        'amount_paid': fields.function(_pay_info, multi='pay_info', string='Paid Amount', type='float', readonly=True),
-        'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),
         'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),

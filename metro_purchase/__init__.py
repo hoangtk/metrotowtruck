@@ -23,3 +23,4 @@ import purchase
 import report
 import wizard
 import change_log
+import purchase_payment
