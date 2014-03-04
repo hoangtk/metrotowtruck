@@ -39,6 +39,8 @@ class stock_import_inventory(osv.osv_memory):
     _columns = {
         'location_id': fields.many2one('stock.location', 'Location', required=True),
         'import_file': fields.binary('File', filters="*.xls"),
+        #to consider the product current inventory or not, if yes then add the current inventory to the upload excel quantity as the quantity to do physical inventory
+        'consider_inventory': fields.boolean('Consider Current Inventory', select=True), 
         'all_done': fields.boolean('All Data Imported', readonly=True, select=True), 
         'result_line': fields.one2many('stock.import.inventory.result', 'import_id', 'Importing Result', readonly=True), 
     }
@@ -129,8 +131,11 @@ class stock_import_inventory(osv.osv_memory):
                 error_rows.append({'row':i+1,'default_code':'','msg':_('System can not find this product')})
                 continue
             else:
+                product_qty = row_data[qty_idx]
+                if import_inventory.consider_inventory:
+                    product_qty += prod.qty_available
                 inv_line_data = {'inventory_id':inventory_id,'location_id':location.id,
-                              'product_id':product_id,'product_uom':prod.uom_id.id,'product_qty':row_data[qty_idx]}
+                              'product_id':product_id,'product_uom':prod.uom_id.id,'product_qty':product_qty}
                 inventory_line_obj.create(cr,uid,inv_line_data,context=context)
             #set import success flag
             row_data.append(True)

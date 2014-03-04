@@ -37,7 +37,7 @@
         
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "purchase", "sale_payment_method"],
+    'depends': ["metro", "purchase", "sale_payment_method", "account_prepayment"],
     'data': [
         'wizard/pur_req_po.xml',
         'wizard/confirm_msg.xml',
