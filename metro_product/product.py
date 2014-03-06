@@ -264,9 +264,9 @@ class product_product(osv.osv):
 			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
 		#add  the onhand query
 		for arg in args:
-			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
 			fld_name = arg[0]
 			if fld_name == 'qty_available':
+				ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
 				qtys = self.read(cr,user,ids,[fld_name],context=context)
 				new_ids = []
 				for qty in qtys:
