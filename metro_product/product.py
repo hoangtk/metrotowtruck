@@ -114,6 +114,9 @@ class product_product(osv.osv):
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 		'safe_qty': fields.float('Minimal Inventory'),
 		'safe_warn': fields.boolean('Warn Inventory'),
+		'safe_warn': fields.boolean('Warn Inventory'),
+		'loc_pos_code': fields.char('Storage Position Code',size=16),
+		'is_print_barcode': fields.boolean('Print barcode label'),
 	}
 	_defaults = {
 		'default_code': generate_seq,
@@ -266,6 +269,9 @@ class product_product(osv.osv):
 			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],'副本'),
 		})
 		return super(product_product, self).copy(cr, uid, id, default, context)		
+	def print_barcode(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'is_print_barcode':context.get("print_flag")})
+		return True
 #	def onchange_name(self, cr, uid, ids, value, context):
 #		prods = self.search(cr, uid, [('name', 'like', value),('id','not in',ids)])
 #		if prods:

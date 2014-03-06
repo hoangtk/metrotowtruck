@@ -140,6 +140,7 @@
 	            	<field name="cn_name" string="中国名"/>
 	            </field>
 	            <field name="state" position="after">
+	            	<field name="is_print_barcode"/>
 	            	<field name="create_uid"/>
 	            	<field name="create_date"/>
 	            </field>
@@ -215,6 +216,17 @@
                     <field name="safe_qty"/>
                     <field name="safe_warn"/>
                 </field>
+           		<group name="store" position="replace">
+            		<group name="store" string="Storage Location">
+                        <field name="loc_pos_code"/>
+                        <field name="is_print_barcode"/>
+                	</group>
+               	</group>               
+               	 
+                <div name="buttons" position="inside">
+                	<button name="print_barcode" string="Set Print Flag" type="object" context="{'print_flag':True}"/>
+                	<button name="print_barcode" string="Clear Print Flag" type="object" context="{'print_flag':False}"/>
+                </div>
             </data>
             </field>
 		</record>
@@ -229,6 +241,10 @@
             		<field name="create_uid"/>
             		<field name="create_date"/>
             	</field>
+            	<filter name="filter_to_sell" position="after">
+            		<filter string="Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',True)]"/>
+            		<filter string="No Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',False)]"/>
+            	</filter>
             </field>
         </record>
 <!-- add cn name to kanban view -->        		
