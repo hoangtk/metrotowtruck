@@ -215,7 +215,7 @@
             </data>
             </field>
 		</record>
-		<record id="metro_product_normal_form_view" model="ir.ui.view">
+		<record id="metro_product_stock_view" model="ir.ui.view">
             <field name="name">metro.product.normal.form</field>
             <field name="model">product.product</field>
             <field name="type">form</field>
