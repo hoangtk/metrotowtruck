@@ -206,12 +206,22 @@
 				<xpath expr="//h1" position="after">
                   <label for="cn_name" help="您必须包括所有部件的英文名称为！"/>
                   <field name="cn_name" colspan="4" placeholder="中国名"/>
-               </xpath>
-<!--                
-               <field name="name" position="attributes">
-               		<attribute name="on_change">onchange_name(name,context)</attribute>
-               </field>
-                -->
+               </xpath>  
+               	 
+                <div name="buttons" position="inside">
+                	<button name="print_barcode" string="Set Print Flag" type="object" context="{'print_flag':True}"/>
+                	<button name="print_barcode" string="Clear Print Flag" type="object" context="{'print_flag':False}"/>
+                </div>
+            </data>
+            </field>
+		</record>
+		<record id="metro_product_normal_form_view" model="ir.ui.view">
+            <field name="name">metro.product.normal.form</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="arch" type="xml">
+            <data>	
                 <field name="virtual_available" position="after">
                     <field name="safe_qty"/>
                     <field name="safe_warn"/>
@@ -221,15 +231,11 @@
                         <field name="loc_pos_code"/>
                         <field name="is_print_barcode"/>
                 	</group>
-               	</group>               
-               	 
-                <div name="buttons" position="inside">
-                	<button name="print_barcode" string="Set Print Flag" type="object" context="{'print_flag':True}"/>
-                	<button name="print_barcode" string="Clear Print Flag" type="object" context="{'print_flag':False}"/>
-                </div>
+               	</group>      
             </data>
             </field>
-		</record>
+		</record>	
+
 		
         <record id="metro_product_search_form_view" model="ir.ui.view">
             <field name="name">metro.product.search.form</field>
@@ -244,6 +250,8 @@
             	<filter name="filter_to_sell" position="after">
             		<filter string="Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',True)]"/>
             		<filter string="No Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',False)]"/>
+            		<filter string="No onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;=',0)]"/>
+            		<filter string="Negative onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;',0)]"/>
             	</filter>
             </field>
         </record>

@@ -250,6 +250,8 @@ class product_product(osv.osv):
 		new_args = deal_args(self,args)
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
+		
+#		qty_available
 		#add the available restriction
 		if context and context.get('inv_warn_restrict'):
 			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
@@ -259,7 +261,18 @@ class product_product(osv.osv):
 			for qty in qtys:
 				if qty['virtual_available'] < qty['safe_qty']:
 					new_ids.append(qty['id'])	
-			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)							
+			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
+		#add  the onhand query
+		for arg in args:
+			fld_name = arg[0]
+			if fld_name == 'qty_available':
+				qtys = self.read(cr,user,ids,[fld_name],context=context)
+				new_ids = []
+				for qty in qtys:
+					if eval('%s%s%s'%(qty[fld_name],arg[1],arg[2])):
+						new_ids.append(qty['id'])	
+				ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)	
+				
 		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
 		if not default:
