@@ -1,13 +1,13 @@
 # Translation of OpenERP Server.
 # This file contains the translation of the following modules:
-# 	* metro_purchase
+# 	* metro_product
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-12 07:40+0000\n"
-"PO-Revision-Date: 2013-12-12 15:41+0800\n"
+"POT-Creation-Date: 2014-03-05 06:36+0000\n"
+"PO-Revision-Date: 2014-03-05 14:47+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,15 +17,250 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 
 #. module: metro_product
-#: field:product.product,create_uid:0
-msgid "Creator"
-msgstr "创建人"
+#: model:ir.model,name:metro_product.model_product_attribute
+msgid "product.attribute"
+msgstr "product.attribute"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_set_printflag
+msgid "Set product barcode print flag"
+msgstr "设置产品条码打印标志"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "中国名"
+msgstr "中国名"
+
+#. module: metro_product
+#: model:ir.actions.report.xml,name:metro_product.report_product_label_80_50
+msgid "Prodcut Label 80*50"
+msgstr "Prodcut Label 80*50"
+
+#. module: metro_product
+#: view:product.set.printflag:0
+msgid "Set/Clear Products Barcode Print Flag"
+msgstr "设置/清除产品条码打印标志"
+
+#. module: metro_product
+#: report:product.label.80.50:0
+msgid "Test"
+msgstr "Test"
+
+#. module: metro_product
+#: model:ir.actions.act_window,name:metro_product.metro_action_product_attribute
+#: model:ir.ui.menu,name:metro_product.metro_menu_product_attribute_metro
+#: model:ir.ui.menu,name:metro_product.metro_menu_product_attribute_product
+msgid "Product Attribute"
+msgstr "Product Attribute"
+
+#. module: metro_product
+#: field:product.product,safe_warn:0
+msgid "Warn Inventory"
+msgstr "库存报警"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_product
+#: field:product.attribute.line,product_id:0 view:product.product:0
+msgid "Product"
+msgstr "产品"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_category
+msgid "Product Category"
+msgstr "产品类别"
+
+#. module: metro_product
+#: sql_constraint:product.attribute.line:0
+msgid "You can use an attribute on a Product once !"
+msgstr "You can use an attribute on a Product once !"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_sequence
+msgid "product.sequence"
+msgstr "product.sequence"
 
 #. module: metro_product
 #: field:product.product,create_date:0
 msgid "Creation Date"
 msgstr "创建时间"
 
+#. module: metro_product
+#: view:product.product:0
+msgid "Storage Location"
+msgstr "存储位置"
+
+#. module: metro_product
+#: field:product.product,loc_pos_code:0
+msgid "Storage Position Code"
+msgstr "存放位置"
+
+#. module: metro_product
+#: field:product.attribute,attribute_id:0
+msgid "Person Name"
+msgstr "Person Name"
+
+#. module: metro_product
+#: field:product.product,safe_qty:0
+msgid "Minimal Inventory"
+msgstr "最小库存"
+
+#. module: metro_product
+#: model:ir.ui.menu,name:metro_product.metro_menu_product_attribute_category_metro
+msgid "Product Attribute Category"
+msgstr "Product Attribute Category"
+
+#. module: metro_product
+#: field:product.sequence,active:0
+msgid "Active"
+msgstr "Active"
+
+#. module: metro_product
+#: field:product.product,cn_name:0
+msgid "Chinese Name"
+msgstr "中文名"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_attribute_line
+msgid "product.attribute.line"
+msgstr "product.attribute.line"
+
+#. module: metro_product
+#: field:product.attribute,category_ids:0
+msgid "Categories"
+msgstr "类别"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "Print Barcode"
+msgstr "打印条码"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "您必须包括所有部件的英文名称为！"
+msgstr "您必须包括所有部件的英文名称为！"
+
+#. module: metro_product
+#: field:product.attribute,name:0
+msgid "Name"
+msgstr "名称"
+
+#. module: metro_product
+#: model:ir.actions.act_window,name:metro_product.action_view_product_set_printflag
+msgid "Set/Clear Print Flag"
+msgstr "设置/清除打印标志"
+
+#. module: metro_product
+#: view:product.product:0 view:product.set.printflag:0
+msgid "Clear Print Flag"
+msgstr "清除打印标志"
+
+#. module: metro_product
+#: view:product.attribute.line:0 field:product.attribute.line,attr_value:0
+msgid "Value"
+msgstr "Value"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_template
+msgid "Product Template"
+msgstr "产品模板"
+
+#. module: metro_product
+#: view:product.product:0 view:product.set.printflag:0
+msgid "Set Print Flag"
+msgstr "设置打印标志"
+
+#. module: metro_product
+#: model:ir.ui.menu,name:metro_product.metro_menu_product
+msgid "Products"
+msgstr "产品"
+
+#. module: metro_product
+#: view:product.set.printflag:0
+msgid "Are you sure you want to set or clear these products barcode print flag"
+msgstr ""
+"Are you sure you want to set or clear these products barcode print flag"
+
+#. module: metro_product
+#: view:product.attribute.line:0 view:product.category:0
+#: field:product.category,attribute:0 view:product.product:0
+#: field:product.product,attribute_line:0
+msgid "Attributes"
+msgstr "属性"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "No Print Barcode"
+msgstr "不打印条码"
+
+#. module: metro_product
+#: model:ir.actions.act_window,name:metro_product.metro_action_product_sequence
+#: model:ir.ui.menu,name:metro_product.metro_menu_product_sequence
+#: view:product.sequence:0
+msgid "Product Sequence"
+msgstr "Product Sequence"
+
+#. module: metro_product
+#: model:ir.model,name:metro_product.model_product_attribute_category
+msgid "product.attribute.category"
+msgstr "product.attribute.category"
+
+#. module: metro_product
+#: field:product.sequence,suffix:0
+msgid "Suffix"
+msgstr "Suffix"
+
+#. module: metro_product
+#: field:product.product,create_uid:0
+msgid "Creator"
+msgstr "创建人"
+
+#. module: metro_product
+#: view:product.attribute:0 view:product.attribute.line:0
+#: field:product.attribute.line,attribute_id:0 view:product.category:0
+msgid "Attribute"
+msgstr "属性"
+
+#. module: metro_product
+#: field:product.product,is_print_barcode:0
+msgid "Print barcode label"
+msgstr "打印条码标签"
+
+#. module: metro_product
+#: view:product.product:0
+msgid ""
+"Only press this button to create a new part number! 只有按这个按钮来创建一个"
+"新的零件编号！"
+msgstr ""
+"Only press this button to create a new part number! 只有按这个按钮来创建一个"
+"新的零件编号！"
+
+#. module: metro_product
+#: model:ir.actions.act_window,name:metro_product.action_product_inventory_warning
+#: model:ir.ui.menu,name:metro_product.menu_product_inventory_warning
+msgid "Inventory Warning"
+msgstr "库存报警"
+
+#. module: metro_product
+#: field:product.sequence,prefix:0
+msgid "Prefix"
+msgstr "前缀"
+
+#. module: metro_product
+#: view:product.set.printflag:0
+msgid "Cancel"
+msgstr "取消"
+
+#. module: metro_product
+#: field:product.sequence,separator:0
+msgid "Separator"
+msgstr "Separator"
+
+#. module: metro_product
+#: view:product.set.printflag:0
+msgid "or"
+msgstr "or"
+
+#==================added manually - begin ==================#
 #. module: metro_product
 #: code:addons/metro_product/product.py:0
 msgid "Product Chinese Name must be unique!"
@@ -37,15 +272,6 @@ msgid "Product Name must be unique!"
 msgstr "产品名称重复!"
 
 #. module: metro_product
-#: field:product.product,safe_qty:0
-msgid "Minimal Inventory"
-msgstr "最小库存"
-
-#. module: metro_product
-#: field:product.product,safe_warn:0
-msgid "Warn Inventory"
-msgstr "库存报警"
-
-#: model:ir.ui.menu,name:metro_product.menu_product_inventory_warning
-msgid "Inventory Warning"
-msgstr "库存报警"
+#: view:product.set.printflag:0
+msgid "Are you sure you want to set or clear these selected products barcode print flag?"
+msgstr "你确信要合并/清除所选择产品的条码打印标志吗？"

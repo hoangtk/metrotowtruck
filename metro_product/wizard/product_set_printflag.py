@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#    Copyright (C) 2010 OpenERP s.a. (<http://openerp.com>).
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,36 +18,21 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro Stock',
-    'version': '1.0',
-    'category': 'Metro',
-    'description': """
-    
-        Metro Stock Extension:  
-        
-        1.Add Material Request function
-        
-        (Ported to OpenERP v 7.0 by Metro Tower Trucks.
-        
-        """,
-        
-        
-    'author': 'Metro Tower Trucks',
-    'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "metro_purchase","metro_sale","stock"],
-    'data': [
-        'security/ir.model.access.csv',
-        'wizard/stock_import_inventory_view.xml',        
-        'stock_view.xml',
-        'stock_sequence.xml',
-        'stock_wh_loc.xml',        
-    ],
-    'test': [],
-    'demo': [],
-#    "js": ["static/src/js/metro_stock.js"],
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-}
+
+import time
+from openerp.osv import fields, osv
+from openerp.osv.orm import browse_record, browse_null
+from openerp.tools.translate import _
+
+class confirm_msg(osv.osv_memory):
+    _name = "product.set.printflag"
+    _description = "Set product barcode print flag"
+
+    def set_print_flag(self, cr, uid, ids, context=None):
+        active_ids = context and context.get('active_ids', [])
+        active_model = context and context.get('active_model', [])
+        data =  self.browse(cr, uid, ids, context=context)[0]
+        self.pool.get(active_model).print_barcode(cr, uid, active_ids, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+confirm_msg()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

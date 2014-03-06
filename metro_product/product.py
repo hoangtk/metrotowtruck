@@ -114,6 +114,9 @@ class product_product(osv.osv):
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 		'safe_qty': fields.float('Minimal Inventory'),
 		'safe_warn': fields.boolean('Warn Inventory'),
+		'safe_warn': fields.boolean('Warn Inventory'),
+		'loc_pos_code': fields.char('Storage Position Code',size=16),
+		'is_print_barcode': fields.boolean('Print barcode label'),
 	}
 	_defaults = {
 		'default_code': generate_seq,
@@ -247,6 +250,8 @@ class product_product(osv.osv):
 		new_args = deal_args(self,args)
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
+		
+#		qty_available
 		#add the available restriction
 		if context and context.get('inv_warn_restrict'):
 			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
@@ -256,7 +261,19 @@ class product_product(osv.osv):
 			for qty in qtys:
 				if qty['virtual_available'] < qty['safe_qty']:
 					new_ids.append(qty['id'])	
-			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)							
+			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
+		#add  the onhand query
+		for arg in args:
+			fld_name = arg[0]
+			if fld_name == 'qty_available':
+				ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
+				qtys = self.read(cr,user,ids,[fld_name],context=context)
+				new_ids = []
+				for qty in qtys:
+					if eval('%s%s%s'%(qty[fld_name],arg[1],arg[2])):
+						new_ids.append(qty['id'])	
+				ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)	
+				
 		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
 		if not default:
@@ -266,6 +283,9 @@ class product_product(osv.osv):
 			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],'副本'),
 		})
 		return super(product_product, self).copy(cr, uid, id, default, context)		
+	def print_barcode(self,cr,uid,ids,context=None):
+		self.write(cr,uid,ids,{'is_print_barcode':context.get("print_flag")})
+		return True
 #	def onchange_name(self, cr, uid, ids, value, context):
 #		prods = self.search(cr, uid, [('name', 'like', value),('id','not in',ids)])
 #		if prods:
