@@ -3465,7 +3465,7 @@ var commands = {
     }
 };
 instance.web.form.FieldOne2Many = instance.web.form.AbstractField.extend({
-    multi_selection: false,
+    multi_selection: true,
     disable_utility_classes: true,
     init: function(field_manager, node) {
         this._super(field_manager, node);

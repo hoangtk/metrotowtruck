@@ -460,7 +460,7 @@ msgstr "备注..."
 #: model:ir.actions.act_window,name:metro_stock.action_inventory_line_tree
 #: model:ir.ui.menu,name:metro_stock.menu_action_inventory_line
 msgid "Physical Inventory Lines"
-msgstr "盘点行"
+msgstr "实物盘点产品"
 
 #. module: metro_stock
 #: field:material.request.line,product_packaging:0
