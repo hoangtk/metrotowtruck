@@ -364,6 +364,10 @@ class stock_picking_in(osv.osv):
 
 class stock_inventory(osv.osv):
     _inherit = "stock.inventory"
+    _columns = {
+        'comments': fields.text('Comments', size=64, readonly=False, states={'done': [('readonly', True)]}),
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+    }
     def unlink(self, cr, uid, ids, context=None):
         inventories = self.read(cr, uid, ids, ['state'], context=context)
         unlink_ids = []
