@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-31 03:22+0000\n"
-"PO-Revision-Date: 2013-12-31 11:31+0800\n"
+"POT-Creation-Date: 2014-03-07 11:35+0000\n"
+"PO-Revision-Date: 2014-03-07 19:39+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -28,12 +28,22 @@ msgid "To Do"
 msgstr "准备处理"
 
 #. module: metro_stock
+#: help:material.request.line,date_expected:0
+msgid "Scheduled date for the processing of this move"
+msgstr "预计进行的调拨时间"
+
+#. module: metro_stock
 #: selection:material.request,move_type:0
 msgid "All at once"
 msgstr "一次性"
 
 #. module: metro_stock
-#: view:material.request.line:0
+#: field:stock.inventory,comments:0
+msgid "Comments"
+msgstr "备注"
+
+#. module: metro_stock
+#: view:material.request.line:0 view:stock.inventory.line:0
 msgid "Group By..."
 msgstr "分组..."
 
@@ -59,9 +69,20 @@ msgid "Orders processed Today or planned for Today"
 msgstr "今天处理过的或者计划今天处理的订单"
 
 #. module: metro_stock
+#: view:stock.inventory.line:0
+msgid "Search Inventory"
+msgstr "搜索库存"
+
+#. module: metro_stock
 #: field:material.request,stock_journal_id:0
 msgid "Stock Journal"
 msgstr "库存帐薄"
+
+#. module: metro_stock
+#: view:stock.import.inventory:0
+msgid ""
+"Data were imported partially, please correct your data by the messages below"
+msgstr "部分数据已经导入,请根据下面的消息更正你的数据"
 
 #. module: metro_stock
 #: field:material.request,message_unread:0
@@ -85,22 +106,23 @@ msgid "All Data were imported successfully!"
 msgstr "全部数据导入成功!"
 
 #. module: metro_stock
-#: view:stock.import.inventory:0
-msgid "Data were imported partially, please correct your data by the messages below"
-msgstr "部分数据已经导入,请根据下面的消息更正你的数据"
-
-#. module: metro_stock
 #: help:material.request.line,state:0
 msgid ""
 "* New: When the stock move is created and not yet confirmed.\n"
-"* Waiting Another Move: This state can be seen when a move is waiting for another one, for example in a chained flow.\n"
-"* Waiting Availability: This state is reached when the procurement resolution is not straight forward. It may need the scheduler to run, a component to me manufactured...\n"
+"* Waiting Another Move: This state can be seen when a move is waiting for "
+"another one, for example in a chained flow.\n"
+"* Waiting Availability: This state is reached when the procurement "
+"resolution is not straight forward. It may need the scheduler to run, a "
+"component to me manufactured...\n"
 "* Available: When products are reserved, it is set to 'Available'.\n"
 "* Done: When the shipment is processed, the state is 'Done'."
 msgstr ""
 "* New: When the stock move is created and not yet confirmed.\n"
-"* Waiting Another Move: This state can be seen when a move is waiting for another one, for example in a chained flow.\n"
-"* Waiting Availability: This state is reached when the procurement resolution is not straight forward. It may need the scheduler to run, a component to me manufactured...\n"
+"* Waiting Another Move: This state can be seen when a move is waiting for "
+"another one, for example in a chained flow.\n"
+"* Waiting Availability: This state is reached when the procurement "
+"resolution is not straight forward. It may need the scheduler to run, a "
+"component to me manufactured...\n"
 "* Available: When products are reserved, it is set to 'Available'.\n"
 "* Done: When the shipment is processed, the state is 'Done'."
 
@@ -108,6 +130,11 @@ msgstr ""
 #: field:material.request.line,prodlot_id:0
 msgid "Serial Number"
 msgstr "序列号"
+
+#. module: metro_stock
+#: field:stock.import.inventory,consider_inventory:0
+msgid "Consider Current Inventory"
+msgstr "考虑现有库存"
 
 #. module: metro_stock
 #: field:material.request.line,scrapped:0
@@ -118,6 +145,11 @@ msgstr "破损"
 #: field:material.request.line,product_qty:0
 msgid "Quantity"
 msgstr "数量"
+
+#. module: metro_stock
+#: field:material.request.line,price_subtotal:0
+msgid "Subtotal"
+msgstr "小计"
 
 #. module: metro_stock
 #: view:material.request:0 field:material.request.line,picking_id:0
@@ -150,8 +182,12 @@ msgstr "备注"
 
 #. module: metro_stock
 #: help:material.request.line,partner_id:0
-msgid "Optional address where goods are to be delivered, specifically used for allotment"
-msgstr "Optional address where goods are to be delivered, specifically used for allotment"
+msgid ""
+"Optional address where goods are to be delivered, specifically used for "
+"allotment"
+msgstr ""
+"Optional address where goods are to be delivered, specifically used for "
+"allotment"
 
 #. module: metro_stock
 #: selection:material.request,state:0
@@ -196,8 +232,12 @@ msgstr "产品ID"
 
 #. module: metro_stock
 #: help:material.request.line,price_unit:0
-msgid "Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"
-msgstr "Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"
+msgid ""
+"Technical field used to record the product cost set by the user during a "
+"picking confirmation (when average price costing method is used)"
+msgstr ""
+"Technical field used to record the product cost set by the user during a "
+"picking confirmation (when average price costing method is used)"
 
 #. module: metro_stock
 #: view:stock.inventory:0
@@ -221,13 +261,17 @@ msgstr "入库"
 
 #. module: metro_stock
 #: help:material.request,message_summary:0
-msgid "Holds the Chatter summary (number of messages, ...). This summary is directly in html format in order to be inserted in kanban views."
-msgstr "Holds the Chatter summary (number of messages, ...). This summary is directly in html format in order to be inserted in kanban views."
+msgid ""
+"Holds the Chatter summary (number of messages, ...). This summary is "
+"directly in html format in order to be inserted in kanban views."
+msgstr ""
+"Holds the Chatter summary (number of messages, ...). This summary is "
+"directly in html format in order to be inserted in kanban views."
 
 #. module: metro_stock
 #: view:stock.inventory:0
 msgid "draft"
-msgstr "draft"
+msgstr "草稿"
 
 #. module: metro_stock
 #: field:stock.import.inventory,result_line:0
@@ -260,9 +304,9 @@ msgid "Stock moves that have been processed"
 msgstr "处理完成的移库"
 
 #. module: metro_stock
-#: field:material.request.line,purchase_line_id:0
-msgid "Purchase Order Line"
-msgstr "采购单行"
+#: view:stock.inventory:0 view:stock.inventory.line:0
+msgid "Confirmed"
+msgstr "已确认"
 
 #. module: metro_stock
 #: view:material.request.line:0
@@ -273,6 +317,11 @@ msgstr "确认"
 #: field:material.request,invoice_state:0
 msgid "Invoice Control"
 msgstr "发票控制"
+
+#. module: metro_stock
+#: field:stock.return.picking,reason:0
+msgid "Return Reason"
+msgstr "退货原因"
 
 #. module: metro_stock
 #: field:material.request.line,priority:0
@@ -368,6 +417,11 @@ msgid "It specifies goods to be deliver partially or all at once"
 msgstr "表明货物是一次还是分批交付"
 
 #. module: metro_stock
+#: model:ir.model,name:metro_stock.model_stock_return_picking
+msgid "Return Picking"
+msgstr "退回分拣"
+
+#. module: metro_stock
 #: view:material.request.line:0
 msgid "Force Availability"
 msgstr "强制可用"
@@ -388,14 +442,25 @@ msgid "Serial number is used to put a serial number on the production"
 msgstr "序列号是产品的唯一编号"
 
 #. module: metro_stock
-#: selection:material.request,move_type:0
-msgid "Partial"
-msgstr "部分"
+#: field:material.request.line,auto_validate:0
+msgid "Auto Validate"
+msgstr "自动审核"
 
 #. module: metro_stock
 #: field:material.request.line,location_dest_id:0
 msgid "Destination Location"
 msgstr "目标库位"
+
+#. module: metro_stock
+#: view:stock.inventory:0
+msgid "Comments..."
+msgstr "备注..."
+
+#. module: metro_stock
+#: model:ir.actions.act_window,name:metro_stock.action_inventory_line_tree
+#: model:ir.ui.menu,name:metro_stock.menu_action_inventory_line
+msgid "Physical Inventory Lines"
+msgstr "实物盘点产品"
 
 #. module: metro_stock
 #: field:material.request.line,product_packaging:0
@@ -416,6 +481,16 @@ msgstr "等待其他操作"
 #: help:material.request,origin:0
 msgid "Reference of the document"
 msgstr "订单参考"
+
+#. module: metro_stock
+#: field:stock.change.product.qty,reason:0
+msgid "Changing Reason"
+msgstr "改变原因"
+
+#. module: metro_stock
+#: model:ir.model,name:metro_stock.model_stock_change_product_qty
+msgid "Change Product Quantity"
+msgstr "更改产品数量"
 
 #. module: metro_stock
 #: view:stock.import.inventory:0
@@ -458,9 +533,9 @@ msgid "Cancel Availability"
 msgstr "取消可用"
 
 #. module: metro_stock
-#: help:material.request.line,date_expected:0
-msgid "Scheduled date for the processing of this move"
-msgstr "预计进行的调拨时间"
+#: field:material.request.line,purchase_line_id:0
+msgid "Purchase Order Line"
+msgstr "采购单行"
 
 #. module: metro_stock
 #: field:material.request,max_date:0
@@ -478,9 +553,15 @@ msgid "Internal"
 msgstr "内部"
 
 #. module: metro_stock
-#: selection:material.request,state:0
+#: selection:material.request,state:0 view:stock.inventory:0
+#: view:stock.inventory.line:0
 msgid "Draft"
 msgstr "草稿"
+
+#. module: metro_stock
+#: view:stock.picking.in:0
+msgid "bold:state not in ('cancel', 'done') and current_date > min_date"
+msgstr "bold:state not in ('cancel', 'done') and current_date > min_date"
 
 #. module: metro_stock
 #: selection:material.request,invoice_state:0
@@ -509,36 +590,60 @@ msgid "Stock moves that are Available (Ready to process)"
 msgstr "库存调拨可用（已准备好）"
 
 #. module: metro_stock
+#: field:stock.inventory.line,image_medium:0
+msgid "unknown"
+msgstr "unknown"
+
+#. module: metro_stock
 #: help:material.request.line,location_id:0
-msgid "Sets a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations."
-msgstr "如果您的产品在一个固定的库位设置一个库位,如果您转包生产这可以是业务伙伴的库位."
+msgid ""
+"Sets a location if you produce at a fixed location. This can be a partner "
+"location if you subcontract the manufacturing operations."
+msgstr ""
+"如果您的产品在一个固定的库位设置一个库位,如果您转包生产这可以是业务伙伴的库"
+"位."
+
+#. module: metro_stock
+#: field:sale.product,name:0
+msgid "ID"
+msgstr "ID"
 
 #. module: metro_stock
 #: help:material.request,state:0
 msgid ""
 "\n"
-"            * Draft: not confirmed yet and will not be scheduled until confirmed\n"
+"            * Draft: not confirmed yet and will not be scheduled until "
+"confirmed\n"
 "\n"
-"            * Waiting Another Operation: waiting for another move to proceed before it becomes automatically available (e.g. in Make-To-Order flows)\n"
+"            * Waiting Another Operation: waiting for another move to proceed "
+"before it becomes automatically available (e.g. in Make-To-Order flows)\n"
 "\n"
-"            * Waiting Availability: still waiting for the availability of products\n"
+"            * Waiting Availability: still waiting for the availability of "
+"products\n"
 "\n"
-"            * Ready to Transfer: products reserved, simply waiting for confirmation.\n"
+"            * Ready to Transfer: products reserved, simply waiting for "
+"confirmation.\n"
 "\n"
-"            * Transferred: has been processed, can't be modified or cancelled anymore\n"
+"            * Transferred: has been processed, can't be modified or "
+"cancelled anymore\n"
 "\n"
 "            * Cancelled: has been cancelled, can't be confirmed anymore"
 msgstr ""
 "\n"
-"            * Draft: not confirmed yet and will not be scheduled until confirmed\n"
+"            * Draft: not confirmed yet and will not be scheduled until "
+"confirmed\n"
 "\n"
-"            * Waiting Another Operation: waiting for another move to proceed before it becomes automatically available (e.g. in Make-To-Order flows)\n"
+"            * Waiting Another Operation: waiting for another move to proceed "
+"before it becomes automatically available (e.g. in Make-To-Order flows)\n"
 "\n"
-"            * Waiting Availability: still waiting for the availability of products\n"
+"            * Waiting Availability: still waiting for the availability of "
+"products\n"
 "\n"
-"            * Ready to Transfer: products reserved, simply waiting for confirmation.\n"
+"            * Ready to Transfer: products reserved, simply waiting for "
+"confirmation.\n"
 "\n"
-"            * Transferred: has been processed, can't be modified or cancelled anymore\n"
+"            * Transferred: has been processed, can't be modified or "
+"cancelled anymore\n"
 "\n"
 "            * Cancelled: has been cancelled, can't be confirmed anymore"
 
@@ -553,9 +658,27 @@ msgid "Is a Follower"
 msgstr "Is a Follower"
 
 #. module: metro_stock
+#: model:ir.model,name:metro_stock.model_sale_product
+msgid "Sale Product"
+msgstr "销售产品"
+
+#. module: metro_stock
+#: field:stock.move,supplier_prod_name:0
+msgid "Supplier Product Name"
+msgstr "供应商产品名称"
+
+#. module: metro_stock
+#: model:ir.model,name:metro_stock.model_stock_inventory_line
+msgid "Inventory Line"
+msgstr "盘点表明细"
+
+#. module: metro_stock
 #: help:material.request.line,date:0
-msgid "Move date: scheduled date until move is done, then date of actual move processing"
-msgstr "调拨日期: 安排的日期直到调拨完成的日期，这日期是调拨实际处理完成的日期."
+msgid ""
+"Move date: scheduled date until move is done, then date of actual move "
+"processing"
+msgstr ""
+"调拨日期: 安排的日期直到调拨完成的日期，这日期是调拨实际处理完成的日期."
 
 #. module: metro_stock
 #: field:material.request,message_summary:0
@@ -573,9 +696,14 @@ msgid "Time"
 msgstr "时间"
 
 #. module: metro_stock
-#: field:material.request.line,auto_validate:0
-msgid "Auto Validate"
-msgstr "自动审核"
+#: view:stock.inventory.line:0
+msgid "Inventory Reference"
+msgstr "Inventory Reference"
+
+#. module: metro_stock
+#: selection:material.request,move_type:0
+msgid "Partial"
+msgstr "部分"
 
 #. module: metro_stock
 #: selection:material.request.line,priority:0
@@ -585,7 +713,7 @@ msgstr "紧急"
 #. module: metro_stock
 #: field:material.request.line,move_dest_id:0
 msgid "Destination Move"
-msgstr "Destination Move"
+msgstr "目标库位"
 
 #. module: metro_stock
 #: view:material.request.line:0
@@ -599,15 +727,20 @@ msgstr "申请类型"
 
 #. module: metro_stock
 #: field:material.request,create_uid:0
-#: field:material.request.line,create_uid:0 field:stock.move,create_uid:0
-#: field:stock.picking,create_uid:0
+#: field:material.request.line,create_uid:0 field:stock.inventory,create_uid:0
+#: field:stock.move,create_uid:0 field:stock.picking,create_uid:0
+#: field:stock.picking.in,create_uid:0
 msgid "Creator"
 msgstr "创建人"
 
 #. module: metro_stock
 #: help:material.request,backorder_id:0
-msgid "If this shipment was split, then this field links to the shipment which contains the already processed part."
-msgstr "If this shipment was split, then this field links to the shipment which contains the already processed part."
+msgid ""
+"If this shipment was split, then this field links to the shipment which "
+"contains the already processed part."
+msgstr ""
+"If this shipment was split, then this field links to the shipment which "
+"contains the already processed part."
 
 #. module: metro_stock
 #: field:material.request.line,procurements:0
@@ -621,6 +754,7 @@ msgstr "单价"
 
 #. module: metro_stock
 #: view:material.request.line:0 selection:material.request.line,state:0
+#: view:stock.inventory:0 view:stock.inventory.line:0
 msgid "Done"
 msgstr "完成"
 
@@ -645,8 +779,14 @@ msgid "Dest. Location"
 msgstr "目标库位"
 
 #. module: metro_stock
+#: model:ir.model,name:metro_stock.model_stock_inventory
+msgid "Inventory"
+msgstr "盘点"
+
+#. module: metro_stock
 #: help:material.request.line,product_packaging:0
-msgid "It specifies attributes of packaging like type, quantity of packaging,etc."
+msgid ""
+"It specifies attributes of packaging like type, quantity of packaging,etc."
 msgstr "指定包装的属性如数量,类型等"
 
 #. module: metro_stock
@@ -688,7 +828,7 @@ msgstr "退料单"
 
 #. module: metro_stock
 #: field:material.request,product_id:0 view:material.request.line:0
-#: field:material.request.line,product_id:0
+#: field:material.request.line,product_id:0 view:stock.inventory.line:0
 msgid "Product"
 msgstr "产品"
 
@@ -698,13 +838,15 @@ msgid "Picking Type"
 msgstr "调拨类型"
 
 #. module: metro_stock
-#: field:material.request.line,name:0
+#: field:material.request.line,name:0 field:sale.product,note:0
 msgid "Description"
 msgstr "描述"
 
 #. module: metro_stock
 #: help:material.request.line,price_currency_id:0
-msgid "Technical field used to record the currency chosen by the user during a picking confirmation (when average price costing method is used)"
+msgid ""
+"Technical field used to record the currency chosen by the user during a "
+"picking confirmation (when average price costing method is used)"
 msgstr "字段用于记录用户确认在分拣期间所用的币别(用于计算平均成本价格)。"
 
 #. module: metro_stock
@@ -724,8 +866,22 @@ msgstr "All Data Imported"
 
 #. module: metro_stock
 #: help:material.request,location_id:0
-msgid "Keep empty if you produce at the location where the finished products are needed.Set a location if you produce at a fixed location. This can be a partner location if you subcontract the manufacturing operations."
-msgstr "如果您需要在成品库位生产请留空.如在固定地点生产请设置库位.如果您外包这生产,这也可以是业务伙伴的库位."
+msgid ""
+"Keep empty if you produce at the location where the finished products are "
+"needed.Set a location if you produce at a fixed location. This can be a "
+"partner location if you subcontract the manufacturing operations."
+msgstr ""
+"如果您需要在成品库位生产请留空.如在固定地点生产请设置库位.如果您外包这生产,这"
+"也可以是业务伙伴的库位."
+
+#. module: metro_stock
+#: view:stock.picking.in:0
+msgid ""
+"red:state not in ('cancel', 'done') and current_date > min_date;blue:state "
+"== 'draft';grey:state == 'cancel'"
+msgstr ""
+"red:state not in ('cancel', 'done') and current_date > min_date;blue:state "
+"== 'draft';grey:state == 'cancel'"
 
 #. module: metro_stock
 #: help:material.request,min_date:0
@@ -751,8 +907,25 @@ msgstr "Messages"
 
 #. module: metro_stock
 #: help:material.request.line,product_qty:0
-msgid "This is the quantity of products from an inventory point of view. For moves in the state 'done', this is the quantity of products that were actually moved. For other moves, this is the quantity of product that is planned to be moved. Lowering this quantity does not generate a backorder. Changing this quantity on assigned moves affects the product reservation, and should be done with care."
-msgstr "This is the quantity of products from an inventory point of view. For moves in the state 'done', this is the quantity of products that were actually moved. For other moves, this is the quantity of product that is planned to be moved. Lowering this quantity does not generate a backorder. Changing this quantity on assigned moves affects the product reservation, and should be done with care."
+msgid ""
+"This is the quantity of products from an inventory point of view. For moves "
+"in the state 'done', this is the quantity of products that were actually "
+"moved. For other moves, this is the quantity of product that is planned to "
+"be moved. Lowering this quantity does not generate a backorder. Changing "
+"this quantity on assigned moves affects the product reservation, and should "
+"be done with care."
+msgstr ""
+"This is the quantity of products from an inventory point of view. For moves "
+"in the state 'done', this is the quantity of products that were actually "
+"moved. For other moves, this is the quantity of product that is planned to "
+"be moved. Lowering this quantity does not generate a backorder. Changing "
+"this quantity on assigned moves affects the product reservation, and should "
+"be done with care."
+
+#. module: metro_stock
+#: view:stock.inventory.line:0
+msgid "Stock Inventory Lines"
+msgstr "库存盘点明细"
 
 #. module: metro_stock
 #: help:material.request.line,tracking_id:0
@@ -935,3 +1108,9 @@ msgstr "供应商产品名称"
 #: field:material.request.line,price_subtotal:0
 msgid "Subtotal"
 msgstr "小计"
+
+#. module: metro_stock
+#: code:addons/metro_stock/wizard/stock_change_product_qty.py:58
+#, python-format
+msgid "Product onhand change: %s,reason: %s"
+msgstr "产品在手数量修改: %s,原因: %s"
