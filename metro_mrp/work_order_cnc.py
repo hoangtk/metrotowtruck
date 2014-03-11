@@ -85,7 +85,8 @@ class work_order_cnc_line(osv.osv):
         'date_finished': fields.date('Finished Date', readonly=True),
         'product_id': fields.many2one('product.product','Product'),
         'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
-        'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company')
+        'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
+        'mr_id': fields.many2one('material.request','MR#'),
     }
 
     _defaults = {
@@ -130,7 +131,7 @@ class work_order_cnc_line(osv.osv):
         return True
     #get the material request price
     def _get_mr_prod_price(self, cr, uid, product, context = None):
-        result = []
+        result = {}
         #update the price_unit the and price_currency_id
         #default is the product's cost price
         price_unit = product.standard_price
@@ -160,20 +161,36 @@ class work_order_cnc_line(osv.osv):
         mr_line_ids = []
         cnc_lines = self.pool.get('work.order.cnc.line').browse(cr, uid, wo_cnc_lines, context=context)
         for ln in cnc_lines:
-            ln_volume = (ln.plate_length * ln.plate_width * ln.plate_height * ln.percent_usage)
-            ln_weight = ln_volume * ln.product_id.density
+            ln_volume = (ln.plate_length * ln.plate_width * ln.plate_height * ln.percent_usage/100)
+            #the name will be like 'Manganese Plate(T20*2200*11750mm)'
+            prod_name = ln.product_id.name
+            start_idx = -1
+            end_idx = -1
+            try:
+                start_idx = prod_name.index('(T')
+                end_idx = prod_name.index('mm)')
+            except Exception, e:
+                raise osv.except_osv(_('Calculate Volume Error!'), _('The product name do not satisfy the format, can not get the plate volume!\n%s')%(prod_name,))
+            prod_volume = eval(prod_name[start_idx+2:end_idx])
+
+            ln_quantity = ln_volume/prod_volume
             #loop ids to generate mr line
             id_cnt = len(ln.order_id.sale_product_ids)
             price = self._get_mr_prod_price(cr, uid, ln.product_id)
             for sale_id in ln.order_id.sale_product_ids:
-                mr_line_vals = {'product_id':ln.product_id.id,
-                                    'product_qty':ln_weight/id_cnt,
+                mr_line_vals = {'picking_id':mr_id,
+                                'name':'CNC_' + ln.file_name,
+                                'product_id':ln.product_id.id,
+                                    'product_qty':ln_quantity/id_cnt,
+                                    'product_uom':ln.product_id.uom_id.id,
                                     'price_unit':price['price_unit'],
                                     'price_currency_id':price['price_currency_id'],
                                     'mr_emp_id':uid,
                                     'mr_sale_prod_id':sale_id.id,
                                     'mr_notes':'CNC Work Order Finished',}
-                mr_line_ids.append(mr_line_obj.create(cr,uid,mr_line_vals,context=context))
+                mr_line_id = mr_line_obj.create(cr,uid,mr_line_vals,context=context)
+                mr_line_ids.append(mr_line_id)
+            self.pool.get('work.order.cnc.line').write(cr,uid,ln.id,{'mr_id':mr_id},context=context)
         
         mr_line_obj.action_confirm(cr, uid, mr_line_ids)
         mr_line_obj.force_assign(cr, uid, mr_line_ids)
