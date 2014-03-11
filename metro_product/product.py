@@ -114,7 +114,6 @@ class product_product(osv.osv):
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 		'safe_qty': fields.float('Minimal Inventory'),
 		'safe_warn': fields.boolean('Warn Inventory'),
-		'safe_warn': fields.boolean('Warn Inventory'),
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
 	}

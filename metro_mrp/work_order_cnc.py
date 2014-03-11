@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from osv import fields,osv
 from openerp.tools.translate import _
+from openerp import netsvc
 class work_order_cnc(osv.osv):
     _name = "work.order.cnc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -127,35 +128,57 @@ class work_order_cnc_line(osv.osv):
         #generate material requisition
         self.make_material_requisition(cr, uid, ids, context)
         return True
-    import copy
+    #get the material request price
+    def _get_mr_prod_price(self, cr, uid, product, context = None):
+        result = []
+        #update the price_unit the and price_currency_id
+        #default is the product's cost price
+        price_unit = product.standard_price
+        price_currency_id = None
+        #get the final purchase price
+        move_obj = self.pool.get('stock.move')
+        #get the final purchase price
+        move_ids = move_obj.search(cr,uid,[('product_id','=',product.id),('state','=','done'),('type','=','in')],limit=1,order='create_date desc')
+        if move_ids:
+            move_price = move_obj.read(cr,uid,move_ids[0],['price_unit','price_currency_id'],context=context)
+            price_unit = move_price['price_unit']
+            price_currency_id = move_price['price_currency_id']
+        result['price_unit'] = price_unit
+        result['price_currency_id'] = price_currency_id
+        return result
+    #generate the material requisition  
     def make_material_requisition(self, cr, uid, wo_cnc_lines, context = None):
-        mr_obj = self.pool.get("material.requisition")
+        mr_obj = self.pool.get("material.request")
+        mr_line_obj = self.pool.get("material.request.line")
+        #create material requisition
         mr_name = self.pool.get('ir.sequence').get(cr, uid, 'material.request') or '/'
         mr_name += ' from CNC'
         mr_vals = {'type':'mr','mr_dept_id':context.get('mr_dept_id'),'name':mr_name,'date':fields.datetime.now()}
-        
-        mr_line_val_template = {
-                        'product_id':context.get('product_id'),
-#                        'product_qty':,
-#                        'price_unit':,
-                        'mr_emp_id':uid,
-#                        'mr_sale_prod_id':
-                        'mr_notes':'CNC Work Order Finished'}
+        mr_id = mr_obj.create(cr, uid, mr_vals, context=context)
+        #create material requisition lines
         mr_line_vals = []
+        mr_line_ids = []
         cnc_lines = self.pool.get('work.order.cnc.line').browse(cr, uid, wo_cnc_lines, context=context)
         for ln in cnc_lines:
             ln_volume = (ln.plate_length * ln.plate_width * ln.plate_height * ln.percent_usage)
-            prod_volume = (ln.product_id.plate_length * ln.product_id.plate_width * ln.product_id.plate_height)
-            ln_weight = (ln_volume/prod_volume) * ln.product_id.density
+            ln_weight = ln_volume * ln.product_id.density
             #loop ids to generate mr line
             id_cnt = len(ln.order_id.sale_product_ids)
-            for id in ln.order_id.sale_product_ids:
-                mr_line_vals = mr_line_val_template.copy()
-                mr_line_vals.update({'product_qty':ln_weight/id_cnt})
-
+            price = self._get_mr_prod_price(cr, uid, ln.product_id)
+            for sale_id in ln.order_id.sale_product_ids:
+                mr_line_vals = {'product_id':ln.product_id.id,
+                                    'product_qty':ln_weight/id_cnt,
+                                    'price_unit':price['price_unit'],
+                                    'price_currency_id':price['price_currency_id'],
+                                    'mr_emp_id':uid,
+                                    'mr_sale_prod_id':sale_id.id,
+                                    'mr_notes':'CNC Work Order Finished',}
+                mr_line_ids.append(mr_line_obj.create(cr,uid,mr_line_vals,context=context))
         
-        move_vals['line_id'] = [(0, 0, line) for line in move_lines]
-        move_obj.create(cr, uid, move_vals, context=context)        
+        mr_line_obj.action_confirm(cr, uid, mr_line_ids)
+        mr_line_obj.force_assign(cr, uid, mr_line_ids)
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'stock.picking', mr_id, 'button_confirm', cr)
         
             
     def _check_changing(self, cr, uid, ids, context=None):
