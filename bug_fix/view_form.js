@@ -3925,7 +3925,8 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
             else
                 return $.when();
         }).done(function () {
-            self.handle_button(name, id, callback);
+//            self.handle_button(name, id, callback);
+        	self.handle_button(name, id, function() {callback; self.o2m.view.reload();});
         });
     },
 

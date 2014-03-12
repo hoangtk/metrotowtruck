@@ -114,7 +114,6 @@ class product_product(osv.osv):
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 		'safe_qty': fields.float('Minimal Inventory'),
 		'safe_warn': fields.boolean('Warn Inventory'),
-		'safe_warn': fields.boolean('Warn Inventory'),
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
 	}
@@ -280,7 +279,7 @@ class product_product(osv.osv):
 			default = {}
 		default.update({
 			'default_code':self.generate_seq(cr, uid),
-			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],'副本'),
+			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],tools.ustr('副本')),
 		})
 		return super(product_product, self).copy(cr, uid, id, default, context)		
 	def print_barcode(self,cr,uid,ids,context=None):
