@@ -160,6 +160,11 @@ class work_order_cnc_line(osv.osv):
         mr_line_vals = []
         mr_line_ids = []
         cnc_lines = self.pool.get('work.order.cnc.line').browse(cr, uid, wo_cnc_lines, context=context)
+        #get the employee id
+        mr_emp_id = None
+        user = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+        if user.employee_ids:
+            mr_emp_id = user.employee_ids[0].id
         for ln in cnc_lines:
             ln_volume = (ln.plate_length * ln.plate_width * ln.plate_height * ln.percent_usage/100)
             #the name will be like 'Manganese Plate(T20*2200*11750mm)'
@@ -185,7 +190,7 @@ class work_order_cnc_line(osv.osv):
                                     'product_uom':ln.product_id.uom_id.id,
                                     'price_unit':price['price_unit'],
                                     'price_currency_id':price['price_currency_id'],
-                                    'mr_emp_id':uid,
+                                    'mr_emp_id':mr_emp_id,
                                     'mr_sale_prod_id':sale_id.id,
                                     'mr_notes':'CNC Work Order Finished',}
                 mr_line_id = mr_line_obj.create(cr,uid,mr_line_vals,context=context)
@@ -223,5 +228,6 @@ class work_order_cnc_line(osv.osv):
         default.update({
             'date_finished': None,
             'product_id': None,
+            'mr_id': None,
         })
         return super(work_order_cnc_line, self).copy_data(cr, uid, id, default, context)        
