@@ -279,7 +279,7 @@ class product_product(osv.osv):
 			default = {}
 		default.update({
 			'default_code':self.generate_seq(cr, uid),
-			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],'副本'),
+			'cn_name':'%s(%s)'%(self.read(cr,uid,id,['cn_name'])['cn_name'],tools.ustr('副本')),
 		})
 		return super(product_product, self).copy(cr, uid, id, default, context)		
 	def print_barcode(self,cr,uid,ids,context=None):
