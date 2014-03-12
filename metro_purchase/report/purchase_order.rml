@@ -204,7 +204,7 @@
             <para style="terp_default_9">[[line.idx]]</para>
           </td>
           <td>
-            <para style="terp_default_9">[[ line.name ]],[[line.product_id.cn_name]]</para>
+            <para style="terp_default_9">[[line.product_id.default_code]],[[ line.name ]],[[line.product_id.cn_name]]</para>
           </td>
           <td>
             <para style="terp_default_9">[[ ', '.join(map(lambda x: x.name, line.taxes_id)) ]]</para>
