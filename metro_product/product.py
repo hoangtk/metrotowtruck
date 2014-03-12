@@ -252,26 +252,26 @@ class product_product(osv.osv):
 		
 #		qty_available
 		#add the available restriction
-		if context and context.get('inv_warn_restrict'):
-			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
-			qtys = self.read(cr,user,ids,['virtual_available','safe_qty'],context=context)
-#			list: [{'product_tmpl_id': 10, 'virtual_available': -255.0, 'id': 10}, {'product_tmpl_id': 26, 'virtual_available': 0.0, 'id': 26}, {'product_tmpl_id': 35, 'virtual_available': 600.0, 'id': 35}]
-			new_ids = []
-			for qty in qtys:
-				if qty['virtual_available'] < qty['safe_qty']:
-					new_ids.append(qty['id'])	
-			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
+#		if context and context.get('inv_warn_restrict'):
+#			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
+#			qtys = self.read(cr,user,ids,['virtual_available','safe_qty'],context=context)
+##			list: [{'product_tmpl_id': 10, 'virtual_available': -255.0, 'id': 10}, {'product_tmpl_id': 26, 'virtual_available': 0.0, 'id': 26}, {'product_tmpl_id': 35, 'virtual_available': 600.0, 'id': 35}]
+#			new_ids = []
+#			for qty in qtys:
+#				if qty['virtual_available'] < qty['safe_qty']:
+#					new_ids.append(qty['id'])	
+#			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
 		#add  the onhand query
-		for arg in args:
-			fld_name = arg[0]
-			if fld_name == 'qty_available':
-				ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
-				qtys = self.read(cr,user,ids,[fld_name],context=context)
-				new_ids = []
-				for qty in qtys:
-					if eval('%s%s%s'%(qty[fld_name],arg[1],arg[2])):
-						new_ids.append(qty['id'])	
-				ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)	
+#		for arg in args:
+#			fld_name = arg[0]
+#			if fld_name == 'qty_available':
+#				ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
+#				qtys = self.read(cr,user,ids,[fld_name],context=context)
+#				new_ids = []
+#				for qty in qtys:
+#					if eval('%s%s%s'%(qty[fld_name],arg[1],arg[2])):
+#						new_ids.append(qty['id'])	
+#				ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)	
 				
 		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
@@ -299,3 +299,10 @@ product_product()
 #	_sql_constraints = [
 #		('name', 'unique (name)', _('Product Name must be unique!'))
 #	] 
+
+class product_template(osv.osv):
+    _inherit = "product.template"
+
+    _columns = {
+        'name': fields.char('Name', size=128, required=True, translate=False, select=True),
+        }
