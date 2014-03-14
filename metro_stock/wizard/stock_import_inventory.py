@@ -89,7 +89,7 @@ class stock_import_inventory(osv.osv_memory):
         location = import_inventory.location_id 
         #get the uploaded data
         import_data = base64.decodestring(import_inventory.import_file)
-        excel_data = xlrd.open_workbook(file_contents=import_data,formatting_info=True, on_demand=True)
+        excel_data = xlrd.open_workbook(file_contents=import_data,formatting_info=False, on_demand=True)
         sheet = excel_data.sheets()[0]
         row_cnt = sheet.nrows
         col_cnt = sheet.ncols
