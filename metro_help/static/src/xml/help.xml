@@ -3,8 +3,7 @@
 <templates id="template" xml:space="preserve">
     <t t-extend="ViewManagerAction">
          <t t-jquery="h2.oe_view_title" t-operation="prepend">
-            <a class="model_help" href="javascript: model_help" title="Online Help">
-                <img t-att-src='_s + "/web/static/src/img/icons/gtk-help.png"'/>
+            <a class="model_help" href="javascript: void(0)" title="Online Help">
             </a>
         </t>
     </t>

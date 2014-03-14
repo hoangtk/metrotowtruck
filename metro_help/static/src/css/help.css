@@ -1,5 +1,10 @@
-   a:link { text-decoration: none;}
-   a:active { text-decoration:none;}
-   a:hover { text-decoration:none;} 
-   a:visited { text-decoration: none;}
-     img{border:0px}  
+.model_help {
+    height: 20px;
+    margin-top: 3px;
+    padding: 0;
+    width: 24px;
+    cursor: pointer;
+    display: block;
+    background: url(/web/static/src/img/icons/gtk-help.png) no-repeat center center;
+    float: left;
+}
