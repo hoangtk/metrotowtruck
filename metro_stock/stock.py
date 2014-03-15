@@ -35,7 +35,7 @@ class material_request(osv.osv):
     _inherit = "stock.picking"
     _table = "stock_picking"
     _description = "Material Request"
-
+    _order = "name desc"
     _columns = {
         'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], 
                                  'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
