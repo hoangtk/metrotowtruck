@@ -179,22 +179,36 @@ class work_order_cnc_line(osv.osv):
             prod_volume = eval(prod_name[start_idx+2:end_idx])
 
             ln_quantity = ln_volume/prod_volume
-            #loop ids to generate mr line
-            id_cnt = len(ln.order_id.sale_product_ids)
             price = self._get_mr_prod_price(cr, uid, ln.product_id)
-            for sale_id in ln.order_id.sale_product_ids:
-                mr_line_vals = {'picking_id':mr_id,
-                                'name':'CNC_' + ln.file_name,
-                                'product_id':ln.product_id.id,
-                                    'product_qty':ln_quantity/id_cnt,
-                                    'product_uom':ln.product_id.uom_id.id,
-                                    'price_unit':price['price_unit'],
-                                    'price_currency_id':price['price_currency_id'],
-                                    'mr_emp_id':mr_emp_id,
-                                    'mr_sale_prod_id':sale_id.id,
-                                    'mr_notes':'CNC Work Order Finished',}
-                mr_line_id = mr_line_obj.create(cr,uid,mr_line_vals,context=context)
-                mr_line_ids.append(mr_line_id)
+            #loop ids to generate mr line
+            if ln.order_id.sale_product_ids:
+                id_cnt = len(ln.order_id.sale_product_ids)
+                for sale_id in ln.order_id.sale_product_ids:
+                    mr_line_vals = {'picking_id':mr_id,
+                                    'name':'CNC_' + ln.file_name,
+                                    'product_id':ln.product_id.id,
+                                        'product_qty':ln_quantity/id_cnt,
+                                        'product_uom':ln.product_id.uom_id.id,
+                                        'price_unit':price['price_unit'],
+                                        'price_currency_id':price['price_currency_id'],
+                                        'mr_emp_id':mr_emp_id,
+                                        'mr_sale_prod_id':sale_id.id,
+                                        'mr_notes':'CNC Work Order Finished',}
+                    mr_line_id = mr_line_obj.create(cr,uid,mr_line_vals,context=context)
+                    mr_line_ids.append(mr_line_id)
+            else:
+                    mr_line_vals = {'picking_id':mr_id,
+                                    'name':'CNC_' + ln.file_name,
+                                    'product_id':ln.product_id.id,
+                                        'product_qty':ln_quantity,
+                                        'product_uom':ln.product_id.uom_id.id,
+                                        'price_unit':price['price_unit'],
+                                        'price_currency_id':price['price_currency_id'],
+                                        'mr_emp_id':mr_emp_id,
+                                        'mr_notes':'CNC Work Order Finished',}
+                    mr_line_id = mr_line_obj.create(cr,uid,mr_line_vals,context=context)
+                    mr_line_ids.append(mr_line_id)
+                
             self.pool.get('work.order.cnc.line').write(cr,uid,ln.id,{'mr_id':mr_id},context=context)
         
         mr_line_obj.action_confirm(cr, uid, mr_line_ids)
