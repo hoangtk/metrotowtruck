@@ -13,7 +13,7 @@
     """,
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ['base','email_template'],
+    'depends': ['base','knowledge'],
     'init_xml': [],
     'data' : [
        "help.xml",

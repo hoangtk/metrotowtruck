@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <record model="ir.ui.view" id="help_from_view">
-            <field name="name">help.form</field>
-            <field name="type">form</field>
-            <field name="inherit_id" ref="base.module_form"/>
-            <field name="model">ir.module.module</field>
-            <field name="arch" type="xml">
-                <field name="installed_version" position="after">
-                    <button name="open_help" type="object" string="Online Help" icon="gtk-help"/>
-                </field>
-            </field>
-        </record>
+    	<menuitem name="Online Help" id="menu_help" parent="knowledge.menu_document" sequence="1" />
+        <menuitem id="menu_help_purchase" parent="menu_help" name="Purchase" sequence="1"/>
 </data>
 </openerp>

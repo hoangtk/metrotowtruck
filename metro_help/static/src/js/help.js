@@ -9,10 +9,7 @@ session.web.ViewManagerAction.include({
     },
     on_click_help_link: function(e) {
         e.preventDefault();
-//        window.open('http://www.osbzr.com/help.php?page='+this.dataset.model);
-        window.open('/?id=6&view_type=form&model=document.page&menu_id=166&action=163');
-        
-        
+        window.open('/?db=metro_develop&ts=1394851475571#id=1&view_type=form&model=document.page&menu_id=534&action=689');
     },
 });
 

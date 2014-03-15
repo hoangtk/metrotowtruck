@@ -91,7 +91,7 @@
                  	<button name="button_to_changing_confirmed" states="changing,changing_rejected" string="Confirm Chaning" type="object"/>
                  	<button name="%(act_purchase_changing_reject)d" states="changing_confirmed" string="Reject Changing" type="action" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing_approved" states="changing_confirmed" string="Approve Changing" type="object" groups="metro_purchase.group_pur_req_manager"/>
-                 	<button name="button_manual_done" states="approved" string="Manual Done" type="object"/>
+                 	<button name="button_manual_done" states="approved" string="Manual Done" type="object" groups="metro_purchase.group_pur_req_manager"/>
                 </xpath>     
                 <xpath expr="//tree/field[@name='product_qty']" position="after">
                 	<field name="receive_qty"/>
