@@ -179,7 +179,7 @@ class material_request_line(osv.osv):
         result = {
             'product_uom': product.uom_id.id,
             'product_uos': uos_id,
-            'product_qty': 1.00,
+            'product_qty': product.qty_available,
             'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
             'prodlot_id' : False,
         }
@@ -228,7 +228,7 @@ class material_request_line(osv.osv):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(material_request_line,self).search(cr, user, new_args, offset, limit, order, context, count)   
-        
+            
 class stock_move(osv.osv):
     _inherit = "stock.move" 
     _columns = {   
@@ -325,7 +325,22 @@ class stock_picking(osv.osv):
                             
             
         return super(stock_picking,self).action_done(cr,uid,ids,context)
-       
+
+    def action_confirm(self, cr, uid, ids, context=None):
+        """ Add the lines aggisnment checking
+        """
+        resu = super(stock_picking,self).action_confirm(cr, uid, ids, context=context)
+        if resu:
+            pickings = self.browse(cr, uid, ids, context=context)
+            todo = []
+            for picking in pickings:
+                if picking.type in('mr','mrr'):
+                    for r in picking.move_lines:
+                        if r.state == 'confirmed':
+                            todo.append(r.id)
+            if len(todo):
+                self.pool.get('stock.move').check_assign(cr, uid, todo, context=context)
+        return resu       
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):

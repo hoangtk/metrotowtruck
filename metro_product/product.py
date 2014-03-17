@@ -306,3 +306,7 @@ class product_template(osv.osv):
     _columns = {
         'name': fields.char('Name', size=128, required=True, translate=False, select=True),
         }
+
+    _defaults = {
+        'type' : 'product',
+    }    
