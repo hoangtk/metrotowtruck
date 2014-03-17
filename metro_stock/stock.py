@@ -228,10 +228,6 @@ class material_request_line(osv.osv):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(material_request_line,self).search(cr, user, new_args, offset, limit, order, context, count)   
-#        moves = self.browse(cr, uid, ids, context=context)
-#        self.write(cr, uid, ids, {'state': 'confirmed'})
-#        self.create_chained_picking(cr, uid, moves, context)
-#        return []
             
 class stock_move(osv.osv):
     _inherit = "stock.move" 

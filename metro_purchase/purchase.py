@@ -508,9 +508,9 @@ class purchase_order_line(osv.osv):
                             rec_qty += move.product_qty
                         if move.type == 'out':
                             return_qty += move.product_qty
-                        #if there are products received then can not change price
-                        if rec_qty - return_qty > 0:
-                            can_change_price = False
+                #if there are products received then can not change price
+                if rec_qty - return_qty > 0:
+                    can_change_price = False
             if line.invoice_lines:
                 can_change_product = False
                 if can_change_price:
@@ -519,7 +519,8 @@ class purchase_order_line(osv.osv):
                         if inv_line.invoice_id.state != 'cancel':
                             can_change_price = False
                             break
-            
+            #set the changing product logic same as change price, 2014/03/17
+            can_change_product = can_change_price
             result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
         return result
             
