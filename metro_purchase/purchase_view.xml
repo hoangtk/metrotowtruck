@@ -122,6 +122,10 @@
                 <field name="fiscal_position" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>
+                <button name="view_invoice" position="replace">
+                	<!-- <button name="view_invoice" string="Receive Invoice" type="object" attrs="{'invisible': ['|', ('invoice_method','=','picking'), '|', ('state','!=', 'approved'), ('invoiced','=',True) ]}" class="oe_highlight"/> -->
+                	<button name="%(act_pur_invoice)d" string="Receive Invoice" type="action" groups="account.group_account_invoice" attrs="{'invisible': [('state','!=','approved')]}"/>
+                </button>                
        		</field>
         </record>  
           
