@@ -390,7 +390,7 @@ class purchase_order(osv.osv):
                 if inv and inv.state not in ('cancel','draft','paid'):
                     raise osv.except_osv(
                         _('Unable to change this purchase order.'),
-                        _('You must first cancel all invoices in draft/cancel/done related to this purchase order.'))
+                        _('You must first cancel all invoices in draft/cancel/paid related to this purchase order.'))
                 if inv.state == 'draft':
                     wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
                             
@@ -660,7 +660,7 @@ class purchase_order_line(osv.osv):
             #changed unir prie can not be do when there are uncanceled pickings or invoices
             if vals.has_key('price_unit') and not po_line.can_change_price:
                 raise osv.except_osv(_('Error!'),
-                                     _('The price of %s can not be change since there are related existing uncanceled pickings or invoices.')%(po_line.product_id.name))     
+                                     _('The price of %s can not be change since there are related existing paid invoices.')%(po_line.product_id.name))     
         
         value_old = po_line.product_qty
         resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)
