@@ -294,6 +294,8 @@ class purchase_order(osv.osv):
         fiscal_obj = self.pool.get('account.fiscal.position')
 
         for order in self.browse(cr, uid, ids, context=context):
+#            pay_acc_id = order.partner_id.property_account_payable.id
+            #use a new method to get the account_id
             pay_acc_id = self._get_inv_pay_acc_id(cr,uid,order)                
             journal_ids = journal_obj.search(cr, uid, [('type', '=','purchase'),('company_id', '=', order.company_id.id)], limit=1)
             if not journal_ids:
@@ -303,16 +305,34 @@ class purchase_order(osv.osv):
             # generate invoice line correspond to PO line and link that to created invoice (inv_id) and PO line
             inv_lines = []
             for po_line in order.order_line:
+                #check if this line have quantity to generate invoice, by johnw
+                if po_line.product_qty <= po_line.invoice_qty:
+                    continue                
+#                if po_line.product_id:
+#                    acc_id = po_line.product_id.property_account_expense.id
+#                    if not acc_id:
+#                        acc_id = po_line.product_id.categ_id.property_account_expense_categ.id
+#                    if not acc_id:
+#                        raise osv.except_osv(_('Error!'), _('Define expense account for this company: "%s" (id:%d).') % (po_line.product_id.name, po_line.product_id.id,))
+#                else:
+#                    acc_id = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category').id      
+                #use a new method to get the account_id, by johnw          
                 acc_id = self._get_inv_line_exp_acc_id(cr,uid,order,po_line)
                 fpos = order.fiscal_position or False
                 acc_id = fiscal_obj.map_account(cr, uid, fpos, acc_id)
 
                 inv_line_data = self._prepare_inv_line(cr, uid, acc_id, po_line, context=context)
+                #update the quantity to the quantity, by johnw
+                inv_line_data.update({'quantity':(po_line.product_qty - po_line.invoice_qty)})
                 inv_line_id = inv_line_obj.create(cr, uid, inv_line_data, context=context)
                 inv_lines.append(inv_line_id)
 
                 po_line.write({'invoiced':True, 'invoice_lines': [(4, inv_line_id)]}, context=context)
-
+            
+            #if no lines then return direct, by johnw
+            if len(inv_lines) == 0:
+                continue
+            
             # get invoice data and create invoice
             inv_data = {
                 'name': order.partner_ref or order.name,
@@ -336,7 +356,8 @@ class purchase_order(osv.osv):
             # Link this new invoice to related purchase order
             order.write({'invoice_ids': [(4, inv_id)]}, context=context)
             res = inv_id
-        return res    
+        return res
+    
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)    
@@ -446,11 +467,6 @@ class purchase_order(osv.osv):
         assert len(ids) == 1, 'This option should only be used for a single order at a time'
         self.write(cr,uid,ids,{'state':'done'},context)
         self._update_po_lines(cr,uid,ids,{'state':'done'},context)   
-        
-#    def __init__(self, pool, cr):
-#        self._columns['partner_id'].states.update({'changing':[('readonly',True)]})
-#        print self._columns['partner_id'].states
-#        return super(purchase_order,self).__init__(pool,cr)
           
 class purchase_order_line(osv.osv):  
     _name = "purchase.order.line"
@@ -491,6 +507,7 @@ class purchase_order_line(osv.osv):
                     })
                     break
         return result
+
     def _get_rec_info(self, cr, uid, ids, fields, args, context=None):
         result = {}
         for id in ids:
@@ -498,32 +515,32 @@ class purchase_order_line(osv.osv):
         for line in self.browse(cr,uid,ids,context=context):
             rec_qty = 0
             return_qty = 0
+            invoice_qty = 0
             can_change_price = True
             can_change_product = True
             if line.move_ids:
-                can_change_product = False
                 for move in line.move_ids:
                     if move.state == 'done':
                         if move.type == 'in':
                             rec_qty += move.product_qty
                         if move.type == 'out':
                             return_qty += move.product_qty
-                #if there are products received then can not change price
+                #if there are products received then can not change product
                 if rec_qty - return_qty > 0:
-                    can_change_price = False
+                    can_change_product = False
             if line.invoice_lines:
-                can_change_product = False
-                if can_change_price:
-                    for inv_line in line.invoice_lines:
-                        #if there are invoices no canceld, then can not change price
-                        if inv_line.invoice_id.state != 'cancel':
-                            can_change_price = False
-                            break
-            #set the changing product logic same as change price, 2014/03/17
-            can_change_product = can_change_price
-            result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
+                for inv_line in line.invoice_lines:
+                    #if there are uncanceled invoices, then can not change product
+                    if inv_line.invoice_id.state != 'cancel':
+                        can_change_product = False
+                        invoice_qty += inv_line.quantity
+                    #if there are done invoices, then can not change price
+                    if can_change_price and (inv_line.invoice_id.state == 'paid' or len(inv_line.invoice_id.payment_ids) > 0):
+                        can_change_price = False
+                    
+            result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'invoice_qty':invoice_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
         return result
-            
+                
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -544,6 +561,7 @@ class purchase_order_line(osv.osv):
         'return_qty' : fields.function(_get_rec_info, type='integer', string='Returned Quantity', multi="rec_info"),
         'can_change_price' : fields.function(_get_rec_info, type='boolean', string='Can Change Price', multi="rec_info"),
         'can_change_product' : fields.function(_get_rec_info, type='boolean', string='Can Change Product', multi="rec_info"),
+        'invoice_qty' : fields.function(_get_rec_info, type='integer', string='Invoice Quantity', multi="rec_info"),
     }  
     _order = "order_id desc"
     _defaults = {
