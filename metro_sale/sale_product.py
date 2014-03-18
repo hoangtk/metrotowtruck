@@ -10,3 +10,6 @@ class sale_product(osv.osv):
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
     }
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'ID must be unique!'),
+    ]
