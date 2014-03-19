@@ -87,6 +87,7 @@
                 </xpath>      
 <!-- purchase changing after approved -->                          
                 <xpath expr="//button[@name='action_cancel']" position="after" >
+               		<button name="button_cancel_except" states="approved" string="Cancel With Exception" type="object" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing" states="approved,except_picking,except_invoice" string="Change" type="object" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing_confirmed" states="changing,changing_rejected" string="Confirm Chaning" type="object"/>
                  	<button name="%(act_purchase_changing_reject)d" states="changing_confirmed" string="Reject Changing" type="action" groups="metro_purchase.group_pur_req_manager"/>

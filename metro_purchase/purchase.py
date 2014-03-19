@@ -53,7 +53,8 @@ class purchase_order(osv.osv):
         ('except_invoice', 'Invoice Exception'),
         ('wait_receipt', 'Waitting Receipt'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Cancelled'),
+        ('cancel_except', 'Cancelled with Exception')
     ] 
     
     def _invoiced_rate(self, cursor, user, ids, name, arg, context=None):
@@ -243,6 +244,37 @@ class purchase_order(osv.osv):
         lines = self._get_lines(cr,uid,ids,context=context)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'cancel'},context)
         return resu
+    def button_cancel_except(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        for purchase in self.browse(cr, uid, ids, context=context):
+            invoice_qty = 0
+            rec_qty = 0
+            for line in purchase.order_line:
+                rec_qty += line.receive_qty - line.return_qty
+                invoice_qty += line.invoice_qty
+            for pick in purchase.picking_ids:
+                if pick.state not in ('draft','cancel'):
+                    if rec_qty > 0:
+                        raise osv.except_osv(
+                        _('Unable to cancel this purchase order.'),
+                        _('There are received products  or receptions not in draft/cancel related to this purchase order.'))
+            for pick in purchase.picking_ids:
+                if pick.state == 'draft':
+                    wf_service.trg_validate(uid, 'stock.picking', pick.id, 'button_cancel', cr)
+            for inv in purchase.invoice_ids:
+                if inv and inv.state not in ('cancel','draft'):
+                    if invoice_qty > 0:
+                        raise osv.except_osv(
+                        _('Unable to cancel this purchase order.'),
+                        _('There are invoiced products or invoices not in draft/cancel related to this purchase order.'))
+                if inv and inv.state == 'draft':
+                    wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
+        self.write(cr,uid,ids,{'state':'cancel_except'})
+        #cancel_excep all order lines
+        lines = self._get_lines(cr,uid,ids,context=context)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'cancel_except'},context)
+        
+        return True    
     def action_cancel_draft(self, cr, uid, ids, context=None):
         resu = super(purchase_order,self).action_cancel_draft(cr,uid,ids,context)
         lines = self._get_lines(cr,uid,ids,context=context)
@@ -481,7 +513,8 @@ class purchase_order_line(osv.osv):
         ('changing_confirmed', 'Changing Waiting Approval'),
         ('changing_rejected', 'Changing Rejected'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Cancelled'),
+        ('cancel_except', 'Cancelled with Exception')
     ]
         
     def _get_supp_prod(self, cr, uid, ids, fields, arg, context=None):
