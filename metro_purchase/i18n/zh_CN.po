@@ -1267,7 +1267,7 @@ msgid "Received Quantity"
 msgstr "已收"
 
 #. module: metro_purchase
-#: field:pur.req,req_dept_id:0
+#: field:pur.req.line,req_dept_id:0
 msgid "Department"
 msgstr "部门"
 
