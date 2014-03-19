@@ -59,6 +59,7 @@
                         <field name="date_required"/>
                         <field name="inv_qty"/>
                         <field name="req_emp_id"/>
+                        <field name="req_dept_id"/>
                         <field name="req_reason"/>
                         <field name="req_ticket_no"/>
                         <field name="generated_po"/>
@@ -72,6 +73,7 @@
                             <field name="date_required" />
                             <field name="inv_qty" />
                         	<field name="req_emp_id"/>
+                       		<field name="req_dept_id"/>
                             <field name="req_reason" />
                         	<field name="req_ticket_no"/>
                         	<field name="generated_po"/>
@@ -177,6 +179,7 @@
                 <field name="date_required" />
                 <field name="inv_qty" />
             	<field name="req_emp_id"/>
+                <field name="req_dept_id"/>
                 <field name="req_reason" />
             	<field name="req_ticket_no"/>
                 <field name="order_warehouse_id"/>

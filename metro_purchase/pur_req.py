@@ -184,6 +184,7 @@ class pur_req_line(osv.osv):
         'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
         'req_emp_id': fields.many2one('hr.employee','Employee'),
+        'req_dept_id': fields.related('req_emp_id','department_id',type='many2one',relation='hr.department',string='Department',readonly=True),
         'req_reason': fields.char('Reason and use',size=64),
         'company_id': fields.related('req_id','company_id',type='many2one',relation='res.company',String='Company',store=True,readonly=True),
         'po_lines_ids' : fields.one2many('purchase.order.line','req_line_id','Purchase Order Lines',readonly=True),
