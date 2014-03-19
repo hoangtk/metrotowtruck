@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-18 06:21+0000\n"
-"PO-Revision-Date: 2014-03-18 14:25+0800\n"
+"POT-Creation-Date: 2014-03-19 03:58+0000\n"
+"PO-Revision-Date: 2014-03-19 11:59+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -99,11 +99,6 @@ msgstr ""
 "grey:state=='cancel';blue:state in ('wait','confirmed');green:state=='done'"
 
 #. module: metro_purchase
-#: field:pur.req,message_unread:0
-msgid "Unread Messages"
-msgstr "未读消息"
-
-#. module: metro_purchase
 #: view:pay.po:0
 msgid "Purchase Order Prepayment"
 msgstr "采购预付"
@@ -159,9 +154,9 @@ msgid "Approved"
 msgstr "已批准"
 
 #. module: metro_purchase
-#: view:purchase.order:0
-msgid "Change"
-msgstr "变更"
+#: view:pur.req:0 view:pur.req.line:0
+msgid "Canceled  Requisition"
+msgstr "取消申请"
 
 #. module: metro_purchase
 #: view:pur.req:0
@@ -410,9 +405,9 @@ msgid "Change Log of PO Lines"
 msgstr "采购产品明细的修改记录"
 
 #. module: metro_purchase
-#: field:purchase.order,create_date:0 field:purchase.order.line,create_date:0
-msgid "Creation Date"
-msgstr "创建日期"
+#: view:purchase.order:0
+msgid "Cancel With Exception"
+msgstr "异常取消"
 
 #. module: metro_purchase
 #: help:purchase.order,payment_exists:0
@@ -579,6 +574,11 @@ msgstr "批准的采购订单"
 #: field:pur.invoice,line_ids:0 view:pur.req:0 field:pur.req.po,line_ids:0
 msgid "Prodcuts"
 msgstr "产品"
+
+#. module: metro_purchase
+#: field:pur.req,message_unread:0
+msgid "Unread Messages"
+msgstr "未读消息"
 
 #. module: metro_purchase
 #: field:purchase.order,amount_freight:0
@@ -880,9 +880,9 @@ msgid "Done"
 msgstr "完成"
 
 #. module: metro_purchase
-#: view:pur.req:0 view:pur.req.line:0
-msgid "Canceled  Requisition"
-msgstr "取消申请"
+#: view:purchase.order:0
+msgid "Change"
+msgstr "变更"
 
 #. module: metro_purchase
 #: view:confirm.msg:0 view:pay.po:0 view:pur.invoice:0 view:pur.req:0
@@ -1235,6 +1235,11 @@ msgstr "采购申请"
 #: view:purchase.order:0
 msgid "Date"
 msgstr "日期"
+
+#. module: metro_purchase
+#: field:purchase.order,create_date:0 field:purchase.order.line,create_date:0
+msgid "Creation Date"
+msgstr "创建日期"
 
 #. module: metro_purchase
 #: model:res.groups,name:metro_purchase.group_pur_req_manager
@@ -1607,110 +1612,123 @@ msgstr "付款"
 msgid "付款日期"
 msgstr "付款日期"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "You cannot approve a purchase order with rejected purchase order lines."
 msgstr "此采购单存在被拒绝的采购订单产品，不能审批！"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "You cannot reject a purchase order with approved purchase order lines."
 msgstr "此采购单存在被审批通过的采购订单产品，不能拒绝！"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "Unable to change this purchase order."
 msgstr "不能变更"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "First cancel all receptions not in draft/cancel/done related to this purchase order."
 msgstr "首先取消或删除采购单相关的不是'草稿/取消/完成'状态的入库单！"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "You must first cancel all invoices in draft/cancel/paid related to this purchase order."
 msgstr "首先取消或删除采购单相关的不是'草稿/取消/已付'状态的凭据！"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "The order quantity(%s) of %s can not be less than the received quantity(%s)."
 msgstr "订单数量(%s) of %s 不能小于入库数量(%s)."
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "The price of %s can not be change since there are related existing paid invoices."
 msgstr "'%s'的价格不能修改，因为存在此产品相关的已付款凭据！"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "Only the lines with draft, canceled, rejected, changing, changing rejected can be deleted!"
 msgstr "只有处于'草稿/取消/被拒绝/变更中/变更被拒绝'的行可以删除！"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
 msgid "Can not delete the lines with picking or invoice lines!\n%s"
 msgstr "此产品存在相关的入库单和凭据，不能删除！\n%s"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase_payment.py:0
 msgid "Cannot cancel this purchase order!"
 msgstr "此采购单不能取消!\n%s"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/purchase_payment.py:0
 msgid "Payment entries are linked with the purchase order."
 msgstr "存在相关联的预付款记录\n%s"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/pur_req.py:0
 msgid "You cannot confirm a purchase requisition order without any product line."
 msgstr "没有请购产品,不能确认此请购单!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/pur_req.py:0
 msgid "Unable to cancel this purchase requisition."
 msgstr "不能取消请购单!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/pur_req.py:0
 msgid "First cancel all purchase orders related to this purchase order."
 msgstr "首先取消此请购单相关的采购单!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/pur_req.py:0
 msgid "In order to delete a purchase requisition, you must cancel it first."
 msgstr "请先取消请购单再进行删除操作!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/wizard/pur_invoice.py:0
 msgid "Invoice quantity(%s) can not bigger than the max quantity(%s)!\n%s"
 msgstr "凭据数量(%s)不能大于最大数量(%s)!\n%s"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/wizard/pur_invoice.py:0
 msgid "You may only create invoices based on approved purchase orders!"
 msgstr "只有审核通过的采购订单才能创建凭据!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/wizard/pur_invoice.py:0
 msgid "No available products need to generate invoice!"
 msgstr "所有产品都已经生成凭据!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/wizard/pur_req_po.py:0
 msgid "The product supplier name is required to product .\n %s"
 msgstr "'%s'缺少供应商产品名称!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/wizard/pur_req_po.py:0
 msgid "You may only generate purchase orders based on confirmed requisitions!"
 msgstr "请购单必须确认才能生成采购单!"
 
-#. module: metro_product
+#. module: metro_purchase
 #: code:addons/metro_product/wizard/pur_req_po.py:0
 msgid "No available products need to generate purchase order!"
 msgstr "所有产品都已经生成采购单!"
 
+#. module: metro_purchase
+#: code:addons/metro_product/wizard/pur_req_po.py:0
+msgid "There are received products  or receptions not in draft/cancel related to this purchase order."
+msgstr "此采购单已经部分收货或者存在不是'草稿/取消'状态的入库单!"
 
+#. module: metro_purchase
+#: code:addons/metro_product/wizard/pur_req_po.py:0
+msgid "There are invoiced products or invoices not in draft/cancel related to this purchase order."
+msgstr "此采购单已经部分开凭据或者存在不是'草稿/取消'状态的凭据!"
 
+#. module: metro_purchase
+#: selection:purchase.order,state:0
+#: selection:purchase.order.line,state:0
+msgid "Cancelled with Exception"
+msgstr "异常取消"
