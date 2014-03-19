@@ -1732,3 +1732,13 @@ msgstr "此采购单已经部分开凭据或者存在不是'草稿/取消'状态
 #: selection:purchase.order.line,state:0
 msgid "Cancelled with Exception"
 msgstr "异常取消"
+
+#. module: purchase
+#: field:purchase.order,minimum_planned_date:0
+msgid "Expected Date"
+msgstr "预计日期"
+
+#. module: purchase
+#: field:purchase.order.line,date_planned:0
+msgid "Scheduled Date"
+msgstr "预计日期"

@@ -18,10 +18,13 @@
                  <xpath expr="//button[@name='action_cancel']" position="attributes" >
                  	<attribute name="states">approved,except_picking,except_invoice,rejected,changing,changing_rejected</attribute>
                 </xpath>             
-                <xpath expr="//button[@name='picking_ok']" position="replace" >
+<!--                 <xpath expr="//button[@name='picking_ok']" position="replace" >
                 </xpath>             
                 <xpath expr="//button[@name='invoice_ok']" position="replace" >
-                </xpath>            
+                </xpath>   -->              
+                <xpath expr="//button[@name='view_picking']" position="replace" >
+                	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}"/>
+                </xpath>                       
                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
                 </xpath>         
@@ -175,7 +178,7 @@
             <field name="inherit_id" ref="purchase.purchase_order_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="/tree" position="attributes">
-                    <attribute name="colors"><![CDATA[red:state in ('except_invoice','except_picking','rejected') or (not shipped and state not in ('cancel', 'done') and current_date > minimum_planned_date);grey:state=='cancel';blue:state in ('wait','confirmed');green:state=='done']]></attribute>
+                    <attribute name="colors"><![CDATA[red:state in ('except_invoice','except_picking','rejected') or (not shipped and state not in ('cancel', 'done', 'cancel_except') and current_date > minimum_planned_date);grey:state=='cancel';blue:state in ('wait','confirmed');green:state=='done']]></attribute>
                     <attribute name="fonts"><![CDATA[bold:state=='done' or (not shipped and state not in ('cancel', 'done') and current_date > minimum_planned_date)]]></attribute>
                 </xpath>
                 <field name="state" position="before">

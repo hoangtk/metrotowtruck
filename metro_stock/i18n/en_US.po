@@ -16,17 +16,17 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: Poedit 1.5.7\n"
 
-#. module: metro_purchase
-#: code:general:0
-msgid "bool_True"
-msgstr "Yes"
+#. module: stock
+#: field:stock.picking.in,date:0
+msgid "Time"
+msgstr "Order Date"
 
-#. module: metro_purchase
-#: code:general:0
-msgid "bool_False"
-msgstr "No"
+#. module: stock
+#: field:stock.picking.in,move_lines:0
+msgid "Internal Moves"
+msgstr "Incoming Products"
 
-#. module: purchase
-#: field:purchase.order.line,date_palnned:0
-msgid "Scheduled Date"
-msgstr "Expected Date"
+#. module: stock
+#: field:stock.picking.out,move_lines:0
+msgid "Internal Moves"
+msgstr "Delivery Products"

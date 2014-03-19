@@ -499,6 +499,16 @@ class purchase_order(osv.osv):
         assert len(ids) == 1, 'This option should only be used for a single order at a time'
         self.write(cr,uid,ids,{'state':'done'},context)
         self._update_po_lines(cr,uid,ids,{'state':'done'},context)   
+        
+    def picking_done(self, cr, uid, ids, context=None):
+        ids_done = []
+        for po in self.browse(cr, uid, ids, context):
+            remain_qty = 0
+            for line in po.order_line:
+                remain_qty += line.product_qty - (line.receive_qty - line.return_qty)
+            if remain_qty == 0:
+                ids_done.append(po.id)
+        return super(purchase_order,self).picking_done(cr, uid, ids_done, context)
           
 class purchase_order_line(osv.osv):  
     _name = "purchase.order.line"

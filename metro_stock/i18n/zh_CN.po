@@ -1114,3 +1114,44 @@ msgstr "小计"
 #, python-format
 msgid "Product onhand change: %s,reason: %s"
 msgstr "产品在手数量修改: %s,原因: %s"
+
+#. module: metro_stock
+#: field:stock.picking.in,create_date:0
+msgid "Creation Date"
+msgstr "创建日期"
+
+#. module: stock
+#: field:stock.picking.in,date:0
+msgid "Time"
+msgstr "订单日期"
+
+#. module: stock
+#: field:stock.picking.in,min_date:0
+msgid "Scheduled Time"
+msgstr "预计日期"
+
+#. module: metro_stock
+#: view:stock.picking.in:0
+msgid "Date of Reception"
+msgstr "入库时间"
+
+#. module: stock
+#: field:stock.move,date_expected:0
+msgid "Scheduled Date"
+msgstr "预计日期"
+
+#. module: stock
+#: field:stock.picking.in,move_lines:0
+msgid "Internal Moves"
+msgstr "入库"
+
+#. module: stock
+#: field:stock.picking.out,move_lines:0
+msgid "Internal Moves"
+msgstr "出库"
+
+#. module: metro_stock
+#: view:stock.move:0
+msgid "Supplier"
+msgstr "供应商"
+
