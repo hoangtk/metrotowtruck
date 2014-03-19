@@ -19,7 +19,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import time
 import datetime
@@ -242,6 +241,14 @@ class stock_move(osv.osv):
         new_args = deal_args(self,args)
         return super(stock_move,self).search(cr, user, new_args, offset, limit, order, context, count)  
 
+    def action_done(self, cr, uid, ids, context=None):
+        super(stock_move,self).action_done(cr, uid, ids, context) 
+        move_ids = []
+        for move in self.browse(cr, uid, ids, context=context):
+            if move.state not in ('done','cancel'):
+                move_ids.append(move.id)     
+        self.write(cr, uid, ids, {'date': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}, context=context)
+
 from openerp.addons.stock import stock_picking as stock_picking_super
       
 def _set_minimum_date(self, cr, uid, ids, name, value, arg, context=None):
@@ -290,6 +297,7 @@ class stock_picking(osv.osv):
     _inherit = "stock.picking" 
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
     }      
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
@@ -323,8 +331,11 @@ class stock_picking(osv.osv):
                     for invoice_id in invoice_ids:
                         wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)
                             
-            
-        return super(stock_picking,self).action_done(cr,uid,ids,context)
+
+        super(stock_picking,self).action_done(cr,uid,ids,context)
+        #fix the time issue to use utc now, by johnw
+        self.write(cr, uid, ids, {'date_done': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')})
+        return True            
 
     def action_confirm(self, cr, uid, ids, context=None):
         """ Add the lines aggisnment checking
@@ -361,6 +372,7 @@ class stock_picking_in(osv.osv):
  
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'min_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date",
                  store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"), 
         'max_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_maximum_date, multi="min_max_date",
