@@ -27,11 +27,11 @@ class pay_po(orm.TransientModel):
     _description = 'Wizard to generate a payment from the purchase order'
 
     _columns = {
-        'journal_id': fields.many2one('account.journal', 'Payment Method'),
-        'amount': fields.float('Amount', digits_compute=dp.get_precision('Sale Price')),
+        'journal_id': fields.many2one('account.journal', 'Payment Method', required=True),
+        'amount': fields.float('Amount', digits_compute=dp.get_precision('Sale Price'), required=True),
         'amount_max': fields.float('Max Amount'),
         'date': fields.datetime('Payment Date'),
-        'description': fields.char('Description', size=64),
+        'description': fields.char('Description', size=64, required=True),
     }
     
     def _get_amount(self, cr, uid, context=None):
