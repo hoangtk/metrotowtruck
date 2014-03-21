@@ -40,6 +40,23 @@ class stock_return_picking(osv.osv_memory):
         note = pick.note and pick.note != '' and (pick.note + ';' + data["reason"]) or data["reason"]
         pick_obj.write(cr, uid, [pick_id], {'note':note})
         return resu
+    def get_return_history(self, cr, uid, pick_id, context=None):
+        """ 
+         Get  return_history.
+         @param self: The object pointer.
+         @param cr: A database cursor
+         @param uid: ID of the user currently logged in
+         @param pick_id: Picking id
+         @param context: A standard dictionary
+         @return: A dictionary which of values.
+        """
+        pick_obj = self.pool.get('stock.picking')
+        pick = pick_obj.browse(cr, uid, pick_id, context=context)
+        return_history = {}
+        for m  in pick.move_lines:
+            #use the function field return_qty direct
+            return_history[m.id] = m.return_qty
+        return return_history    
 #note        
 
 stock_return_picking()

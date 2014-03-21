@@ -977,6 +977,11 @@ msgstr "Excel文件"
 msgid "Stock Moves"
 msgstr "库存调拨"
 
+#. module: metro_stock
+#: field:stock.move,return_qty:0
+msgid "Return Quantity"
+msgstr "退货数量"
+
 ########################manual########################
 #. module: stock
 #: view:stock.picking:0
@@ -1133,7 +1138,7 @@ msgstr "预计日期"
 #. module: metro_stock
 #: view:stock.picking.in:0
 msgid "Date of Reception"
-msgstr "入库时间"
+msgstr "入库时间vv"
 
 #. module: stock
 #: field:stock.move,date_expected:0
@@ -1143,7 +1148,7 @@ msgstr "预计日期"
 #. module: stock
 #: field:stock.picking.in,move_lines:0
 msgid "Internal Moves"
-msgstr "入库"
+msgstr "入库oopp"
 
 #. module: stock
 #: field:stock.picking.out,move_lines:0
