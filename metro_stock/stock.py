@@ -230,10 +230,30 @@ class material_request_line(osv.osv):
             
 class stock_move(osv.osv):
     _inherit = "stock.move" 
+    def _get_rec_info(self, cr, uid, ids, fields, args, context=None):
+        result = {}
+        for id in ids:
+            result[id] = {'return_qty':0,}
+        for m in self.browse(cr,uid,ids,context=context):
+            return_qty = 0
+            if m.state == 'done':
+                for rec in m.move_history_ids2:
+                    # only take into account 'product return' moves, ignoring any other
+                    # kind of upstream moves, such as internal procurements, etc.
+                    # a valid return move will be the exact opposite of ours:
+                    #     (src location, dest location) <=> (dest location, src location))
+                    if rec.state != 'cancel' \
+                        and rec.location_dest_id.id == m.location_id.id \
+                        and rec.location_id.id == m.location_dest_id.id:
+                        return_qty += (rec.product_qty * rec.product_uom.factor)
+                    
+            result[m.id].update({'return_qty':return_qty,})
+        return result    
     _columns = {   
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], string='Shipping Type'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True,store=True),
+        'return_qty': fields.function(_get_rec_info, type='integer', string='Return Quantity', multi="rec_info"),
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -327,10 +347,12 @@ class stock_picking(osv.osv):
                     inv_create_id = inv_create_obj.create(cr,uid,{'journal_id':journal_id},context)
                     pick_inv_ids = inv_create_obj.create_invoice(cr,uid,[inv_create_id],context)
                     invoice_ids = pick_inv_ids.values()
+                    '''
+                    remove the auto validate, need the accoutant to validate manually.
                     wf_service = netsvc.LocalService("workflow")
                     for invoice_id in invoice_ids:
-                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)
-                            
+                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)\
+                    '''   
 
         super(stock_picking,self).action_done(cr,uid,ids,context)
         #fix the time issue to use utc now, by johnw
