@@ -52,7 +52,7 @@ class pur_req(osv.osv):
         'remark': fields.text('Remark'),
         'company_id': fields.many2one('res.company', 'Company', required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'line_ids' : fields.one2many('pur.req.line','req_id','Products to Purchase',readonly=True, states={'draft':[('readonly',False)]}),
-        'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
+        'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True, groups='metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_buyer'),
         'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),      
         'full_gen_po': fields.function(_full_gen_po, string='All products generated PO', type='boolean', help="It indicates that this requsition's all lines generated PO"),      
@@ -195,7 +195,7 @@ class pur_req_line(osv.osv):
         'order_user_id': fields.related('req_id','user_id',type='many2one',relation='res.users',string='Requester',readonly=True),
         'order_date_request': fields.related('req_id','date_request',type='datetime',string='Requisition Date',readonly=True),
         'order_state': fields.related('req_id', 'state', type='selection',string='Status',readonly=True,
-                                      selection=[('draft','New'),('confirmed','Confirmed'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
+                                      selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
                 
     }
     
