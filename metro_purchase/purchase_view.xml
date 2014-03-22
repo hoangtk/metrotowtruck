@@ -5,7 +5,7 @@
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
-            <field name="arch" type="xml">            
+            <field name="arch" type="xml">           
             	<xpath expr="//button[@name='purchase_approve']" position="attributes" >
             		<attribute name="groups">metro_purchase.group_pur_req_manager</attribute>
             	</xpath>            
@@ -18,10 +18,10 @@
                  <xpath expr="//button[@name='action_cancel']" position="attributes" >
                  	<attribute name="states">approved,except_picking,except_invoice,rejected,changing,changing_rejected</attribute>
                 </xpath>             
-<!--                 <xpath expr="//button[@name='picking_ok']" position="replace" >
+                <xpath expr="//button[@name='picking_ok']" position="replace" >
                 </xpath>             
                 <xpath expr="//button[@name='invoice_ok']" position="replace" >
-                </xpath>   -->              
+                </xpath>                
                 <xpath expr="//button[@name='view_picking']" position="replace" >
                 	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}"/>
                 </xpath>                       
@@ -40,7 +40,6 @@
                 	<field name="is_sent_supplier"/>
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
-                	<!-- <field name="amount_paid"/> -->
                 	<field name="receipt_number"/>
                 	<field name="create_uid"/>
                 	<!-- <field name="paid_done"/> -->
@@ -95,7 +94,7 @@
                  	<button name="button_to_changing_confirmed" states="changing,changing_rejected" string="Confirm Chaning" type="object"/>
                  	<button name="%(act_purchase_changing_reject)d" states="changing_confirmed" string="Reject Changing" type="action" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing_approved" states="changing_confirmed" string="Approve Changing" type="object" groups="metro_purchase.group_pur_req_manager"/>
-                 	<button name="button_manual_done" states="approved" string="Manual Done" type="object" groups="metro_purchase.group_pur_req_manager"/>
+                 	<button name="button_manual_done" states="approved,wait_receipt" string="Manual Done" type="object" groups="metro_purchase.group_pur_req_manager"/>
                 </xpath>     
                 <xpath expr="//tree/field[@name='product_qty']" position="after">
                 	<field name="receive_qty"/>
