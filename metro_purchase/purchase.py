@@ -188,7 +188,18 @@ class purchase_order(osv.osv):
     def wkf_done(self, cr, uid, ids, context=None):
         #check the receipt number field
         order = self.browse(cr,uid,ids[0],context=context)
+        #to see if there are taxes code
         has_tax = order.taxes_id and len(order.taxes_id) > 0
+        if has_tax:
+            # to see if the tax code has amount, since there is a 'No Tax' tax in system
+            has_tax_amt = False
+            for tax in order.taxes_id:
+                if tax.amount > 0:
+                    has_tax_amt = True
+                    break
+            if not has_tax_amt:
+                has_tax = False
+                    
         if  (not has_tax and order.amount_tax <= 0) or (order.receipt_number and order.receipt_number != ''):
             #only when get the receipt, then update status to 'done'
             #update lines to 'done'  

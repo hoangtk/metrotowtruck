@@ -70,7 +70,7 @@ class cron_job(osv.osv_memory):
                 if need_check:
                     po_obj.wkf_done(cr, uid, [po.id], context=context)
                     done_ids.append(po.id)
-        _logger.info('#########po_state_update  don pos:%s##########'%done_ids)
+        _logger.info('#########po_state_update  done pos:%s##########'%done_ids)
         _logger.info('#########po_state_update  end##########')
                     
 cron_job()  
