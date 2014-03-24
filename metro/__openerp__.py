@@ -21,6 +21,7 @@
        "metro_menu.xml",
 	   "security/metro.xml",
        "order_informer.xml",
+       "cron_job_data.xml",
     ],
     'installable': True,
     'auto_install': False,

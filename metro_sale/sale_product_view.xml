@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+    <record model="ir.ui.view" id="view_sale_product_form">
+    	<field name="name">view_sale_product_form</field>
+    	<field name="model">sale.product</field>
+    	<field name="arch" type="xml">
+            <tree string="Sale Product IDs" editable="bottom">
+                <field name="name"/>
+                <field name="note"/>
+                <field name="create_uid"/>
+                <field name="create_date"/>
+            </tree>    	
+    	</field>
+    </record>
+    <record model="ir.ui.view" id="view_sale_product_filter">
+            <field name="name">view_sale_product_filter</field>
+            <field name="model">sale.product</field>
+            <field name="arch" type="xml">
+                <search string="Search Sale Products">
+                    <field name="name" string="ID"/>
+                    <field name="create_uid" />
+                </search>
+            </field>
+    </record>   
+    <record model="ir.actions.act_window" id="action_sale_product">
+        <field name="name">Sale Product IDs</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.product</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_sale_product_filter"/>
+    </record>
+
+    <menuitem
+        id="menu_sale_product_mrp"
+        sequence="102"
+        parent="mrp.menu_mrp_manufacturing"
+        action="action_sale_product"
+        groups="mrp.group_mrp_user"/>
+        
+    <menuitem
+        id="menu_sale_product_warehouse"
+        sequence="101"
+        parent="stock.menu_stock_configuration"
+        action="action_sale_product"
+        groups="base.group_user"/>        
+    </data>
+</openerp>

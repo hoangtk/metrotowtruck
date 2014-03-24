@@ -19,14 +19,15 @@
         <field name="arch" type="xml">
             <form string="Purchase Requisition" version="7.0">
             <header>
-				<button name="pur_req_confirm" states="draft" string="Confirm" class="oe_highlight" groups="metro_purchase.group_pur_req_requester"/>
+				<button name="pur_req_confirm" states="draft" string="Confirm" class="oe_highlight"/>				  
+				<button name="pur_req_approve" states="confirmed" string="Approve" class="oe_highlight" groups="metro_purchase.group_pur_req_checker"/>
 				<button name="%(act_pur_req_po)d" string="Generate PO" type="action" groups="metro_purchase.group_pur_req_buyer"
-					attrs="{'invisible': ['&amp;',('state','!=','confirmed'),'|',('state','!=','in_purchase'),('full_gen_po','=',True)]}" class="oe_highlight"/>
+					attrs="{'invisible': ['&amp;',('state','!=','approved'),'|',('state','!=','in_purchase'),('full_gen_po','=',True)]}" class="oe_highlight"/>
 				<button name="pur_req_done" string="Done"  groups="metro_purchase.group_pur_req_buyer" 
 					attrs="{'invisible': ['|',('full_gen_po','=',False),('state','!=','in_purchase')]}" class="oe_highlight"/>
-				<button name="pur_req_cancel" states="draft,confirmed,in_purchase" string="Cancel"  groups="metro_purchase.group_pur_req_requester"/>
+				<button name="pur_req_cancel" states="draft,confirmed,approved,in_purchase" string="Cancel"/>
 				<button name="action_cancel_draft" states="cancel" string="Set to Draft" type="object" />
-                <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_purchase,done"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,in_purchase,done"/>
             </header>
             <sheet>
 				<div class="oe_title">
@@ -59,6 +60,7 @@
                         <field name="date_required"/>
                         <field name="inv_qty"/>
                         <field name="req_emp_id"/>
+                        <field name="req_dept_id"/>
                         <field name="req_reason"/>
                         <field name="req_ticket_no"/>
                         <field name="generated_po"/>
@@ -72,6 +74,7 @@
                             <field name="date_required" />
                             <field name="inv_qty" />
                         	<field name="req_emp_id"/>
+                       		<field name="req_dept_id"/>
                             <field name="req_reason" />
                         	<field name="req_ticket_no"/>
                         	<field name="generated_po"/>
@@ -160,7 +163,7 @@
         sequence="9"
         parent="purchase.menu_procurement_management"
         action="action_pur_req"
-        groups="metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_buyer"/>
+        groups="base.group_user,metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_checker,metro_purchase.group_pur_req_buyer"/>
     
 <!-- pur request line -->
     <record model="ir.ui.view" id="view_pur_req_line_full_tree">
@@ -177,6 +180,7 @@
                 <field name="date_required" />
                 <field name="inv_qty" />
             	<field name="req_emp_id"/>
+                <field name="req_dept_id"/>
                 <field name="req_reason" />
             	<field name="req_ticket_no"/>
                 <field name="order_warehouse_id"/>
@@ -268,7 +272,7 @@
         sequence="10"
         parent="purchase.menu_procurement_management"
         action="action_pur_req_line_full"
-        groups="metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_buyer"/>
+        groups="base.group_user,metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_checker,metro_purchase.group_pur_req_buyer"/>
         
     </data>    
 </openerp>

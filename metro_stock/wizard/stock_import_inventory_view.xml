@@ -8,7 +8,8 @@
               <form string="Import Inventory" version="7.0">
                   <separator string="Import inventory from Excel"/>
                   <group>
-                      <field name="location_id"/>
+                      <field name="location_id" domain="[('usage','=','internal')]" />
+                      <field name="consider_inventory"/>
                       <field name="import_file"/>
                   </group>
                   <footer>

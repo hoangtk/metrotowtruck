@@ -19,7 +19,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import time
 import datetime
@@ -35,7 +34,7 @@ class material_request(osv.osv):
     _inherit = "stock.picking"
     _table = "stock_picking"
     _description = "Material Request"
-
+    _order = "name desc"
     _columns = {
         'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], 
                                  'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
@@ -179,7 +178,7 @@ class material_request_line(osv.osv):
         result = {
             'product_uom': product.uom_id.id,
             'product_uos': uos_id,
-            'product_qty': 1.00,
+            'product_qty': product.qty_available,
             'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
             'prodlot_id' : False,
         }
@@ -228,19 +227,47 @@ class material_request_line(osv.osv):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(material_request_line,self).search(cr, user, new_args, offset, limit, order, context, count)   
-        
+            
 class stock_move(osv.osv):
     _inherit = "stock.move" 
+    def _get_rec_info(self, cr, uid, ids, fields, args, context=None):
+        result = {}
+        for id in ids:
+            result[id] = {'return_qty':0,}
+        for m in self.browse(cr,uid,ids,context=context):
+            return_qty = 0
+            if m.state == 'done':
+                for rec in m.move_history_ids2:
+                    # only take into account 'product return' moves, ignoring any other
+                    # kind of upstream moves, such as internal procurements, etc.
+                    # a valid return move will be the exact opposite of ours:
+                    #     (src location, dest location) <=> (dest location, src location))
+                    if rec.state != 'cancel' \
+                        and rec.location_dest_id.id == m.location_id.id \
+                        and rec.location_id.id == m.location_dest_id.id:
+                        return_qty += (rec.product_qty * rec.product_uom.factor)
+                    
+            result[m.id].update({'return_qty':return_qty,})
+        return result    
     _columns = {   
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], string='Shipping Type'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True,store=True),
+        'return_qty': fields.function(_get_rec_info, type='integer', string='Return Quantity', multi="rec_info"),
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(stock_move,self).search(cr, user, new_args, offset, limit, order, context, count)  
+
+    def action_done(self, cr, uid, ids, context=None):
+        super(stock_move,self).action_done(cr, uid, ids, context) 
+        move_ids = []
+        for move in self.browse(cr, uid, ids, context=context):
+            if move.state not in ('done','cancel'):
+                move_ids.append(move.id)     
+        self.write(cr, uid, ids, {'date': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}, context=context)
 
 from openerp.addons.stock import stock_picking as stock_picking_super
       
@@ -290,6 +317,7 @@ class stock_picking(osv.osv):
     _inherit = "stock.picking" 
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
     }      
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
@@ -319,13 +347,33 @@ class stock_picking(osv.osv):
                     inv_create_id = inv_create_obj.create(cr,uid,{'journal_id':journal_id},context)
                     pick_inv_ids = inv_create_obj.create_invoice(cr,uid,[inv_create_id],context)
                     invoice_ids = pick_inv_ids.values()
+                    '''
+                    remove the auto validate, need the accoutant to validate manually.
                     wf_service = netsvc.LocalService("workflow")
                     for invoice_id in invoice_ids:
-                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)
-                            
-            
-        return super(stock_picking,self).action_done(cr,uid,ids,context)
-       
+                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)\
+                    '''   
+
+        super(stock_picking,self).action_done(cr,uid,ids,context)
+        #fix the time issue to use utc now, by johnw
+        self.write(cr, uid, ids, {'date_done': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')})
+        return True            
+
+    def action_confirm(self, cr, uid, ids, context=None):
+        """ Add the lines aggisnment checking
+        """
+        resu = super(stock_picking,self).action_confirm(cr, uid, ids, context=context)
+        if resu:
+            pickings = self.browse(cr, uid, ids, context=context)
+            todo = []
+            for picking in pickings:
+                if picking.type in('mr','mrr'):
+                    for r in picking.move_lines:
+                        if r.state == 'confirmed':
+                            todo.append(r.id)
+            if len(todo):
+                self.pool.get('stock.move').check_assign(cr, uid, todo, context=context)
+        return resu       
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -346,6 +394,7 @@ class stock_picking_in(osv.osv):
  
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'min_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date",
                  store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"), 
         'max_date': fields.function(stock_picking_super.get_min_max_date, fnct_inv=_set_maximum_date, multi="min_max_date",
@@ -364,6 +413,10 @@ class stock_picking_in(osv.osv):
 
 class stock_inventory(osv.osv):
     _inherit = "stock.inventory"
+    _columns = {
+        'comments': fields.text('Comments', size=64, readonly=False, states={'done': [('readonly', True)]}),
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+    }
     def unlink(self, cr, uid, ids, context=None):
         inventories = self.read(cr, uid, ids, ['state'], context=context)
         unlink_ids = []

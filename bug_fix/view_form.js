@@ -2930,6 +2930,7 @@ instance.web.form.CompletionFieldMixin = {
                     classname: 'oe_m2o_dropdown_option'
                 });
             }
+            /*
             // quick create
             var raw_result = _(data.result).map(function(x) {return x[1];});
             if (search_val.length > 0 && !_.include(raw_result, search_val)) {
@@ -2950,7 +2951,7 @@ instance.web.form.CompletionFieldMixin = {
                 },
                 classname: 'oe_m2o_dropdown_option'
             });
-
+			*/
             return values;
         });
     },
@@ -3465,7 +3466,7 @@ var commands = {
     }
 };
 instance.web.form.FieldOne2Many = instance.web.form.AbstractField.extend({
-    multi_selection: false,
+    multi_selection: true,
     disable_utility_classes: true,
     init: function(field_manager, node) {
         this._super(field_manager, node);
@@ -3925,7 +3926,8 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
             else
                 return $.when();
         }).done(function () {
-            self.handle_button(name, id, callback);
+//            self.handle_button(name, id, callback);
+        	self.handle_button(name, id, function() {callback; self.o2m.view.reload();});
         });
     },
 

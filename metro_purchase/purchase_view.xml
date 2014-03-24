@@ -5,7 +5,7 @@
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
-            <field name="arch" type="xml">            
+            <field name="arch" type="xml">           
             	<xpath expr="//button[@name='purchase_approve']" position="attributes" >
             		<attribute name="groups">metro_purchase.group_pur_req_manager</attribute>
             	</xpath>            
@@ -21,7 +21,10 @@
                 <xpath expr="//button[@name='picking_ok']" position="replace" >
                 </xpath>             
                 <xpath expr="//button[@name='invoice_ok']" position="replace" >
-                </xpath>            
+                </xpath>                
+                <xpath expr="//button[@name='view_picking']" position="replace" >
+                	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}"/>
+                </xpath>                       
                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
                 </xpath>         
@@ -37,7 +40,6 @@
                 	<field name="is_sent_supplier"/>
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
-                	<!-- <field name="amount_paid"/> -->
                 	<field name="receipt_number"/>
                 	<field name="create_uid"/>
                 	<!-- <field name="paid_done"/> -->
@@ -87,11 +89,12 @@
                 </xpath>      
 <!-- purchase changing after approved -->                          
                 <xpath expr="//button[@name='action_cancel']" position="after" >
-                 	<button name="button_to_changing" states="approved,except_picking,except_invoice" string="Change" type="object"/>
+               		<button name="button_cancel_except" states="approved" string="Cancel With Exception" type="object" groups="metro_purchase.group_pur_req_manager"/>
+                 	<button name="button_to_changing" states="approved,except_picking,except_invoice" string="Change" type="object" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing_confirmed" states="changing,changing_rejected" string="Confirm Chaning" type="object"/>
                  	<button name="%(act_purchase_changing_reject)d" states="changing_confirmed" string="Reject Changing" type="action" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing_approved" states="changing_confirmed" string="Approve Changing" type="object" groups="metro_purchase.group_pur_req_manager"/>
-                 	<button name="button_manual_done" states="approved" string="Manual Done" type="object"/>
+                 	<button name="button_manual_done" states="approved,wait_receipt" string="Manual Done" type="object" groups="metro_purchase.group_pur_req_manager"/>
                 </xpath>     
                 <xpath expr="//tree/field[@name='product_qty']" position="after">
                 	<field name="receive_qty"/>
@@ -122,6 +125,10 @@
                 <field name="fiscal_position" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>
+                <button name="view_invoice" position="replace">
+                	<!-- <button name="view_invoice" string="Receive Invoice" type="object" attrs="{'invisible': ['|', ('invoice_method','=','picking'), '|', ('state','!=', 'approved'), ('invoiced','=',True) ]}" class="oe_highlight"/> -->
+                	<button name="%(act_pur_invoice)d" string="Receive Invoice" type="action" groups="account.group_account_invoice" attrs="{'invisible': [('state','!=','approved')]}"/>
+                </button>                
        		</field>
         </record>  
           
@@ -170,7 +177,7 @@
             <field name="inherit_id" ref="purchase.purchase_order_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="/tree" position="attributes">
-                    <attribute name="colors"><![CDATA[red:state in ('except_invoice','except_picking','rejected') or (not shipped and state not in ('cancel', 'done') and current_date > minimum_planned_date);grey:state=='cancel';blue:state in ('wait','confirmed');green:state=='done']]></attribute>
+                    <attribute name="colors"><![CDATA[red:state in ('except_invoice','except_picking','rejected') or (not shipped and state not in ('cancel', 'done', 'cancel_except') and current_date > minimum_planned_date);grey:state=='cancel';blue:state in ('wait','confirmed');green:state=='done']]></attribute>
                     <attribute name="fonts"><![CDATA[bold:state=='done' or (not shipped and state not in ('cancel', 'done') and current_date > minimum_planned_date)]]></attribute>
                 </xpath>
                 <field name="state" position="before">
@@ -196,8 +203,9 @@
             		<filter icon="terp-document-new" name="confirmed" string="Waitting Approval" domain="[('state','=','confirmed')]" help="Purchase orders waitting approval"/>
             		<filter icon="terp-document-new" name="rejected" string="Rejected" domain="[('state','=','rejected')]" help="Purchase orders been rejected"/>
             	</xpath>
+            	
             	<xpath expr="//filter[@name='approved']" position="replace" >
-            		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','not in',('draft','cancel','rejected','confirmed'))]" help="Approved purchase orders"/>
+            		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','=','approved')]" help="Approved purchase orders"/>
             	</xpath>            	
             	<xpath expr="//filter[@name='exception']" position="before" >
 					<filter icon="terp-emblem-important" name="is_sent" string="Sent to Supplier" domain="[('is_sent_supplier','=',True)]"/>

@@ -33,11 +33,11 @@ class account_invoice(osv.osv):
                 for m in invoice.move_id.line_id:
                     temp_lines = []
                     if m.reconcile_id:
-                        #only include the account move with cash/bank journal
-                        temp_lines = map(lambda x: not (x.purchase_ids or x.sale_ids) and x.id, m.reconcile_id.line_id)
+                        #only include the account move with cash/bank journal and not related with so/po
+                        temp_lines = map(lambda x: not x.purchase_ids and not x.sale_ids and x.journal_id.type in('cash','bank') and x.id, m.reconcile_id.line_id)
                     elif m.reconcile_partial_id:
-                        #only include the account move with cash/bank journal
-                        temp_lines = map(lambda x: not (x.purchase_ids or x.sale_ids) and x.id, m.reconcile_partial_id.line_partial_ids)
+                        #only include the account move with cash/bank journal and not related with so/po
+                        temp_lines = map(lambda x: not x.purchase_ids and not x.sale_ids and x.journal_id.type in('cash','bank') and x.id, m.reconcile_partial_id.line_partial_ids)
 #                    lines += [x for x in temp_lines if x not in lines]
                     lines += [x for x in temp_lines if (x and x not in lines)]
                     src.append(m.id)

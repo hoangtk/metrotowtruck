@@ -53,7 +53,8 @@ class purchase_order(osv.osv):
         ('except_invoice', 'Invoice Exception'),
         ('wait_receipt', 'Waitting Receipt'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Cancelled'),
+        ('cancel_except', 'Cancelled with Exception')
     ] 
     
     def _invoiced_rate(self, cursor, user, ids, name, arg, context=None):
@@ -187,8 +188,20 @@ class purchase_order(osv.osv):
     def wkf_done(self, cr, uid, ids, context=None):
         #check the receipt number field
         order = self.browse(cr,uid,ids[0],context=context)
-        if order.amount_tax <= 0 or (order.receipt_number and order.receipt_number != ''):
-            #only when get the receipt, then upadte status to 'done'
+        #to see if there are taxes code
+        has_tax = order.taxes_id and len(order.taxes_id) > 0
+        if has_tax:
+            # to see if the tax code has amount, since there is a 'No Tax' tax in system
+            has_tax_amt = False
+            for tax in order.taxes_id:
+                if tax.amount > 0:
+                    has_tax_amt = True
+                    break
+            if not has_tax_amt:
+                has_tax = False
+                    
+        if  (not has_tax and order.amount_tax <= 0) or (order.receipt_number and order.receipt_number != ''):
+            #only when get the receipt, then update status to 'done'
             #update lines to 'done'  
             lines = self._get_lines(cr,uid,ids,['approved'],context=context)
             self.pool.get('purchase.order.line').write(cr, uid, lines, {'state':'done'},context)
@@ -243,6 +256,37 @@ class purchase_order(osv.osv):
         lines = self._get_lines(cr,uid,ids,context=context)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'cancel'},context)
         return resu
+    def button_cancel_except(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        for purchase in self.browse(cr, uid, ids, context=context):
+            invoice_qty = 0
+            rec_qty = 0
+            for line in purchase.order_line:
+                rec_qty += line.receive_qty - line.return_qty
+                invoice_qty += line.invoice_qty
+            for pick in purchase.picking_ids:
+                if pick.state not in ('draft','cancel'):
+                    if rec_qty > 0:
+                        raise osv.except_osv(
+                        _('Unable to cancel this purchase order.'),
+                        _('There are received products  or receptions not in draft/cancel related to this purchase order.'))
+            for pick in purchase.picking_ids:
+                if pick.state == 'draft':
+                    wf_service.trg_validate(uid, 'stock.picking', pick.id, 'button_cancel', cr)
+            for inv in purchase.invoice_ids:
+                if inv and inv.state not in ('cancel','draft'):
+                    if invoice_qty > 0:
+                        raise osv.except_osv(
+                        _('Unable to cancel this purchase order.'),
+                        _('There are invoiced products or invoices not in draft/cancel related to this purchase order.'))
+                if inv and inv.state == 'draft':
+                    wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
+        self.write(cr,uid,ids,{'state':'cancel_except'})
+        #cancel_excep all order lines
+        lines = self._get_lines(cr,uid,ids,context=context)
+        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'cancel_except'},context)
+        
+        return True    
     def action_cancel_draft(self, cr, uid, ids, context=None):
         resu = super(purchase_order,self).action_cancel_draft(cr,uid,ids,context)
         lines = self._get_lines(cr,uid,ids,context=context)
@@ -294,6 +338,8 @@ class purchase_order(osv.osv):
         fiscal_obj = self.pool.get('account.fiscal.position')
 
         for order in self.browse(cr, uid, ids, context=context):
+#            pay_acc_id = order.partner_id.property_account_payable.id
+            #use a new method to get the account_id
             pay_acc_id = self._get_inv_pay_acc_id(cr,uid,order)                
             journal_ids = journal_obj.search(cr, uid, [('type', '=','purchase'),('company_id', '=', order.company_id.id)], limit=1)
             if not journal_ids:
@@ -303,16 +349,34 @@ class purchase_order(osv.osv):
             # generate invoice line correspond to PO line and link that to created invoice (inv_id) and PO line
             inv_lines = []
             for po_line in order.order_line:
+                #check if this line have quantity to generate invoice, by johnw
+                if po_line.product_qty <= po_line.invoice_qty:
+                    continue                
+#                if po_line.product_id:
+#                    acc_id = po_line.product_id.property_account_expense.id
+#                    if not acc_id:
+#                        acc_id = po_line.product_id.categ_id.property_account_expense_categ.id
+#                    if not acc_id:
+#                        raise osv.except_osv(_('Error!'), _('Define expense account for this company: "%s" (id:%d).') % (po_line.product_id.name, po_line.product_id.id,))
+#                else:
+#                    acc_id = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category').id      
+                #use a new method to get the account_id, by johnw          
                 acc_id = self._get_inv_line_exp_acc_id(cr,uid,order,po_line)
                 fpos = order.fiscal_position or False
                 acc_id = fiscal_obj.map_account(cr, uid, fpos, acc_id)
 
                 inv_line_data = self._prepare_inv_line(cr, uid, acc_id, po_line, context=context)
+                #update the quantity to the quantity, by johnw
+                inv_line_data.update({'quantity':(po_line.product_qty - po_line.invoice_qty)})
                 inv_line_id = inv_line_obj.create(cr, uid, inv_line_data, context=context)
                 inv_lines.append(inv_line_id)
 
                 po_line.write({'invoiced':True, 'invoice_lines': [(4, inv_line_id)]}, context=context)
-
+            
+            #if no lines then return direct, by johnw
+            if len(inv_lines) == 0:
+                continue
+            
             # get invoice data and create invoice
             inv_data = {
                 'name': order.partner_ref or order.name,
@@ -336,7 +400,8 @@ class purchase_order(osv.osv):
             # Link this new invoice to related purchase order
             order.write({'invoice_ids': [(4, inv_id)]}, context=context)
             res = inv_id
-        return res    
+        return res
+    
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)    
@@ -369,7 +434,7 @@ class purchase_order(osv.osv):
                 if inv and inv.state not in ('cancel','draft','paid'):
                     raise osv.except_osv(
                         _('Unable to change this purchase order.'),
-                        _('You must first cancel all invoices in draft/cancel/done related to this purchase order.'))
+                        _('You must first cancel all invoices in draft/cancel/paid related to this purchase order.'))
                 if inv.state == 'draft':
                     wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
                             
@@ -447,10 +512,15 @@ class purchase_order(osv.osv):
         self.write(cr,uid,ids,{'state':'done'},context)
         self._update_po_lines(cr,uid,ids,{'state':'done'},context)   
         
-#    def __init__(self, pool, cr):
-#        self._columns['partner_id'].states.update({'changing':[('readonly',True)]})
-#        print self._columns['partner_id'].states
-#        return super(purchase_order,self).__init__(pool,cr)
+    def picking_done(self, cr, uid, ids, context=None):
+        ids_done = []
+        for po in self.browse(cr, uid, ids, context):
+            remain_qty = 0
+            for line in po.order_line:
+                remain_qty += line.product_qty - (line.receive_qty - line.return_qty)
+            if remain_qty == 0:
+                ids_done.append(po.id)
+        return super(purchase_order,self).picking_done(cr, uid, ids_done, context)
           
 class purchase_order_line(osv.osv):  
     _name = "purchase.order.line"
@@ -465,7 +535,8 @@ class purchase_order_line(osv.osv):
         ('changing_confirmed', 'Changing Waiting Approval'),
         ('changing_rejected', 'Changing Rejected'),
         ('done', 'Done'),
-        ('cancel', 'Cancelled')
+        ('cancel', 'Cancelled'),
+        ('cancel_except', 'Cancelled with Exception')
     ]
         
     def _get_supp_prod(self, cr, uid, ids, fields, arg, context=None):
@@ -491,6 +562,7 @@ class purchase_order_line(osv.osv):
                     })
                     break
         return result
+
     def _get_rec_info(self, cr, uid, ids, fields, args, context=None):
         result = {}
         for id in ids:
@@ -498,31 +570,32 @@ class purchase_order_line(osv.osv):
         for line in self.browse(cr,uid,ids,context=context):
             rec_qty = 0
             return_qty = 0
+            invoice_qty = 0
             can_change_price = True
             can_change_product = True
             if line.move_ids:
-                can_change_product = False
                 for move in line.move_ids:
                     if move.state == 'done':
                         if move.type == 'in':
                             rec_qty += move.product_qty
                         if move.type == 'out':
                             return_qty += move.product_qty
-                        #if there are products received then can not change price
-                        if rec_qty - return_qty > 0:
-                            can_change_price = False
+                #if there are products received then can not change product
+                if rec_qty - return_qty > 0:
+                    can_change_product = False
             if line.invoice_lines:
-                can_change_product = False
-                if can_change_price:
-                    for inv_line in line.invoice_lines:
-                        #if there are invoices no canceld, then can not change price
-                        if inv_line.invoice_id.state != 'cancel':
-                            can_change_price = False
-                            break
-            
-            result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
+                for inv_line in line.invoice_lines:
+                    #if there are uncanceled invoices, then can not change product
+                    if inv_line.invoice_id.state != 'cancel':
+                        can_change_product = False
+                        invoice_qty += inv_line.quantity
+                    #if there are done invoices, then can not change price
+                    if can_change_price and (inv_line.invoice_id.state == 'paid' or len(inv_line.invoice_id.payment_ids) > 0):
+                        can_change_price = False
+                    
+            result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'invoice_qty':invoice_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
         return result
-            
+                
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -543,6 +616,7 @@ class purchase_order_line(osv.osv):
         'return_qty' : fields.function(_get_rec_info, type='integer', string='Returned Quantity', multi="rec_info"),
         'can_change_price' : fields.function(_get_rec_info, type='boolean', string='Can Change Price', multi="rec_info"),
         'can_change_product' : fields.function(_get_rec_info, type='boolean', string='Can Change Product', multi="rec_info"),
+        'invoice_qty' : fields.function(_get_rec_info, type='integer', string='Invoice Quantity', multi="rec_info"),
     }  
     _order = "order_id desc"
     _defaults = {
@@ -641,7 +715,7 @@ class purchase_order_line(osv.osv):
             #changed unir prie can not be do when there are uncanceled pickings or invoices
             if vals.has_key('price_unit') and not po_line.can_change_price:
                 raise osv.except_osv(_('Error!'),
-                                     _('The price of %s can not be change since there are related existing uncanceled pickings or invoices.')%(po_line.product_id.name))     
+                                     _('The price of %s can not be change since there are related existing paid invoices.')%(po_line.product_id.name))     
         
         value_old = po_line.product_qty
         resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)

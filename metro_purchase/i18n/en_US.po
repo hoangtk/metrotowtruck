@@ -25,3 +25,8 @@ msgstr "Yes"
 #: code:general:0
 msgid "bool_False"
 msgstr "No"
+
+#. module: purchase
+#: field:purchase.order.line,date_palnned:0
+msgid "Scheduled Date"
+msgstr "Expected Date"

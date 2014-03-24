@@ -42,6 +42,7 @@
     'update_xml': [
         'product_view.xml',
         'security/ir.model.access.csv',
+        'wizard/product_set_printflag.xml',
     ],
     'demo_xml': [],
     'test': [],

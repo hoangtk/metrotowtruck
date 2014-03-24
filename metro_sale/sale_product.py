@@ -7,4 +7,9 @@ class sale_product(osv.osv):
     _columns = {
         'name': fields.char('ID', size=32, required=True),
         'note': fields.char('Description', size=128, required=False),
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
     }
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'ID must be unique!'),
+    ]

@@ -248,8 +248,7 @@ class purchase_order(osv.osv):
             if po.payment_ids:
                 raise osv.except_osv(
                     _('Cannot cancel this purchase order!'),
-                    _('Payment entries are linked '
-                      'with the purchase order.'))
+                    _('Payment entries are linked with the purchase order.'))
         return super(purchase_order, self).action_cancel(cr, uid, ids, context=context)
     
 class account_move_line(orm.Model):
