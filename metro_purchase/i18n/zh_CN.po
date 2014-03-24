@@ -1271,6 +1271,31 @@ msgstr "已收"
 msgid "Department"
 msgstr "部门"
 
+#. module: metro_purchase
+#: view:pur.req:0
+#: selection:pur.req,state:0 
+#: selection:pur.req.line,order_state:0
+msgid "Approved"
+msgstr "已审核"
+
+#. module: metro_purchase
+#: view:pur.req:0
+msgid "Approve"
+msgstr "审核"
+
+
+#. module: metro_purchase
+#: view:pur.req:0
+#: selection:pur.req,state:0 
+#: selection:pur.req.line,order_state:0
+msgid "Rejected"
+msgstr "已拒绝"
+
+#. module: metro_purchase
+#: view:pur.req:0
+msgid "Reject"
+msgstr "拒绝"
+
 #==================added manually - begin ==================#
 #. module: metro_purchase
 #: field:purchase.order,notes:0

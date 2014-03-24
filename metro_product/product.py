@@ -72,7 +72,7 @@ class product_attribute(osv.osv):
 	_name = "product.attribute"
 	_columns = {
 		'name': fields.char('Name', size=512, required=True),
-        'attribute_id': fields.many2one('product.category', 'Person Name', select=True),
+#        'attribute_id': fields.many2one('product.category', 'Person Name', select=True),
         'category_ids' : fields.many2many('product.category', 
             'prod_categ_attribute_rel', 'attribute_id', 'category_id', 
             'Categories'

@@ -203,8 +203,9 @@
             		<filter icon="terp-document-new" name="confirmed" string="Waitting Approval" domain="[('state','=','confirmed')]" help="Purchase orders waitting approval"/>
             		<filter icon="terp-document-new" name="rejected" string="Rejected" domain="[('state','=','rejected')]" help="Purchase orders been rejected"/>
             	</xpath>
+            	
             	<xpath expr="//filter[@name='approved']" position="replace" >
-            		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','not in',('draft','cancel','rejected','confirmed'))]" help="Approved purchase orders"/>
+            		<filter icon="terp-check" name="approved" string="Purchase Orders" domain="[('state','=','approved')]" help="Approved purchase orders"/>
             	</xpath>            	
             	<xpath expr="//filter[@name='exception']" position="before" >
 					<filter icon="terp-emblem-important" name="is_sent" string="Sent to Supplier" domain="[('is_sent_supplier','=',True)]"/>
