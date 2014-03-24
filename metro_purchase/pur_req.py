@@ -46,25 +46,29 @@ class pur_req(osv.osv):
         return res    
     _columns = {
         'name': fields.char('Requisition#', size=32,required=True),
-        'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse',required=True,readonly=True, states={'draft':[('readonly',False)]}),    
-        'user_id': fields.many2one('res.users', 'Requester',required=True,readonly=True, states={'draft':[('readonly',False)]}),        
-        'date_request': fields.datetime('Requisition Date',required=True,readonly=True, states={'draft':[('readonly',False)]}),
+        'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse',required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),    
+        'user_id': fields.many2one('res.users', 'Requester',required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),        
+        'date_request': fields.datetime('Requisition Date',required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'remark': fields.text('Remark'),
-        'company_id': fields.many2one('res.company', 'Company', required=True,readonly=True, states={'draft':[('readonly',False)]}),
-        'line_ids' : fields.one2many('pur.req.line','req_id','Products to Purchase',readonly=True, states={'draft':[('readonly',False)]}),
-        'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
+        'company_id': fields.many2one('res.company', 'Company', required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'line_ids' : fields.one2many('pur.req.line','req_id','Products to Purchase',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True,),
         'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),      
         'full_gen_po': fields.function(_full_gen_po, string='All products generated PO', type='boolean', help="It indicates that this requsition's all lines generated PO"),      
     }
     _defaults = {
-        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'pur.req'),
+#        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'pur.req'),
+        'name': lambda obj, cr, uid, context: '/',
 #        'warehouse_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
         'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id ,
         'date_request': lambda *args: time.strftime('%Y-%m-%d %H:%M:%S'),
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'pur.req', context=c),
         'state': 'draft',
     }
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'Order Reference must be unique!'),
+    ]
 
     def copy(self, cr, uid, id, default=None, context=None):
         if not default:
@@ -76,6 +80,12 @@ class pur_req(osv.osv):
         })
         return super(pur_req, self).copy(cr, uid, id, default, context)
     
+    def create(self, cr, uid, vals, context=None):
+        if vals.get('name','/')=='/':
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pur.req') or '/'
+        order =  super(pur_req, self).create(cr, uid, vals, context=context)
+        return order
+        
     def wkf_confirm_req(self, cr, uid, ids, context=None):
         for req in self.browse(cr, uid, ids, context=context):
             if not req.line_ids:
@@ -195,7 +205,7 @@ class pur_req_line(osv.osv):
         'order_user_id': fields.related('req_id','user_id',type='many2one',relation='res.users',string='Requester',readonly=True),
         'order_date_request': fields.related('req_id','date_request',type='datetime',string='Requisition Date',readonly=True),
         'order_state': fields.related('req_id', 'state', type='selection',string='Status',readonly=True,
-                                      selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
+                                      selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
                 
     }
     

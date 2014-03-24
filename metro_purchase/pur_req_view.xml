@@ -19,13 +19,14 @@
         <field name="arch" type="xml">
             <form string="Purchase Requisition" version="7.0">
             <header>
-				<button name="pur_req_confirm" states="draft" string="Confirm" class="oe_highlight"/>				  
+				<button name="pur_req_confirm" states="draft,rejected" string="Confirm" class="oe_highlight"/>				  
 				<button name="pur_req_approve" states="confirmed" string="Approve" class="oe_highlight" groups="metro_purchase.group_pur_req_checker"/>
+				<button name="pur_req_reject" states="confirmed" string="Reject" groups="metro_purchase.group_pur_req_checker"/>
 				<button name="%(act_pur_req_po)d" string="Generate PO" type="action" groups="metro_purchase.group_pur_req_buyer"
 					attrs="{'invisible': ['&amp;',('state','!=','approved'),'|',('state','!=','in_purchase'),('full_gen_po','=',True)]}" class="oe_highlight"/>
 				<button name="pur_req_done" string="Done"  groups="metro_purchase.group_pur_req_buyer" 
 					attrs="{'invisible': ['|',('full_gen_po','=',False),('state','!=','in_purchase')]}" class="oe_highlight"/>
-				<button name="pur_req_cancel" states="draft,confirmed,approved,in_purchase" string="Cancel"/>
+				<button name="pur_req_cancel" states="draft,confirmed,approved,rejected,in_purchase" string="Cancel"/>
 				<button name="action_cancel_draft" states="cancel" string="Set to Draft" type="object" />
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,in_purchase,done"/>
             </header>
@@ -132,6 +133,7 @@
                     <field name="name" string="Purchase Requisition"/>
                     <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
                     <filter icon="terp-camera_test" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                    <filter icon="terp-camera_test" name="approved" string="Approved" domain="[('state','=','approved')]"/>
                     <filter icon="terp-camera_test" name="in_purchase" string="In Purchasing" domain="[('state','=','in_purchase')]"/>
                     <filter icon="terp-camera_test" name="done" string="Done" domain="[('state','=','done')]"/>
                     <separator/>

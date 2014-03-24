@@ -47,6 +47,9 @@ class material_request(osv.osv):
         'type': 'mr',
         'state': 'creating',
     }
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'Order Reference must be unique!'),
+    ]
 
     def check_access_rights(self, cr, uid, operation, raise_exception=True):
         #override in order to redirect the check of acces rights on the stock.picking object
