@@ -59,11 +59,11 @@
             <field name="act_to" ref="act_confirmed"/>
             <field name="signal">pur_req_confirm</field>
         </record>
-        <record id="trans_rejected_confirmed" model="workflow.transition">
+        <record id="trans_req_rejected_confirmed" model="workflow.transition">
             <field name="act_from" ref="act_rejected"/>
             <field name="act_to" ref="act_confirmed"/>
             <field name="signal">pur_req_confirm</field>
-        </record>        
+        </record>
 <!--         <record id="trans_confirmed_purchase" model="workflow.transition">
             <field name="act_from" ref="act_confirmed"/>
             <field name="act_to" ref="act_in_purchase"/>
@@ -98,7 +98,17 @@
             <field name="act_from" ref="act_confirmed"/>
             <field name="act_to" ref="act_cancel"/>
             <field name="signal">pur_req_cancel</field>
-        </record>                
+        </record>
+        <record id="trans_approved_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_approved"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">pur_req_cancel</field>
+        </record> 
+        <record id="trans_rejected_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_rejected"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">pur_req_cancel</field>
+        </record>                 
         <record id="trans_purchase_cancel" model="workflow.transition">
             <field name="act_from" ref="act_in_purchase"/>
             <field name="act_to" ref="act_cancel"/>

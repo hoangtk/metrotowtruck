@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <form string="Purchase Requisition" version="7.0">
             <header>
-				<button name="pur_req_confirm" states="draft,rejected" string="Confirm" class="oe_highlight"/>				  
+				<button name="pur_req_confirm" states="draft,rejected" string="Confirm" class="oe_highlight"/>	
 				<button name="pur_req_approve" states="confirmed" string="Approve" class="oe_highlight" groups="metro_purchase.group_pur_req_checker"/>
 				<button name="pur_req_reject" states="confirmed" string="Reject" groups="metro_purchase.group_pur_req_checker"/>
 				<button name="%(act_pur_req_po)d" string="Generate PO" type="action" groups="metro_purchase.group_pur_req_buyer"
