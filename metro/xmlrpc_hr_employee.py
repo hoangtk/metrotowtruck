@@ -13,11 +13,17 @@ if dbname == 'metro_production':
 username = raw_input('Enter user name : ')
 pwd = raw_input('Enter password : ')
 '''
-host = 'localhost'
-port = '9069'
-dbname = 'metro_develop'
+#host = 'localhost'
+#port = '9069'
+#dbname = 'metro_develop'
+#username = 'erpadmin'
+#pwd = 'develop'
+
+host = '10.1.1.141'
+port = '80'
+dbname = 'metro_production'
 username = 'erpadmin'
-pwd = 'develop'
+pwd = 'erp123'
 
 sock_common = xmlrpclib.ServerProxy ('http://%s:%s/xmlrpc/common'%(host,port))
 uid = sock_common.login(dbname, username, pwd)
