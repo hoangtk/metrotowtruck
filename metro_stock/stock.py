@@ -34,14 +34,13 @@ class material_request(osv.osv):
     _inherit = "stock.picking"
     _table = "stock_picking"
     _description = "Material Request"
-    _order = "name desc"
+    _order = "name desc"    
     _columns = {
         'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], 
                                  'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
-        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
-        
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),        
     }
     _defaults = {
         'type': 'mr',
@@ -126,6 +125,7 @@ class material_request_line(osv.osv):
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
     }
+    _order = 'id'
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(material_request_line,self).default_get(cr, uid, fields_list, context)
         #material_request.type: mr or mrr

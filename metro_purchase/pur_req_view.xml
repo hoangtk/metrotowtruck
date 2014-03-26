@@ -274,7 +274,7 @@
         sequence="10"
         parent="purchase.menu_procurement_management"
         action="action_pur_req_line_full"
-        groups="base.group_user,metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_checker,metro_purchase.group_pur_req_buyer"/>
+        groups="metro_purchase.group_pur_req_requester,metro_purchase.group_pur_req_checker,metro_purchase.group_pur_req_buyer"/>
         
     </data>    
 </openerp>

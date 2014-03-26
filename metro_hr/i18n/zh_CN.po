@@ -71,3 +71,12 @@ msgstr "职工工资历史"
 msgid "Employment Started"
 msgstr "就业开始"
 
+#. module: hr
+#: field:hr.employee,emp_code:0
+msgid "Employee Code"
+msgstr "员工编号"
+
+#. module: hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "员工卡ID"
