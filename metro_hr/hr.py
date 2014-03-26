@@ -67,9 +67,24 @@ class hr_employee(osv.osv):
 			('validate1', 'Waiting Second Approval'), ('validate', 'Approved'), ('cancel', 'Cancelled')]),
 		'current_leave_id': fields.function(_get_leave_status, multi="leave_status", string="Current Leave Type",type='many2one', relation='hr.holidays.status'),
 		'leave_date_from': fields.function(_get_leave_status, multi='leave_status', type='date', string='From Date'),
-		'leave_date_to': fields.function(_get_leave_status, multi='leave_status', type='date', string='To Date'),		
+		'leave_date_to': fields.function(_get_leave_status, multi='leave_status', type='date', string='To Date'),
+		'emp_code': fields.char('Employee Code', size=16),
+		'emp_card_id': fields.char('Employee Card ID', size=16),		
 	}
-	
+	_sql_constraints = [
+		('emp_code_uniq', 'unique(emp_code)', 'Employee Code must be unique!'),
+	]	
+ 	def default_get(self, cr, uid, fields_list, context=None):
+ 		values = super(hr_employee,self).default_get(cr, uid, fields_list, context)
+		cr.execute("SELECT max(id) from hr_employee")
+		emp_max_id = cr.fetchone()
+ 		emp_code = '%03d'%emp_max_id
+ 		values.update({'emp_code':emp_code})
+ 		return values
+#	def create(self, cr, user, vals, context=None):
+#		emp_id = super(hr_employee,self).create(cr, user, vals, context)
+#		self.write(cr, user, emp_id, {'emp_code':'%03d'%emp_id},context)
+		
 hr_employee()
 
 class salary_history(osv.osv):
