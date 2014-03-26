@@ -3815,7 +3815,8 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
             GroupsType: instance.web.form.One2ManyGroups,
             ListType: instance.web.form.One2ManyList
         }));
-        this.on('edit:before', this, this.proxy('_before_edit'));
+//johnw,03/26/2014, null id issue        
+//        this.on('edit:before', this, this.proxy('_before_edit'));
         this.on('edit:after', this, this.proxy('_after_edit'));
         this.on('save:before cancel:before', this, this.proxy('_before_unedit'));
 
@@ -3930,12 +3931,18 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
         	self.handle_button(name, id, function() {callback; self.o2m.view.reload();});
         });
     },
-
-    _before_edit: function () {
+/*johnw,03/26/2014, null id issue
+ * fix the "Cannot read property 'id' of null" issue in the one2many_list_view_widget
+ * https://bugs.launchpad.net/openerp-web/+bug/1182101
+*/    
+//    _before_edit: function () {
+    _after_edit: function () {
+    	// fixbug https://bugs.launchpad.net/openerp-web/+bug/1182101: move the blurred listener in edit:after
         this.__ignore_blur = false;
         this.editor.form.on('blurred', this, this._on_form_blur);
-    },
-    _after_edit: function () {
+//johnw,03/26/2014, null id issue        
+//    },
+//    _after_edit: function () {
         // The form's blur thing may be jiggered during the edition setup,
         // potentially leading to the o2m instasaving the row. Cancel any
         // blurring triggered the edition startup here
