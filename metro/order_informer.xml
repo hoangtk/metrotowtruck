@@ -147,5 +147,78 @@ Contact: <a href="mailto:ncoad@metrospv.com">Nicholas Coad</a> &nbsp;&nbsp;<a hr
             <field name="key">OI_group_po_approve</field>
             <field name="value">Purchase Requisition / Manager</field>            
         </record>
+        
+<!-- purchase order changing approve/rejected -->  
+        <record id="OI_po_changing_wait_approval" model="email.template">
+            <field name="name">OI_po_changing_wait_approval</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="report_template" ref="metro_purchase.report_purchase_order_metro"/>
+            <field name="report_name"><![CDATA[${(object.name or '').replace('/','_')}]]></field>
+            <field name="email_recipients"><![CDATA[$list_names$ quantity or price were changed after approval, need your review and approve]]></field>
+            <field name="subject"><![CDATA[${object.name}]]></field>
+            <field name="body_html"><![CDATA[
+<h2>Purchase Order ${object.name}</h2>
+<table>
+  <tr>
+    <td align="right"><strong>Supplier:</strong></td>
+    <td>${object.partner_id.name}</td>
+    <td align="right"><strong>Order Date:</strong></td>
+    <td>${object.date_order}</td>
+  </tr>
+  <tr>
+    <td align="right"><strong>Total:</strong></td>
+    <td>${object.amount_total}</td>
+    <td align="right"><strong>Source Document: </strong></td>
+    <td>${object.origin}</td>
+  </tr>
+  <tr>
+    <td align="right"><strong>Pricelist:</strong></td>
+    <td><p>${object.pricelist_id.name}(${object.pricelist_id.currency_id.name})</p></td>
+    <td align="right"><strong>Warehouse: </strong></td>
+    <td>${object.warehouse_id.name}</td>
+  </tr>
+  
+  <tr>
+    <td align="right"><strong>Payment Term:</strong></td>
+    <td><p>${object.payment_term_id.name}</p></td>
+    <td align="right">&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="right"><strong>Creator:</strong></td>
+    <td><p>${object.create_uid.name}</p></td>
+    <td align="right"><strong>Creator Date:</strong></td>
+    <td>${object.create_date}</td>
+  </tr>
+</table>            
+]]>
+			</field>
+        </record>
+        <record id="OI_po_changing_rejected" model="email.template">
+            <field name="name">OI_po_changing_rejected</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>            
+            <field name="email_recipients"><![CDATA[$list_names$ changing were rejected]]></field>
+            <field name="subject"><![CDATA[${object.name}]]></field>
+            <field name="body_html"><![CDATA[
+<h2>${object.name} with supplier ${object.partner_id.name} </h2>
+<h2>Rejection Message:${object.reject_msg}</h2>            
+]]>
+			</field>
+        </record>
+               
+        <record id="OI_header_po_changing_wait_approval" model="ir.config_parameter">
+            <field name="key">OI_header_po_changing_wait_approval</field>
+            <field name="value"><![CDATA[
+<h3>Purchase orders were changed with quantity or price after approval, please review them as below, you can see the detail in the attachments, and go to <a href="http://erp:8069http://erp:8069/?db=metro_production">OpenERP Production</a> to approve/reject them.</h3>
+]]>
+            </field>
+        </record>
+        <record id="OI_header_po_changing_rejected" model="ir.config_parameter">
+            <field name="key">OI_header_po_changing_rejected</field>
+            <field name="value"><![CDATA[
+<h3>The changing after approval of following purchase orders were rejected, please correct them, and submit for approval again.</h3>
+]]>
+            </field>
+        </record>        
     </data>
 </openerp>
