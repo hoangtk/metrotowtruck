@@ -982,6 +982,26 @@ msgstr "库存调拨"
 msgid "Return Quantity"
 msgstr "退货数量"
 
+#. module: metro_stock
+#: field:material.request,mr_emp_code:0
+msgid "Employee Code"
+msgstr "员工编码"
+
+#. module: metro_stock
+#: field:material.request,mr_emp_id:0
+msgid "Employee"
+msgstr "员工"
+
+#. module: metro_stock
+#: field:material.request,mr_sale_prod_id:0
+msgid "Sale Product ID"
+msgstr "ID"
+
+#. module: metro_stock
+#: field:material.request.line,bc_product_code:0
+msgid "Product Code"
+msgstr "产品编码"
+
 ########################manual########################
 #. module: stock
 #: view:stock.picking:0

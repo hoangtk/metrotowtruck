@@ -54,6 +54,9 @@
 				<field name="name" position="before">
 					<field name="emp_code"/>
 				</field>
+				<field name="name" position="after">
+					<field name="emp_card_id"/>
+				</field>
 			</field>
 		</record>
 		<record id="metro_employee_kanban_view" model="ir.ui.view">
@@ -66,6 +69,17 @@
 				</field>
 			</field>
 		</record>
+        <record id="metro_view_employee_filter" model="ir.ui.view">
+            <field name="name">Employees</field>
+            <field name="model">hr.employee</field>
+			<field name="inherit_id" ref="hr.view_employee_filter"/>
+            <field name="arch" type="xml">
+            	<field name="name" position="replace">
+            		<field name="name" string="Employees" filter_domain="['|',('name','ilike',self),('emp_code','ilike',self)]"/>
+            		<field name="emp_card_id" />
+            	</field>
+             </field>
+         </record>		
 				         
          <record model="ir.ui.view" id="metro_holiday_calendar">
             <field name="name">hr_calendar</field>
