@@ -145,6 +145,8 @@ class order_informer(osv.osv_memory):
             1):confirmed: waitting approval
             2):rejected
             3):approved
+            4):changing confirmed: waitting approval
+            5):changing rejected
         '''
         #waitting for approval
         email_to = []
@@ -179,6 +181,27 @@ class order_informer(osv.osv_memory):
             email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                            'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
         
+        #changing: waitting for approval
+        email_to = []
+        email_cc = []
+        email_subject = ""
+        email_body = ""
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order','4','OI_po_changing_wait_approval','OI_header_po_changing_wait_approval','OI_erp_signature',context = context)
+        if len(obj_ids) > 0:
+            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})   
+            
+        #changing rejected
+        email_to = []
+        email_cc = []
+        email_subject = ""
+        email_body = ""
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','5','OI_po_changing_rejected','OI_header_po_changing_rejected','OI_erp_signature',context = context)
+        if len(email_to) > 0:
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})                 
         '''
         1.PO Order Line:inform_type 
             1):confirmed: waitting approval

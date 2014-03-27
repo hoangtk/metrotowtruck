@@ -443,12 +443,12 @@ class purchase_order(osv.osv):
         
     def button_to_changing_confirmed(self, cr, uid, ids, context=None):
         assert len(ids) == 1, 'This option should only be used for a single order at a time'
-        self.write(cr,uid,ids,{'state':'changing_confirmed','inform_type':'1'},context)
+        self.write(cr,uid,ids,{'state':'changing_confirmed','inform_type':'4'},context)
         self._update_po_lines(cr,uid,ids,{'state':'changing_confirmed'},context)
         
     def button_to_changing_rejected(self, cr, uid, ids, reject_msg, context=None):
         assert len(ids) == 1, 'This option should only be used for a single order at a time'
-        self.write(cr,uid,ids,{'state':'changing_rejected','reject_msg':reject_msg,'inform_type':'2'},context)
+        self.write(cr,uid,ids,{'state':'changing_rejected','reject_msg':reject_msg,'inform_type':'5'},context)
         self._update_po_lines(cr,uid,ids,{'state':'changing_rejected'},context)
         
     def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
