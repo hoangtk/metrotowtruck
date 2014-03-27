@@ -77,8 +77,8 @@ class hr_employee(osv.osv):
  	def default_get(self, cr, uid, fields_list, context=None):
  		values = super(hr_employee,self).default_get(cr, uid, fields_list, context)
 		cr.execute("SELECT max(id) from hr_employee")
-		emp_max_id = cr.fetchone()
- 		emp_code = '%03d'%emp_max_id
+		emp_id = cr.fetchone()
+ 		emp_code = '%03d'%(emp_id[0] + 1,)
  		values.update({'emp_code':emp_code})
  		return values
 #	def create(self, cr, user, vals, context=None):
@@ -111,3 +111,10 @@ class hr_holiday_calendar(osv.osv):
     _defaults = {'holidaytype': 'chineseholiday',
     }
 hr_holiday_calendar() 
+
+class res_users(osv.osv):
+    _name = 'res.users'
+    _inherit = 'res.users'
+    def copy(self, cr, uid, id, default=None, context=None):
+		default.update({'employee_ids':[]})
+		return super(res_users,self).copy(cr, uid, id, default, context)

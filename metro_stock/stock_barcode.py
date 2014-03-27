@@ -49,6 +49,19 @@ class material_request_barcode(osv.osv):
         result = {'mr_emp_id':emp_ids[0],'mr_dept_id':dept_id}
         return {'value': result}
     
+    def onchange_mr_emp_id(self, cr, uid, ids, mr_emp_id, context=None):
+        """ On change of product barcode.
+        @param bc_product_code: Changed Product code
+        @return: Dictionary of values
+        """
+        
+        if not mr_emp_id:
+            return {}
+        emp_obj = self.pool.get('hr.employee')
+        emp = emp_obj.browse(cr, uid, mr_emp_id,context)
+        result = {'mr_dept_id':emp.department_id.id,'mr_emp_code':emp.emp_code}
+        return {'value': result}
+    
     def create(self, cr, user, vals, context=None):
         vals.update({'show_barcode_info':False})
         return super(material_request_barcode,self).create(cr, user, vals, context)

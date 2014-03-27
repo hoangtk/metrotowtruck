@@ -10,7 +10,7 @@
 	            	<field name="show_barcode_info"/>
             		<group attrs="{'invisible': [('show_barcode_info','=',False)]}" >
 	            		<field name="mr_emp_code" on_change="onchange_mr_emp_code(mr_emp_code)"/>
-	            		<field name="mr_emp_id"/>
+	            		<field name="mr_emp_id" on_change="onchange_mr_emp_id(mr_emp_id)"/>
 	            		<field name="mr_sale_prod_id"/>
             		</group>
             	</xpath>
