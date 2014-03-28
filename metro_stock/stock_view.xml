@@ -280,6 +280,13 @@
                     <filter icon="terp-dialog-close" string="Done" name="done" domain="[('state','=','done')]" help="Stock moves that have been processed"/>
                     <separator/>
                     <filter icon="terp-go-today" string="Today" domain="[('date','&lt;=',time.strftime('%%Y-%%m-%%d 23:59:59')),('date','&gt;=',time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Orders processed Today or planned for Today"/>
+                    
+                    <!-- 
+                    Change the prodcut_id to allow to remove the default active=True restriction                    
+                     -->
+                    <!-- <field name="product_id"/> -->
+                    <field name="product_id" domain="['|',('active','=',True),('active','=',False)]"/>
+                                        
                     <field name="product_id"/>
                     <field name="mr_dept_id"/>
                     <field name="mr_emp_id"  filter_domain="[('mr_emp_id','ilike',self)]"/>
@@ -627,6 +634,12 @@
             <field name="model">stock.move</field>
             <field name="inherit_id" ref="stock.view_move_search"/>	
             <field name="arch" type="xml">
+            	<field name="product_id" position="replace">
+                    <!-- 
+                    Change the prodcut_id to allow to remove the default active=True restriction                    
+                     -->
+                    <field name="product_id" domain="['|',('active','=',True),('active','=',False)]"/>
+            	</field>
             	<field name="product_id" position="after">
             		<field name="supplier_prod_name"/>
             		<field name="origin"/>

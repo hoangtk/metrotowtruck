@@ -148,6 +148,12 @@
 	            	<field name="safe_qty"/>
 	            	<field name="safe_warn"/>
 	            </field>
+	            <field name='lst_price' position="replace">
+	            </field>
+	            <field name='standard_price' position="replace">
+	            	<field name="standard_price"/>
+	            	<field name="loc_pos_code"/>
+	            </field>
             </field>
         </record>
         
