@@ -382,7 +382,13 @@
                     <filter icon="terp-emblem-important" name="cancelled" string="Cancelled" domain="[('state','=','cancel')]" help="Purchase order lines which are cancelled"/>                    
                     <field name="order_id"/>
                     <field name="partner_id"/>
-                    <field name="product_id"/>
+                    <!-- 
+                    Change the prodcut_id to allow query the purchase_ok=False/active=False products, since we will set the purchase_ok=False for the prodcuts that need to stop
+                    The purchase line's product searching won't show the products with purchase_ok=False, the reason is the below defining in purchase_order.py
+                    'product_id': fields.many2one('product.product', 'Product', domain=[('purchase_ok','=',True)], change_default=True),                    
+                     -->
+                    <!-- <field name="product_id"/> -->
+                    <field name="product_id" domain="['|','|',('purchase_ok','=',True),('purchase_ok','=',False),('active','=',False)]"/>
                     <field name="create_uid"/>
                     <field name="create_date"/>                   
                     <group expand="0" string="Group By...">
