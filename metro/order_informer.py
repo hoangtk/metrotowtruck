@@ -125,9 +125,7 @@ class order_informer(osv.osv_memory):
                 self.pool.get(msg['model']).write(cr,uid,msg['model_ids'],{'inform_type':msg['inform_type_new']},context=context);
             else:
                 _logger.warning('Failed to send email to: %s', msg['to'])                
-    def _inform_po(self,cr,uid,context=None):
-        po_obj = self.pool.get("purchase.order")   
-        
+    def _inform_po(self,cr,uid,context=None):        
         email_from = config['email_from']
         email_msgs = []
         #get the approvers emails
@@ -145,8 +143,6 @@ class order_informer(osv.osv_memory):
             1):confirmed: waitting approval
             2):rejected
             3):approved
-            4):changing confirmed: waitting approval
-            5):changing rejected
         '''
         #waitting for approval
         email_to = []
@@ -180,28 +176,7 @@ class order_informer(osv.osv_memory):
         if len(email_to) > 0:
             email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
                            'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})
-        
-        #changing: waitting for approval
-        email_to = []
-        email_cc = []
-        email_subject = ""
-        email_body = ""
-        #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order','4','OI_po_changing_wait_approval','OI_header_po_changing_wait_approval','OI_erp_signature',context = context)
-        if len(obj_ids) > 0:
-            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
-                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})   
-            
-        #changing rejected
-        email_to = []
-        email_cc = []
-        email_subject = ""
-        email_body = ""
-        #get object ids, email subject & body, object creator emails
-        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','5','OI_po_changing_rejected','OI_header_po_changing_rejected','OI_erp_signature',context = context)
-        if len(email_to) > 0:
-            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
-                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})                 
+           
         '''
         1.PO Order Line:inform_type 
             1):confirmed: waitting approval
@@ -232,5 +207,49 @@ class order_informer(osv.osv_memory):
         #send all emails at last
         self._send_emails(cr,uid,email_msgs,context)
         return True 
-
+    
+    def _inform_po_changing(self,cr,uid,context=None):
+        email_from = config['email_from']
+        email_msgs = []
+        #get the approvers emails
+        group_cata_name = 'Purchase Requisition';
+        group_name = 'Manager'
+        approver_group_full_name = self.pool.get('ir.config_parameter').get_param(cr, uid, 'OI_group_po_approve', context=context)
+        if approver_group_full_name:
+            info = approver_group_full_name.split('/')
+            if len(info) == 2:
+                group_cata_name = info[0].strip()
+                group_name = info[1].strip()
+        approver_emails = self._get_group_cata_name_emails(cr,uid,group_cata_name,group_name,context)
+        '''
+        1.PO Order:inform_type 
+            4):changing confirmed: waitting approval
+            5):changing rejected
+        '''
+        
+        #changing confirmed: waitting for approval
+        email_to = []
+        email_cc = []
+        email_subject = ""
+        email_body = ""
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_cc, email_attachments = self._get_body_subject(cr,uid,'purchase.order','4','OI_po_changing_wait_approval','OI_header_po_changing_wait_approval','OI_erp_signature',context = context)
+        if len(obj_ids) > 0:
+            email_msgs.append({'from':email_from,'to':approver_emails,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})   
+            
+        #changing rejected
+        email_to = []
+        email_cc = []
+        email_subject = ""
+        email_body = ""
+        #get object ids, email subject & body, object creator emails
+        obj_ids, email_subject, email_body, email_to, email_attachments = self._get_body_subject(cr,uid,'purchase.order','5','OI_po_changing_rejected','OI_header_po_changing_rejected','OI_erp_signature',context = context)
+        if len(email_to) > 0:
+            email_msgs.append({'from':email_from,'to':email_to,'subject':email_subject,'body':email_body,'cc':email_cc,'subtype':'html','attachments':email_attachments,
+                           'model':'purchase.order','model_ids':obj_ids,'inform_type_new':''})                 
+        
+        #send all emails at last
+        self._send_emails(cr,uid,email_msgs,context)
+        return True 
 order_informer()  
