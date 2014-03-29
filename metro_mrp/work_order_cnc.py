@@ -15,7 +15,8 @@ class work_order_cnc(osv.osv):
             'Status', track_visibility='onchange', required=True),
         'create_uid': fields.many2one('res.users','Creator',readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True),   
-        'company_id': fields.many2one('res.company', 'Company', readonly=True),                      
+        'company_id': fields.many2one('res.company', 'Company', readonly=True),     
+        'product_id': fields.related('wo_cnc_lines','product_id', type='many2one', relation='product.product', string='Product'),                 
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
