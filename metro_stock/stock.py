@@ -117,7 +117,7 @@ class material_request_line(osv.osv):
     _columns = {
         'picking_id': fields.many2one('material.request', 'MR#', select=True,states={'done': [('readonly', True)]}),
         'mr_emp_id': fields.many2one('hr.employee','Employee'),
-        'mr_sale_prod_id': fields.many2one('sale.product','Sale Product ID'),
+        'mr_sale_prod_id': fields.many2one('sale.product','Sale Product ID', ondelete="restrict"),
         'mr_notes': fields.text('Reason and use'),
         'mr_dept_id': fields.related('picking_id','mr_dept_id',string='Department',type='many2one',relation='hr.department',select=True),
         'mr_date_order': fields.related('picking_id','date',string='Order Date',type='datetime'),
