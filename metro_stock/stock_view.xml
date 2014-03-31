@@ -28,7 +28,6 @@
                     <field name="mr_dept_id"/>
                     <field name="date" string="Order Date"/>
                     <field name="stock_journal_id" groups="account.group_account_user"/>
-                    <field name="type"/>
                     <field name="create_uid"/>
                     <field name="state"/>
                 </tree>
@@ -51,7 +50,7 @@
                 <xpath expr="//page[@string='Additional Info']" position="replace">
                 </xpath>
                 <xpath expr="//field[@name='min_date']" position="replace">
-                	<field name="type"/>
+                	<field name="type" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='origin']" position="replace">
                 </xpath>
@@ -86,7 +85,8 @@
             <field name="type">ir.actions.act_window</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">['|',('type','=','mr'),('type','=','mrr')]</field>
+            <field name="domain">[('type','=','mr')]</field>
+            <field name="context">{'default_type':'mr'}</field>
             <field name="search_view_id" ref="view_material_request_search"/>
         </record>
         <record model="ir.actions.act_window.view" id="action_material_request_tree_tree">
@@ -102,6 +102,31 @@
         </record>        
         <menuitem action="action_material_request_tree" id="menu_action_material_request_tree" 
         	parent="stock.menu_stock_warehouse_mgmt" sequence="10" groups="stock.group_stock_user"/>
+
+        <record id="action_material_request_return_tree" model="ir.actions.act_window">
+            <field name="name">Material Return</field>
+            <field name="res_model">material.request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('type','=','mrr')]</field>
+            <field name="context">{'default_type':'mrr'}</field>
+            <field name="search_view_id" ref="view_material_request_search"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="action_material_request_return_tree_tree">
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_material_request_tree"/>
+            <field name="act_window_id" ref="action_material_request_return_tree"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_material_request_return_tree__form">
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_material_request_form"/>
+        	<field name="act_window_id" ref="action_material_request_return_tree"/>
+        </record>        
+        <menuitem action="action_material_request_return_tree" id="menu_action_material_request_return_tree" 
+        	parent="stock.menu_stock_warehouse_mgmt" sequence="10" groups="stock.group_stock_user"/>
+        	
         
 <!-- material return -->
 <!--         <record id="action_material_return_tree" model="ir.actions.act_window">
@@ -271,10 +296,11 @@
             <field name="name">material.request.line.search</field>
             <field name="model">material.request.line</field>
             <field name="arch" type="xml">
-                <search string="Material Request Products">
+                <search string="Material Req/Ret Products">
                     <field name="name"/>
                     <field name="date" string="Order Date"/>
-
+					<filter icon="terp-stock" string="Request" name="data_mr" domain="[('type','=','mr')]"/>
+					<filter icon="terp-stock" string="Return" name="data_mr" domain="[('type','=','mrr')]"/>
                     <filter icon="terp-camera_test" string="Ready" name="ready" domain="[('state','=','assigned')]" help="Stock moves that are Available (Ready to process)"/>
                     <filter icon="terp-stock" string="To Do" name="future" domain="[('state','in',('assigned','confirmed','waiting'))]" help="Stock moves that are Confirmed, Available or Waiting"/>
                     <filter icon="terp-dialog-close" string="Done" name="done" domain="[('state','=','done')]" help="Stock moves that have been processed"/>
@@ -303,7 +329,7 @@
             </field>
         </record>
         <record id="action_material_request_line" model="ir.actions.act_window">
-            <field name="name">Material Request Products</field>
+            <field name="name">Material Req/Ret Products</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">material.request.line</field>
             <field name="view_type">form</field>

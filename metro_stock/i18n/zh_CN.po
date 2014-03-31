@@ -386,6 +386,16 @@ msgid "Today"
 msgstr "今天"
 
 #. module: metro_stock
+#: view:material.request.line:0
+msgid "Request"
+msgstr "领料"
+
+#. module: metro_stock
+#: view:material.request.line:0
+msgid "Return"
+msgstr "退料"
+
+#. module: metro_stock
 #: view:material.request.line:0 field:material.request.line,product_uom:0
 msgid "Unit of Measure"
 msgstr "单位"
@@ -813,8 +823,8 @@ msgstr "新建"
 #: model:ir.actions.act_window,name:metro_stock.action_material_request_line
 #: model:ir.ui.menu,name:metro_stock.menu_action_material_request_line
 #: view:material.request.line:0
-msgid "Material Request Products"
-msgstr "领料产品"
+msgid "Material Req/Ret Products"
+msgstr "领退料产品"
 
 #. module: metro_stock
 #: field:material.request.line,mr_notes:0
@@ -823,7 +833,7 @@ msgstr "原因和用途"
 
 #. module: metro_stock
 #: selection:material.request,type:0
-msgid "Material Request Return"
+msgid "Material Return"
 msgstr "退料单"
 
 #. module: metro_stock
@@ -1001,6 +1011,12 @@ msgstr "ID"
 #: field:material.request.line,bc_product_code:0
 msgid "Product Code"
 msgstr "产品编码"
+
+#. module: metro_stock
+#: model:ir.actions.act_window,name:metro_stock.action_material_request_return_tree
+#: model:ir.ui.menu,name:metro_stock.menu_action_material_request_return_tree
+msgid "Material Return"
+msgstr "退料单"
 
 ########################manual########################
 #. module: stock

@@ -36,7 +36,7 @@ class material_request(osv.osv):
     _description = "Material Request"
     _order = "name desc"    
     _columns = {
-        'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], 
+        'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Return')], 
                                  'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
@@ -78,31 +78,11 @@ class material_request(osv.osv):
                 
         order =  super(material_request, self).create(cr, uid, vals, context=context)
         return order
-#    def default_get(self, cr, uid, fields_list, context=None):
-#        resu = super(material_request,self).default_get(cr, uid, fields_list, context)
-#        return resu
+
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(material_request,self).search(cr, user, new_args, offset, limit, order, context, count)    
-             
-#class material_return(osv.osv):
-#    _name = "material.return"
-#    _inherit = "material.request"
-#    _description = "Material Return"
-#    _defaults = {
-#        'type': 'mrr',
-#        'move_type': 'one',
-#    }
-#    def view_init(self, cr, uid, fields_list, context=None):
-#        """Override this method to do specific things when a view on the object is opened."""
-#        pass
-#    def _get_default_form_view(self, cr, user, context=None):
-#        resu = super(material_return,self)._get_default_form_view(cr,user, context)
-#        return resu            
-#    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-#        resu = super(material_return,self).fields_view_get(cr, user, view_id, view_type, context, toolbar, submenu)
-#        return resu            
                 
 class material_request_line(osv.osv):
     _name = "material.request.line"
@@ -267,7 +247,7 @@ class stock_move(osv.osv):
     _columns = {
         #make the price and quantity's decimal precision as the 'Product Price'
         'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price'), help="Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"),       
-        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Request Return')], string='Shipping Type'),
+        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Return')], string='Shipping Type'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True,store=True),
         'return_qty': fields.function(_get_rec_info, type='integer', string='Return Quantity', multi="rec_info"),
