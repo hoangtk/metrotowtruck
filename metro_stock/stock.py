@@ -245,12 +245,23 @@ class stock_move(osv.osv):
             result[m.id].update({'return_qty':return_qty,})
         return result    
     _columns = {
-        #make the price and quantity's decimal precision as the 'Product Price'
-        'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price'), help="Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"),       
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Return')], string='Shipping Type'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True,store=True),
         'return_qty': fields.function(_get_rec_info, type='integer', string='Return Quantity', multi="rec_info"),
+        #make the price's decimal precision as the 'Product Price'
+        'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price'), help="Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"),
+        'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Price'),
+            required=True,states={'done': [('readonly', True)]},
+            help="This is the quantity of products from an inventory "
+                "point of view. For moves in the state 'done', this is the "
+                "quantity of products that were actually moved. For other "
+                "moves, this is the quantity of product that is planned to "
+                "be moved. Lowering this quantity does not generate a "
+                "backorder. Changing this quantity on assigned moves affects "
+                "the product reservation, and should be done with care."
+        ),                
+        
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
