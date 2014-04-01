@@ -6,6 +6,21 @@ class work_order_cnc(osv.osv):
     _name = "work.order.cnc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = "CNC Work Order"
+    def _get_done_info(self, cr, uid, ids, fields, args, context=None):
+        result = {}
+        for id in ids:
+            result[id] = {'can_change_ids':True}
+        for order in self.browse(cr,uid,ids,context=context):
+            if order.state != 'draft' :
+                can_change_ids = False
+            else:
+                can_change_ids = True
+                for line in order.wo_cnc_lines:
+                    if line.state == 'done':
+                        can_change_ids = False
+                        break
+            result[order.id].update({'can_change_ids':can_change_ids})
+        return result    
     _columns = {
         'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'note': fields.text('Description', required=False),
@@ -16,12 +31,14 @@ class work_order_cnc(osv.osv):
         'create_uid': fields.many2one('res.users','Creator',readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True),   
         'company_id': fields.many2one('res.company', 'Company', readonly=True),     
-        'product_id': fields.related('wo_cnc_lines','product_id', type='many2one', relation='product.product', string='Product'),                 
+        'product_id': fields.related('wo_cnc_lines','product_id', type='many2one', relation='product.product', string='Product'),
+        'can_change_ids' : fields.function(_get_done_info, type='boolean', string='Can Change IDs', multi="done_info"),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
         'state': 'draft',
     }
+    _order = 'id desc'
     def _set_state(self,cr,uid,ids,state,context=None):
         self.write(cr,uid,ids,{'state':state},context=context)
         line_ids = []
