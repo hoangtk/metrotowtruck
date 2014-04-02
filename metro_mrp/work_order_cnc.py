@@ -37,6 +37,7 @@ class work_order_cnc(osv.osv):
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
         'state': 'draft',
+        'can_change_ids': True,
     }
     _order = 'id desc'
     def _set_state(self,cr,uid,ids,state,context=None):
