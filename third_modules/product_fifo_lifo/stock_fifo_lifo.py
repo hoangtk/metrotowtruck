@@ -21,6 +21,7 @@
 
 from openerp import tools
 from openerp.osv import osv, fields
+import openerp.addons.decimal_precision as dp
 
 
 #TODO: remove this FILE and put everything in existing core modules (purchase, stock, product...)
@@ -182,6 +183,7 @@ class stock_move(osv.osv):
         return res
 
     _columns = {'qty_remaining': fields.function(_get_qty_remaining, type="float", string="Remaining quantity to be matched", 
+                                                 digits_compute=dp.get_precision('Product Price'),
                                                  store = {'stock.move.matching': (_get_moves_from_matchings, ['qty', 'move_in_id', 'move_out_id'], 10),
                                                           'stock.move':  (lambda self, cr, uid, ids, ctx: ids, ['product_qty', 'product_uom', 'location_id', 'location_dest_id'], 10)}),
                 'matching_ids_in': fields.one2many('stock.move.matching', 'move_in_id'),
