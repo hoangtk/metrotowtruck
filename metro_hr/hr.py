@@ -23,8 +23,8 @@ from osv import fields, osv
 from datetime import datetime, time
 import tools
 from tools.translate import _
-from openerp.addons.metro import mdb
-from openerp.tools.misc import resolve_attr
+#from openerp.addons.metro import mdb
+#from openerp.tools.misc import resolve_attr
 
 class hr_employee(osv.osv):
 	_inherit = "hr.employee"
@@ -82,7 +82,7 @@ class hr_employee(osv.osv):
 		emp_code = '%03d'%(emp_id[0] + 1,)
 		values.update({'emp_code':emp_code})
 		return values
-	
+	'''
 	def sync_clock(self, cr, uid, ids=None, context=None):
 		if not context:
 			context = {}
@@ -177,7 +177,7 @@ class hr_employee(osv.osv):
 					mdb.exec_ddl(conn, sql)
 		mdb.close_conn(conn)
 		return True
-				
+		'''		
 hr_employee()
 
 class salary_history(osv.osv):
