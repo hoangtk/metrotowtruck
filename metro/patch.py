@@ -113,12 +113,13 @@ def _sequence_next(self, cr, uid, seq_ids, context=None):
     seq = preferred_sequences[0] if preferred_sequences else sequences[0]
     if seq['implementation'] == 'standard':
         cr.execute("SELECT nextval('ir_sequence_%03d')" % seq['id'])
-        seq['number_next'] = cr.fetchone()
+#        seq['number_next'] = cr.fetchone()
     else:
         cr.execute("SELECT number_next FROM ir_sequence WHERE id=%s FOR UPDATE NOWAIT", (seq['id'],))
 #        cr.execute("UPDATE ir_sequence SET number_next=number_next+number_increment WHERE id=%s ", (seq['id'],))
     #fixed by johnw, to update the number_next for all sequence type.
-    cr.execute("UPDATE ir_sequence SET number_next=number_next+number_increment WHERE id=%s ", (seq['id'],))
+    seq['number_next'] = cr.fetchone()    
+    cr.execute("UPDATE ir_sequence SET number_next=%s+1 WHERE id=%s ", (seq['number_next'], seq['id'],))
     d = self._interpolation_dict()
     interpolated_prefix = self._interpolate(seq['prefix'], d)
     interpolated_suffix = self._interpolate(seq['suffix'], d)

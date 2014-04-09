@@ -39,7 +39,7 @@ class res_users(osv.osv):
                 #make the user partner's company id same as the user's company_id
                 user_info = self.browse(cr, uid, id, context=context)
                 self.pool.get('res.partner').write(cr, uid, user_info.partner_id.id, {'company_id':user_info.company_id.id}, context=context)
-            
+        return resu
 res_users()
 
 
