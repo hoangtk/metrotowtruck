@@ -145,6 +145,11 @@ class hr_employee(osv.osv):
 						attr_val = resolve_attr(emp,check_attrs[attr]) or ''
 						if fld_size[attr] > 0:
 							attr_val = attr_val[:fld_size[attr]] 
+					if attr == 'gender':
+						if attr_val == 'male':
+							attr_val = 'M'
+						if attr_val == 'female':
+							attr_val = 'F'
 					vals = vals + '\'' +  attr_val + '\','				
 				sql = 'insert into userinfo (%s) values(%s)'%(cols[:-1], vals[:-1])
 				mdb.exec_ddl(conn, sql)
@@ -159,6 +164,11 @@ class hr_employee(osv.osv):
 					if fld_size[attr] > 0:
 						attr_val = attr_val[:fld_size[attr]] 
 					attr_val_clock = emp_clock[attr]
+					if attr == 'gender':
+						if attr_val == 'male':
+							attr_val = 'M'
+						if attr_val == 'female':
+							attr_val = 'F'
 					if attr_val != attr_val_clock:
 						upt_cols = upt_cols + attr + '=\'' + attr_val + '\','
 				if upt_cols != '':

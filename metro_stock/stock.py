@@ -248,7 +248,7 @@ class stock_move(osv.osv):
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Return')], string='Shipping Type'),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'supplier_prod_name': fields.related('purchase_line_id', 'supplier_prod_name',string='Supplier Product Name',type="char",readonly=True,store=True),
-        'return_qty': fields.function(_get_rec_info, type='integer', string='Return Quantity', multi="rec_info"),
+        'return_qty': fields.function(_get_rec_info, type='float', string='Return Quantity', multi="rec_info", digits_compute=dp.get_precision('Product Price')),
         #make the price's decimal precision as the 'Product Price'
         'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price'), help="Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Price'),
