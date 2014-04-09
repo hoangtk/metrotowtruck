@@ -5,3 +5,5 @@ import order_informer
 import patch
 import email_template
 import cron_job
+import res_users
+import mdb

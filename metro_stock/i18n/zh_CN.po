@@ -1174,7 +1174,7 @@ msgstr "预计日期"
 #. module: metro_stock
 #: view:stock.picking.in:0
 msgid "Date of Reception"
-msgstr "入库时间vv"
+msgstr "入库时间"
 
 #. module: stock
 #: field:stock.move,date_expected:0

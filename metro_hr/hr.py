@@ -23,7 +23,8 @@ from osv import fields, osv
 from datetime import datetime, time
 import tools
 from tools.translate import _
-
+from openerp.addons.metro import mdb
+from openerp.tools.misc import resolve_attr
 
 class hr_employee(osv.osv):
 	_inherit = "hr.employee"
@@ -74,17 +75,109 @@ class hr_employee(osv.osv):
 	_sql_constraints = [
 		('emp_code_uniq', 'unique(emp_code)', 'Employee Code must be unique!'),
 	]	
- 	def default_get(self, cr, uid, fields_list, context=None):
- 		values = super(hr_employee,self).default_get(cr, uid, fields_list, context)
+	def default_get(self, cr, uid, fields_list, context=None):
+		values = super(hr_employee,self).default_get(cr, uid, fields_list, context)
 		cr.execute("SELECT max(id) from hr_employee")
 		emp_id = cr.fetchone()
- 		emp_code = '%03d'%(emp_id[0] + 1,)
- 		values.update({'emp_code':emp_code})
- 		return values
-#	def create(self, cr, user, vals, context=None):
-#		emp_id = super(hr_employee,self).create(cr, user, vals, context)
-#		self.write(cr, user, emp_id, {'emp_code':'%03d'%emp_id},context)
-		
+		emp_code = '%03d'%(emp_id[0] + 1,)
+		values.update({'emp_code':emp_code})
+		return values
+	
+	def sync_clock(self, cr, uid, ids=None, context=None):
+		if not context:
+			context = {}
+		if not ids:
+			ids = self.search(cr, uid, [('active','=',True)], context = context)
+		#get the clock data
+		file_name = self.pool.get('ir.config_parameter').get_param(cr, uid, 'hr_clock_mdb_file', context=context)
+		conn = mdb.open_conn(file_name)
+		sql = "select userid,badgenumber,name,gender,ssn,minzu,ophone,title,birthday,hiredday,cardno,pager,street from userinfo"
+		emps_clock, fld_size = mdb.exec_query(conn, sql, 'ssn')
+		if len(fld_size) == 0:
+			fld_size = {'badgenumber':24,
+						'name':40,
+						'gender':8,
+						'ssn':20,
+						'minzu':8,
+						'ophone':20,
+						'title':20,
+						'birthday':-1,
+						'hiredday':-1,
+						'cardno':20,
+						'pager':20,
+						'street':80,
+						'badgenumber':24,
+						'name':40,
+						'gender':8,
+						'ssn':20,
+						'minzu':8,
+						'ophone':20,
+						'title':20,
+						'birthday':-1,
+						'hiredday':-1,
+						'cardno':20,
+						'pager':20,
+						'street':80,
+						}
+		#compare the data, and push the chaning to clock
+		check_attrs = {'badgenumber':'emp_code',
+						'name':'name',
+						'gender':'gender',
+						'ssn':'emp_code',
+						'minzu':'',
+						'ophone':'work_phone',
+						'title':'job_id.name',
+						'birthday':'birthday',
+						'hiredday':'employment_start',
+						'cardno':'emp_card_id',
+						'pager':'mobile_phone',
+						'street':'address_home_id.name',
+						}
+		for emp in self.browse(cr, uid, ids, context=context):
+			if not emps_clock.has_key(emp.emp_code):
+				#do insert
+				cols = ''
+				vals = ''
+				for attr in check_attrs:
+					cols = cols + attr + ','
+					attr_val = ''
+					if check_attrs[attr] != '':
+						attr_val = resolve_attr(emp,check_attrs[attr]) or ''
+						if fld_size[attr] > 0:
+							attr_val = attr_val[:fld_size[attr]] 
+					if attr == 'gender':
+						if attr_val == 'male':
+							attr_val = 'M'
+						if attr_val == 'female':
+							attr_val = 'F'
+					vals = vals + '\'' +  attr_val + '\','				
+				sql = 'insert into userinfo (%s) values(%s)'%(cols[:-1], vals[:-1])
+				mdb.exec_ddl(conn, sql)
+			else:
+				#do update
+				emp_clock = emps_clock[emp.emp_code]
+				upt_cols = ''
+				for attr in check_attrs:
+					if check_attrs[attr] == '':
+						continue
+					attr_val = resolve_attr(emp,check_attrs[attr]) or ''
+					if fld_size[attr] > 0:
+						attr_val = attr_val[:fld_size[attr]] 
+					attr_val_clock = emp_clock[attr]
+					if attr == 'gender':
+						if attr_val == 'male':
+							attr_val = 'M'
+						if attr_val == 'female':
+							attr_val = 'F'
+					if attr_val != attr_val_clock:
+						upt_cols = upt_cols + attr + '=\'' + attr_val + '\','
+				if upt_cols != '':
+					upt_cols = upt_cols[:-1]
+					sql = 'update userinfo set ' + upt_cols + ' where userid = ' + str(emp_clock['userid'])
+					mdb.exec_ddl(conn, sql)
+		mdb.close_conn(conn)
+		return True
+				
 hr_employee()
 
 class salary_history(osv.osv):

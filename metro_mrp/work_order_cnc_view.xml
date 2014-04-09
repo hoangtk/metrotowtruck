@@ -19,7 +19,8 @@
     				</group>
     				<group>
     					<group>
-		    				<field name="sale_product_ids" widget="many2many_tags"/>
+    						<field name="can_change_ids" invisible="1"/>
+		    				<field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/>
 		    				<field name="create_uid"/>
 		    				<field name="create_date"/>
 		    				<field name="company_id" groups="base.group_multi_company" widget="selection"/>
