@@ -260,6 +260,16 @@ msgstr "Separator"
 msgid "or"
 msgstr "or"
 
+#. module: metro_product
+#: view:product.product:0
+msgid "No Onhand"
+msgstr "无库存"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "Negative Onhand"
+msgstr "负库存"
+
 #==================added manually - begin ==================#
 #. module: metro_product
 #: code:addons/metro_product/product.py:0

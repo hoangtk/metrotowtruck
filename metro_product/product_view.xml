@@ -254,10 +254,12 @@
             		<field name="create_date"/>
             	</field>
             	<filter name="filter_to_sell" position="after">
+            		<separator/>
             		<filter string="Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',True)]"/>
             		<filter string="No Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',False)]"/>
-            		<filter string="No onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;=',0)]"/>
-            		<filter string="Negative onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;',0)]"/>
+            		<separator/>
+            		<filter string="No Onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;=',0)]"/>
+            		<filter string="Negative Onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;',0)]"/>
             	</filter>
             </field>
         </record>

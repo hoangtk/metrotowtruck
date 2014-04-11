@@ -37,7 +37,7 @@
     'author': 'IntellectSeed Technologies, PY Solutions',
     'maintainer': 'PY Solutions',
     'website': 'http://www.intellectseed.com, http://www.pysolutions.com',
-    'depends': ["metro", "product", "sale", "stock", "product_manufacturer"],
+    'depends': ["metro", "product", "sale", "stock", "product_manufacturer", "purchase"],
     'init_xml': [],
     'update_xml': [
         'product_view.xml',

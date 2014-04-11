@@ -24,6 +24,8 @@ from osv import fields, osv
 import tools
 from tools.translate import _
 from openerp.addons.metro_purchase.purchase import deal_args
+from openerp.addons.stock.product import product_product as stock_product
+import openerp.addons.decimal_precision as dp
 class product_sequence(osv.osv):
 	_name = "product.sequence"
 	_rec_name = "prefix"
@@ -107,6 +109,23 @@ class product_product(osv.osv):
 			code = str(sequence) + str(seq_rec.separator) + str(seq_rec.suffix)
 		return code
 	
+	def _get_move_products(self, cr, uid, ids, context=None):
+		res = set()
+		move_obj = self.pool.get("stock.move")
+		for move in move_obj.browse(cr, uid, ids, context=context):
+			res.add(move.product_id.id)
+		return res
+
+	def rpc_product_available(self, cr, uid, ids, field_names=None, arg=False, context=None):
+		res = self._product_available(cr, uid, ids, field_names, arg, context)
+		rpc_res = {}
+		#convert the ket of dictory yo string, since the dumps() method in below code only allow the string key in dictory.
+		#openerp/service/wsgi_server.py
+		#response = xmlrpclib.dumps((result,), methodresponse=1, allow_none=False, encoding=None)
+		for id in ids:
+			rpc_res['%s'%id] = res[id]
+		return rpc_res
+			
 	_columns = {
 		'attribute_line' : fields.one2many('product.attribute.line', 'product_id','Attributes'),
 		'cn_name': fields.char(string=u'Chinese Name', size=128),
@@ -116,6 +135,75 @@ class product_product(osv.osv):
 		'safe_warn': fields.boolean('Warn Inventory'),
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
+		'qty_available': fields.function(stock_product._product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Quantity On Hand',
+			help="Current quantity of products.\n"
+				 "In a context with a single Stock Location, this includes "
+				 "goods stored at this Location, or any of its children.\n"
+				 "In a context with a single Warehouse, this includes "
+				 "goods stored in the Stock Location of this Warehouse, or any "
+				 "of its children.\n"
+				 "In a context with a single Shop, this includes goods "
+				 "stored in the Stock Location of the Warehouse of this Shop, "
+				 "or any of its children.\n"
+				 "Otherwise, this includes goods stored in any Stock Location "
+				 "with 'internal' type.",
+                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+				 ),
+		'virtual_available': fields.function(stock_product._product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Forecasted Quantity',
+			help="Forecast quantity (computed as Quantity On Hand "
+				 "- Outgoing + Incoming)\n"
+				 "In a context with a single Stock Location, this includes "
+				 "goods stored in this location, or any of its children.\n"
+				 "In a context with a single Warehouse, this includes "
+				 "goods stored in the Stock Location of this Warehouse, or any "
+				 "of its children.\n"
+				 "In a context with a single Shop, this includes goods "
+				 "stored in the Stock Location of the Warehouse of this Shop, "
+				 "or any of its children.\n"
+				 "Otherwise, this includes goods stored in any Stock Location "
+				 "with 'internal' type.",
+                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+                 ),
+		'incoming_qty': fields.function(stock_product._product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Incoming',
+			help="Quantity of products that are planned to arrive.\n"
+				 "In a context with a single Stock Location, this includes "
+				 "goods arriving to this Location, or any of its children.\n"
+				 "In a context with a single Warehouse, this includes "
+				 "goods arriving to the Stock Location of this Warehouse, or "
+				 "any of its children.\n"
+				 "In a context with a single Shop, this includes goods "
+				 "arriving to the Stock Location of the Warehouse of this "
+				 "Shop, or any of its children.\n"
+				 "Otherwise, this includes goods arriving to any Stock "
+				 "Location with 'internal' type.",
+                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+                 ),
+		'outgoing_qty': fields.function(stock_product._product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Outgoing',
+			help="Quantity of products that are planned to leave.\n"
+				 "In a context with a single Stock Location, this includes "
+				 "goods leaving this Location, or any of its children.\n"
+				 "In a context with a single Warehouse, this includes "
+				 "goods leaving the Stock Location of this Warehouse, or "
+				 "any of its children.\n"
+				 "In a context with a single Shop, this includes goods "
+				 "leaving the Stock Location of the Warehouse of this "
+				 "Shop, or any of its children.\n"
+				 "Otherwise, this includes goods leaving any Stock "
+				 "Location with 'internal' type.",
+                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+                 ),		
 	}
 	_defaults = {
 		'default_code': generate_seq,
