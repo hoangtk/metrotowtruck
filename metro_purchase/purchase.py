@@ -688,7 +688,7 @@ class purchase_order_line(osv.osv):
             if ids:
                 #from order line update
                 for line in self.browse(cr,uid,ids,context=context):
-                    new_vals.update({'name':line.partner_id.id,'product_id':line.product_id.id,'currency':line.order_id.pricelist_id.currency_id.id})
+                    new_vals.update({'name':line.partner_id.id,'product_id':line.product_id.product_tmpl_id.id,'currency':line.order_id.pricelist_id.currency_id.id})
                     if line.supplier_prod_id:
                         #update the prodcut supplier info
                         prod_supp_obj.write(cr,uid,line.supplier_prod_id,new_vals,context=context)
@@ -697,7 +697,8 @@ class purchase_order_line(osv.osv):
             else:
                 # from order line create
                 po = self.pool.get('purchase.order').browse(cr,uid,vals['order_id'])
-                new_vals.update({'name':po.partner_id.id,'product_id':vals['product_id'],'currency':po.pricelist_id.currency_id.id})
+                product = self.pool.get('product.product').browse(cr, uid, vals['product_id'], context=context)
+                new_vals.update({'name':po.partner_id.id,'product_id':product.product_tmpl_id.id,'currency':po.pricelist_id.currency_id.id})
                 prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',new_vals['product_id']),('name','=',new_vals['name'])])
                 if prod_supp_ids and len(prod_supp_ids) > 0:
                     #update the prodcut supplier info
@@ -776,9 +777,10 @@ class purchase_order_line(osv.osv):
             res['value'].update({'taxes_id': taxes_ids})
 
         # update the product supplier info
-        if not context.get('supplier_prod_id'):
+        if product_id and not context.get('supplier_prod_id'):
             prod_supp_obj = self.pool.get('product.supplierinfo')
-            prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',product_id),('name','=',partner_id)])
+            product = self.pool.get("product.product").browse(cr, uid, product_id, context=context)
+            prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',product.product_tmpl_id.id),('name','=',partner_id)])
             if prod_supp_ids and len(prod_supp_ids) > 0:
                 prod_supp = prod_supp_obj.browse(cr,uid,prod_supp_ids[0],context=context)
                 res['value'].update({'supplier_prod_id': prod_supp.id,
