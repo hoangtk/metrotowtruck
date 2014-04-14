@@ -36,6 +36,7 @@ class ir_attachment(osv.osv):
         'employee_id': fields.many2one('hr.employee', 'Employee'),
         'sale_order_id': fields.many2one('sale.order', 'Sale Order'),
         'project_issue_id': fields.many2one('project.issue', 'Project Issue'),
+        'shipment_id': fields.many2one('shipment.shipment', 'Shipment'),
         'attach_type_id': fields.many2one('ir.attachment.type',
                                           'Attachment Type'),
     }

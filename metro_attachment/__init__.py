@@ -22,3 +22,4 @@ import base
 import product
 import hr
 import sale
+import ship
