@@ -1184,7 +1184,7 @@ msgstr "预计日期"
 #. module: stock
 #: field:stock.picking.in,move_lines:0
 msgid "Internal Moves"
-msgstr "入库oopp"
+msgstr "入库"
 
 #. module: stock
 #: field:stock.picking.out,move_lines:0

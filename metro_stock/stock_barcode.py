@@ -77,7 +77,7 @@ class material_request_line_barcode(osv.osv):
     _columns = {
         'bc_product_code' : fields.char('Product Code', size=64),
     }
-    def onchange_bc_product_code(self, cr, uid, ids, bc_product_code, mr_emp_id, mr_sale_prod_id, context=None):
+    def onchange_bc_product_code(self, cr, uid, ids, bc_product_code, mr_emp_id, mr_sale_prod_id, product_id, context=None):
         """ On change of product barcode.
         @param bc_product_code: Changed Product code
         @return: Dictionary of values
@@ -92,4 +92,15 @@ class material_request_line_barcode(osv.osv):
         prod_id = prod_ids[0]
         bc_product_name = prod_obj.name_get(cr, uid, [prod_id], context)[0][1]
         result = {'product_id':prod_id,'product_qty':1,'mr_emp_id':mr_emp_id,'mr_sale_prod_id':mr_sale_prod_id}
+        if product_id and product_id == prod_id:
+           id_change_resu = self.onchange_product_id(cr, uid, ids, product_id)
+           result.update(id_change_resu['value'])
         return {'value': result}
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(material_request_line_barcode,self).default_get(cr, uid, fields_list, context)
+        #material_request.type: mr or mrr
+        if context.get('set_emp_id'):
+            resu.update({'mr_emp_id':context.get('set_emp_id')})
+        if context.get('set_sale_prod_id'):
+            resu.update({'mr_sale_prod_id':context.get('set_sale_prod_id')})
+        return resu    
