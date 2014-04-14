@@ -81,6 +81,13 @@ def metro_rpt_index(self, req, action, token):
             model_obj = req.session.model(context['active_model'])
             model_rec_name = model_obj.name_get(context['active_ids'],context)[0][1]            
             if model_rec_name:
+                #added by john, to call the object report name getting method to get the file name
+                try:
+                    file_name = model_obj.get_report_name(context['active_ids'][0],action['report_name'],context)  
+                except AttributeError, e:
+                    pass
+                except Exception, e:
+                    raise e
                 file_name = '%s_%s' % (file_name, model_rec_name)
     except Exception:
         pass

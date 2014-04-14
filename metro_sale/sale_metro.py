@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from osv import fields,osv
+from openerp import netsvc
 
 class SaleOrder(osv.osv):
 
@@ -9,6 +10,25 @@ class SaleOrder(osv.osv):
         'checkbox':fields.boolean("Include Payment Information"),
     }
     _defaults={'checkbox':True}
+    def get_report_name(self, cr, uid, id, rpt_name, context=None):
+        state = self.pool.get('sale.order').read(cr, uid, id, ['state'],context=context)['state']
+        if state == 'draft' or state == 'sent':
+            return "Quote"
+        else:
+            return "SalesOrder"
+    def print_quotation(self, cr, uid, ids, context=None):
+        '''
+        This function prints the sales order and mark it as sent, so that we can see more easily the next step of the workflow
+        '''
+        assert len(ids) == 1, 'This option should only be used for a single id at a time'
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'sale.order', ids[0], 'quotation_sent', cr)
+        datas = {
+                 'model': 'sale.order',
+                 'ids': ids,
+                 'form': self.read(cr, uid, ids[0], context=context),
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'sale.agreement', 'datas': datas, 'nodestroy': True}        
 SaleOrder()
 
 

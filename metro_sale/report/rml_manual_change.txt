@@ -1,10 +1,13 @@
+change the 'Disc.(%)' column header to below:
+<para style="terp_tblheader_Details_Right">[[not show_discount(user.id) and removeParentNode('para')]]Disc.(%)</para>
+
+
+============================do not need to do below changings=================
 1.replace 
   <pageBreak/>
 with
 </story>\r\n  <story>
-2.change the 'Disc.(%)' column header to below:
-<para style="terp_tblheader_Details_Right">[[not show_discount(user.id) and removeParentNode('para')]]Disc.(%)</para>
-3.add the '<section' before
+2.add the '<section' before
 <para style="P3">[[repeatIn(o.payment_moves,'pay')]]</para>
 add '</section>' after:
     <blockTable colWidths="135.0,135.0,135.0,135.0" repeatRows="1" style="Table9">
