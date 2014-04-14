@@ -22,6 +22,7 @@
 from openerp import tools
 from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
+from openerp.tools.translate import _
 
 def rounding(f, r):
     if not r:
