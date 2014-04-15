@@ -77,7 +77,7 @@ class pur_req_po_line(osv.osv_memory):
             if ids:
                 #from order line update
                 for line in self.browse(cr,uid,ids,context=context):
-                    new_vals.update({'name':line.wizard_id.partner_id.id,'product_id':line.product_id.id,'currency':user.company_id.currency_id.id})
+                    new_vals.update({'name':line.wizard_id.partner_id.id,'product_id':line.product_id.product_tmpl_id.id,'currency':user.company_id.currency_id.id})
                     if line.supplier_prod_id:
                         #update the prodcut supplier info
                         prod_supp_obj.write(cr,uid,line.supplier_prod_id,new_vals,context=context)
@@ -86,7 +86,8 @@ class pur_req_po_line(osv.osv_memory):
             else:
                 # from order line create
                 po = self.pool.get('pur.req.po').browse(cr,uid,vals['wizard_id'])
-                new_vals.update({'name':po.partner_id.id,'product_id':vals['product_id'],'currency':user.company_id.currency_id.id})
+                product = self.pool.get('product.product').browse(cr, uid, vals['product_id'], context=context)
+                new_vals.update({'name':po.partner_id.id,'product_id':product.product_tmpl_id.id,'currency':user.company_id.currency_id.id})
                 prod_supp_ids = prod_supp_obj.search(cr,uid,[('product_id','=',new_vals['product_id']),('name','=',new_vals['name'])])
                 if prod_supp_ids and len(prod_supp_ids) > 0:
                     #update the prodcut supplier info
