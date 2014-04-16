@@ -342,9 +342,22 @@ class stock_picking(osv.osv):
         po_obj = self.pool.get('purchase.order')
         for pick in self.browse(cr,uid,ids,context):
             if pick.purchase_id:
-                #if this is purchase return, then set the related purchase order shipped to False
+                #if this is a out, then check  the purchase return                
                 if pick.type=='out':
-                    po_obj.write(cr,uid,[pick.purchase_id.id],{'shipped':False})
+                    if pick.purchase_id:
+                        #if this is purchase return
+                        #1.then set the related purchase order shipped to False
+                        po_obj.write(cr,uid,[pick.purchase_id.id],{'shipped':False})
+                        #2.if need create invoices after picking, then auto generate the invoie
+                        if pick.invoice_state == '2binvoiced':
+                            inv_create_obj = self.pool.get("stock.invoice.onshipping")
+                            if not context:
+                                context = {}
+                            context.update({'active_model':'stock.picking.out','active_ids':[pick.id],'active_id':pick.id})
+                            journal_id = inv_create_obj._get_journal(cr,uid,context)
+                            inv_create_id = inv_create_obj.create(cr,uid,{'journal_id':journal_id},context)
+                            pick_inv_ids = inv_create_obj.create_invoice(cr,uid,[inv_create_id],context)
+                        
                 #if this is related to a PO and need to create invoices after picking, then auto generate the invoie and valid the invoice.
                 if pick.type=='in' and pick.invoice_state == '2binvoiced':
                     inv_create_obj = self.pool.get("stock.invoice.onshipping")
