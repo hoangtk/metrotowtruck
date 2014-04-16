@@ -28,7 +28,7 @@
     """,
     'author': 'Acespritech Solutions Pvt Ltd',
     'website': 'http://www.acespritech.com',
-    'depends': ['base', 'sale', 'hr', 'document', 'metro_shipping'],
+    'depends': ['base', 'sale', 'hr', 'document', 'metro_shipping', 'metro_product'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
