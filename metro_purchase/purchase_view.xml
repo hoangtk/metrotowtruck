@@ -124,6 +124,18 @@
                 </field>    
                 <field name="fiscal_position" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>    
+                <field name="payment_term_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>
+                <field name="taxes_id" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>    
+                <field name="has_freight" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                </field>    
+                <field name="amount_freight" position="attributes">
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>
                 <button name="view_invoice" position="replace">
                 	<!-- <button name="view_invoice" string="Receive Invoice" type="object" attrs="{'invisible': ['|', ('invoice_method','=','picking'), '|', ('state','!=', 'approved'), ('invoiced','=',True) ]}" class="oe_highlight"/> -->
