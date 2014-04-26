@@ -337,6 +337,17 @@ class product_product(osv.osv):
 		new_args = deal_args(self,args)
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
+
+		#add the available restriction
+		if context and context.get('inv_warn_restrict'):
+			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
+			qtys = self.read(cr,user,ids,['virtual_available','safe_qty'],context=context)
+#			list: [{'product_tmpl_id': 10, 'virtual_available': -255.0, 'id': 10}, {'product_tmpl_id': 26, 'virtual_available': 0.0, 'id': 26}, {'product_tmpl_id': 35, 'virtual_available': 600.0, 'id': 35}]
+			new_ids = []
+			for qty in qtys:
+				if qty['virtual_available'] < qty['safe_qty']:
+					new_ids.append(qty['id'])	
+			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
 		
 #		qty_available
 		#add the available restriction
