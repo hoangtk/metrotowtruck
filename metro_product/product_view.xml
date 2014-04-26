@@ -313,7 +313,6 @@
 	        id="menu_product_inventory_warning"
 	        sequence="2"
 	        parent="purchase.menu_procurement_management"
-	        action="action_product_inventory_warning"
-	        groups="purchase.group_purchase_user"/>  
+	        action="action_product_inventory_warning"/>  
 	</data>		    
 </openerp>	
