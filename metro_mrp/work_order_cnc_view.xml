@@ -38,6 +38,7 @@
 	                        <field name="percent_usage"/>
 	                        <field name="date_finished"/>
 	                        <field name="product_id"/>
+	                        <field name="is_whole_plate" />
 	                        <field name="state"/>                       
 		                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
 		                    type="action" states="confirmed" icon="terp-gtk-jump-to-ltr"/>

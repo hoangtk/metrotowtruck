@@ -21,3 +21,4 @@
 import stock
 import wizard
 import stock_barcode
+import stock_raw_material

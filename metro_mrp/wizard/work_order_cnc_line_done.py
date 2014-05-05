@@ -34,6 +34,8 @@ class work_order_cnc_line_done(osv.osv_memory):
         'percent_usage': fields.float('Usage Percent(%)', readonly=True),
         'date_finished': fields.date('Finished Date'),
         'product_id': fields.many2one('product.product','Product', required=True),
+        'is_whole_plate': fields.boolean('Whole Plate'),
+        'product_inv': fields.float('Inventory'),
         'property_cnc_mr_dept': fields.property(
         'hr.department',
         type='many2one',
@@ -71,7 +73,13 @@ class work_order_cnc_line_done(osv.osv_memory):
         if not context:
             context = {}
         data = self.browse(cr,uid,ids,context)[0]
-        context.update({'product_id':data.product_id.id,'date_finished':data.date_finished,'mr_dept_id':data.property_cnc_mr_dept.id})
+        context.update({'product_id':data.product_id.id,'date_finished':data.date_finished,'mr_dept_id':data.property_cnc_mr_dept.id,'is_whole_plate':data.is_whole_plate})
         self.pool.get('work.order.cnc.line').action_done(cr,uid,[record_id],context=context)
         return {'type': 'ir.actions.act_window_close'}  
+    
+    def on_change_product(self, cr, uid, ids, product_id,context=None):
+        qty_available = 0
+        if product_id:
+            qty_available = self.pool.get("product.product").read(cr, uid, [product_id], ['qty_available'],context=context)[0]['qty_available']
+        return {'value':{'product_inv':qty_available}}
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

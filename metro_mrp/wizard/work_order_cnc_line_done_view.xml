@@ -15,7 +15,9 @@
                     <group>
 							<field name="size" />
 							<field name="percent_usage" />
-							<field name="product_id"/>
+							<field name="product_id" on_change="on_change_product(product_id)"/>
+							<field name="is_whole_plate" />
+							<field name="product_inv" />
 							<field name="date_finished" />
 							<field name="property_cnc_mr_dept"/>
                     </group>

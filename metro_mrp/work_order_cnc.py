@@ -106,6 +106,7 @@ class work_order_cnc_line(osv.osv):
         'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
         'mr_id': fields.many2one('material.request','MR#'),
+        'is_whole_plate': fields.boolean('Whole Plate', readonly=True),
     }
 
     _defaults = {
@@ -123,7 +124,7 @@ class work_order_cnc_line(osv.osv):
                         
     def action_done(self, cr, uid, ids, context=None):
         #set the done data
-        vals = {'state':'done','product_id':context.get('product_id'),'date_finished':context.get('date_finished')}
+        vals = {'state':'done','product_id':context.get('product_id'),'date_finished':context.get('date_finished'),'is_whole_plate':context.get('is_whole_plate')}
         if not context:
             context = {}
         context.update({'force_write':True})
@@ -147,7 +148,11 @@ class work_order_cnc_line(osv.osv):
         self.pool.get('work.order.cnc').action_done(cr,uid,order_ids_done,context=context)
         #generate material requisition
         self.make_material_requisition(cr, uid, ids, context)
+        #decrease the quantity of whole plate
+        if context.get("is_whole_plate"):
+            self.pool.get('plate.material').update_plate_whole_qty(cr, uid, context.get('product_id'), -1, context=context)
         return True
+
     #get the material request price
     def _get_mr_prod_price(self, cr, uid, product, context = None):
         result = {}
