@@ -30,6 +30,7 @@
                             <group col="4" colspan="4">
 		                    	<field name="date_created" string="Case Date Created" />
 			                    <field name="date_closed" string="Case Date Resolved" />
+			                    <field name="partner_id" invisible="1" />
                                 <field name="serial_id" on_change="onchange_serial_id(serial_id, partner_id)" />
                                 <field name="model_id" />
 		                    </group>
