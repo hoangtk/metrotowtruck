@@ -48,6 +48,18 @@ class plate_material(osv.osv):
     ]
 
     def update_plate_whole_qty(self, cr, uid, prod_id, change_qty, context=None):
+        if not prod_id:
+            return
+        #check if this product need to generate whole quantity records
+        prod_data = self.pool.get('product.product').browse(cr, uid, prod_id, context=context)
+        cate_ids = self.pool.get('ir.config_parameter').get_param(cr, uid, 'stock.plate.wholeqty.category_id', context=context)
+        if not cate_ids:
+            return
+        cate_ids_list = cate_ids.split(',')
+        categ_id = '%s'%prod_data.categ_id.id
+        if categ_id not in cate_ids_list:
+            return        
+        
         plate_obj = self.pool.get("plate.material")
         plate_ids = plate_obj.search(cr, uid, [('product_id','=',prod_id)])
         if plate_ids and len(plate_ids) > 0:
