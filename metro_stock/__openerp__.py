@@ -36,7 +36,7 @@
         
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "metro_purchase","metro_sale","stock"],
+    'depends': ["metro", "metro_purchase","metro_sale","stock","product_fifo_lifo"],
     'data': [
         'security/ir.model.access.csv',
         'wizard/stock_import_inventory_view.xml',       
@@ -46,6 +46,7 @@
         'stock_sequence.xml',
         'stock_wh_loc.xml',     
         'stock_barcode_view.xml',
+        'stock_raw_material_view.xml',
     ],
     'test': [],
     'demo': [],

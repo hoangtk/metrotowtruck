@@ -72,7 +72,10 @@ class purchase_order(osv.osv):
             #check the invoice paid            
             for invoice in purchase.invoice_ids:
                 if invoice.state not in ('draft','cancel'):
-                    inv_paid += (invoice.amount_total - invoice.residual)
+                    if invoice.type == 'in_refund':
+                        inv_paid -= (invoice.amount_total - invoice.residual)
+                    else:                        
+                        inv_paid += (invoice.amount_total - invoice.residual)
                
             res[purchase.id] = {
                     'amount_paid': inv_paid + pre_paid, 

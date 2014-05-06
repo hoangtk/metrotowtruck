@@ -423,16 +423,6 @@
       </tr>
     </blockTable>
     <section>
-      <para style="terp_default_8">
-        <font color="white"> </font>
-      </para>
-      <para style="terp_default_8">
-        <font color="white"> </font>
-      </para>
-      <pageBreak/>
-      <para style="P4">
-        <font color="white"> </font>
-      </para>
       <para style="P5">[[not o.checkbox and o.state and removeParentNode('section')]]Wire Transfer Information</para>
       <para style="terp_default_9">
         <font color="white"> </font>
@@ -537,13 +527,6 @@
           </td>
         </tr>
       </blockTable>
-      <para style="P16">
-        <font color="white"> </font>
-      </para>
-      <para style="P16">
-        <font color="white"> </font>
-      </para>
-      <para style="P16">fffff</para>
     </section>
   </story>
 </document>

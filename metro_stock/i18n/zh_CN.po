@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-07 11:35+0000\n"
-"PO-Revision-Date: 2014-03-07 19:39+0800\n"
+"POT-Creation-Date: 2014-05-05 08:31+0000\n"
+"PO-Revision-Date: 2014-05-05 16:33+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -33,11 +33,18 @@ msgid "Scheduled date for the processing of this move"
 msgstr "预计进行的调拨时间"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_date_4363
+#: field:material.request,date:0
+msgid "Time"
+msgstr "时间"
+
+#. module: metro_stock
 #: selection:material.request,move_type:0
 msgid "All at once"
 msgstr "一次性"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_inventory_comments
 #: field:stock.inventory,comments:0
 msgid "Comments"
 msgstr "备注"
@@ -48,11 +55,14 @@ msgid "Group By..."
 msgstr "分组..."
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_date_done_4360
 #: field:material.request,date_done:0
 msgid "Date of Transfer"
 msgstr "移库日期"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_mr_dept_id
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_mr_dept_id
 #: view:material.request:0 field:material.request,mr_dept_id:0
 #: view:material.request.line:0 field:material.request.line,mr_dept_id:0
 msgid "Department"
@@ -74,6 +84,7 @@ msgid "Search Inventory"
 msgstr "搜索库存"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_stock_journal_id_4366
 #: field:material.request,stock_journal_id:0
 msgid "Stock Journal"
 msgstr "库存帐薄"
@@ -85,16 +96,24 @@ msgid ""
 msgstr "部分数据已经导入,请根据下面的消息更正你的数据"
 
 #. module: metro_stock
-#: field:material.request,message_unread:0
-msgid "Unread Messages"
-msgstr "未读消息"
+#: selection:material.request,invoice_state:0
+msgid "To Be Invoiced"
+msgstr "将要开票"
 
 #. module: metro_stock
+#: sql_constraint:material.request:0
+msgid "Order Reference must be unique!"
+msgstr "Order Reference must be unique!"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_move_type_4374
 #: field:material.request,move_type:0
 msgid "Delivery Method"
 msgstr "送货方式"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_company_id_4403
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_company_id_4376
 #: field:material.request,company_id:0
 #: field:material.request.line,company_id:0
 msgid "Company"
@@ -127,31 +146,48 @@ msgstr ""
 "* Done: When the shipment is processed, the state is 'Done'."
 
 #. module: metro_stock
-#: field:material.request.line,prodlot_id:0
-msgid "Serial Number"
-msgstr "序列号"
+#: help:material.request.line,cancel_cascade:0
+msgid "If checked, when this move is cancelled, cancel the linked move too"
+msgstr "If checked, when this move is cancelled, cancel the linked move too"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_consider_inventory
 #: field:stock.import.inventory,consider_inventory:0
 msgid "Consider Current Inventory"
 msgstr "考虑现有库存"
 
 #. module: metro_stock
+#: model:ir.actions.act_window,name:metro_stock.action_material_request_line
+#: model:ir.ui.menu,name:metro_stock.menu_action_material_request_line
+#: view:material.request.line:0
+msgid "Material Req/Ret Products"
+msgstr "领退料产品"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_scrapped_4396
 #: field:material.request.line,scrapped:0
 msgid "Scrapped"
 msgstr "破损"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_qty_4393
 #: field:material.request.line,product_qty:0
 msgid "Quantity"
 msgstr "数量"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_price_subtotal
 #: field:material.request.line,price_subtotal:0
 msgid "Subtotal"
 msgstr "小计"
 
 #. module: metro_stock
+#: sql_constraint:plate.material:0
+msgid "Product must be unique!"
+msgstr "产品不能重复"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_picking_id_4426
 #: view:material.request:0 field:material.request.line,picking_id:0
 msgid "MR#"
 msgstr "领料单号"
@@ -162,6 +198,7 @@ msgid "Ready to Transfer"
 msgstr "准备好"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_min_date_4361
 #: field:material.request,min_date:0
 msgid "Scheduled Time"
 msgstr "预定日期"
@@ -176,18 +213,19 @@ msgid "Material Request"
 msgstr "领料单"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_plate_material_notes
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_note_4398
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_note_4378
 #: field:material.request,note:0 field:material.request.line,note:0
+#: field:plate.material,notes:0
 msgid "Notes"
 msgstr "备注"
 
 #. module: metro_stock
-#: help:material.request.line,partner_id:0
-msgid ""
-"Optional address where goods are to be delivered, specifically used for "
-"allotment"
-msgstr ""
-"Optional address where goods are to be delivered, specifically used for "
-"allotment"
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_message_ids_4365
+#: field:material.request,message_ids:0
+msgid "Messages"
+msgstr "Messages"
 
 #. module: metro_stock
 #: selection:material.request,state:0
@@ -195,9 +233,16 @@ msgid "Transferred"
 msgstr "完成"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_purchase_id_4368
 #: field:material.request,purchase_id:0
 msgid "Purchase Order"
 msgstr "采购单"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_message_unread_4384
+#: field:material.request,message_unread:0
+msgid "Unread Messages"
+msgstr "未读消息"
 
 #. module: metro_stock
 #: selection:material.request,state:0 selection:material.request.line,state:0
@@ -226,9 +271,12 @@ msgid "Waiting Another Move"
 msgstr "等待可用"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_mr_sale_prod_id
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_mr_sale_prod_id
+#: field:material.request,mr_sale_prod_id:0
 #: field:material.request.line,mr_sale_prod_id:0
 msgid "Sale Product ID"
-msgstr "产品ID"
+msgstr "ID"
 
 #. module: metro_stock
 #: help:material.request.line,price_unit:0
@@ -245,9 +293,10 @@ msgid "False"
 msgstr "False"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_name_4371
 #: field:material.request,name:0
 msgid "Reference"
-msgstr "参考单号"
+msgstr "引用参考"
 
 #. module: metro_stock
 #: model:ir.model,name:metro_stock.model_stock_move
@@ -274,16 +323,19 @@ msgid "draft"
 msgstr "草稿"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_result_line
 #: field:stock.import.inventory,result_line:0
 msgid "Importing Result"
 msgstr "导入结果"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_partner_id_4364
 #: field:material.request,partner_id:0
 msgid "Partner"
 msgstr "合作伙伴"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_sale_id_4375
 #: field:material.request,sale_id:0
 msgid "Sales Order"
 msgstr "销售单"
@@ -294,9 +346,10 @@ msgid "Delivery Orders"
 msgstr "送货单"
 
 #. module: metro_stock
-#: field:material.request.line,sale_line_id:0
-msgid "Sales Order Line"
-msgstr "销售单行"
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_cancel_cascade_4707
+#: field:material.request.line,cancel_cascade:0
+msgid "Cancel Cascade"
+msgstr "Cancel Cascade"
 
 #. module: metro_stock
 #: view:material.request.line:0
@@ -314,31 +367,44 @@ msgid "Confirm"
 msgstr "确认"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_invoice_state_4377
 #: field:material.request,invoice_state:0
 msgid "Invoice Control"
 msgstr "发票控制"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_return_picking_reason
 #: field:stock.return.picking,reason:0
 msgid "Return Reason"
 msgstr "退货原因"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_priority_4404
 #: field:material.request.line,priority:0
 msgid "Priority"
 msgstr "优先级"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_origin_4386
 #: field:material.request.line,origin:0
 msgid "Source"
 msgstr "源"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_plate_material_on_order_qty
+#: field:plate.material,on_order_qty:0
+msgid "On Order Quantity"
+msgstr "在途数量"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_message_follower_ids_4358
 #: field:material.request,message_follower_ids:0
 msgid "Followers"
 msgstr "Followers"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_location_id
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_location_id_4373
 #: field:material.request,location_id:0
 #: field:stock.import.inventory,location_id:0
 msgid "Location"
@@ -350,15 +416,17 @@ msgid "Picking List"
 msgstr "分拣单"
 
 #. module: metro_stock
-#: view:material.request.line:0 field:material.request.line,mr_emp_id:0
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_mr_emp_id
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_mr_emp_id
+#: field:material.request,mr_emp_id:0 view:material.request.line:0
+#: field:material.request.line,mr_emp_id:0
 msgid "Employee"
 msgstr "员工"
 
 #. module: metro_stock
-#: field:material.request,backorder_id:0
-#: field:material.request.line,backorder_id:0
-msgid "Back Order of"
-msgstr "分单"
+#: selection:material.request.line,state:0
+msgid "New"
+msgstr "新建"
 
 #. module: metro_stock
 #: selection:material.request,state:0 selection:material.request.line,state:0
@@ -371,11 +439,16 @@ msgid "Available"
 msgstr "可用"
 
 #. module: metro_stock
-#: field:material.request.line,create_date:0
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_create_date_4388
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_create_date
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_create_date_4609
+#: field:material.request.line,create_date:0 field:stock.picking,create_date:0
+#: field:stock.picking.in,create_date:0
 msgid "Creation Date"
 msgstr "创建日期"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_result_msg
 #: field:stock.import.inventory.result,msg:0
 msgid "Error Message"
 msgstr "错误消息"
@@ -386,21 +459,19 @@ msgid "Today"
 msgstr "今天"
 
 #. module: metro_stock
-#: view:material.request.line:0
-msgid "Request"
-msgstr "领料"
+#: model:ir.model.fields,field_description:metro_stock.field_plate_material_product_name
+#: field:plate.material,product_name:0
+msgid "Product Name"
+msgstr "产品名称"
 
 #. module: metro_stock
-#: view:material.request.line:0
-msgid "Return"
-msgstr "退料"
-
-#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_uom_4389
 #: view:material.request.line:0 field:material.request.line,product_uom:0
 msgid "Unit of Measure"
 msgstr "单位"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_price_currency_id_4401
 #: field:material.request.line,price_currency_id:0
 msgid "Currency for average price"
 msgstr "均价币种"
@@ -411,11 +482,13 @@ msgid "True"
 msgstr "True"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_move_lines_4359
 #: field:material.request,move_lines:0
 msgid "Request Products"
 msgstr "领料产品"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_mr_date_order
 #: view:material.request:0 view:material.request.line:0
 #: field:material.request.line,mr_date_order:0
 msgid "Order Date"
@@ -437,11 +510,13 @@ msgid "Force Availability"
 msgstr "强制可用"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_tracking_id_4423
 #: field:material.request.line,tracking_id:0
 msgid "Pack"
 msgstr "Pack"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_move_history_ids_4409
 #: field:material.request.line,move_history_ids:0
 msgid "Move History (child moves)"
 msgstr "调拨记录 (子调拨)"
@@ -452,11 +527,13 @@ msgid "Serial number is used to put a serial number on the production"
 msgstr "序列号是产品的唯一编号"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_auto_validate_4400
 #: field:material.request.line,auto_validate:0
 msgid "Auto Validate"
 msgstr "自动审核"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_location_dest_id_4422
 #: field:material.request.line,location_dest_id:0
 msgid "Destination Location"
 msgstr "目标库位"
@@ -473,6 +550,7 @@ msgid "Physical Inventory Lines"
 msgstr "实物盘点产品"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_packaging_4406
 #: field:material.request.line,product_packaging:0
 msgid "Packaging"
 msgstr "打包"
@@ -481,6 +559,18 @@ msgstr "打包"
 #: help:material.request,date_done:0
 msgid "Date of Completion"
 msgstr "完成日期"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_show_barcode_info
+#: field:material.request,show_barcode_info:0
+msgid "Show?"
+msgstr "Show?"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_sale_line_id_4399
+#: field:material.request.line,sale_line_id:0
+msgid "Sales Order Line"
+msgstr "销售单行"
 
 #. module: metro_stock
 #: selection:material.request,state:0
@@ -493,9 +583,16 @@ msgid "Reference of the document"
 msgstr "订单参考"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_change_product_qty_reason
 #: field:stock.change.product.qty,reason:0
 msgid "Changing Reason"
 msgstr "改变原因"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_mr_emp_code
+#: field:material.request,mr_emp_code:0
+msgid "Employee Code"
+msgstr "员工编码"
 
 #. module: metro_stock
 #: model:ir.model,name:metro_stock.model_stock_change_product_qty
@@ -523,16 +620,19 @@ msgid "Sending Goods"
 msgstr "出库"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_result_import_id
 #: field:stock.import.inventory.result,import_id:0
 msgid "Stock Inventory Import"
 msgstr "导入仓库库存"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_partner_id_4395
 #: field:material.request.line,partner_id:0
 msgid "Destination Address "
 msgstr "目的地址"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_origin_4357
 #: field:material.request,origin:0
 msgid "Source Document"
 msgstr "源单据"
@@ -543,16 +643,19 @@ msgid "Cancel Availability"
 msgstr "取消可用"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_purchase_line_id_4407
 #: field:material.request.line,purchase_line_id:0
 msgid "Purchase Order Line"
 msgstr "采购单行"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_max_date_4382
 #: field:material.request,max_date:0
 msgid "Max. Expected Date"
 msgstr "最晚预计日期"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_auto_picking_4383
 #: field:material.request,auto_picking:0
 msgid "Auto-Picking"
 msgstr "自动收货"
@@ -574,9 +677,9 @@ msgid "bold:state not in ('cancel', 'done') and current_date > min_date"
 msgstr "bold:state not in ('cancel', 'done') and current_date > min_date"
 
 #. module: metro_stock
-#: selection:material.request,invoice_state:0
-msgid "To Be Invoiced"
-msgstr "将要开票"
+#: view:stock.move:0
+msgid "Supplier"
+msgstr "供应商"
 
 #. module: metro_stock
 #: view:stock.import.inventory:0
@@ -584,11 +687,14 @@ msgid "Import inventory from Excel"
 msgstr "从Excel导入库存数据"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_uos_qty_4387
 #: field:material.request.line,product_uos_qty:0
 msgid "Quantity (UOS)"
 msgstr "数量(销售单位)"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_state_4405
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_state_4379
 #: field:material.request,state:0 view:material.request.line:0
 #: field:material.request.line,state:0
 msgid "Status"
@@ -600,6 +706,7 @@ msgid "Stock moves that are Available (Ready to process)"
 msgstr "库存调拨可用（已准备好）"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_inventory_line_image_medium
 #: field:stock.inventory.line,image_medium:0
 msgid "unknown"
 msgstr "unknown"
@@ -614,9 +721,10 @@ msgstr ""
 "位."
 
 #. module: metro_stock
-#: field:sale.product,name:0
-msgid "ID"
-msgstr "ID"
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_prodlot_id_4413
+#: field:material.request.line,prodlot_id:0
+msgid "Serial Number"
+msgstr "序列号"
 
 #. module: metro_stock
 #: help:material.request,state:0
@@ -658,21 +766,19 @@ msgstr ""
 "            * Cancelled: has been cancelled, can't be confirmed anymore"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_date_4415
 #: view:material.request.line:0 field:material.request.line,date:0
 msgid "Date"
 msgstr "日期"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_message_is_follower_4372
 #: field:material.request,message_is_follower:0
 msgid "Is a Follower"
 msgstr "Is a Follower"
 
 #. module: metro_stock
-#: model:ir.model,name:metro_stock.model_sale_product
-msgid "Sale Product"
-msgstr "销售产品"
-
-#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_supplier_prod_name
 #: field:stock.move,supplier_prod_name:0
 msgid "Supplier Product Name"
 msgstr "供应商产品名称"
@@ -691,19 +797,22 @@ msgstr ""
 "调拨日期: 安排的日期直到调拨完成的日期，这日期是调拨实际处理完成的日期."
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_message_summary_4367
 #: field:material.request,message_summary:0
 msgid "Summary"
 msgstr "总计"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_move_history_ids2_4419
 #: field:material.request.line,move_history_ids2:0
 msgid "Move History (parent moves)"
 msgstr "调拨日志(上级调拨)"
 
 #. module: metro_stock
-#: field:material.request,date:0
-msgid "Time"
-msgstr "时间"
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_return_qty
+#: field:stock.move,return_qty:0
+msgid "Return Quantity"
+msgstr "退货数量"
 
 #. module: metro_stock
 #: view:stock.inventory.line:0
@@ -721,6 +830,7 @@ msgid "Urgent"
 msgstr "紧急"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_move_dest_id_4414
 #: field:material.request.line,move_dest_id:0
 msgid "Destination Move"
 msgstr "目标库位"
@@ -731,17 +841,30 @@ msgid "Stock moves that are Confirmed, Available or Waiting"
 msgstr "库存调拨处于已确认、可用或者在等待的状态"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_type_4385
 #: field:material.request,type:0
 msgid "Request Type"
 msgstr "申请类型"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_inventory_create_uid
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_create_uid
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_create_uid_4427
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_create_uid
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_create_uid_4428
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_create_uid_4452
 #: field:material.request,create_uid:0
 #: field:material.request.line,create_uid:0 field:stock.inventory,create_uid:0
 #: field:stock.move,create_uid:0 field:stock.picking,create_uid:0
 #: field:stock.picking.in,create_uid:0
 msgid "Creator"
 msgstr "创建人"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_location_id_4402
+#: field:material.request.line,location_id:0
+msgid "Source Location"
+msgstr "源库位"
 
 #. module: metro_stock
 #: help:material.request,backorder_id:0
@@ -753,11 +876,13 @@ msgstr ""
 "contains the already processed part."
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_procurements_4391
 #: field:material.request.line,procurements:0
 msgid "Procurements"
 msgstr "需求"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_price_unit_4390
 #: field:material.request.line,price_unit:0
 msgid "Unit Price"
 msgstr "单价"
@@ -784,6 +909,7 @@ msgid "Moves"
 msgstr "调拨"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_location_dest_id_4381
 #: field:material.request,location_dest_id:0
 msgid "Dest. Location"
 msgstr "目标库位"
@@ -810,45 +936,61 @@ msgid "Incoming Shipments"
 msgstr "入库"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_plate_material_plate_whole_qty
+#: field:plate.material,plate_whole_qty:0
+msgid "Whole Quantity of Plate"
+msgstr "整张数"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_production_id_4425
 #: field:material.request.line,production_id:0
 msgid "Production"
 msgstr "生产"
 
 #. module: metro_stock
-#: selection:material.request.line,state:0
-msgid "New"
-msgstr "新建"
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_backorder_id_4411
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_backorder_id_4370
+#: field:material.request,backorder_id:0
+#: field:material.request.line,backorder_id:0
+msgid "Back Order of"
+msgstr "分单"
 
 #. module: metro_stock
-#: model:ir.actions.act_window,name:metro_stock.action_material_request_line
-#: model:ir.ui.menu,name:metro_stock.menu_action_material_request_line
-#: view:material.request.line:0
-msgid "Material Req/Ret Products"
-msgstr "领退料产品"
-
-#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_mr_notes
 #: field:material.request.line,mr_notes:0
 msgid "Reason and use"
 msgstr "原因和用途"
 
 #. module: metro_stock
-#: selection:material.request,type:0
-msgid "Material Return"
-msgstr "退料单"
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_date_expected_4410
+#: field:material.request.line,date_expected:0
+msgid "Scheduled Date"
+msgstr "安排日期"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_plate_material_product_id
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_id_4420
+#: model:ir.model.fields,field_description:metro_stock.field_stock_picking_product_id_4380
 #: field:material.request,product_id:0 view:material.request.line:0
-#: field:material.request.line,product_id:0 view:stock.inventory.line:0
+#: field:material.request.line,product_id:0 field:plate.material,product_id:0
+#: view:stock.inventory.line:0
 msgid "Product"
 msgstr "产品"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_pick_type
 #: field:material.request.line,pick_type:0
 msgid "Picking Type"
 msgstr "调拨类型"
 
 #. module: metro_stock
-#: field:material.request.line,name:0 field:sale.product,note:0
+#: view:material.request.line:0
+msgid "Return"
+msgstr "退料"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_name_4418
+#: field:material.request.line,name:0
 msgid "Description"
 msgstr "描述"
 
@@ -865,11 +1007,13 @@ msgid "Ready"
 msgstr "准备好"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_uos_4394
 #: field:material.request.line,product_uos:0
 msgid "Product UOS"
 msgstr "产品销售单位"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_all_done
 #: field:stock.import.inventory,all_done:0
 msgid "All Data Imported"
 msgstr "All Data Imported"
@@ -906,14 +1050,28 @@ msgid "Import Inventory"
 msgstr "导入盘点库存"
 
 #. module: metro_stock
-#: field:material.request.line,date_expected:0
-msgid "Scheduled Date"
-msgstr "安排日期"
+#: view:stock.picking.in:0
+msgid "Date of Reception"
+msgstr "入库时间"
 
 #. module: metro_stock
-#: field:material.request,message_ids:0
-msgid "Messages"
-msgstr "Messages"
+#: view:plate.material:0
+msgid "Search Plate Material"
+msgstr "搜索板材"
+
+#. module: metro_stock
+#: help:material.request.line,partner_id:0
+msgid ""
+"Optional address where goods are to be delivered, specifically used for "
+"allotment"
+msgstr ""
+"Optional address where goods are to be delivered, specifically used for "
+"allotment"
+
+#. module: metro_stock
+#: view:material.request.line:0
+msgid "Request"
+msgstr "领料"
 
 #. module: metro_stock
 #: help:material.request.line,product_qty:0
@@ -943,11 +1101,18 @@ msgid "Logistical shipping unit: pallet, box, pack ..."
 msgstr "Logistical shipping unit: pallet, box, pack ..."
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_result_row
 #: field:stock.import.inventory.result,row:0
 msgid "Row#"
 msgstr "行号"
 
 #. module: metro_stock
+#: view:stock.move:0 view:stock.picking.in:0
+msgid "date"
+msgstr "date"
+
+#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_type_4408
 #: field:material.request.line,type:0
 msgid "Shipping Type"
 msgstr "移库单类型"
@@ -968,9 +1133,19 @@ msgid "Material Request Line"
 msgstr "领料单行"
 
 #. module: metro_stock
-#: field:material.request.line,location_id:0
-msgid "Source Location"
-msgstr "源库位"
+#: model:ir.actions.act_window,name:metro_stock.action_plate_material_tree
+#: model:ir.model,name:metro_stock.model_plate_material
+#: model:ir.ui.menu,name:metro_stock.menu_plate_material_tree
+#: view:plate.material:0
+msgid "Plate Material"
+msgstr "板材"
+
+#. module: metro_stock
+#: model:ir.actions.act_window,name:metro_stock.action_material_request_return_tree
+#: model:ir.ui.menu,name:metro_stock.menu_action_material_request_return_tree
+#: selection:material.request,type:0
+msgid "Material Return"
+msgstr "退料单"
 
 #. module: metro_stock
 #: help:material.request.line,move_dest_id:0
@@ -978,6 +1153,7 @@ msgid "Optional: next stock move when chaining them"
 msgstr "选项: 如果是连锁那会引发库存调拨."
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_import_file
 #: field:stock.import.inventory,import_file:0
 msgid "File"
 msgstr "Excel文件"
@@ -988,35 +1164,15 @@ msgid "Stock Moves"
 msgstr "库存调拨"
 
 #. module: metro_stock
-#: field:stock.move,return_qty:0
-msgid "Return Quantity"
-msgstr "退货数量"
+#: view:stock.picking.in:0
+msgid "e.g. PO0032"
+msgstr "e.g. PO0032"
 
 #. module: metro_stock
-#: field:material.request,mr_emp_code:0
-msgid "Employee Code"
-msgstr "员工编码"
-
-#. module: metro_stock
-#: field:material.request,mr_emp_id:0
-msgid "Employee"
-msgstr "员工"
-
-#. module: metro_stock
-#: field:material.request,mr_sale_prod_id:0
-msgid "Sale Product ID"
-msgstr "ID"
-
-#. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_move_bc_product_code
 #: field:material.request.line,bc_product_code:0
 msgid "Product Code"
 msgstr "产品编码"
-
-#. module: metro_stock
-#: model:ir.actions.act_window,name:metro_stock.action_material_request_return_tree
-#: model:ir.ui.menu,name:metro_stock.menu_action_material_request_return_tree
-msgid "Material Return"
-msgstr "退料单"
 
 ########################manual########################
 #. module: stock

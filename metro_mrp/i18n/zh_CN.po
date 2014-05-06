@@ -255,3 +255,14 @@ msgstr "or"
 #: view:work.order.cnc:0 field:work.order.cnc.line.done,size:0
 msgid "Size"
 msgstr "尺寸"
+
+#. module: metro_mrp
+#: field:work.order.cnc.line,is_whole_plate:0
+#: field:work.order.cnc.line.done,is_whole_plate:0
+msgid "Whole Plate"
+msgstr "整张板"
+
+#. module: metro_mrp
+#: field:work.order.cnc.line.done,product_inv:0
+msgid "Inventory"
+msgstr "库存"
