@@ -100,12 +100,13 @@ class work_order_cnc_line(osv.osv):
         'plate_length': fields.integer('Length(mm)', required=True),
         'plate_width': fields.integer('Width(mm)', required=True),
         'plate_height': fields.integer('Height(mm)', required=True),
-        'percent_usage': fields.float('Usage Percent(%)', required=True),
+        'percent_usage_theory': fields.float('Usage Percent in Theory(%)', required=True),
+        'percent_usage': fields.float('Usage Percent of Manufacture(%)', required=True),
         'date_finished': fields.date('Finished Date', readonly=True),
-        'product_id': fields.many2one('product.product','Product'),
+        'product_id': fields.many2one('product.product','Product', readonly=True),
         'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
-        'mr_id': fields.many2one('material.request','MR#'),
+        'mr_id': fields.many2one('material.request','MR#', readonly=True),
         'is_whole_plate': fields.boolean('Whole Plate', readonly=True),
     }
 
