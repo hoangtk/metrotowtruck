@@ -2,6 +2,8 @@
 from osv import fields,osv
 from openerp.tools.translate import _
 from openerp import netsvc
+import time
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 class work_order_cnc(osv.osv):
     _name = "work.order.cnc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -241,6 +243,18 @@ class work_order_cnc_line(osv.osv):
         wf_service = netsvc.LocalService("workflow")
         wf_service.trg_validate(uid, 'stock.picking', mr_id, 'button_confirm', cr)
         
+        #do auto receiving
+        partial_data = {
+            'delivery_date' : time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        }
+        for mr_line in mr_line_obj.browse(cr, uid, mr_line_ids, context=context):
+            partial_data['move%s' % (mr_line.id)] = {
+                'product_id': mr_line.product_id.id,
+                'product_qty': mr_line.product_qty,
+                'product_uom': mr_line.product_uom.id,
+                'prodlot_id': mr_line.prodlot_id.id,
+            }
+        self.pool.get('stock.picking').do_partial(cr, uid, [mr_id], partial_data, context=context)           
             
     def _check_changing(self, cr, uid, ids, context=None):
         lines = self.read(cr, uid, ids, ['state','file_name'], context=context)
