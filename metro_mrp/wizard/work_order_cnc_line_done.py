@@ -22,6 +22,7 @@
 import time
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
 
 class work_order_cnc_line_done(osv.osv_memory):
     _name = "work.order.cnc.line.done"
@@ -35,7 +36,7 @@ class work_order_cnc_line_done(osv.osv_memory):
         'date_finished': fields.date('Finished Date'),
         'product_id': fields.many2one('product.product','Product', required=True),
         'is_whole_plate': fields.boolean('Whole Plate'),
-        'product_inv': fields.float('Inventory'),
+        'product_inv': fields.float('Inventory',digits_compute=dp.get_precision('Product Unit of Measure'),),
         'property_cnc_mr_dept': fields.property(
         'hr.department',
         type='many2one',

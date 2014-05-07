@@ -19,8 +19,13 @@ msgstr ""
 #. module: metro_mrp
 #: field:work.order.cnc.line,percent_usage:0
 #: field:work.order.cnc.line.done,percent_usage:0
-msgid "Usage Percent(%)"
-msgstr "利用率(%)"
+msgid "Usage Percent of Manufacture(%)"
+msgstr "生产利用率(%)"
+
+#. module: metro_mrp
+#: field:work.order.cnc.line,percent_usage_theory:0
+msgid "Usage Percent in Theory(%)"
+msgstr "理论利用率(%)"
 
 #. module: metro_mrp
 #: view:work.order.cnc:0 selection:work.order.cnc,state:0
