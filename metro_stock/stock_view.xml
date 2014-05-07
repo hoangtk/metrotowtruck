@@ -242,6 +242,7 @@
                     <field name="mr_emp_id"/>
                     <field name="mr_sale_prod_id"/>
                     <field name="mr_notes"/>
+                    <field name="name"/>
                     <field name="location_id" groups="stock.group_locations"/>
                     <field name="location_dest_id" groups="stock.group_locations"/>
                     <field name="create_date"/>
