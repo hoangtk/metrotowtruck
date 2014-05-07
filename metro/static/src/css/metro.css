@@ -16,3 +16,10 @@
 .openerp .oe_form .oe_subtotal_footer label.oe_form_label {
   font-weight: normal;
 }
+.openerp .oe_form_sheetbg {
+  padding: 16px 0;
+  max-width: none !important;
+}
+.openerp .oe_form_sheet_width_wider {
+  max-width: 1130px;
+}
