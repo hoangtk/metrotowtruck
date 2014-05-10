@@ -407,3 +407,8 @@ msgstr "所有库存操作的默认计量单位. 对于新建产品,先保存,�
 msgid "The manufacture standard name, like GB/T5782-86"
 msgstr "制造标准名称,例如GB/T5782-86"
 
+#. module: metro_product
+#: code:addons/metro_product/product.py:451
+#, python-format
+msgid "There are related business data with '%s', cannot change the Category,Type or Ratio."
+msgstr "'%s'已经有相关的业务数据,不能更改'类别','类型'或者'比例'."

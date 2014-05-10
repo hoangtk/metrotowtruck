@@ -351,4 +351,112 @@ class product_uom(osv.osv):
 			}   
 	_defaults = {
 		'rounding': 0.0001,
-	}	      
+	}
+	def has_related_data(self, cr, uid, ids, context=None):
+		sql = 'select 1 as flag from account_analytic_line where product_uom_id=%s \
+				union \
+				select 1 as flag from account_invoice_line where uos_id=%s \
+				union \
+				select 1 as flag from account_move_line where product_uom_id=%s \
+				union \
+				select 1 as flag from make_procurement where uom_id=%s \
+				union \
+				select 1 as flag from mrp_bom where product_uom=%s \
+				union \
+				select 1 as flag from mrp_bom where product_uos=%s \
+				union \
+				select 1 as flag from mrp_production_product_line where product_uom=%s \
+				union \
+				select 1 as flag from mrp_production_product_line where product_uos=%s \
+				union \
+				select 1 as flag from mrp_production where product_uom=%s \
+				union \
+				select 1 as flag from mrp_production where product_uos=%s \
+				union \
+				select 1 as flag from procurement_order where product_uom=%s \
+				union \
+				select 1 as flag from procurement_order where product_uos=%s \
+				union \
+				select 1 as flag from product_template where uom_id=%s \
+				union \
+				select 1 as flag from product_template where uom_po_id=%s \
+				union \
+				select 1 as flag from product_template where uos_id=%s \
+				union \
+				select 1 as flag from project_config_settings where time_unit=%s \
+				union \
+				select 1 as flag from pur_history_line where product_uom=%s \
+				union \
+				select 1 as flag from pur_invoice_line where product_uom_id=%s \
+				union \
+				select 1 as flag from pur_req_line where product_uom_id=%s \
+				union \
+				select 1 as flag from pur_req_po_line where product_uom_id=%s \
+				union \
+				select 1 as flag from purchase_order_line where product_uom=%s \
+				union \
+				select 1 as flag from res_company where project_time_mode_id=%s \
+				union \
+				select 1 as flag from sale_config_settings where time_unit=%s \
+				union \
+				select 1 as flag from sale_order_line where product_uom=%s \
+				union \
+				select 1 as flag from sale_order_line where product_uos=%s \
+				union \
+				select 1 as flag from stock_inventory_line where product_uom=%s \
+				union \
+				select 1 as flag from stock_inventory_line_split where product_uom=%s \
+				union \
+				select 1 as flag from stock_move_consume where product_uom=%s \
+				union \
+				select 1 as flag from stock_move where product_uom=%s \
+				union \
+				select 1 as flag from stock_move where product_uos=%s \
+				union \
+				select 1 as flag from stock_move_scrap where product_uom=%s \
+				union \
+				select 1 as flag from stock_move_split where product_uom=%s \
+				union \
+				select 1 as flag from stock_partial_move_line where product_uom=%s \
+				union \
+				select 1 as flag from stock_partial_picking_line where product_uom=%s \
+				union \
+				select 1 as flag from stock_warehouse_orderpoint where product_uom=%s \
+				limit 1 \
+				'				
+		for id in ids:
+			id_params = [id for i in range(35)]
+			cr.execute(sql, id_params)
+			res = cr.fetchone()
+			found_id = res and res[0] or False
+			if found_id:
+				return True
+				
+		return False	
+	def write(self, cr, uid, ids, vals, context=None):
+		check_ids = set()
+		if 'category_id' in vals:
+			for uom in self.browse(cr, uid, ids, context=context):
+				if uom.category_id.id != vals['category_id']:
+					check_ids.add(uom.id)
+		if 'uom_type' in vals:
+			for uom in self.browse(cr, uid, ids, context=context):
+				if uom.category_id.id != vals['uom_type']:
+					check_ids.add(uom.id)
+		if 'factor' in vals:
+			for uom in self.browse(cr, uid, ids, context=context):
+				if uom.category_id.id != vals['factor']:
+					check_ids.add(uom.id)										
+		if len(check_ids) > 0 and self.has_related_data(cr, uid, ids, context):					
+			raise osv.except_osv(_('Warning!'),_("There are related business data with '%s', cannot change the Category,Type or Ratio.") % (uom.name,))
+		return super(product_uom, self).write(cr, uid, ids, vals, context=context)
+	
+from openerp.addons.product import product	
+def uom_write(self, cr, uid, ids, vals, context=None):
+#	if 'category_id' in vals:
+#		for uom in self.browse(cr, uid, ids, context=context):
+#			if uom.category_id.id != vals['category_id']:
+#				raise osv.except_osv(_('Warning!'),_("Cannot change the category of existing Unit of Measure '%s'.") % (uom.name,))
+	return super(product.product_uom, self).write(cr, uid, ids, vals, context=context)	
+
+product.product_uom.write = uom_write
