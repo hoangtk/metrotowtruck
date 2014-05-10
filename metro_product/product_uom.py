@@ -434,6 +434,8 @@ class product_uom(osv.osv):
 				
 		return False	
 	def write(self, cr, uid, ids, vals, context=None):
+		if isinstance(ids, (int, long)):
+		  	ids = [ids]		
 		check_ids = set()
 		if 'category_id' in vals:
 			for uom in self.browse(cr, uid, ids, context=context):
