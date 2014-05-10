@@ -36,7 +36,7 @@ class product_product(osv.osv):
 										string='Measure Type', required=True,),
 		'uom_categ_id': fields.many2one('product.uom.categ','UOM Category', required=True),
 		'uom_po_price': fields.float('Purchase Unit Price'),
-		'uom_po_factor': fields.related('uom_po_id','factor_display',type='float',digits=(12,4),string='UOM Ratio')		
+		'uom_po_factor': fields.related('uom_po_id','factor_display',type='float',digits=(12,4),string='UOM Ratio',readonly=True)		
 #		'msp_uom_list': fields.one2many('product.uom','product_id',string='Units of Measure'),
         }
     
@@ -285,7 +285,7 @@ limit 1
 				#create a new uom category
 				new_uom_categ_id = self.pool.get('product.uom.categ').create(cr, uid, {'name':'MSP_%s'%product.default_code})
 				#create a new uom of the new category
-				new_uom_id = self.pool.get('product.uom').create(cr, uid, {'name':'BaseUnit','category_id':new_uom_categ_id,'factor':1},context)			
+				new_uom_id = self.pool.get('product.uom').create(cr, uid, {'name':'BaseUnit','category_id':new_uom_categ_id,'factor':1,'rounding': 0.0001},context)			
 				#update product's uom category and uom, po uom
 				self.pool.get('product.product').write(cr, uid, [product_id], {'uom_categ_id':new_uom_categ_id,'uom_id':new_uom_id,'uom_po_id':new_uom_id},context)
 
@@ -346,4 +346,7 @@ class product_uom(osv.osv):
 		return res	
 	_columns = {
 			'factor_display': fields.function(_factor_display, digits=(12,4),string='Ratio',),			
-			}         
+			}   
+	_defaults = {
+		'rounding': 0.0001,
+	}	      
