@@ -8,6 +8,8 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
             <data>
+                <field name="mes_type" position="replate">
+                </field>
                 <field name="uom_id" position="before">
                     <label for="measure_type"/>
                     <div>
