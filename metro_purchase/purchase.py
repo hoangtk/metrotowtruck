@@ -735,7 +735,8 @@ class purchase_order_line(osv.osv):
         self._update_prod_supplier(cr, uid, ids, vals, context)
         #if price_unit changed then update it to product_product.standard_price
         if vals.has_key('price_unit'):
-            self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'standard_price':vals['price_unit']},context=context)
+            standard_price = self.pool.get('product.uom')._compute_price(cr, uid, po_line.product_uom.id, vals["price_unit"],po_line.product_id.uom_id.id)
+            self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)
             
         return resu
     def create(self, cr, user, vals, context=None):
@@ -744,7 +745,9 @@ class purchase_order_line(osv.osv):
         self._update_prod_supplier(cr, user, [], vals, context)
         #if price_unit changed then update it to product_product.standard_price
         if vals.has_key('price_unit'):
-            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':vals['price_unit']},context=context)        
+            prod = self.pool.get('product.product').browse(cr, user, vals['product_id'], context=context)
+            standard_price = self.pool.get('product.uom')._compute_price(cr, user, vals["product_uom"], vals["price_unit"],prod.uom_id.id)            
+            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)        
         return resu  
     def unlink(self, cr, uid, ids, context=None):
         #only the draft,canceled can be deleted

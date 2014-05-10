@@ -285,3 +285,19 @@ msgstr "产品名称重复!"
 #: view:product.set.printflag:0
 msgid "Are you sure you want to set or clear these selected products barcode print flag?"
 msgstr "你确信要合并/清除所选择产品的条码打印标志吗？"
+
+#. module: product
+#: code:addons/product/product.py:361
+#, python-format
+msgid ""
+"New Unit of Measure '%s' must belong to same Unit of Measure category '%s' "
+"as of old Unit of Measure '%s'. If you need to change the unit of measure, "
+"you may deactivate this product from the 'Procurements' tab and create a new "
+"one."
+msgstr ""
+"新的计量单位'%s'的类别必须是'%s',即和老单位 '%s' 的相同。如果你要改变计量单位，你要'需求'标签停用这个产品 ，并且创建一个新的。"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "Default Unit of Measure used for all stock operation. For the new product, please save it first, and then you can define the units."
+msgstr "所有库存操作的默认计量单位. 对于新建产品,先保存,然后可定义产品单位"
