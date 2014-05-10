@@ -221,6 +221,20 @@
             </data>
             </field>
 		</record>
+		<record id="metro_product_mfg_view" model="ir.ui.view">
+            <field name="name">metro_product_mfg_view</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="product_manufacturer.view_product_form_expiry"/>
+            <field name="arch" type="xml">
+            <data>
+                <field name="manufacturer" position="before">
+                	<field name="mfg_standard"/>
+                </field>
+            </data>
+        	</field>
+       	</record>		
+		
 		<record id="metro_product_stock_view" model="ir.ui.view">
             <field name="name">metro.product.normal.form</field>
             <field name="model">product.product</field>

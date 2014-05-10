@@ -230,6 +230,8 @@ limit 1
 		return res
 	
     def write(self, cr, uid, ids, vals, context=None):
+		if isinstance(ids, (int, long)):
+		  	ids = [ids]
 		if 'uom_id' in vals or 'uom_po_id' in vals:
 			#do the units changing checking
 			check_ids = set()

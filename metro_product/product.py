@@ -135,6 +135,7 @@ class product_product(osv.osv):
 		'safe_warn': fields.boolean('Warn Inventory'),
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
+		'mfg_standard': fields.char(string=u'Manufacture Standard', size=32, help="The manufacture standard name, like GB/T5782-86"),
 		'qty_available': fields.function(stock_product._product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
 			string='Quantity On Hand',
