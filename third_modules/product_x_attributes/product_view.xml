@@ -23,7 +23,7 @@
             <field name="arch" type="xml">
                 <field name="type" position="after">
                     <!-- <field name="property_attribute_group_id"/> -->
-                    <field name="attribute_group_id"/>
+                    <field name="attribute_group_id" domain="[('model_id.model','=','product.product')]"/>
                 </field>
             </field>
         </record>
