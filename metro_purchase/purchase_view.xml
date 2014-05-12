@@ -183,6 +183,9 @@
                 <field name="product_qty"  position="attributes">
                 	<attribute name="context">{'supplier_prod_id':supplier_prod_id,'supplier_prod_name':supplier_prod_name,'supplier_prod_code':supplier_prod_code,'supplier_delay':supplier_delay}</attribute>
                 </field>
+                <field name="product_uom" position="attributes">
+                	<attribute name="attrs">{'readonly':1}</attribute>
+                </field>
             </field>
         </record>
           

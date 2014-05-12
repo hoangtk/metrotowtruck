@@ -629,7 +629,7 @@ class purchase_order_line(osv.osv):
         'return_qty': 0,
         'can_change_price': True,
         'can_change_product': True,
-    }    
+    }               
     def _is_po_update(self,cr,uid,po,state,context=None):
         po_update = True
         for line in po.order_line:
@@ -740,6 +740,15 @@ class purchase_order_line(osv.osv):
             
         return resu
     def create(self, cr, user, vals, context=None):
+        #add the procut_uom set by product's purchase uom
+        if 'product_uom' not in vals:
+            prod = self.pool.get('product.product').browse(cr, user, vals['product_id'], context=context)
+            product_uom = None
+            if prod.uom_po_id:
+                product_uom = prod.uom_po_id.id
+            else:
+                product_uom = prod.uom_id.id
+            vals.update({'product_uom':product_uom})            
         resu = super(purchase_order_line,self).create(cr, user, vals, context=context)
         #update product supplier info
         self._update_prod_supplier(cr, user, [], vals, context)
