@@ -28,13 +28,21 @@ from openerp.addons.stock.product import product_product as stock_product
 import openerp.addons.decimal_precision as dp
 from openerp.addons.product import product
 
+
+class product_template(osv.osv):
+    _inherit = "product.template"
+    _columns = {
+        'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
+        'uom_po_id': fields.many2one('product.uom', 'Purchase Unit of Measure', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
+        }
+            
 class product_product(osv.osv):
     _inherit = "product.product"
     
     _columns = {
         'measure_type': fields.selection([('single', 'Single Unit'), ('mmp', 'Multi Units Multi Products'), ('msp', 'Multi Units Single Product')], 
-										string='Measure Type', required=True,),
-		'uom_categ_id': fields.many2one('product.uom.categ','UOM Category', required=True),
+										string='Measure Type', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
+		'uom_categ_id': fields.many2one('product.uom.categ','UOM Category', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
 		'uom_po_price': fields.float('Purchase Unit Price'),
 		'uom_po_factor': fields.related('uom_po_id','factor_display',type='float',digits=(12,4),string='UOM Ratio',readonly=True)		
 #		'msp_uom_list': fields.one2many('product.uom','product_id',string='Units of Measure'),

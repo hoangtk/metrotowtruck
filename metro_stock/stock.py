@@ -222,7 +222,18 @@ class material_request_line(osv.osv):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
         return super(material_request_line,self).search(cr, user, new_args, offset, limit, order, context, count)   
-            
+    def create(self, cr, user, vals, context=None):
+        #add the procut_uom set by product's purchase uom
+        if 'product_uom' not in vals:
+            prod = self.pool.get('product.product').browse(cr, user, vals['product_id'], context=context)
+            product_uom = None
+            if prod.uom_po_id:
+                product_uom = prod.uom_po_id.id
+            else:
+                product_uom = prod.uom_id.id
+            vals.update({'product_uom':product_uom})            
+        resu = super(material_request_line,self).create(cr, user, vals, context=context)
+        return resu            
 class stock_move(osv.osv):
     _inherit = "stock.move" 
     def _get_rec_info(self, cr, uid, ids, fields, args, context=None):

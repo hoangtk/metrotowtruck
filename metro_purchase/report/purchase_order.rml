@@ -219,7 +219,7 @@
             <para style="terp_default_Right_9">[[ o.pricelist_id.currency_id.symbol ]][[ formatLang(line.price_unit, digits=get_digits(dp='Product Price') ) ]]</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ o.pricelist_id.currency_id.symbol ]][[ formatLang(line.price_subtotal, digits=get_digits(dp='Account') ) ]] </para>
+            <para style="terp_default_Right_9">[[ o.pricelist_id.currency_id.symbol ]][[ formatLang(line.price_subtotal_withtax, digits=get_digits(dp='Account') ) ]] </para>
           </td>
         </tr>
       </blockTable>

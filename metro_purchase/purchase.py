@@ -89,6 +89,21 @@ class purchase_order(osv.osv):
     _defaults = {
         'is_sent_supplier': False,
     }    
+    def _check_duplicated_products(self, cr, uid, ids, context=None):
+        for po in self.browse(cr, uid, ids, context=context):
+            products = {}
+            for line in po.order_line:
+                product = line.product_id
+                product_id = product.id
+                if product_id not in products:
+                    products[product_id] = 1
+                else:
+#                    products[product_id] = products[product_id] + 1
+                    raise osv.except_osv(_('Error!'), _('[%s]%s is duplicated in this order!')%(product.default_code,product.name))
+        return True 
+    _constraints = [
+        (_check_duplicated_products, 'Error ! You can not add duplicated products!', ['order_line'])
+    ]    
     def new_po(self, cr, uid, pos, context=None):
         """
         Create New RFQ for Supplier
@@ -599,7 +614,18 @@ class purchase_order_line(osv.osv):
                     
             result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'invoice_qty':invoice_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
         return result
-                
+    def _amount_line(self, cr, uid, ids, prop, arg, context=None):
+        res = {}    
+        for id in ids:
+            res[id] = {'price_subtotal':0,'price_subtotal_withtax':0}         
+        cur_obj=self.pool.get('res.currency')
+        tax_obj = self.pool.get('account.tax')
+        for line in self.browse(cr, uid, ids, context=context):
+            taxes = tax_obj.compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, line.order_id.partner_id)
+            cur = line.order_id.pricelist_id.currency_id
+            res[line.id]['price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])
+            res[line.id]['price_subtotal_withtax'] = cur_obj.round(cr, uid, cur, line.price_unit*line.product_qty)
+        return res                
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -621,6 +647,8 @@ class purchase_order_line(osv.osv):
         'can_change_price' : fields.function(_get_rec_info, type='boolean', string='Can Change Price', multi="rec_info"),
         'can_change_product' : fields.function(_get_rec_info, type='boolean', string='Can Change Product', multi="rec_info"),
         'invoice_qty' : fields.function(_get_rec_info, type='integer', string='Invoice Quantity', multi="rec_info"),
+        'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
+        'price_subtotal_withtax': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
     }  
     _order = "order_id desc"
     _defaults = {
@@ -629,7 +657,7 @@ class purchase_order_line(osv.osv):
         'return_qty': 0,
         'can_change_price': True,
         'can_change_product': True,
-    }    
+    }               
     def _is_po_update(self,cr,uid,po,state,context=None):
         po_update = True
         for line in po.order_line:
@@ -740,6 +768,15 @@ class purchase_order_line(osv.osv):
             
         return resu
     def create(self, cr, user, vals, context=None):
+        #add the procut_uom set by product's purchase uom
+        if 'product_uom' not in vals:
+            prod = self.pool.get('product.product').browse(cr, user, vals['product_id'], context=context)
+            product_uom = None
+            if prod.uom_po_id:
+                product_uom = prod.uom_po_id.id
+            else:
+                product_uom = prod.uom_id.id
+            vals.update({'product_uom':product_uom})            
         resu = super(purchase_order_line,self).create(cr, user, vals, context=context)
         #update product supplier info
         self._update_prod_supplier(cr, user, [], vals, context)
