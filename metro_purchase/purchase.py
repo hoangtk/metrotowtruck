@@ -599,7 +599,18 @@ class purchase_order_line(osv.osv):
                     
             result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'invoice_qty':invoice_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
         return result
-                
+    def _amount_line(self, cr, uid, ids, prop, arg, context=None):
+        res = {}    
+        for id in ids:
+            res[id] = {'price_subtotal':0,'price_subtotal_withtax':0}         
+        cur_obj=self.pool.get('res.currency')
+        tax_obj = self.pool.get('account.tax')
+        for line in self.browse(cr, uid, ids, context=context):
+            taxes = tax_obj.compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, line.order_id.partner_id)
+            cur = line.order_id.pricelist_id.currency_id
+            res[line.id]['price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])
+            res[line.id]['price_subtotal_withtax'] = cur_obj.round(cr, uid, cur, line.price_unit*line.product_qty)
+        return res                
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -621,6 +632,8 @@ class purchase_order_line(osv.osv):
         'can_change_price' : fields.function(_get_rec_info, type='boolean', string='Can Change Price', multi="rec_info"),
         'can_change_product' : fields.function(_get_rec_info, type='boolean', string='Can Change Product', multi="rec_info"),
         'invoice_qty' : fields.function(_get_rec_info, type='integer', string='Invoice Quantity', multi="rec_info"),
+        'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
+        'price_subtotal_withtax': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
     }  
     _order = "order_id desc"
     _defaults = {

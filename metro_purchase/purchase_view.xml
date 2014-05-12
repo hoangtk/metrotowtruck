@@ -143,7 +143,10 @@
                 <button name="view_invoice" position="replace">
                 	<!-- <button name="view_invoice" string="Receive Invoice" type="object" attrs="{'invisible': ['|', ('invoice_method','=','picking'), '|', ('state','!=', 'approved'), ('invoiced','=',True) ]}" class="oe_highlight"/> -->
                 	<button name="%(act_pur_invoice)d" string="Receive Invoice" type="action" groups="account.group_account_invoice" attrs="{'invisible': [('state','!=','approved')]}"/>
-                </button>                
+                </button>
+				<xpath expr="//tree/field[@name='price_subtotal']" position="replace">
+					<field name="price_subtotal_withtax"/>
+				</xpath>              
        		</field>
         </record>  
           
