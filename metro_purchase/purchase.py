@@ -89,6 +89,21 @@ class purchase_order(osv.osv):
     _defaults = {
         'is_sent_supplier': False,
     }    
+    def _check_duplicated_products(self, cr, uid, ids, context=None):
+        for po in self.browse(cr, uid, ids, context=context):
+            products = {}
+            for line in po.order_line:
+                product = line.product_id
+                product_id = product.id
+                if product_id not in products:
+                    products[product_id] = 1
+                else:
+#                    products[product_id] = products[product_id] + 1
+                    raise osv.except_osv(_('Error!'), _('[%s]%s is duplicated in this order!')%(product.default_code,product.name))
+        return True 
+    _constraints = [
+        (_check_duplicated_products, 'Error ! You can not add duplicated products!', ['order_line'])
+    ]    
     def new_po(self, cr, uid, pos, context=None):
         """
         Create New RFQ for Supplier
