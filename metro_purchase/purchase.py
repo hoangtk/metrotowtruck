@@ -174,19 +174,43 @@ class purchase_order(osv.osv):
                     todo.append(line.id)
         return todo
         
+    def button_update_uom(self, cr, uid, ids, context=None):
+        po_lines = {}
+        if context and context.get("uom_todo"):
+            po_lines = context.get("uom_todo")
+        else:
+            for po in self.browse(cr, uid, ids, context=context):
+                for line in po.order_line:
+                    if line.product_id.id not in po_lines and line.product_uom.id != line.product_id.uom_po_id.id:
+                        po_lines.update({line.id:line.product_id.uom_po_id.id})
+                        
+        po_line_obj = self.pool.get('purchase.order.line')
+        for po_line in po_lines:
+            cr.execute('update purchase_order_line set product_uom=%s where id=%s',(po_lines[po_line],po_line))
+            
+        return True
+    
     def wkf_confirm_order(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         todo = []
+        uom_todo = {}
         for po in self.browse(cr, uid, ids, context=context):
             if not po.order_line:
                 raise osv.except_osv(_('Error!'),_('You cannot confirm a purchase order without any purchase order line.'))
             for line in po.order_line:
                 if line.state=='draft' or line.state=='rejected':
-                    todo.append(line.id)        
+                    todo.append(line.id)
+                    if line.product_uom.id != line.product_id.uom_po_id.id:
+                        uom_todo.update({line.id:line.product_id.uom_po_id.id})        
         self.pool.get('purchase.order.line').write(cr, uid, todo, {'state':'confirmed'},context)
         for id in ids:
             self.write(cr, uid, [id], {'state' : 'confirmed', 'validator' : uid, 'inform_type':'1'})
+        #update the product uom to po line
+        context.update({'uom_todo':uom_todo})
+        self.button_update_uom(cr, uid, ids, context)
         return True    
-    
+            
     def wkf_approve_order(self, cr, uid, ids, context=None):                    
 #        lines = self._get_lines(cr,uid,ids,['confirmed','rejected'],context=context)
         lines = []

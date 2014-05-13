@@ -13,28 +13,28 @@ if dbname == 'metro_production':
 username = raw_input('Enter user name : ')
 pwd = raw_input('Enter password : ')
 '''
-#host = 'localhost'
-#port = '9069'
-#dbname = 'metro_dev_prod_0328'
-#username = 'erpadmin'
-#pwd = 'develop'
+host = 'localhost'
+port = '9069'
+dbname = 'metro_develop'
+username = 'erpadmin'
+pwd = 'develop'
 
 #host = '10.1.1.141'
 #port = '80'
 #dbname = 'metro_prod_0328'
 #username = 'erpadmin'
 #pwd = 'develop'
-
-host = '10.1.1.140'
-port = '80'
-dbname = 'metro_production'
-username = 'erpadmin'
-pwd = 'erp123'
+#
+#host = '10.1.1.140'
+#port = '80'
+#dbname = 'metro_production'
+#username = 'erpadmin'
+#pwd = 'erp123'
 
 sock_common = xmlrpclib.ServerProxy ('http://%s:%s/xmlrpc/common'%(host,port))
 uid = sock_common.login(dbname, username, pwd)
 sock = xmlrpclib.ServerProxy('http://%s:%s/xmlrpc/object'%(host,port))
-
+print 'begin...'
 #get the product inventory quantity
 prod_ids = sock.execute(dbname, uid, pwd, 'product.product', 'search', [])
 for prod_id in prod_ids:
@@ -52,6 +52,6 @@ for prod_id in prod_ids:
     if qty['qty_available'] == 0.0 and qty['virtual_available'] == 0.0 and qty['incoming_qty'] == 0.0 and qty['outgoing_qty'] == 0.0:
 #            print qty
         continue
-    print "insert into temp_prod_inv_0411 select %s,%s,%s,%s,%s;"%(prod_id,qty['qty_available'],qty['virtual_available'],qty['incoming_qty'],qty['outgoing_qty'])
+    print "insert into temp_prod_inv_0415 select %s,%s,%s,%s,%s;"%(prod_id,qty['qty_available'],qty['virtual_available'],qty['incoming_qty'],qty['outgoing_qty'])
     
 print 'done...'
