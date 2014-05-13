@@ -23,8 +23,11 @@ from osv import fields, osv
 from datetime import datetime, time
 import tools
 from tools.translate import _
-#from openerp.addons.metro import mdb
-#from openerp.tools.misc import resolve_attr
+from openerp.addons.metro import mdb
+from openerp.tools.misc import resolve_attr
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class hr_employee(osv.osv):
 	_inherit = "hr.employee"
@@ -82,14 +85,16 @@ class hr_employee(osv.osv):
 		emp_code = '%03d'%(emp_id[0] + 1,)
 		values.update({'emp_code':emp_code})
 		return values
-	'''
+	
 	def sync_clock(self, cr, uid, ids=None, context=None):
+		_logger.info('begining sync_clock...')
 		if not context:
 			context = {}
 		if not ids:
 			ids = self.search(cr, uid, [('active','=',True)], context = context)
 		#get the clock data
 		file_name = self.pool.get('ir.config_parameter').get_param(cr, uid, 'hr_clock_mdb_file', context=context)
+		_logger.info('sync data to file:%s',file_name)
 		conn = mdb.open_conn(file_name)
 		sql = "select userid,badgenumber,name,gender,ssn,minzu,ophone,title,birthday,hiredday,cardno,pager,street from userinfo"
 		emps_clock, fld_size = mdb.exec_query(conn, sql, 'ssn')
@@ -175,9 +180,11 @@ class hr_employee(osv.osv):
 					upt_cols = upt_cols[:-1]
 					sql = 'update userinfo set ' + upt_cols + ' where userid = ' + str(emp_clock['userid'])
 					mdb.exec_ddl(conn, sql)
+			_logger.info('Synchronized employee-%s...', emp.emp_code)
 		mdb.close_conn(conn)
+		_logger.info('end sync_clock')
 		return True
-		'''		
+	
 hr_employee()
 
 class salary_history(osv.osv):

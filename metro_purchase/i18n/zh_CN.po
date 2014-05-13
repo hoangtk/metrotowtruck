@@ -1772,3 +1772,8 @@ msgstr "预计日期"
 #: field:purchase.order.line,date_planned:0
 msgid "Scheduled Date"
 msgstr "预计日期"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Update UOM"
+msgstr "更新单位"
