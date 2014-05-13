@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
@@ -155,7 +155,10 @@ class hr_employee(osv.osv):
 							attr_val = 'M'
 						if attr_val == 'female':
 							attr_val = 'F'
-					vals = vals + '\'' +  attr_val + '\','				
+					vals = vals + ('\'%s\','%attr_val)
+				import sys
+				_logger.info('%s - %s'%(isinstance(vals,unicode),sys.getdefaultencoding()))
+				vals = vals.encode('utf-8')
 				sql = 'insert into userinfo (%s) values(%s)'%(cols[:-1], vals[:-1])
 				mdb.exec_ddl(conn, sql)
 			else:
