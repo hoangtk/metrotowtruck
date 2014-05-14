@@ -189,7 +189,11 @@ class stock_move(osv.osv):
                 'matching_ids_in': fields.one2many('stock.move.matching', 'move_in_id'),
                 'matching_ids_out':fields.one2many('stock.move.matching', 'move_out_id'),
     }
-
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default.update({'matching_ids_in': [], 'matching_ids_out': []})
+        return super(stock_move, self).copy_data(cr, uid, id, default, context=context)
 
 class stock_move_matching(osv.osv):
     _name = "stock.move.matching"
