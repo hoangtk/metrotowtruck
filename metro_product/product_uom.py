@@ -27,6 +27,7 @@ from openerp.addons.metro_purchase.purchase import deal_args
 from openerp.addons.stock.product import product_product as stock_product
 import openerp.addons.decimal_precision as dp
 from openerp.addons.product import product
+from openerp.tools import float_round, float_is_zero, float_compare
 
 
 class product_template(osv.osv):
@@ -451,11 +452,11 @@ class product_uom(osv.osv):
 					check_ids.add(uom.id)
 		if 'uom_type' in vals:
 			for uom in self.browse(cr, uid, ids, context=context):
-				if uom.category_id.id != vals['uom_type']:
+				if uom.uom_type != vals['uom_type']:
 					check_ids.add(uom.id)
 		if 'factor' in vals:
 			for uom in self.browse(cr, uid, ids, context=context):
-				if uom.category_id.id != vals['factor']:
+				if not float_is_zero(uom.factor-vals['factor'], uom.rounding):
 					check_ids.add(uom.id)										
 		if len(check_ids) > 0 and self.has_related_data(cr, uid, ids, context):					
 			raise osv.except_osv(_('Warning!'),_("There are related business data with '%s', cannot change the Category,Type or Ratio.") % (uom.name,))
