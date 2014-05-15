@@ -336,6 +336,13 @@ class product_product(osv.osv):
 	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
 		#deal the 'date' datetime field query
 		new_args = deal_args(self,args)
+		#add the category improving
+		for arg in new_args:
+			if arg[0] == 'categ_id' and arg[1] == '=' and isinstance(arg[2], (int,long)):
+				idx = new_args.index(arg)
+				new_args.remove(arg)
+				new_args.insert(idx, [arg[0],'child_of',arg[2]])
+			
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
 
@@ -349,6 +356,8 @@ class product_product(osv.osv):
 				if qty['qty_available'] < qty['safe_qty']:
 					new_ids.append(qty['id'])	
 			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
+
+			
 		
 #		qty_available
 		#add the available restriction

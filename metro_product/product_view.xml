@@ -267,9 +267,10 @@
             		<field name="create_uid"/>
             		<field name="create_date"/>
             	</field>
-            	<field name="categ_id" position="attributes">
-            		<attribute name="filter_domain">[('categ_id','child_of',self)]</attribute>
-            	</field>
+<!--            move to product_product.search to deal the 'child_of', use the view xml. the category name will be passed to search(), we need the category ID 	
+				<field name="categ_id" position="attributes">
+            		<attribute name="filter_domain">[('categ_id','child_of',self.id)]</attribute>
+            	</field> -->
             	<filter name="filter_to_sell" position="after">
             		<separator/>
             		<filter string="Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',True)]"/>

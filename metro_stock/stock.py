@@ -115,7 +115,8 @@ class material_request_line(osv.osv):
                 "be moved. Lowering this quantity does not generate a "
                 "backorder. Changing this quantity on assigned moves affects "
                 "the product reservation, and should be done with care."
-        ),                
+        ),
+        'prod_categ_id': fields.related('product_id','categ_id',string='Product Category Type',type='many2one',relation="product.category",select=True),
     }
     _order = 'id'
     def default_get(self, cr, uid, fields_list, context=None):
