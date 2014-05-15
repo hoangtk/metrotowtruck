@@ -33,8 +33,8 @@ from openerp.tools import float_round, float_is_zero, float_compare
 class product_template(osv.osv):
     _inherit = "product.template"
     _columns = {
-        'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
-        'uom_po_id': fields.many2one('product.uom', 'Purchase Unit of Measure', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
+        'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True, write=['metro.group_data_maintain'], read=['base.group_user'], track_visibility='onchange'),
+        'uom_po_id': fields.many2one('product.uom', 'Purchase Unit of Measure', required=True, write=['metro.group_data_maintain'], read=['base.group_user'], track_visibility='onchange'),
         }
             
 class product_product(osv.osv):
@@ -42,9 +42,9 @@ class product_product(osv.osv):
     
     _columns = {
         'measure_type': fields.selection([('single', 'Single Unit'), ('mmp', 'Multi Units Multi Products'), ('msp', 'Multi Units Single Product')], 
-										string='Measure Type', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
-		'uom_categ_id': fields.many2one('product.uom.categ','UOM Category', required=True, write=['metro.group_data_maintain'], read=['base.group_user']),
-		'uom_po_price': fields.float('Purchase Unit Price'),
+										string='Measure Type', required=True, write=['metro.group_data_maintain'], read=['base.group_user'], track_visibility='onchange'),
+		'uom_categ_id': fields.many2one('product.uom.categ','UOM Category', required=True, write=['metro.group_data_maintain'], read=['base.group_user'], track_visibility='onchange'),
+		'uom_po_price': fields.float('Purchase Unit Price', track_visibility='onchange'),
 		'uom_po_factor': fields.related('uom_po_id','factor_display',type='float',digits=(12,4),string='UOM Ratio',readonly=True)		
 #		'msp_uom_list': fields.one2many('product.uom','product_id',string='Units of Measure'),
         }
