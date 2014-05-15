@@ -321,6 +321,7 @@
                     <field name="mr_emp_id"/>
                     <field name="mr_sale_prod_id"/>
                     <group expand="0" string="Group By...">
+                    	<filter string="ID" name="by_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'mr_sale_prod_id'}"/>
                         <filter string="Department" name="by_dept" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'mr_dept_id'}"/>
                         <filter string="Employee" name="by_emp" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'mr_emp_id'}"/>                        
                         <filter string="Product" name="by_product" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'product_id'}"/>
