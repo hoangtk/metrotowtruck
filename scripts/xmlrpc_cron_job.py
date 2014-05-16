@@ -15,7 +15,7 @@ pwd = raw_input('Enter password : ')
 '''
 host = 'localhost'
 port = '9069'
-dbname = 'metro_develop'
+dbname = 'metro_0514'
 username = 'erpadmin'
 pwd = 'develop'
 

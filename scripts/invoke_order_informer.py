@@ -1,12 +1,18 @@
 #!/usr/bin/python
 import sys, getopt
 import xmlrpclib
-    
-host = '10.1.4.14'
+
+host = 'localhost'
 port = '9069'
-dbname = 'metro_po141'
+dbname = 'metro_0514'
 username = 'erpadmin'
-pwd = 'erp123'
+pwd = 'develop'
+    
+#host = '10.1.4.14'
+#port = '9069'
+#dbname = 'metro_po141'
+#username = 'erpadmin'
+#pwd = 'erp123'
 
 #host = '10.0.1.119'
 #port = '9069'

@@ -91,6 +91,8 @@ class purchase_order(osv.osv):
     }    
     def _check_duplicated_products(self, cr, uid, ids, context=None):
         for po in self.browse(cr, uid, ids, context=context):
+            if po.state in('done','approved', 'wait_receipt'):
+                continue
             products = {}
             for line in po.order_line:
                 product = line.product_id
@@ -560,7 +562,8 @@ class purchase_order(osv.osv):
         for po in self.browse(cr, uid, ids, context):
             remain_qty = 0
             for line in po.order_line:
-                remain_qty += line.product_qty - (line.receive_qty - line.return_qty)
+                if line.product_id.type not in ('consu','service'):
+                    remain_qty += line.product_qty - (line.receive_qty - line.return_qty)
             if remain_qty == 0:
                 ids_done.append(po.id)
         return super(purchase_order,self).picking_done(cr, uid, ids_done, context)
