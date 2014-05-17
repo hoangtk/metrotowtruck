@@ -219,33 +219,7 @@
                 <div name="buttons" position="inside">
                 	<button name="print_barcode" string="Set Print Flag" type="object" context="{'print_flag':True}"/>
                 	<button name="print_barcode" string="Clear Print Flag" type="object" context="{'print_flag':False}"/>
-                </div>
-                <xpath expr="//div[@name='options']/label[@for='purchase_ok']" position="attributes">
-	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </xpath>
-	            <field name="purchase_ok" position="attributes">
-	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </field>
-                <xpath expr="//div[@name='options']/label[@for='sale_ok']" position="attributes">
-	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </xpath>
-	            <field name="sale_ok" position="attributes">
-	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </field>
-	            <field name="active" position="attributes">
-	            	<attribute name="invisible">1</attribute>
-	            </field>
-	            <field name="state" position="replace">
-	            </field>
-	            <xpath expr="//form/sheet" position="before">
-	                <header>
-	                    <button name="button_approve" states="draft" string="Approve" type="object" class="oe_highlight" groups="metro.group_data_maintain_manager"/>
-	                    <button name="button_eol" states="sellable" string="End of Life" type="object" groups="metro.group_data_maintain_manager"/>
-	                    <button name="button_obsolete" states="sellable" string="Obsolete" type="object" groups="metro.group_data_maintain_manager"/>
-	                    <button name="button_draft" states="end,obsolete" string="Restart" type="object" class="oe_highlight" groups="metro.group_data_maintain_manager"/>
-	                    <field name="state" widget="statusbar" statusbar_visible="draft,sellable,end" statusbar_colors='{"end":"red","obsolete":"red"}' readonly="1"/>
-	                </header>	            
-	            </xpath>                
+                </div>              
             </data>
             </field>
 		</record>
