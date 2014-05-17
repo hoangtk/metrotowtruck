@@ -136,6 +136,7 @@ class product_product(osv.osv):
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
 		'mfg_standard': fields.char(string=u'Manufacture Standard', size=32, help="The manufacture standard name, like GB/T5782-86"),
+		'default_code' : fields.char('Internal Reference', size=64, select=True, required=True),
 		'qty_available': fields.function(stock_product._product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
 			string='Quantity On Hand',
@@ -394,15 +395,20 @@ class product_product(osv.osv):
 	def print_barcode(self,cr,uid,ids,context=None):
 		self.write(cr,uid,ids,{'is_print_barcode':context.get("print_flag")})
 		return True
-#	def onchange_name(self, cr, uid, ids, value, context):
-#		prods = self.search(cr, uid, [('name', 'like', value),('id','not in',ids)])
-#		if prods:
-#			for prod in prods
-#			
-#		res = {}
-#		res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
-#		return res
-		
+
+	def button_approve(self, cr, uid, ids, context=None):
+		#state will be changed to 'sellable', purchase_ok=1, sale_ok=1, active=1
+		self.write(cr,uid,ids,{'state':'sellable','purchase_ok':1,'sale_ok':1,'active':1},context=context)
+	def button_eol(self, cr, uid, ids, context=None):
+		#state will be changed to 'end', purchase_ok=0, sale_ok=0
+		self.write(cr,uid,ids,{'state':'end','purchase_ok':0,'sale_ok':0},context=context)
+	def button_obsolete(self, cr, uid, ids, context=None):
+		#state will be changed to 'obsolete', purchase_ok=0, sale_ok=0, active=0
+		self.write(cr,uid,ids,{'state':'obsolete','purchase_ok':0,'sale_ok':0,'active':0},context=context)
+	def button_draft(self, cr, uid, ids, context=None):
+		#state will be changed to 'sellable', purchase_ok=1, sale_ok=1, active=1
+		self.write(cr,uid,ids,{'state':'draft','purchase_ok':0,'sale_ok':0,'active':1},context=context)
+				
 product_product()
 
 #	_sql_constraints = [
@@ -413,9 +419,16 @@ class product_template(osv.osv):
 	_inherit = "product.template"
 
 	_columns = {
-        'name': fields.char('Name', size=128, required=True, translate=False, select=True, track_visibility='onchange'),     
+        'name': fields.char('Name', size=128, required=True, translate=False, select=True, track_visibility='onchange'),   
+		'state': fields.selection([('draft', 'In Development'),
+			('sellable','Normal'),
+			('end','End of Lifecycle'),
+			('obsolete','Obsolete')], 'Status', track_visibility='onchange'),          
         }
 
 	_defaults = {
         'type' : 'product',
-    }    
+		'purchase_ok':False,
+		'sale_ok':False,
+		'state':'draft'        
+    }
