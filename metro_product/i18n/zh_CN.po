@@ -412,3 +412,23 @@ msgstr "制造标准名称,例如GB/T5782-86"
 #, python-format
 msgid "There are related business data with '%s', cannot change the Category,Type or Ratio."
 msgstr "'%s'已经有相关的业务数据,不能更改'类别','类型'或者'比例'."
+
+#. module: metro_product
+#: view:product.product:0
+msgid "Approve"
+msgstr "批准"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "End of Life"
+msgstr "停用"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "Obsolete"
+msgstr "废弃"
+
+#. module: metro_product
+#: view:product.product:0
+msgid "Restart"
+msgstr "重新启用"
