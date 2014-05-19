@@ -346,7 +346,13 @@ product.product_template.write =  product_template_write
 
 
 class product_uom(osv.osv):
-	_inherit = "product.uom"
+    _inherit = "product.uom"    
+
+    def name_create(self, cr, uid, name, context=None):
+        """ The UoM category and factor are required, so we'll have to add temporary values
+            for imported UoMs """
+        raise osv.except_osv(_('Error'),_('Quick cration is not allowed to Unit of Measure!'))
+    
 	def _factor_display(self, cursor, user, ids, name, arg, context=None):
 		res = {}
 		for uom in self.browse(cursor, user, ids, context=context):
