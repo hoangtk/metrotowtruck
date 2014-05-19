@@ -57,9 +57,11 @@
                 </xpath>
                 <xpath expr="//field[@name='origin']" position="replace">
                 </xpath>
-                <xpath expr="//button[@string='Reverse Transfer']" position="replace">
+                <xpath expr="//button[@string='Reverse Transfer']" position="after">
+                    <button name="action_revert_done" string="Reopen" states="done,cancel" type="object" groups="stock.group_stock_manager" confirm="Are you sure you want to reopen this stock picking?"/>
                 </xpath>
-                
+                <xpath expr="//button[@string='Reverse Transfer']" position="replace">
+                </xpath>                
             </field>
         </record>
         <record id="view_material_request_search" model="ir.ui.view">
