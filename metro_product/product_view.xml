@@ -220,20 +220,11 @@
                 	<button name="print_barcode" string="Set Print Flag" type="object" context="{'print_flag':True}"/>
                 	<button name="print_barcode" string="Clear Print Flag" type="object" context="{'print_flag':False}"/>
                 </div>
-                <xpath expr="//div[@name='options']/label[@for='purchase_ok']" position="attributes">
-	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </xpath>
-	            <field name="purchase_ok" position="attributes">
-	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </field>
                 <xpath expr="//div[@name='options']/label[@for='sale_ok']" position="attributes">
 	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
 	            </xpath>
 	            <field name="sale_ok" position="attributes">
 	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
-	            </field>
-	            <field name="active" position="attributes">
-	            	<attribute name="invisible">1</attribute>
 	            </field>
 	            <field name="state" position="replace">
 	            </field>
@@ -261,7 +252,36 @@
                 </field>
             </data>
         	</field>
-       	</record>		
+       	</record>
+		<record id="metro_product_purchase_view" model="ir.ui.view">
+            <field name="name">metro_product_purchase_view</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
+            <field name="arch" type="xml">
+            <data>
+                <xpath expr="//div[@name='options']/label[@for='purchase_ok']" position="attributes">
+	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
+	            </xpath>
+	            <field name="purchase_ok" position="attributes">
+	            	<attribute name="groups">metro.group_data_maintain_manager</attribute>
+	            </field>
+            </data>
+        	</field>
+       	</record>       			
+		<record id="metro_product_procurement_view" model="ir.ui.view">
+            <field name="name">metro_product_procurement_view</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="arch" type="xml">
+            <data>
+	            <field name="active" position="attributes">
+	            	<attribute name="invisible">1</attribute>
+	            </field>
+            </data>
+        	</field>
+       	</record> 
 		
 		<record id="metro_product_stock_view" model="ir.ui.view">
             <field name="name">metro.product.normal.form</field>
