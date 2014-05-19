@@ -1352,3 +1352,12 @@ msgstr "出库"
 msgid "Supplier"
 msgstr "供应商"
 
+#. module: metro_stock
+#: view:material.request:0
+msgid "Are you sure you want to reopen this stock picking?"
+msgstr "确认重置此出入库单吗?"
+
+#. module: metro_stock
+#: view:material.request:0
+msgid "Reopen"
+msgstr "重置"

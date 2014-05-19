@@ -13,17 +13,17 @@ if dbname == 'metro_production':
 username = raw_input('Enter user name : ')
 pwd = raw_input('Enter password : ')
 '''
-#host = 'localhost'
-#port = '9069'
-#dbname = 'metro_0514'
-#username = 'erpadmin'
-#pwd = 'develop'
-
-host = '10.1.1.140'
-port = '80'
-dbname = 'metro_production'
+host = 'localhost'
+port = '9069'
+dbname = 'metro_0514'
 username = 'erpadmin'
-pwd = 'erp123'
+pwd = 'develop'
+
+#host = '10.1.1.140'
+#port = '80'
+#dbname = 'metro_production'
+#username = 'erpadmin'
+#pwd = 'erp123'
 
 #host = '10.1.1.141'
 #port = '80'
@@ -34,12 +34,13 @@ pwd = 'erp123'
 sock_common = xmlrpclib.ServerProxy ('http://%s:%s/xmlrpc/common'%(host,port))
 uid = sock_common.login(dbname, username, pwd)
 sock = xmlrpclib.ServerProxy('http://%s:%s/xmlrpc/object'%(host,port))
-product_code = ['113353-1',
+product_code = ['112144-1',
 ]
 for code in product_code:
     new_uom_categ_id = sock.execute(dbname, uid, pwd, 'product.uom.categ', 'create', {'name':'MSP_%s'%code})
+    #Meter
     uom_data = {
-        'name':'BaseUnit',
+        'name':'Meter',
         'category_id':new_uom_categ_id,
         'factor':1,
         'rounding': 0.0001,
@@ -47,5 +48,14 @@ for code in product_code:
 #        'active': 1,
     }
     sock.execute(dbname, uid, pwd, 'product.uom', 'create', uom_data)
+    #Tons
+    uom_data = {
+        'name':'Ton',
+        'category_id':new_uom_categ_id,
+        'factor':1,
+        'rounding': 0.0001,
+        'uom_type': 'bigger',
+    }
+    sock.execute(dbname, uid, pwd, 'product.uom', 'create', uom_data)    
     print 'Created UOM for %s'%code
 print 'done...'

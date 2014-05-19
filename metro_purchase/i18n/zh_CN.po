@@ -1777,3 +1777,13 @@ msgstr "预计日期"
 #: view:purchase.order:0
 msgid "Update UOM"
 msgstr "更新单位"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Are you sure you want to cancel this purchase order with exception?"
+msgstr "确认异常取消此采购单吗?"
+
+#. module: metro_purchase
+#: view:purchase.order:0
+msgid "Are you sure you want to make this purchase order done manually?"
+msgstr "确认手动完成此采购单吗?"
