@@ -27,27 +27,48 @@ import openerp.addons.decimal_precision as dp
 
 class product_supplierinfo(osv.osv):
     _inherit = 'product.supplierinfo'
+
+    def _calc_products(self, cr, uid, ids, field_names, arg, context=None):
+        result = {}
+        prod_obj = self.pool.get('product.product')
+        for supplier_info in self.browse(cr, uid, ids, context=context):
+            result[supplier_info.id] = {}.fromkeys(field_names, 0.0)
+            prod_ids = prod_obj.search(cr, uid, [('product_tmpl_id','=',supplier_info.product_id.id)],context=context)
+            if len(prod_ids) > 0:
+                result[supplier_info.id]['product_product_id'] = prod_ids[0]
+            
+        return result    
+    def _get_product_tmpl_id(self, cr, uid, product_id, context=None):
+        if not product_id:
+            return False
+        prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
+        return prod.product_tmpl_id.id
+        
+    def _product_product_write(self, cr, uid, id, name, value, arg, context=None):
+        if not value:
+            return
+        prod_tmpl_id = self._get_product_tmpl_id(cr,uid,value,context=context)
+        return self.write(cr, uid, id, {'product_id': prod_tmpl_id}, context=context)
     
-    def _product_available(self, cr, uid, ids, field_names=None, arg=False, context=None):
-        if not field_names:
-            field_names = []
-        if context is None:
-            context = {}
-        res = {}
-        for id in ids:
-            res[id] = {}.fromkeys(field_names, 0.0)
-            supplier_info = self.browse(cr, uid, id)
-            for f in field_names:
-                if f == 'qty_available':
-                    res[id][f] = supplier_info.product_id.qty_available
-                if f == 'virtual_available':
-                    res[id][f] = supplier_info.product_id.virtual_available
-        return res
+    def create(self, cr, uid, data, context=None):
+        if 'product_product_id' in data and data['product_product_id'] > 0:
+            data['product_id'] = self._get_product_tmpl_id(cr, uid, data['product_product_id'], context=context)
+        return super(product_supplierinfo, self).create(cr, uid, data, context)
+            
+    def onchange_product_product_id(self, cr, uid, ids, product_product_id, context=None):
+        prod = self.pool.get('product.product').browse(cr, uid, product_product_id, context=context)
+        return {'value': {'product_id': prod.product_tmpl_id.id}}
     
     _columns={
-        'product_id' : fields.many2one('product.product', 'Product', select=1, ondelete='cascade', required=True),
-        'qty_available' : fields.function(_product_available,multi='qty_available',type='float',digits_compute=dp.get_precision('Product Unit of Measure'),string="Quantity On Hand"),
-        'virtual_available' : fields.function(_product_available,multi='qty_available',type='float', digits_compute=dp.get_precision('Product Unit of Measure'),string="Forecasted Quantity"),
+        'product_id' : fields.many2one('product.template', 'Product', select=1, ondelete='cascade', required=True),
+        'product_product_id' : fields.function(_calc_products, type='many2one', relation='product.product', 
+                                               string='Product', multi="product_info", store=True,fnct_inv=_product_product_write,),
+        'product_product_default_code' : fields.related('product_product_id','default_code',type='char',string='Default Code'),
+        'product_product_cn_name' : fields.related('product_product_id','cn_name',type='char',string='Chinese Name'),
+        'qty_available' : fields.related('product_product_id','qty_available',type='float',string='Quantity On Hand'),
+        'virtual_available' : fields.related('product_product_id','virtual_available',type='float',string='Forecasted Quantity'),
+        'min_qty': fields.float('Minimal Quantity', required=True, digits_compute=dp.get_precision('Product Unit of Measure'), 
+                                help="The minimal quantity to purchase to this supplier, expressed in the supplier Product Unit of Measure if not empty, in the default unit of measure of the product otherwise."),
     }
 product_supplierinfo()
 
