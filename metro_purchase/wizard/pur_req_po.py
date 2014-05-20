@@ -65,7 +65,7 @@ class pur_req_po_line(osv.osv_memory):
     def _update_prod_supplier(self,cr,uid,ids,vals,context=None):
         if vals.has_key('supplier_prod_name') or vals.has_key('supplier_prod_code') or vals.has_key('supplier_delay'):
             prod_supp_obj = self.pool.get('product.supplierinfo')
-            new_vals = {'min_qty':1}
+            new_vals = {'min_qty':0}
             if vals.has_key('supplier_prod_name'):
                 new_vals.update({'product_name':vals['supplier_prod_name']})
             if vals.has_key('supplier_prod_code'):
