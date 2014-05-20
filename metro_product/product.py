@@ -312,6 +312,9 @@ class product_product(osv.osv):
 
 		result = []
 		for product in self.browse(cr, user, ids, context=context):
+			if product.id <= 0:
+				result.append((product.id,''))
+				continue
 			sellers = filter(lambda x: x.name.id == partner_id, product.seller_ids)
 			if sellers:
 				for s in sellers:
