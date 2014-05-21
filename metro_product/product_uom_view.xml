@@ -65,5 +65,21 @@
             </data>
             </field>
 		</record> 
+		
+        <record id="product_uom_measure_search_view" model="ir.ui.view">
+            <field name="name">product_uom_measure_search_view</field>
+            <field name="model">product.uom</field>
+            <field name="arch" type="xml">
+                <search string="Product UOM">
+                   <field name="name"/>
+                   <field name="category_id"/>
+                </search>
+            </field>
+        </record>
+        		
+        <record id="product.product_uom_form_action" model="ir.actions.act_window">
+        	<field name="search_view_id" ref="product_uom_measure_search_view"/>
+        </record>
+        		
 	</data>		    
 </openerp>	
