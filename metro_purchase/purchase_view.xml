@@ -151,8 +151,8 @@
                  	<button name="button_update_uom" states="draft,rejected" string="Update UOM" type="object"/>
                 </xpath>     
                 <xpath expr="//tree/field[@name='price_unit']" position="after">
-                	<field name="product_uom_base"/>
                 	<field name="product_uom_base_qty"/>
+                	<field name="product_uom_base"/>
                 </xpath>			              
        		</field>
         </record>  
