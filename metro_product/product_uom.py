@@ -462,7 +462,7 @@ class product_uom(osv.osv):
                     check_ids.add(uom.id)
         if 'factor' in vals:
             for uom in self.browse(cr, uid, ids, context=context):
-                if not float_is_zero(uom.factor-vals['factor'], uom.rounding):
+                if not float_is_zero(uom.factor-vals['factor'], precision_rounding=uom.rounding):
                     check_ids.add(uom.id)                                        
         if len(check_ids) > 0 and self.has_related_data(cr, uid, ids, context):                    
             raise osv.except_osv(_('Warning!'),_("There are related business data with '%s', cannot change the Category,Type or Ratio.") % (uom.name,))
