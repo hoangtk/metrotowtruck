@@ -268,6 +268,8 @@ class stock_move(osv.osv):
                 "backorder. Changing this quantity on assigned moves affects "
                 "the product reservation, and should be done with care."
         ),                
+        'product_uom_base': fields.related('purchase_line_id','product_uom_base',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
+        'product_uom_base_qty': fields.related('purchase_line_id','product_uom_base_qty',type='float',digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity',readonly=True),
         
     }
 
