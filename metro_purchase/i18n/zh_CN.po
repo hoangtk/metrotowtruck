@@ -1296,6 +1296,21 @@ msgstr "已拒绝"
 msgid "Reject"
 msgstr "拒绝"
 
+#. module: metro_purchase
+#: field:purchase.order.line,product_uom_base:0
+msgid "Base UOM"
+msgstr "基本单位"
+
+#. module: metro_purchase
+#: field:purchase.order.line,product_uom_base_qty:0
+msgid "Base Quantity"
+msgstr "基本数量"
+
+#. module: purchase
+#: field:purchase.order.line,price_subtotal_withtax:0
+msgid "Subtotal"
+msgstr "小计"
+
 #==================added manually - begin ==================#
 #. module: metro_purchase
 #: field:purchase.order,notes:0
@@ -1787,3 +1802,8 @@ msgstr "确认异常取消此采购单吗?"
 #: view:purchase.order:0
 msgid "Are you sure you want to make this purchase order done manually?"
 msgstr "确认手动完成此采购单吗?"
+
+#. module: purchase
+#: field:purchase.order.line,product_uom:0
+msgid "Product Unit of Measure"
+msgstr "单位"

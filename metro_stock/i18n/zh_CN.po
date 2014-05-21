@@ -1174,6 +1174,17 @@ msgstr "e.g. PO0032"
 msgid "Product Code"
 msgstr "产品编码"
 
+
+#. module: metro_stock
+#: field:stock.move,product_uom_base:0
+msgid "Base UOM"
+msgstr "基本单位"
+
+#. module: metro_stock
+#: field:stock.move,product_uom_base_qty:0
+msgid "Base Quantity"
+msgstr "基本数量"
+
 ########################manual########################
 #. module: stock
 #: view:stock.picking:0

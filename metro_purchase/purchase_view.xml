@@ -149,7 +149,11 @@
 				</xpath>           
                  <xpath expr="//button[@name='action_cancel']" position="before" >
                  	<button name="button_update_uom" states="draft,rejected" string="Update UOM" type="object"/>
-                </xpath>				              
+                </xpath>     
+                <xpath expr="//tree/field[@name='price_unit']" position="after">
+                	<field name="product_uom_base_qty"/>
+                	<field name="product_uom_base"/>
+                </xpath>			              
        		</field>
         </record>  
           
@@ -191,6 +195,10 @@
                 </field>
                 <field name="product_uom" position="attributes">
                 	<attribute name="attrs">{'readonly':1}</attribute>
+                </field>
+                <field name="price_unit" position="after">
+                	<field name="product_uom_base_qty"/>
+                	<field name="product_uom_base"/>
                 </field>
             </field>
         </record>

@@ -582,6 +582,10 @@
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
             	</field>
+            	<field name="product_uom" position="after">
+            		<field name="product_uom_base_qty"/>
+            		<field name="product_uom_base"/>
+            	</field>
             	<field name="state" position="before">
             		<field name="date"/>
             	</field>
@@ -601,6 +605,10 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            	</field>
+            	<field name="product_uom" position="after">
+            		<field name="product_uom_base_qty"/>
+            		<field name="product_uom_base"/>
             	</field>
             	<field name="date_expected" position="after">
             		<field name="purchase_line_id"/>
@@ -625,6 +633,10 @@
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
             	</field>
+            	<field name="product_uom" position="after">
+            		<field name="product_uom_base_qty"/>
+            		<field name="product_uom_base"/>
+            	</field>
             </field>
         </record>		
                 
@@ -642,6 +654,13 @@
             	<field name="date_expected" position="attributes">
             		<attribute name="widget">date</attribute>
             	</field>
+            	<field name="product_qty" position="after">
+            		<field name="return_qty"/>
+            	</field>
+            	<field name="product_uom" position="after">
+            		<field name="product_uom_base_qty"/>
+            		<field name="product_uom_base"/>
+            	</field>
             </field>
         </record>                 
                 
@@ -655,6 +674,10 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            	</field>
+            	<field name="product_uom" position="after">
+            		<field name="product_uom_base_qty"/>
+            		<field name="product_uom_base"/>
             	</field>
             	<field name="date" position="replace">
             		<field name="date"/>

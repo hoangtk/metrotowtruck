@@ -613,6 +613,7 @@ class purchase_order_line(osv.osv):
         result = {}
         for id in ids:
             result[id] = {'receive_qty':0,'return_qty':0,'can_change_price':True,'can_change_product':True}
+        uom_obj = self.pool.get("product.uom")
         for line in self.browse(cr,uid,ids,context=context):
             rec_qty = 0
             return_qty = 0
@@ -638,8 +639,15 @@ class purchase_order_line(osv.osv):
                     #if there are done invoices, then can not change price
                     if can_change_price and (inv_line.invoice_id.state == 'paid' or len(inv_line.invoice_id.payment_ids) > 0):
                         can_change_price = False
-                    
-            result[line.id].update({'receive_qty':rec_qty,'return_qty':return_qty,'invoice_qty':invoice_qty,'can_change_price':can_change_price,'can_change_product':can_change_product})
+            product_uom_base_qty = line.product_qty
+            if line.product_uom.id != line.product_id.uom_id.id:
+                product_uom_base_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom, line.product_qty, line.product_id.uom_id)
+            result[line.id].update({'receive_qty':rec_qty,
+                                    'return_qty':return_qty,
+                                    'invoice_qty':invoice_qty,
+                                    'can_change_price':can_change_price,
+                                    'can_change_product':can_change_product,
+                                    'product_uom_base_qty':product_uom_base_qty,})
         return result
     def _amount_line(self, cr, uid, ids, prop, arg, context=None):
         res = {}    
@@ -652,7 +660,8 @@ class purchase_order_line(osv.osv):
             cur = line.order_id.pricelist_id.currency_id
             res[line.id]['price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])
             res[line.id]['price_subtotal_withtax'] = cur_obj.round(cr, uid, cur, line.price_unit*line.product_qty)
-        return res                
+        return res
+ 
     _columns = {
         'po_notes': fields.related('order_id','notes',string='Terms and Conditions',readonly=True,type="text"),
         'payment_term_id': fields.related('order_id','payment_term_id',string='Payment Term',readonly=True,type="many2one", relation="account.payment.term"),
@@ -669,13 +678,15 @@ class purchase_order_line(osv.osv):
         'supplier_prod_name': fields.function(_get_supp_prod, type='char', string='Supplier Product Name', required=True, multi="seller_info"),
         'supplier_prod_code': fields.function(_get_supp_prod, type='char', string='Supplier Product Code', multi="seller_info"),
         'supplier_delay' : fields.function(_get_supp_prod, type='integer', string='Supplier Lead Time', multi="seller_info"),
-        'receive_qty' : fields.function(_get_rec_info, type='integer', string='Received Quantity', multi="rec_info"),
-        'return_qty' : fields.function(_get_rec_info, type='integer', string='Returned Quantity', multi="rec_info"),
+        'receive_qty' : fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Received Quantity', multi="rec_info"),
+        'return_qty' : fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Returned Quantity', multi="rec_info"),
         'can_change_price' : fields.function(_get_rec_info, type='boolean', string='Can Change Price', multi="rec_info"),
         'can_change_product' : fields.function(_get_rec_info, type='boolean', string='Can Change Product', multi="rec_info"),
-        'invoice_qty' : fields.function(_get_rec_info, type='integer', string='Invoice Quantity', multi="rec_info"),
+        'invoice_qty' : fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Invoice Quantity', multi="rec_info"),
         'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
         'price_subtotal_withtax': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
+        'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
+        'product_uom_base_qty': fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity', multi="rec_info"),        
     }  
     _order = "order_id desc"
     _defaults = {
