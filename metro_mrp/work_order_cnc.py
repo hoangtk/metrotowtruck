@@ -117,13 +117,13 @@ class work_order_cnc_line(osv.osv):
     }
     def _check_size(self,cr,uid,ids,context=None):
         for record in self.browse(cr, uid, ids, context=context):
-            if record.state == 'draft' and (record.plate_length <= 0 or record.plate_width <= 0 or record.plate_height <= 0 or record.percent_usage <= 0):
-                raise osv.except_osv(_('Error'), _('The Length/Width/Height/UsagePercent must be larger than zero\n %s.')% (record.file_name,))
+            if record.state == 'draft' and (record.plate_length <= 0 or record.plate_width <= 0 or record.plate_height <= 0 or record.percent_usage <= 0 or record.percent_usage_theory <= 0):
+                raise osv.except_osv(_('Error'), _('The "Length/Width/Height/Usage Percent in Theory/Usage Percent of Manufacture" must be larger than zero\n %s.')% (record.file_name,))
         return True
     _constraints = [
         (_check_size,
             'You must assign a serial number for this product.',
-            ['plate_length','plate_width','plate_height']),]
+            ['plate_length','plate_width','plate_height','percent_usage','percent_usage_theory']),]
                         
     def action_done(self, cr, uid, ids, context=None):
         #set the done data
