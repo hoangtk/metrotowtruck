@@ -5,7 +5,7 @@
     	<field name="name">view_sale_product_form</field>
     	<field name="model">sale.product</field>
     	<field name="arch" type="xml">
-            <tree string="Sale Product IDs" editable="bottom">
+            <tree string="Sale Product IDs" editable="top">
                 <field name="name"/>
                 <field name="note"/>
                 <field name="create_uid"/>
