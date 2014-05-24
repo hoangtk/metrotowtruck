@@ -10,6 +10,7 @@
                 <field name="note"/>
                 <field name="create_uid"/>
                 <field name="create_date"/>
+                <field name="active" groups="mrp.group_mrp_manager"/>
             </tree>    	
     	</field>
     </record>

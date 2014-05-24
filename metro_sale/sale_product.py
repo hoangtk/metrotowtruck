@@ -10,10 +10,12 @@ class sale_product(osv.osv):
         'note': fields.char('Description', size=128, required=False),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the product without removing it."),
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
     ]
+    _defaults = {'active':True}
     def write(self, cr, uid, ids, vals, context=None):
         if context is None:
             context = {}
