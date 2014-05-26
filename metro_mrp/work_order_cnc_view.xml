@@ -30,7 +30,7 @@
     					</group>
     				</group>
     				<field name="wo_cnc_lines">
-	                    <tree string="Work Items" editable="bottom">
+	                    <tree string="Work Items" editable="top">
 	                        <field name="file_name"/>
 	                        <field name="plate_length"/>
 	                        <field name="plate_width" />

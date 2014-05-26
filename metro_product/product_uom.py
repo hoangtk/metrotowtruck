@@ -392,14 +392,6 @@ class product_uom(osv.osv):
                 union \
                 select 1 as flag from procurement_order where product_uos=%s \
                 union \
-                select 1 as flag from product_template where uom_id=%s \
-                union \
-                select 1 as flag from product_template where uom_po_id=%s \
-                union \
-                select 1 as flag from product_template where uos_id=%s \
-                union \
-                select 1 as flag from project_config_settings where time_unit=%s \
-                union \
                 select 1 as flag from pur_history_line where product_uom=%s \
                 union \
                 select 1 as flag from pur_invoice_line where product_uom_id=%s \
@@ -409,8 +401,6 @@ class product_uom(osv.osv):
                 select 1 as flag from pur_req_po_line where product_uom_id=%s \
                 union \
                 select 1 as flag from purchase_order_line where product_uom=%s \
-                union \
-                select 1 as flag from res_company where project_time_mode_id=%s \
                 union \
                 select 1 as flag from sale_config_settings where time_unit=%s \
                 union \
@@ -440,7 +430,7 @@ class product_uom(osv.osv):
                 limit 1 \
                 '                
         for id in ids:
-            id_params = [id for i in range(35)]
+            id_params = [id for i in range(30)]
             cr.execute(sql, id_params)
             res = cr.fetchone()
             found_id = res and res[0] or False
