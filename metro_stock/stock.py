@@ -248,8 +248,12 @@ class stock_move(osv.osv):
                         and rec.location_dest_id.id == m.location_id.id \
                         and rec.location_id.id == m.location_dest_id.id:
                         return_qty += (rec.product_qty * rec.product_uom.factor)
-                    
-            result[m.id].update({'return_qty':return_qty,})
+            #calculate the product base uom quantity
+            product_uom_base_qty = m.product_qty
+            if m.product_uom.id != m.product_id.uom_id.id:
+                product_uom_base_qty = self.pool.get('product.uom')._compute_qty_obj(cr, uid, m.product_uom, m.product_qty, m.product_id.uom_id)
+            
+            result[m.id].update({'return_qty':return_qty,'product_uom_base_qty':product_uom_base_qty})
         return result    
     _columns = {
         'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Return')], string='Shipping Type'),
@@ -268,8 +272,8 @@ class stock_move(osv.osv):
                 "backorder. Changing this quantity on assigned moves affects "
                 "the product reservation, and should be done with care."
         ),                
-        'product_uom_base': fields.related('purchase_line_id','product_uom_base',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
-        'product_uom_base_qty': fields.related('purchase_line_id','product_uom_base_qty',type='float',digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity',readonly=True),
+        'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
+        'product_uom_base_qty': fields.function(_get_rec_info, type='float', string='Base Quantity', multi="rec_info", digits_compute=dp.get_precision('Product Unit of Measure'),readonly=True),
         
     }
 

@@ -44,7 +44,7 @@ class product_product(osv.osv):
         'measure_type': fields.selection([('single', 'Single Unit'), ('mmp', 'Multi Units Multi Products'), ('msp', 'Multi Units Single Product')], 
 										string='Measure Type', required=True, write=['metro.group_data_maintain'], read=['base.group_user'], track_visibility='onchange'),
 		'uom_categ_id': fields.many2one('product.uom.categ','UOM Category', required=True, write=['metro.group_data_maintain'], read=['base.group_user'], track_visibility='onchange'),
-		'uom_po_price': fields.float('Purchase Unit Price', track_visibility='onchange'),
+		'uom_po_price': fields.float('Purchase Unit Price', track_visibility='onchange',digits_compute=dp.get_precision('Product Unit of Measure')),
 		'uom_po_factor': fields.related('uom_po_id','factor_display',type='float',digits=(12,4),string='UOM Ratio',readonly=True)		
 #		'msp_uom_list': fields.one2many('product.uom','product_id',string='Units of Measure'),
         }
