@@ -46,7 +46,8 @@ class winpdb_debugger_wizard(osv.osv_memory):
     _name = 'winpdb.debugger.wizard'
 
     def action_start_debugger(self, cr, uid, data, context):
-        rpdb2.start_embedded_debugger(config['admin_passwd'])
+        #rpdb2.start_embedded_debugger(config['admin_passwd'])
+        rpdb2.start_embedded_debugger(config['admin_passwd'],fAllowUnencrypted=True,fAllowRemote=True)
         return{}
 
 
