@@ -48,6 +48,8 @@
                 <field name="category_id" position="after">
                     <field name="uom_type"/>
                     <field name="factor_display"/>
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
                 </field>
             </data>
             </field>
@@ -61,6 +63,10 @@
             <data>
                 <field name="category_id" position="attributes">
                     <attribute name="invisible">context.get('force_categ')</attribute>
+                </field>
+                <field name="rounding" position="after">
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
                 </field>
             </data>
             </field>

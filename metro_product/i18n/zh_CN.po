@@ -117,6 +117,7 @@ msgstr "product.sequence"
 #. module: metro_product
 #: model:ir.model.fields,field_description:metro_product.field_product_product_create_date
 #: field:product.product,create_date:0
+#: field:product.uom,create_date:0
 msgid "Creation Date"
 msgstr "创建日期"
 
@@ -306,6 +307,7 @@ msgstr "Suffix"
 #. module: metro_product
 #: model:ir.model.fields,field_description:metro_product.field_product_product_create_uid
 #: field:product.product,create_uid:0
+#: field:product.uom,create_uid:0
 msgid "Creator"
 msgstr "创建人"
 
