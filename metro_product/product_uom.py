@@ -361,7 +361,9 @@ class product_uom(osv.osv):
                 res[uom.id] = uom.factor
         return res    
     _columns = {
-            'factor_display': fields.function(_factor_display, digits=(12,4),string='Ratio',),            
+            'factor_display': fields.function(_factor_display, digits=(12,4),string='Ratio',),
+            'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+            'create_date': fields.datetime('Creation Date', readonly=True, select=True),
             }   
     _defaults = {
         'rounding': 0.0001,
@@ -438,6 +440,14 @@ class product_uom(osv.osv):
                 return True
                 
         return False    
+    def create(self, cr, uid, vals, context=None):
+        #check the duplicated name under same category
+        if 'name' in vals and 'category_id' in vals:
+            exist_ids = self.search(cr, uid, [('name','=',vals['name']),('category_id','=',vals['category_id'])])
+            if len(exist_ids) > 0:
+                raise osv.except_osv(_('Error'),_("Dupliated UOM name of same category"))
+        return super(product_uom, self).create(cr, uid, vals, context=context)
+        
     def write(self, cr, uid, ids, vals, context=None):
         if isinstance(ids, (int, long)):
               ids = [ids]        
@@ -456,6 +466,23 @@ class product_uom(osv.osv):
                     check_ids.add(uom.id)                                        
         if len(check_ids) > 0 and self.has_related_data(cr, uid, ids, context):                    
             raise osv.except_osv(_('Warning!'),_("There are related business data with '%s', cannot change the Category,Type or Ratio.") % (uom.name,))
+        #check the duplicated name under same category
+        if 'name' in vals or 'category_id' in vals:
+            id = ids[0]
+            uom = self.browse(cr, uid, id, context=context)
+            domain = [('id','!=',id)]
+            if 'name' not in vals:
+                domain.append(('name','=',uom.name))
+            else:
+                domain.append(('name','=',vals['name']))
+            if 'category_id' not in vals:
+                domain.append(('category_id','=',uom.category_id.id))
+            else:
+                domain.append(('category_id','=',vals['category_id']))
+                
+            exist_ids = self.search(cr, uid, domain)
+            if len(exist_ids) > 0:
+                raise osv.except_osv(_('Error'),_("Dupliated UOM name of same category"))
         return super(product_uom, self).write(cr, uid, ids, vals, context=context) 
 	
 from openerp.addons.product import product	
