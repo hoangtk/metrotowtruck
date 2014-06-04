@@ -16,6 +16,7 @@ class sale_product(osv.osv):
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
     ]
     _defaults = {'active':True}
+    _order = 'id desc'
     def write(self, cr, uid, ids, vals, context=None):
         if context is None:
             context = {}
