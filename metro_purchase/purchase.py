@@ -621,6 +621,8 @@ class purchase_order_line(osv.osv):
             can_change_price = True
             can_change_product = True
             if line.move_ids:
+                #once there are moving, then can not change product, 06/07/2014 by johnw
+                can_change_product = False
                 for move in line.move_ids:
                     if move.state == 'done':
                         if move.type == 'in':
@@ -628,13 +630,15 @@ class purchase_order_line(osv.osv):
                         if move.type == 'out':
                             return_qty += move.product_qty
                 #if there are products received then can not change product
-                if rec_qty - return_qty > 0:
-                    can_change_product = False
+#                if rec_qty - return_qty > 0:
+#                    can_change_product = False
             if line.invoice_lines:
+                #once there are invoice lines, then can not change product, 06/07/2014 by johnw
+                can_change_product = False
                 for inv_line in line.invoice_lines:
                     #if there are uncanceled invoices, then can not change product
                     if inv_line.invoice_id.state != 'cancel':
-                        can_change_product = False
+#                        can_change_product = False
                         invoice_qty += inv_line.quantity
                     #if there are done invoices, then can not change price
                     if can_change_price and (inv_line.invoice_id.state == 'paid' or len(inv_line.invoice_id.payment_ids) > 0):
