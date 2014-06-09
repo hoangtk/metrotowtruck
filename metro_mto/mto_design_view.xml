@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  product_custom_attributes for OpenERP
+  Copyright (C) 2011-2013 Akretion (http://www.akretion.com/)
+  @author: Benoît GUILLOT <benoit.guillot@akretion.com>
+  The licence is in the file __openerp__.py
+-->
+
+<openerp>
+    <data>
+<!--  product designment -->
+        <record id="mto_design_search_view" model="ir.ui.view">
+            <field name="name">mto.design.search</field>
+            <field name="model">mto.design</field>
+            <field name="arch" type="xml">
+                <search string="Product">
+                   <field name="name" string="Designment"/>
+                   <field name="design_tmpl_id" string="Template"/>
+                   <group  expand='0' string='Group by...'>
+                       <filter string='Template' icon="terp-stock_symbol-selection" domain="[]" context="{'group_by' : 'design_tmpl_id'}"/>
+                   </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="mto_design_tree_view" model="ir.ui.view">
+            <field name="name">mto.design.tree</field>
+            <field name="model">mto.design</field>
+            <field name="arch" type="xml">
+                <tree string="Design" editable="top">
+                    <field name="name"/>
+                    <field name="design_tmpl_id" on_change="onchange_template(design_tmpl_id, context)"/>
+                    <field name="list_price"/>
+                    <field name="weight" string="Weight(kg)"/>
+					<button name="open_designment" string="Open Designment" type="object" icon="gtk-preferences"/>
+                    <field name="company_id" groups="base.group_multi_company" invisible="1"/>                    
+                </tree>
+            </field>
+        </record>
+
+        <record id="mto_design_form_view" model="ir.ui.view">
+            <field name="name">mto.design.form</field>
+            <field name="model">mto.design</field>
+            <field name="arch" type="xml">
+                <form string="Designment" version="7.0">
+                	<sheet>
+                   	<group>
+                   		<group>
+	                    	<field name="name"/>
+	                    	<field name="design_tmpl_id"/>
+                    	</group>
+                    	<group>
+	                    	<field name="list_price" string="Price"/>
+	                    	<field name="weight" string="Weight(kg)"/>
+                    	</group>
+                   	</group>
+                    <notebook string="attributes_notebook">
+                    	<separator name="attributes_placeholder" invisible="1"/> 
+                        <page string="Description">
+                        	<field name="description" placeholder="describe the designment characteristics..."/>
+                        </page>
+	                    <page string="Images">
+	                        <field name="multi_images" widget="image_multi"/>
+	                    </page>
+	                    <page string="Attachment">
+	                        <field name="attachment_lines" nolabel="1" colspan="4"
+	                                context="{'o2m_attach': True}">
+	                           <tree string="Attachment">
+	                                <field name="name"/>
+	                                <field name="attach_type_id"/>
+	                                <field name="create_uid"/>
+	                                <field name="create_date"/>
+	                            </tree>
+	                        </field>
+	                    </page>	                                                  		
+                    </notebook>
+                    <footer>
+                        <button name="save_and_close_design" string="Save and Close" type="object" class="oe_highlight"/>
+                        or
+                        <button special="cancel" string="Cancel" class="oe_link"/>
+                    </footer>     
+                    </sheet>        		  
+                </form>
+            </field>
+        </record>
+        
+        <record id="mto_design_form_action" model="ir.actions.act_window">
+            <field name="name">Designments</field>
+            <field name="res_model">mto.design</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="search_view_id" ref="mto_design_search_view"/>
+        </record>
+                
+         <menuitem
+             action="mto_design_form_action" id="menu_mto_design_form"
+             parent="metro_mto.menu_mto_design" sequence="1"/>            
+    </data>
+</openerp>
