@@ -426,7 +426,9 @@ class product_template(osv.osv):
 		'state': fields.selection([('draft', 'In Development'),
 			('sellable','Normal'),
 			('end','End of Lifecycle'),
-			('obsolete','Obsolete')], 'Status', track_visibility='onchange'),          
+			('obsolete','Obsolete')], 'Status', track_visibility='onchange'), 
+		'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Base price to compute the customer price. Sometimes called the catalog price."),
+		'standard_price': fields.float('Cost', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Cost price of the product used for standard stock valuation in accounting and used as a base price on purchase orders.", groups="base.group_user"),			     
         }
 
 	_defaults = {
