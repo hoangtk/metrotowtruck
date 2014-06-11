@@ -18,3 +18,6 @@ _process_job()中取现在时间应该改为utc时间,否则会造成下次运行时间不对
 5.Solve the from and login email user variance issue
 enhance the mail sending logic, to handle the login and from address not mathcing issue
 if from and login user is different, then to try to send using smtp_user again
+
+6.mail_mail.py
+line#304, add 'raise e' to thow the exception to user
