@@ -306,6 +306,9 @@ class product_product(osv.osv):
 				name = '%s, %s' % (name,cn_name)
 			if d.get('variants'):
 				name = name + ' - %s' % (d['variants'],)
+			if d.get('mfg_standard'):
+				name = name + '[%s]' % (d['mfg_standard'],)
+				
 			return (d['id'], name)
 
 		partner_id = context.get('partner_id', False)
@@ -323,7 +326,8 @@ class product_product(osv.osv):
 							  'name': s.product_name or product.name,
 							  'cn_name': product.cn_name,
 							  'default_code': s.product_code or product.default_code,
-							  'variants': product.variants
+							  'variants': product.variants,
+							  'mfg_standard': product.mfg_standard
 							  }
 					result.append(_name_get(mydict))
 			else:
@@ -332,7 +336,8 @@ class product_product(osv.osv):
 						  'name': product.name,
 						  'cn_name': product.cn_name,
 						  'default_code': product.default_code,
-						  'variants': product.variants
+						  'variants': product.variants,
+						  'mfg_standard': product.mfg_standard
 						  }
 				result.append(_name_get(mydict))
 		return result	
