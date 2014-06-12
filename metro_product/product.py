@@ -306,6 +306,9 @@ class product_product(osv.osv):
 				name = '%s, %s' % (name,cn_name)
 			if d.get('variants'):
 				name = name + ' - %s' % (d['variants'],)
+			if d.get('mfg_standard'):
+				name = name + '[%s]' % (d['mfg_standard'],)
+				
 			return (d['id'], name)
 
 		partner_id = context.get('partner_id', False)
@@ -323,7 +326,8 @@ class product_product(osv.osv):
 							  'name': s.product_name or product.name,
 							  'cn_name': product.cn_name,
 							  'default_code': s.product_code or product.default_code,
-							  'variants': product.variants
+							  'variants': product.variants,
+							  'mfg_standard': product.mfg_standard
 							  }
 					result.append(_name_get(mydict))
 			else:
@@ -332,7 +336,8 @@ class product_product(osv.osv):
 						  'name': product.name,
 						  'cn_name': product.cn_name,
 						  'default_code': product.default_code,
-						  'variants': product.variants
+						  'variants': product.variants,
+						  'mfg_standard': product.mfg_standard
 						  }
 				result.append(_name_get(mydict))
 		return result	
@@ -426,7 +431,9 @@ class product_template(osv.osv):
 		'state': fields.selection([('draft', 'In Development'),
 			('sellable','Normal'),
 			('end','End of Lifecycle'),
-			('obsolete','Obsolete')], 'Status', track_visibility='onchange'),          
+			('obsolete','Obsolete')], 'Status', track_visibility='onchange'), 
+		'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Base price to compute the customer price. Sometimes called the catalog price."),
+		'standard_price': fields.float('Cost', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Cost price of the product used for standard stock valuation in accounting and used as a base price on purchase orders.", groups="base.group_user"),			     
         }
 
 	_defaults = {
