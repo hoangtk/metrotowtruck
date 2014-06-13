@@ -34,13 +34,14 @@ class material_request(osv.osv):
     _inherit = "stock.picking"
     _table = "stock_picking"
     _description = "Material Request"
-    _order = "name desc"    
+    _order = "name desc"        
+    
     _columns = {
         'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal'), ('mr', 'Material Request'), ('mrr', 'Material Return')], 
                                  'Request Type', required=True, select=True, readonly=True, states={'creating':[('readonly',False)]}),
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
-        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),        
+        'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
     }
     _defaults = {
         'type': 'mr',
@@ -336,9 +337,10 @@ def _set_maximum_date(self, cr, uid, ids, name, value, arg, context=None):
      
 class stock_picking(osv.osv):
     _inherit = "stock.picking" 
+        
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
-        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True), 
     }      
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
@@ -419,7 +421,8 @@ class stock_picking_out(osv.osv):
             domain=lambda self: [('model', '=', 'stock.picking')],
             auto_join=True,
             string='Messages',
-            help="Messages and communication history"),                   
+            help="Messages and communication history"), 
+        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),                  
     }            
     _order = 'name desc'  
             
@@ -437,7 +440,8 @@ class stock_picking_in(osv.osv):
             domain=lambda self: [('model', '=', 'stock.picking')],
             auto_join=True,
             string='Messages',
-            help="Messages and communication history"),                          
+            help="Messages and communication history"),
+        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),                          
     }     
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query

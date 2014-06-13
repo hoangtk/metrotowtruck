@@ -125,7 +125,14 @@ class product_product(osv.osv):
 		for id in ids:
 			rpc_res['%s'%id] = res[id]
 		return rpc_res
-			
+	def _product_partner_ref(self, cr, uid, ids, name, arg, context=None):
+		res = {}
+		if context is None:
+			context = {}
+		names = self.name_get(cr, uid, ids, context=context)
+		for name in names:
+			res[name[0]] = name[1]
+		return res			
 	_columns = {
 		'attribute_line' : fields.one2many('product.attribute.line', 'product_id','Attributes'),
 		'cn_name': fields.char(string=u'Chinese Name', size=128, track_visibility='onchange'),
@@ -137,6 +144,7 @@ class product_product(osv.osv):
 		'is_print_barcode': fields.boolean('Print barcode label'),
 		'mfg_standard': fields.char(string=u'Manufacture Standard', size=32, help="The manufacture standard name, like GB/T5782-86"),
 		'default_code' : fields.char('Internal Reference', size=64, select=True, required=True),
+		'partner_ref' : fields.function(_product_partner_ref, type='char', string='Customer ref'),
 		'qty_available': fields.function(stock_product._product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
 			string='Quantity On Hand',
