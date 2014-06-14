@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#    Copyright (C) 2010 OpenERP s.a. (<http://openerp.com>).
+#    Copyright (C) 2012-Today Acespritech Solutions Pvt Ltd
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,30 +18,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro Product Configuration',
-    'version': '1.0',
-    'category': 'Metro',
-    'description': """
-    
-        Metro Make to Order Extension
-        
-        """,
-        
-        
-    'author': 'Metro Tower Trucks',
-    'website': 'http://www.metrotowtrucks.com',
-    'depends': ["base_custom_attributes","base","product","multi_image"],
-    'data': [
-        'mto_sequence.xml',
-        'security/ir.model.access.csv',
-        'mto_attribute_view.xml',
-        'mto_design_view.xml',
-    ],
-    'test': [],
-    'demo': [],
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-}
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from openerp.osv import fields, osv
+
+
+class mto_design(osv.osv):
+    _inherit = "mto.design"
+    _columns = {
+        'attachment_lines': fields.one2many('ir.attachment', 'mto_design_id',
+                                            'Attachment'),
+    }
+mto_design()

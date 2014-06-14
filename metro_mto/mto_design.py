@@ -3,19 +3,24 @@ from osv import fields,osv,orm
 from openerp.tools import resolve_attr 
 from tools.translate import translate
 from lxml import etree
+import openerp.addons.decimal_precision as dp
 
 class mto_design(osv.osv):
     _name = "mto.design"
-    _inherits = {'product.product': 'product_id'}
     _columns = {
+        'name': fields.char('Configuration#', size=64,required=True,readonly=True),
+        'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), required=True),
+        'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Stock Weight')),
+        'description': fields.text('Description'),
+        'multi_images': fields.text("Multi Images"),
         'design_tmpl_id': fields.many2one('attribute.set', 'Template', domain=[('type','=','design')], required=True),
-        'product_id': fields.many2one('product.product', 'Product', required=True, ondelete="restrict", select=True),       
     }    
+    _defaults={'name':'/'}
     def _attr_grp_ids(self, cr, uid, ids, field_names, arg=None, context=None):
         res = {}
-        for product in self.browse(cr, uid, ids, context=context):
-            product_attr_groups = [ag.id for ag in product.design_tmpl_id.attribute_group_ids]
-            res[product.id] = product_attr_groups
+        for design in self.browse(cr, uid, ids, context=context):
+            design_attr_groups = [ag.id for ag in design.design_tmpl_id.attribute_group_ids]
+            res[design.id] = design_attr_groups
         return res
     
     def open_designment(self, cr, uid, ids, context=None):
@@ -95,6 +100,9 @@ class mto_design(osv.osv):
                 if attr.attribute_type == "select" and attr.standard_option_id:
                     data.update({attr.name:attr.standard_option_id.id})
 
+        if data.get('name','/')=='/':
+            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'mto.design') or '/'
+                        
         resu = super(mto_design, self).create(cr, uid, data, context)
         return resu
     def write(self, cr, uid, ids, vals, context=None):        
@@ -103,6 +111,8 @@ class mto_design(osv.osv):
         return resu
     def update_price(self, cr, uid, ids, context=None):
         #update the price and weight by  the selected options
+        if isinstance(ids,(int,long)):
+            ids = [ids] 
         designs = self.browse(cr, uid, ids, context=context)
         for design in designs:
             price_total = 0
@@ -119,7 +129,6 @@ class mto_design(osv.osv):
                         for opt in options:
                             price = price + resolve_attr(opt,'price')
                             weight = weight + resolve_attr(opt,'weight')
-                        print '111'
 #                    elif attr.attribute_type == "boolean":
 #                        is_selected = resolve_attr(design,attr.name)
 #                        if is_selected:
@@ -130,6 +139,7 @@ class mto_design(osv.osv):
                     weight_total = weight_total + weight
             price_total = design.design_tmpl_id.price_standard + price_total
             weight_total = design.design_tmpl_id.weight_standard + weight_total
-            cr.execute("""update product_template set
-                    list_price=%s, weight=%s where id=%s""", (price_total, weight_total, design.product_id.product_tmpl_id.id))
+            cr.execute("""update mto_design set
+                    list_price=%s, weight=%s where id=%s""", (price_total, weight_total, design.id))
+            
        

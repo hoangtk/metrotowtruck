@@ -33,7 +33,6 @@
                     <field name="list_price"/>
                     <field name="weight" string="Weight(kg)"/>
 					<button name="open_designment" string="Open Designment" type="object" icon="gtk-preferences"/>
-                    <field name="company_id" groups="base.group_multi_company" invisible="1"/>                    
                 </tree>
             </field>
         </record>
@@ -61,18 +60,7 @@
                         </page>
 	                    <page string="Images">
 	                        <field name="multi_images" widget="image_multi"/>
-	                    </page>
-	                    <page string="Attachment">
-	                        <field name="attachment_lines" nolabel="1" colspan="4"
-	                                context="{'o2m_attach': True}">
-	                           <tree string="Attachment">
-	                                <field name="name"/>
-	                                <field name="attach_type_id"/>
-	                                <field name="create_uid"/>
-	                                <field name="create_date"/>
-	                            </tree>
-	                        </field>
-	                    </page>	                                                  		
+	                    </page>                                               		
                     </notebook>
                     <footer>
                         <button name="save_and_close_design" string="Save and Close" type="object" class="oe_highlight"/>
