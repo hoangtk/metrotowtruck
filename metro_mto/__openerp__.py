@@ -35,7 +35,7 @@
     'depends': ["base_custom_attributes","base","product","multi_image","metro_attachment"],
     'data': [
         'security/ir.model.access.csv',
-        'mto_attr_view.xml',
+        'mto_attribute_view.xml',
         'mto_design_view.xml',
     ],
     'test': [],
