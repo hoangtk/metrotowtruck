@@ -24,10 +24,16 @@ from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import tools
 from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
-
+class account_move(osv.osv):
+    _inherit = "account.move"
+    _columns = {
+        'picking_id': fields.many2one('stock.picking', 'Picking to the move'),
+    }    
 class stock_picking(osv.osv):
     _inherit = "stock.picking"
-
+    _columns = {
+        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
+    }
     def do_partial(self, cr, uid, ids, partial_datas, context=None):
         """ Makes partial picking and moves done.
         @param partial_datas : Dictionary containing details of partial picking
@@ -361,13 +367,15 @@ class stock_move(osv.osv):
                                         {'journal_id': j_id, 
                                          'line_id': move_lines, 
                                          'ref': out_mov.picking_id and out_mov.picking_id.name,
+                                         'picking_id': move.picking_id.id
                                          })
             for j_id, move_lines in account_moves:
                 move_obj.create(cr, uid,
                         {
                          'journal_id': j_id,
                          'line_id': move_lines,
-                         'ref': move.picking_id and move.picking_id.name})
+                         'ref': move.picking_id and move.picking_id.name,
+                         'picking_id': move.picking_id.id})
 
     def action_done(self, cr, uid, ids, context=None):
         """ Makes the move done and if all moves are done, it will finish the picking.
