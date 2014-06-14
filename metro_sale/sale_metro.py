@@ -8,6 +8,7 @@ class SaleOrder(osv.osv):
     _name="sale.order"
     _columns={
         'checkbox':fields.boolean("Include Payment Information"),
+        'contact_log_ids': fields.many2many('contact.log', 'oppor_contact_log_rel','oppor_id','log_id',string='Contact Logs', )  
     }
     _defaults={'checkbox':True}
     def get_report_name(self, cr, uid, id, rpt_name, context=None):

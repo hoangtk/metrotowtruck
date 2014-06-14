@@ -9,6 +9,11 @@
             <field name="client_order_ref" position="after">
                 <field name="checkbox"/>
             </field>
+			<xpath expr="//page[@string='Other Information']" position="before">
+				<page name="contact_log" string="Contacts Log">
+					<field name="contact_log_ids" widget="one2many_list" context="{'op_name':name}"/>
+				</page>
+			</xpath>    
          </field>
        </record>  
        
