@@ -244,7 +244,6 @@ class work_order_cnc_line(osv.osv):
         wf_service.trg_validate(uid, 'stock.picking', mr_id, 'button_confirm', cr)
         
         #do auto receiving
-        '''
         partial_data = {
             'delivery_date' : time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         }
@@ -256,7 +255,6 @@ class work_order_cnc_line(osv.osv):
                 'prodlot_id': mr_line.prodlot_id.id,
             }
         self.pool.get('stock.picking').do_partial(cr, uid, [mr_id], partial_data, context=context)
-        '''           
             
     def _check_changing(self, cr, uid, ids, context=None):
         lines = self.read(cr, uid, ids, ['state','file_name'], context=context)
