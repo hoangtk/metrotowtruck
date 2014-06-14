@@ -8,13 +8,13 @@
 
 <openerp>
     <data>
-<!--  product designment -->
+<!--  product Configuration -->
         <record id="mto_design_search_view" model="ir.ui.view">
             <field name="name">mto.design.search</field>
             <field name="model">mto.design</field>
             <field name="arch" type="xml">
-                <search string="Product">
-                   <field name="name" string="Designment"/>
+                <search string="Configuration">
+                   <field name="name" string="Configuration"/>
                    <field name="design_tmpl_id" string="Template"/>
                    <group  expand='0' string='Group by...'>
                        <filter string='Template' icon="terp-stock_symbol-selection" domain="[]" context="{'group_by' : 'design_tmpl_id'}"/>
@@ -27,7 +27,7 @@
             <field name="name">mto.design.tree</field>
             <field name="model">mto.design</field>
             <field name="arch" type="xml">
-                <tree string="Design" editable="top">
+                <tree string="Configuration" editable="top">
                     <field name="name"/>
                     <field name="design_tmpl_id" on_change="onchange_template(design_tmpl_id, context)"/>
                     <field name="list_price"/>
@@ -42,7 +42,7 @@
             <field name="name">mto.design.form</field>
             <field name="model">mto.design</field>
             <field name="arch" type="xml">
-                <form string="Designment" version="7.0">
+                <form string="Configuration" version="7.0">
                 	<sheet>
                    	<group>
                    		<group>
@@ -85,7 +85,7 @@
         </record>
         
         <record id="mto_design_form_action" model="ir.actions.act_window">
-            <field name="name">Designments</field>
+            <field name="name">Configuration</field>
             <field name="res_model">mto.design</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree</field>

@@ -20,7 +20,7 @@
 #
 ##############################################################################
 {
-    'name': 'Metro MTO',
+    'name': 'Metro Product Configuration',
     'version': '1.0',
     'category': 'Metro',
     'description': """

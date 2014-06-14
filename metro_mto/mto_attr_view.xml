@@ -9,7 +9,7 @@
 <openerp>
     <data>
         <menuitem
-            id="menu_mto_design" name="Designment"
+            id="menu_mto_design" name="Product Configuration"
             parent="base.menu_product" sequence="22"/>            
             
 
@@ -20,7 +20,7 @@
             <field name="model">attribute.set</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <form string="Design Template">
+                <form string="Configuration Template">
                 	<group>
                 		<group>
 		                    <field name="name"/>
@@ -47,7 +47,7 @@
             <field name="model">attribute.set</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <tree string="Design Template" >
+                <tree string="Configuration Template" >
                     <field name="name" />
                     <field name="price_standard" />
                     <field name="currency_id" />
@@ -62,14 +62,14 @@
             <field name="model">attribute.set</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <search string="Search Design Templates">
+                <search string="Search Configuration Templates">
                     <field name="name"/>
                </search>
             </field>
         </record>
 
         <record id="design_template_form_action" model="ir.actions.act_window">
-            <field name="name">Design Template</field>
+            <field name="name">Configuration Template</field>
             <field name="res_model">attribute.set</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
@@ -123,7 +123,7 @@
             <field name="model">attribute.group</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <tree string="Attribute Group">
+                <tree string="Parameter Group">
                     <field name="name" />
                     <field name="sequence" />
                     <field name="attribute_set_id" invisible="context.get('from_attribute_set')"/>
@@ -138,7 +138,7 @@
             <field name="model">attribute.group</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <search string="Search Attribute Groups">
+                <search string="Search Parameter Groups">
                     <field name="name"/>
                     <field name="attribute_set_id"/>
                </search>
@@ -220,7 +220,7 @@
             <field name="model">attribute.attribute</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <tree string="Attribute">
+                <tree string="Parameter">
                     <field name="name" />
                     <field name="attribute_type" />
                     <field name="model_id" invisible="context.get('force_model')"/>
@@ -237,7 +237,7 @@
             <field name="model">attribute.attribute</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
-                <search string="Search Attributes">
+                <search string="Search Parameters">
                     <field name="name"/>
                </search>
             </field>
