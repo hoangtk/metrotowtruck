@@ -1,13 +1,13 @@
 # Translation of OpenERP Server.
 # This file contains the translation of the following modules:
-# 	* metro_purchase
+# 	* metro_accounts
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-21 00:23+0000\n"
-"PO-Revision-Date: 2013-12-21 08:25+0800\n"
+"POT-Creation-Date: 2014-06-19 07:58+0000\n"
+"PO-Revision-Date: 2014-06-19 16:03+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,59 +18,41 @@ msgstr ""
 
 #. module: metro_accounts
 #: field:account.voucher,receipt_number:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_voucher_receipt_number
 msgid "Receipt Number"
 msgstr "发票号"
 
-#. module: account
-#: view:account.invoice:0
-msgid "Ask Refund"
-msgstr "退款"
-
 #. module: metro_accounts
-#: view:account.invoice:0
-msgid "Sale Advance Payments"
-msgstr "销售预付款"
-
-#. module: metro_purchase
-#: field:purchase.order,amount_paid:0
-msgid "Amount Paid"
-msgstr "已付"
-
+#: view:account.move:0 view:account.move.batch:0
+#: model:ir.actions.act_window,name:metro_accounts.action_view_account_move_review
+msgid "Review"
+msgstr "审查"
 
 #. module: metro_accounts
 #: field:account.invoice,auto_reconcile_purchase_pay:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_invoice_auto_reconcile_purchase_pay
 msgid "Auto Reconcile Purchase Payment"
 msgstr "自动核销预付款"
 
 #. module: metro_accounts
-#: field:account.invoice,auto_reconcile_sale_pay:0
-msgid "Auto Reconcile Sale Payment"
-msgstr "自动核销预付款"
+#: view:account.move.batch:0
+msgid "Review account entries by batch"
+msgstr "凭证批量审查"
 
 #. module: metro_accounts
-#: help:account.invoice,auto_reconcile_purchase_pay:0
-msgid "Auto reconcile the purchase order payments when valid the invoice"
-msgstr "Auto reconcile the purchase order payments when valid the invoice"
+#: view:account.move:0
+msgid "{'invisible':[('state','=','draft')]}"
+msgstr "{'invisible':[('state','=','draft')]}"
 
 #. module: metro_accounts
-#: help:account.invoice,auto_reconcile_sale_pay:0
-msgid "Auto reconcile the sale order payments when valid the invoice"
-msgstr "Auto reconcile the sale order payments when valid the invoice"
-
-#. modules: metro_accounts
 #: view:account.invoice:0
-msgid "Date"
-msgstr "日期"
-
-#. modules: metro_accounts
-#: view:account.invoice:0
-msgid "Paid Amount"
-msgstr "金额"
+msgid "Payment Method"
+msgstr "付款方式"
 
 #. module: metro_accounts
-#: field:account.invoice,purchase_payment_ids:0
-msgid "Purchase Payments"
-msgstr "采购预付款"
+#: model:ir.model,name:metro_accounts.model_account_move_batch
+msgid "Batch action on the account move"
+msgstr "Batch action on the account move"
 
 #. module: metro_accounts
 #: view:account.invoice:0
@@ -79,20 +61,119 @@ msgstr "核销预付款"
 
 #. module: metro_accounts
 #: view:account.invoice:0
+msgid "Date"
+msgstr "日期"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+#: model:ir.actions.act_window,name:metro_accounts.action_view_account_move_post
+msgid "Post"
+msgstr "过账"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Are you sure to post the selected acccount entries?"
+msgstr "确认过账选择的凭证吗?"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Payment"
+msgstr "付款"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Are you sure to review the selected acccount entries?"
+msgstr "确认审查选择的凭证吗?"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_account
+msgid "Account"
+msgstr "科目"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_move_review
+msgid "Review the account move"
+msgstr "Review the account move"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Note: Only unposted entries can be post!"
+msgstr "注意: 只有未记账的凭证可以过账!"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Post account entries by batch"
+msgstr "凭证批量过账"
+
+#. module: metro_accounts
+#: view:account.invoice:0
 msgid "Sale Advance Payments"
 msgstr "销售预付款"
 
 #. module: metro_accounts
-#: field:account.invoice,sale_payment_ids:0
-msgid "Sale Payments"
-msgstr "销售预付款"
+#: model:ir.model,name:metro_accounts.model_account_move
+msgid "Account Entry"
+msgstr "凭证"
 
-#. modules: metro_accounts
-#: view:account.invoice:0
-msgid "Payment Method"
-msgstr "付款方式"
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_voucher
+msgid "Accounting Voucher"
+msgstr "手工凭证"
 
 #. module: metro_accounts
 #: view:account.invoice:0
 msgid "Purchase Advance Payments"
 msgstr "采购预付款"
+
+#. module: metro_accounts
+#: help:account.voucher,receipt_number:0
+msgid "The reference of this invoice as provided by the partner."
+msgstr "The reference of this invoice as provided by the partner."
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Note: Only posted entries can be review!"
+msgstr "注意: 只有已登帐的凭证可以审查!"
+
+#. module: metro_accounts
+#: help:account.invoice,auto_reconcile_purchase_pay:0
+msgid "Auto reconcile the purchase order payments when valid the invoice"
+msgstr "Auto reconcile the purchase order payments when valid the invoice"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_invoice
+msgid "Invoice"
+msgstr "发票"
+
+#. module: metro_accounts
+#: field:account.invoice,purchase_payment_ids:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_invoice_purchase_payment_ids
+msgid "Purchase Payments"
+msgstr "采购预付款"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Cancel"
+msgstr "取消"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Paid Amount"
+msgstr "金额"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "or"
+msgstr "or"
+
+#. module: metro_accounts
+#: field:account.invoice,purchase_ids:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_invoice_purchase_ids
+msgid "Purchase Orders"
+msgstr "采购订单"
+
+########################manual########################
+#. module: account
+#: view:account.move:0
+msgid "Cancel Entry"
+msgstr "取消登帐"

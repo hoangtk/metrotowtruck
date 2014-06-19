@@ -28,7 +28,17 @@ class account_move(osv.osv):
     _inherit = "account.move"
     _columns = {
         'picking_id': fields.many2one('stock.picking', 'Picking to the move'),
-    }    
+    }
+class account_journal(osv.osv):
+    _inherit = "account.journal"
+    _columns = {
+        'type': fields.selection([('sale', 'Sale'),('sale_refund','Sale Refund'), ('purchase', 'Purchase'), ('purchase_refund','Purchase Refund'), ('cash', 'Cash'), ('bank', 'Bank and Checks'), ('stock', 'Stock'), ('general', 'General'), ('situation', 'Opening/Closing Situation')], 'Type', size=32, required=True,
+                                 help="Select 'Sale' for customer invoices journals."\
+                                 " Select 'Purchase' for supplier invoices journals."\
+                                 " Select 'Cash' or 'Bank' for journals that are used in customer or supplier payments."\
+                                 " Select 'General' for miscellaneous operations journals."\
+                                 " Select 'Opening/Closing Situation' for entries generated for new fiscal years."), 
+            }   
 class stock_picking(osv.osv):
     _inherit = "stock.picking"
     _columns = {
@@ -138,6 +148,9 @@ class stock_picking(osv.osv):
                 # Then we finish the good picking
                 self.write(cr, uid, [pick.id], {'backorder_id': new_picking})
                 self.action_move(cr, uid, [new_picking], context=context)
+                #added by johne, 06/19/2014, begin
+                self.merge_pick_moves(cr, uid, new_picking, context)
+                #added by johne, 06/19/2014, end
                 wf_service.trg_validate(uid, 'stock.picking', new_picking, 'button_done', cr)
                 wf_service.trg_write(uid, 'stock.picking', pick.id, cr)
                 delivered_pack_id = new_picking
@@ -145,6 +158,9 @@ class stock_picking(osv.osv):
                 self.message_post(cr, uid, ids, body=_("Back order <em>%s</em> has been <b>created</b>.") % (back_order_name), context=context)
             else:
                 self.action_move(cr, uid, [pick.id], context=context)
+                #added by johne, 06/19/2014, begin
+                self.merge_pick_moves(cr, uid, pick.id, context)
+                #added by johne, 06/19/2014, end
                 wf_service.trg_validate(uid, 'stock.picking', pick.id, 'button_done', cr)
                 delivered_pack_id = pick.id
 
@@ -152,7 +168,115 @@ class stock_picking(osv.osv):
             res[pick.id] = {'delivered_picking': delivered_pack.id or False}
 
         return res
+    #merge the account moves of one picking,since the account move are generated one by one per stock move
+    def merge_pick_moves(self, cr, uid, picking_id, context):
+        '''
+        Merge rule:
+        *State: draft
+        *Same data: with same ref,period_id,journal_id,company_id
+        *journal_id.type: stock
+        Result:
+        --same: ref,period_id,journal_id,company_id
+        //--date: the max of the moves
+        //--narration: combine all of the move's narration together
+        --merge:line_id        
+        '''
 
+        '''
+        stock_journal_id = self.pool.get('ir_property').get(cr, uid, 'property_stock_journal', 'product.category',context=context)
+        
+        property_stock_valuation_account_id,product.category
+        
+        property_stock_account_output, product.template
+        property_stock_account_input, product.template
+        
+        property_stock_account_output_categ, product.category
+        property_stock_account_input_categ, product.category
+        '''
+        
+        pick = self.browse(cr, uid, picking_id,context=context)
+        #only do the merging when there more than one stocking moves to this picking
+        if not pick.account_move_ids or len(pick.account_move_ids) <= 1:
+            return        
+        # pick one product to get the account configuration
+        product_id = pick.move_lines[0].product_id.id
+        accounts = self.pool.get('product.product').get_product_accounts(cr, uid, product_id, context)
+        '''
+                return {
+            'stock_account_input': stock_input_acc,
+            'stock_account_output': stock_output_acc,
+            'stock_journal': journal_id,
+            'property_stock_valuation_account_id': account_valuation
+        }
+        '''
+        new_moves = {}
+        unlink_move_ids = []
+        for move in pick.account_move_ids:
+            #only the draft's stock move can be merge
+            if move.state != 'draft' and move.journal_id.id != accounts['stock_journal']:
+                continue
+            #get the account move values
+            move_key = '%s-%s-%s-%s'%(move.ref,move.period_id.id,move.journal_id.id,move.company_id.id)
+            move_vals = {}
+            if move_key not in new_moves:
+                move_vals = {'picking_id':pick.id,
+                             'ref':move.ref,
+                             'period_id':move.period_id.id,
+                             'journal_id':move.journal_id.id,
+                             'company_id':move.company_id.id,
+                             'line_id':[],}
+                new_moves.update({move_key:move_vals})
+            else:
+                move_vals = new_moves.get(move_key)
+                #get the move lines
+                
+            for move_line in move.line_id:
+                if move_line.account_id.id == accounts['property_stock_valuation_account_id']:
+                    #merge the stock valuation values to one line
+                    stock_valuation_line = {}
+                    if 'stock_valuation_line' not in move_vals:
+                        stock_valuation_line = {
+                            'name': pick.name, 
+                            'ref': pick.name,
+                            'date': time.strftime('%Y-%m-%d'),
+                            'partner_id': move_line.partner_id.id,
+                            'credit': 0,
+                            'debit': 0,
+                            'account_id': move_line.account_id.id,
+                            }
+                        move_vals.update({'stock_valuation_line':stock_valuation_line});
+                    else:
+                        stock_valuation_line = move_vals.get('stock_valuation_line')
+                    stock_valuation_line['credit'] += move_line.credit
+                    stock_valuation_line['debit'] += move_line.debit
+                else:
+                    #add other move lines for the stock in/out account
+                    new_move_line = {
+                        'name': move_line.name,
+                        'product_id': move_line.product_id.id,
+                        'quantity': move_line.quantity,
+                        'product_uom_id': move_line.product_uom_id.id, 
+                        'ref': move_line.ref,
+                        'date': time.strftime('%Y-%m-%d'),
+                        'partner_id': move_line.partner_id.id,
+                        'credit': move_line.credit,
+                        'debit': move_line.debit,
+                        'account_id': move_line.account_id.id,
+                        }
+                    
+                    move_vals.get('line_id').append((0, 0, new_move_line))
+            if len(move_vals.get('line_id')) > 0:
+                unlink_move_ids.append(move.id)
+        move_obj = self.pool.get('account.move')
+        #create the new moves
+        for new_move_vals in new_moves.values():
+            if len(move_vals.get('line_id')) <= 0:
+                continue
+            new_move_vals.get('line_id').append((0,0,new_move_vals['stock_valuation_line']))
+            move_obj.create(cr, uid, new_move_vals, context=context)
+        #deleted the merged moves
+        move_obj.unlink(cr, uid, unlink_move_ids, context=context)
+        
 class stock_move(osv.osv):
     _inherit = "stock.move"
 
