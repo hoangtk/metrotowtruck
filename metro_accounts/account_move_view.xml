@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="metro_view_account_move_form">
+            <field name="name">metro_view_account_move_form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+<!--             	<xpath expr="//field[@name='line_id']/tree" position="attributes">
+                     <attribute name="editable"/>
+            	</xpath> -->
+            	<xpath expr="//field[@name='line_id']/tree/field[@name='name']" position="after">
+                     <field name="product_id"/>
+                     <field name="quantity"/>
+                     <field name="product_uom_id"/>
+            	</xpath>
+            	<field name='to_check' position="attributes">
+            		<attribute name="attrs">{'invisible':[('state','=','draft')]}</attribute>
+            	</field>
+            	
+            	<button name="button_cancel" position="before">
+            		<button name="review_account_move" states="posted" string="Review" type="object" groups="account.group_account_invoice"/>
+            	</button>
+            	
+            </field>
+        </record>   
+    </data>
+</openerp>

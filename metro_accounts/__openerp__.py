@@ -18,6 +18,8 @@
        "account_voucher_view.xml",
        "account_invoice_view.xml",
        "invoice_payment_view.xml",
+       "account_move_view.xml",
+       "wizard/account_move_batch.xml"
         ],
     'demo': [],
     'test': [],
