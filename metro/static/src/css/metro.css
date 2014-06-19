@@ -23,3 +23,7 @@
 .openerp .oe_form_sheet_width_wider {
   max-width: 1130px;
 }
+
+.openerp .oe_form_sheet_width {
+  max-width: 100%;
+}
