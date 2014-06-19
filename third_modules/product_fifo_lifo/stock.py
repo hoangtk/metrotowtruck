@@ -44,6 +44,16 @@ class stock_picking(osv.osv):
     _columns = {
         'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
     }
+        
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'account_move_ids':[],
+        })
+        res = super(stock_picking, self).copy(cr, uid, id, default, context)
+        return res     
+     
     def do_partial(self, cr, uid, ids, partial_datas, context=None):
         """ Makes partial picking and moves done.
         @param partial_datas : Dictionary containing details of partial picking
@@ -276,7 +286,7 @@ class stock_picking(osv.osv):
             move_obj.create(cr, uid, new_move_vals, context=context)
         #deleted the merged moves
         move_obj.unlink(cr, uid, unlink_move_ids, context=context)
-        
+           
 class stock_move(osv.osv):
     _inherit = "stock.move"
 
