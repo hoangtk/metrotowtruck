@@ -1,12 +1,18 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-    <record model="ir.ui.view" id="view_sale_product_form">
-    	<field name="name">view_sale_product_form</field>
+    <record model="ir.ui.view" id="view_sale_product_tree">
+    	<field name="name">view_sale_product_tree</field>
     	<field name="model">sale.product</field>
     	<field name="arch" type="xml">
-            <tree string="Sale Product IDs" editable="top">
+            <tree string="Sale Product IDs">
                 <field name="name"/>
+                <field name="source"/>
+                <field name="mto_design_id"/>
+                <field name="product_id"/>
+                <field name="project_id"/>
+                <field name="mrp_order_id"/>
+                <field name="state"/>
                 <field name="note"/>
                 <field name="create_uid"/>
                 <field name="create_date"/>
@@ -14,18 +20,56 @@
             </tree>    	
     	</field>
     </record>
+    <record model="ir.ui.view" id="view_sale_product_form">
+    	<field name="name">view_sale_product_form</field>
+    	<field name="model">sale.product</field>
+    	<field name="arch" type="xml">
+            <form string="Sale Product IDs" version="7.0">
+                <header>
+                    <button name="button_confirm" states="draft" type="object" string="Confirm"/>
+                    <button name="button_cancel" states="confirmed" type="object" string="Cancel"/>
+                    <button name="button_create_project" states="confirmed" string="Create Project" type="object" attrs="{'invisible':[('project_id','>',0)]}"/>
+                    <button name="button_create_mfg_order" states="confirmed" string="Create Manfacture Order" type="object"/>
+                    <button name="button_to_draft" states="cancelled" type="object" string="Set to Draft"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done" readonly="1"/>
+                </header>   
+                <sheet>
+	            	<group>
+	            		<group>
+			                <field name="name"/>
+			                <field name="source"/>
+			                <field name="mto_design_id"/>
+			                <field name="product_id"/>
+	            		</group>
+	            		<group>
+			                <field name="project_id"/>
+			                <field name="mrp_order_id"/>
+			                <field name="create_uid"/>
+			                <field name="create_date"/>
+			                <field name="active" groups="mrp.group_mrp_manager"/>
+	            		</group>
+	            	</group>     
+		        	<field name="note" placeholder="Description..."/>           
+                </sheet>         
+
+            </form>    	
+    	</field>
+    </record>    
     <record model="ir.ui.view" id="view_sale_product_filter">
             <field name="name">view_sale_product_filter</field>
             <field name="model">sale.product</field>
             <field name="arch" type="xml">
                 <search string="Search Sale Products">
                     <field name="name" string="ID"/>
+	                <field name="mto_design_id"/>
+	                <field name="state"/>
+	                <field name="note"/>
                     <field name="create_uid" />
                 </search>
             </field>
     </record>   
     <record model="ir.actions.act_window" id="action_sale_product">
-        <field name="name">Sale Product IDs</field>
+        <field name="name">MFG IDs</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">sale.product</field>
         <field name="view_type">form</field>
@@ -45,6 +89,28 @@
         sequence="101"
         parent="stock.menu_stock_configuration"
         action="action_sale_product"
-        groups="base.group_user"/>        
+        groups="base.group_user"/>     
+<!-- Add mfg id to serial view -->    
+	<record id="mttl_serials_tree_mfg_id" model="ir.ui.view">
+		<field name="name">mttl_serials_tree_mfg_id</field>
+        <field name="model">mttl.serials</field>
+        <field name="inherit_id" ref="metro_serial.mttl_serials_tree"/>
+        <field name="arch" type="xml">
+            <field name="serial" position="after">
+                <field name="mfg_id_id"/>
+            </field>
+         </field>
+	</record>     
+	<record id="mttl_serials_form_mfg_id" model="ir.ui.view">
+		<field name="name">mttl_serials_form_mfg_id</field>
+        <field name="model">mttl.serials</field>
+        <field name="inherit_id" ref="metro_serial.mttl_serials_form"/>
+        <field name="arch" type="xml">
+            <field name="serial" position="after">
+                <field name="mfg_id_id"/>
+            </field>
+         </field>
+	</record>  
+	  
     </data>
 </openerp>

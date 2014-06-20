@@ -6,7 +6,7 @@
             <field name="name">Product Configuration</field>
             <field name="code">mto.design</field>
         </record>
-        <record id="seq_purchase_order" model="ir.sequence">
+        <record id="seq_mto_design" model="ir.sequence">
             <field name="name">Product Configuration</field>
             <field name="code">mto.design</field>
             <field name="prefix">PC</field>
