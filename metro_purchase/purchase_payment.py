@@ -152,10 +152,10 @@ class purchase_order(osv.osv):
         period_obj = self.pool.get('account.period')
         period_id = period_obj.find(cr, uid, dt=date, context=context)[0]
         period = period_obj.browse(cr, uid, period_id, context=context)
-        move_name = description or self._get_payment_move_name(cr, uid, journal,
+        move_name =  self._get_payment_move_name(cr, uid, journal,
                                                 period, context=context)
         move_vals = self._prepare_payment_move(cr, uid, move_name, order,
-                                               journal, period, date,
+                                               journal, period, date, description,
                                                context=context)
         move_lines = self._prepare_payment_move_line(cr, uid, move_name, order,
                                                      journal, period, amount,
@@ -187,13 +187,14 @@ class purchase_order(osv.osv):
         return name
 
     def _prepare_payment_move(self, cr, uid, move_name, order, journal,
-                              period, date, context=None):
+                              period, date, description, context=None):
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': date,
                 'ref': order.name,
                 'period_id': period.id,
                 'purchase_ids': [(4, order.id)],
+                'narration':description,
                 }
 
     def _prepare_payment_move_line(self, cr, uid, move_name, order, journal,
