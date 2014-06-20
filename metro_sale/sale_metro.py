@@ -32,7 +32,21 @@ class SaleOrder(osv.osv):
         return {'type': 'ir.actions.report.xml', 'report_name': 'sale.agreement', 'datas': datas, 'nodestroy': True}        
 SaleOrder()
 
-
+class sale_order_line(osv.osv):
+    _inherit = 'sale.order.line'
+    _columns = {
+        'mto_design_id': fields.many2one('mto.design', 'Configuration'),
+#        'serial_ids': fields.many2many('mttl.serials', 'sale_serial_rel','line_id','serials_id',string='Serials',),
+    }
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'mto_design_id': None,
+            'serial_ids': None,
+        })         
+        return super(sale_order_line, self).copy_data(cr, uid, id, default, context=context)                
+     
 class Invoice(osv.osv):
 
     _inherit="account.invoice"
