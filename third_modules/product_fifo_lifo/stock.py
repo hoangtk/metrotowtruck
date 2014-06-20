@@ -28,12 +28,23 @@ class account_move(osv.osv):
     _inherit = "account.move"
     _columns = {
         'picking_id': fields.many2one('stock.picking', 'Picking to the move'),
-    }    
+    }
+  
 class stock_picking(osv.osv):
     _inherit = "stock.picking"
     _columns = {
         'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
     }
+        
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'account_move_ids':[],
+        })
+        res = super(stock_picking, self).copy(cr, uid, id, default, context)
+        return res     
+     
     def do_partial(self, cr, uid, ids, partial_datas, context=None):
         """ Makes partial picking and moves done.
         @param partial_datas : Dictionary containing details of partial picking
@@ -152,7 +163,7 @@ class stock_picking(osv.osv):
             res[pick.id] = {'delivered_picking': delivered_pack.id or False}
 
         return res
-
+           
 class stock_move(osv.osv):
     _inherit = "stock.move"
 
