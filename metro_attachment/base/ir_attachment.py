@@ -38,6 +38,8 @@ class ir_attachment(osv.osv):
         'project_issue_id': fields.many2one('project.issue', 'Project Issue'),
         'shipment_id': fields.many2one('shipment.shipment', 'Shipment'),
         'mto_design_id': fields.many2one('mto.design', 'Product Configuration'),
+        'project_project_id': fields.many2one('project.project', 'Project'),
+        'project_task_id': fields.many2one('project.task', 'Project'),
         'attach_type_id': fields.many2one('ir.attachment.type',
                                           'Attachment Type'),
     }
@@ -72,7 +74,13 @@ class ir_attachment(osv.osv):
             vals['res_model'] = 'project.issue'  
         if vals.get('mto_design_id'):
             vals['res_id'] = vals['mto_design_id']
-            vals['res_model'] = 'mto.design'         
+            vals['res_model'] = 'mto.design'
+        if vals.get('project_project_id'):
+            vals['res_id'] = vals['project_project_id']
+            vals['res_model'] = 'project.project'
+        if vals.get('project_task_id'):
+            vals['res_id'] = vals['project_task_id']
+            vals['res_model'] = 'project.task'             
             
         return super(ir_attachment, self).create(cr, uid, vals, context)
 

@@ -10,7 +10,7 @@
                 <field name="source"/>
                 <field name="mto_design_id"/>
                 <field name="product_id"/>
-                <field name="project_id"/>
+                <field name="project_ids" widget='many2many_tags'/>
                 <field name="mrp_order_id"/>
                 <field name="state"/>
                 <field name="note"/>
@@ -28,7 +28,7 @@
                 <header>
                     <button name="button_confirm" states="draft" type="object" string="Confirm"/>
                     <button name="button_cancel" states="confirmed" type="object" string="Cancel"/>
-                    <button name="button_create_project" states="confirmed" string="Create Project" type="object" attrs="{'invisible':[('project_id','>',0)]}"/>
+                    <button name="button_create_project" states="confirmed" string="Create Project" type="object" attrs="{'invisible':[('project_ids','!=',False)]}"/>
                     <button name="button_create_mfg_order" states="confirmed" string="Create Manfacture Order" type="object"/>
                     <button name="button_to_draft" states="cancelled" type="object" string="Set to Draft"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done" readonly="1"/>
@@ -42,7 +42,7 @@
 			                <field name="product_id"/>
 	            		</group>
 	            		<group>
-			                <field name="project_id"/>
+			                <field name="project_ids" widget='many2many_tags'/>
 			                <field name="mrp_order_id"/>
 			                <field name="create_uid"/>
 			                <field name="create_date"/>
@@ -79,7 +79,7 @@
 
     <menuitem
         id="menu_sale_product_mrp"
-        sequence="102"
+        sequence="1"
         parent="mrp.menu_mrp_manufacturing"
         action="action_sale_product"
         groups="mrp.group_mrp_user"/>

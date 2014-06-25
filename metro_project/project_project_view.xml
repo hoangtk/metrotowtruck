@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>   
+        <record model="ir.ui.view" id="metro_project_form_view">
+            <field name="name">metro_project_form_view</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+            	<page name="team" position="before">
+                    <page string="MFG IDs" name="mfg_ids">
+	                    <field name="mfg_ids"/>
+                    </page>
+                    <page string="Bill of Material" name="bom">
+                    	<group>
+                    		<group>
+			                    <label for="bom_id"/>
+			                    <div>
+			                        <field name="bom_id" class="oe_inline"/> 
+			                    </div>	                    		
+                    		</group>
+                    		<group>
+	                    		<field name="product_id"/>
+                    		</group>
+                    	</group>
+                    	<label for='components'/>
+	                    <field name="components" widget='one2many_tree'/>
+                    </page>
+            	</page>
+            </field>
+        </record>   
+        
+        <record model="ir.ui.view" id="metro_project_task_form_view">
+            <field name="name">metro_project_task_form_view</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+				<field name="planned_hours" position="after">
+					<field name="bom_id"/>
+					<field name="product_id"/>
+				</field>          	         
+            </field>
+        </record>           
+    </data>
+</openerp>

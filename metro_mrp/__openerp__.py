@@ -41,6 +41,7 @@
         'security/ir.model.access.csv',
         'wizard/work_order_cnc_line_done_view.xml',
         'work_order_cnc_view.xml',
+        'mrp_view.xml',
     ],
     'test': [],
     'demo': [],

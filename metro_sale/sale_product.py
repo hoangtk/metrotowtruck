@@ -15,7 +15,7 @@ class sale_product(osv.osv):
         'serial_id': fields.many2one('mttl.serials', 'Product Serial'),
         'mto_design_id': fields.many2one('mto.design', 'Configuration'),
         'product_id': fields.many2one('product.product',string='Product'),
-        'project_id': fields.many2one('project.project',string='Engineering Project'),
+        'project_ids': fields.many2many('project.project','project_id_rel','mfg_id','project_id',string='Engineering Project',readonly=True),
         'mrp_order_id': fields.many2one('mrp.production',string='Manufacture Order'),
         'state': fields.selection([
                    ('draft','Draft'),
@@ -52,7 +52,7 @@ class sale_product(osv.osv):
             if work_order_cncs and len(work_order_cncs) > 0:
                 raise osv.except_osv(_('Warning !'), _("You cannot change the ID which contains CNC work orders!"))    
             
-        if ('project_id' in vals and vals['project_id']) or ('mrp_order_id' in vals and vals['mrp_order_id']):
+        if ('project_ids' in vals and vals['project_ids']) or ('mrp_order_id' in vals and vals['mrp_order_id']):
             vals.update({'state':'in_progress'})
             
         return super(sale_product, self).write(cr, uid, ids, vals, context=context)
@@ -65,11 +65,11 @@ class sale_product(osv.osv):
         self.write(cr, uid, ids, {'state':'draft'})  
     def button_create_project(self, cr, uid, ids, context=None):
         for sale_product_id in self.browse(cr, uid, ids, context=context):
-            if sale_product_id.project_id:
+            if sale_product_id.project_ids:
                 raise osv.except_osv(_('Error'),_("This ID already has project generated!"))
             vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,))}
             project_id = self.pool.get('project.project').create(cr, uid, vals, context=context)
-            self.write(cr, uid, sale_product_id.id, {'project_id':project_id},context=context)
+            self.write(cr, uid, sale_product_id.id, {'project_ids':[(4, project_id)]},context=context)
     def button_create_mfg_order(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'draft'})                  
 

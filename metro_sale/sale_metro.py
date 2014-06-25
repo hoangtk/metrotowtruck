@@ -36,7 +36,7 @@ class sale_order_line(osv.osv):
     _inherit = 'sale.order.line'
     _columns = {
         'mto_design_id': fields.many2one('mto.design', 'Configuration'),
-#        'serial_ids': fields.many2many('mttl.serials', 'sale_serial_rel','line_id','serials_id',string='Serials',),
+        'serial_ids': fields.many2many('mttl.serials', 'sale_serial_rel','line_id','serials_id',string='Serials',),
     }
     def copy_data(self, cr, uid, id, default=None, context=None):
         if not default:

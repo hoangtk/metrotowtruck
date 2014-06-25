@@ -18,29 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro Attachment',
-    'version': '1.0',
-    'category': 'Metro',
-    'sequence': 500,
-    'description': """
-    Add default products to sales order
-    """,
-    'author': 'Acespritech Solutions Pvt Ltd',
-    'website': 'http://www.acespritech.com',
-    'depends': ['base', 'sale', 'hr', 'document', 'metro_shipping', 'metro_product', 'metro_mto'],
-    'data': [
-        'security/security.xml',
-        'security/ir.model.access.csv',
-        'base/ir_attachment_view.xml',
-        'product/product_view.xml',
-        'hr/hr_view.xml',
-        'sale/sale_view.xml',
-        'ship/shipment_view.xml',
-        'mto/mto_design_view.xml',
-        'project/project_view.xml',
-    ],
-    'installable': True,
-    'active': False,
-    'application': True,
-}
+import project
