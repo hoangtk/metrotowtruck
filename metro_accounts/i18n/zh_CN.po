@@ -172,6 +172,12 @@ msgstr "or"
 msgid "Purchase Orders"
 msgstr "采购订单"
 
+#. module: metro_accounts
+#: view:account.move.line:0
+#: field:account.move.line,to_check:0
+msgid "To Review"
+msgstr "审查"
+
 ########################manual########################
 #. module: account
 #: view:account.move:0
