@@ -16,4 +16,9 @@ class account_move(osv.osv):
         unpost_ids = self.search(cr, uid, [('id','in',ids),('state','=','draft')], context=context)
         return super(account_move,self).button_validate(cr, uid, unpost_ids, context=context)
     
+class account_move_line(osv.osv):
+    _inherit = "account.move.line"
+    _columns = {
+        'to_check': fields.related('move_id','to_check',type='boolean',string='To Review'),
+    }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
