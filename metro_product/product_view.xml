@@ -156,6 +156,11 @@
 	            	<field name="standard_price"/>
 	            	<field name="loc_pos_code"/>
 	            </field>
+	            <xpath expr="//tree[@string='Products']" position="attributes">
+	            	<attribute name="colors">
+	            		red:(virtual_available and virtual_available&lt;0);blue:virtual_available&gt;=0 and state in ('draft', 'end', 'obsolete');black:virtual_available&gt;=0 and state not in ('draft', 'end', 'obsolete')
+	            	</attribute>
+	            </xpath>
             </field>
         </record>
         
@@ -178,7 +183,8 @@
             <field name="type">form</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
-            <data>
+            <data>           
+            
                 <field name="categ_id" position="replace">
                     <field name="categ_id"/>
                 </field>
@@ -202,6 +208,7 @@
                                     help="Only press this button to create a new part number! 只有按这个按钮来创建一个新的零件编号！"
 									groups="metro.group_metro_base_manager"  />
                     </div>
+                	<field name="part_no_external"/>
                 </field>
                 <xpath expr="//page[@string='Information']/group/group[3]" position="after">
                      <group>
@@ -314,6 +321,7 @@
             		<field name="name" string="Product" filter_domain="['|','|',('name','ilike',self),('default_code','ilike',self),('cn_name','ilike',self)]"/>
             		<field name="create_uid"/>
             		<field name="create_date"/>
+            		<field name="default_code" filter_domain="[('default_code','in',self)]" string="Multi Part#"/>
             	</field>
 <!--            move to product_product.search to deal the 'child_of', use the view xml. the category name will be passed to search(), we need the category ID 	
 				<field name="categ_id" position="attributes">
