@@ -34,7 +34,7 @@ pwd = 'erp123'
 sock_common = xmlrpclib.ServerProxy ('http://%s:%s/xmlrpc/common'%(host,port))
 uid = sock_common.login(dbname, username, pwd)
 sock = xmlrpclib.ServerProxy('http://%s:%s/xmlrpc/object'%(host,port))
-product_code = ['116157-1',
+product_code = ['115625-1',
 ]
 for code in product_code:
     new_uom_categ_id = sock.execute(dbname, uid, pwd, 'product.uom.categ', 'create', {'name':'MSP_%s'%code})

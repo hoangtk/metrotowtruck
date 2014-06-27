@@ -20,5 +20,6 @@
 ##############################################################################
 
 import work_order_cnc_line_done
+import bom_import
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

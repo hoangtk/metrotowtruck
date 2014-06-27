@@ -1,43 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-<!--         <record id="mrp.action2" model="ir.actions.act_window">
-            <field name="name">Bill of Materials Structure</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">mrp.bom</field>
-            <field name="domain">[('bom_id', '=',active_ids)]</field>
-            <field name="view_id" ref="mrp.mrp_bom_tree_view"/>
-            <field name="view_type">tree</field>
-            <field name="view_mode">tree,form</field>
-        </record>   -->      
-
-<!--        <record id="metro_mrp_bom_tree_view" model="ir.ui.view">
-            <field name="name">mrp.bom.tree</field>
+    <!-- Add BOM Name to display -->
+		<record id="metro_mrp_bom_form_view" model="ir.ui.view">
+            <field name="name">metro_mrp_bom_form_view</field>
+            <field name="model">mrp.bom</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+	            <data>
+	            	<!-- remove the groups attribute, make the name fields visible to all users  -->
+	                <field name="name" position="attributes">
+	                	<attribute name="groups"/>
+	                </field>
+	                <!-- add name to the components list -->
+	                <xpath expr="//page/field/tree/field[@name='product_id']" position="before">
+                    	<field name="sequence" widget="handle"/>
+                    	<field name="code"/>
+	                	<field name="name"/>
+	                </xpath>
+	            </data>
+        	</field>
+       	</record>
+	<!-- Add BOM Name to display -->       	 
+		<record id="metro_mrp_bom_tree_view" model="ir.ui.view">
+            <field name="name">metro_mrp_bom_tree_view</field>
             <field name="model">mrp.bom</field>
             <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
             <field name="arch" type="xml">
-                <field name="product_id" position="after">
-                	<button name="open_bom" string="Open BOM" type="object" icon="gtk-preferences"/>
-                </field>
-            </field>
-        </record> -->
-<!-- 
-        <record id="mrp_bom_action_tree" model="ir.actions.act_window">
-            <field name="name">Bill of Material</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">mrp.bom</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="res_id">form</field>
-            <field name="target">new</field>
-        </record>
-                    
-        <record id="ir_mrp_bom_tree_open" model="ir.values">
-            <field name="key2">tree_but_open</field>
+	            <data>
+	                <field name="code" position="replace">
+	                </field>
+	                <field name="name" position="attributes">
+	                	<attribute name="invisible">0</attribute>
+	                </field>
+	                <field name="name" position="before">
+	                	<field name="code"/>
+	                </field>
+	            </data>
+        	</field>
+       	</record>
+	<!-- Add BOM Name to display -->       	 
+		<record id="metro_mrp_bom_component_tree_view" model="ir.ui.view">
+            <field name="name">"metro_mrp_bom_component_tree_view"</field>
             <field name="model">mrp.bom</field>
-            <field name="name">BOM's Tree</field>
-            <field eval="'ir.actions.act_window,%d'%mrp_bom_action_tree" name="value"/>
-        </record>     
- -->                            
-    </data>
+            <field name="inherit_id" ref="mrp.mrp_bom_component_tree_view"/>
+            <field name="arch" type="xml">
+	            <data>
+	                <field name="code" position="replace">
+	                </field>
+	                <field name="name" position="attributes">
+	                	<attribute name="groups"/>
+	                </field>
+	                <field name="name" position="before">
+	                	<field name="code"/>
+	                </field>
+	            </data>
+        	</field>
+       	</record>       	
+       	       	
+	<!-- Add 'material' field to product -->                                 
+		<record id="bom_product_mfg_view" model="ir.ui.view">
+            <field name="name">bom_product_mfg_view</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="product_manufacturer.view_product_form_expiry"/>
+            <field name="arch" type="xml">
+	            <data>
+	                <field name="manufacturer" position="before">
+	                	<field name="material"/>
+	                </field>
+	            </data>
+        	</field>
+       	</record>
+	</data>	  
 </openerp>

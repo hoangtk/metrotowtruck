@@ -34,3 +34,9 @@ class mrp_bom(osv.osv):
 #        resu = super(mrp_bom, self).search(cr, user, args, offset, limit, order, context, count)
 #        
 #        return resu
+class product_product(osv.osv):
+    _inherit = "product.product"
+        
+    _columns = {
+        'material': fields.char(string=u'Material', size=32, help="The material of the product"),
+    }
