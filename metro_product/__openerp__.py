@@ -37,7 +37,7 @@
     'author': 'IntellectSeed Technologies, PY Solutions',
     'maintainer': 'PY Solutions',
     'website': 'http://www.intellectseed.com, http://www.pysolutions.com',
-    'depends': ["metro", "product", "sale", "stock", "product_manufacturer", "purchase"],
+    'depends': ["metro", "product", "sale", "stock", "product_manufacturer", "purchase", "mrp"],
     'init_xml': [],
     'update_xml': [
         'product_view.xml',
@@ -45,6 +45,7 @@
         'product_uom_view.xml',
         'security/ir.model.access.csv',
         'wizard/product_set_printflag.xml',
+        'wizard/product_batch_query_view.xml',
     ],
     'demo_xml': [],
     'test': [],

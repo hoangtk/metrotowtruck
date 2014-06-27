@@ -145,6 +145,7 @@ class product_product(osv.osv):
 		'mfg_standard': fields.char(string=u'Manufacture Standard', size=32, help="The manufacture standard name, like GB/T5782-86"),
 		'default_code' : fields.char('Internal Reference', size=64, select=True, required=True),
 		'partner_ref' : fields.function(_product_partner_ref, type='char', string='Customer ref'),
+        'part_no_external': fields.char(string=u'External Part#', size=32, help="The external part#, may be from engineering, purchase..."),
 		'qty_available': fields.function(stock_product._product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
 			string='Quantity On Hand',
@@ -353,13 +354,22 @@ class product_product(osv.osv):
 	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
 		#deal the 'date' datetime field query
 		new_args = deal_args(self,args)
-		#add the category improving
 		for arg in new_args:
+			#add the category improving
 			if arg[0] == 'categ_id' and arg[1] == '=' and isinstance(arg[2], (int,long)):
 				idx = new_args.index(arg)
 				new_args.remove(arg)
 				new_args.insert(idx, [arg[0],'child_of',arg[2]])
-			
+
+			#add the multi part# query
+			if arg[0] == 'default_code' and arg[1] == 'in' and isinstance(arg[2], type(u'aaa')):
+				part_nos = []
+				for part_no in arg[2].split(','):
+					part_nos.append(part_no.strip())
+				idx = new_args.index(arg)
+				new_args.remove(arg)
+				new_args.insert(idx, [arg[0],arg[1],part_nos])
+							
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
 
@@ -373,31 +383,6 @@ class product_product(osv.osv):
 				if qty['qty_available'] < qty['safe_qty']:
 					new_ids.append(qty['id'])	
 			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
-
-			
-		
-#		qty_available
-		#add the available restriction
-#		if context and context.get('inv_warn_restrict'):
-#			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
-#			qtys = self.read(cr,user,ids,['virtual_available','safe_qty'],context=context)
-##			list: [{'product_tmpl_id': 10, 'virtual_available': -255.0, 'id': 10}, {'product_tmpl_id': 26, 'virtual_available': 0.0, 'id': 26}, {'product_tmpl_id': 35, 'virtual_available': 600.0, 'id': 35}]
-#			new_ids = []
-#			for qty in qtys:
-#				if qty['virtual_available'] < qty['safe_qty']:
-#					new_ids.append(qty['id'])	
-#			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
-		#add  the onhand query
-#		for arg in args:
-#			fld_name = arg[0]
-#			if fld_name == 'qty_available':
-#				ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
-#				qtys = self.read(cr,user,ids,[fld_name],context=context)
-#				new_ids = []
-#				for qty in qtys:
-#					if eval('%s%s%s'%(qty[fld_name],arg[1],arg[2])):
-#						new_ids.append(qty['id'])	
-#				ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)	
 				
 		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
