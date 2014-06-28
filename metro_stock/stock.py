@@ -473,6 +473,16 @@ class stock_inventory_line(osv.osv):
         'state': fields.related('inventory_id','state',type='selection',selection=(('draft', 'Draft'), ('cancel','Cancelled'), ('confirm','Confirmed'), ('done', 'Done')),
                                 string='Status',readonly=True),
     }
+    def _default_stock_location(self, cr, uid, context=None):
+        loc_ids = self.pool.get('stock.location').search(cr, uid, [('usage','=','internal')], context=context)
+        if loc_ids:
+            return loc_ids[0]
+        else:
+            return False
+
+    _defaults = {
+        'location_id': _default_stock_location
+    }    
 #stock physical inventroy move
 #class stock_inventory_move(osv.osv):
 #    _name = "stock.inventory.move"
