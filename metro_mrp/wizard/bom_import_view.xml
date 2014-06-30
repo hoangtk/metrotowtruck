@@ -48,7 +48,7 @@
             <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
             <field name="arch" type="xml">
             	<field name="company_id" position="after">
-            		<button string="Import BOM from Excel" name="%(action_view_bom_import)d" type="action"/>
+            		<button string="Import BOM" name="%(action_view_bom_import)d" type="action" attrs="{'invisible':[('bom_id','!=',False)]}"/>
             	</field>
             </field>
         </record>

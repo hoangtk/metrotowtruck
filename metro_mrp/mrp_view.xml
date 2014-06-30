@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-    <!-- Add BOM Name to display -->
 		<record id="metro_mrp_bom_form_view" model="ir.ui.view">
             <field name="name">metro_mrp_bom_form_view</field>
             <field name="model">mrp.bom</field>
@@ -13,15 +12,85 @@
 	                <field name="name" position="attributes">
 	                	<attribute name="groups"/>
 	                </field>
+	                <!-- the common BOM flag -->
+	                <field name="type" position="after">
+	                	<field name="is_common" attrs="{'invisible':[('bom_id','!=',False)]}" onchange='onchange_is_common(is_common,bom_id)'/>
+	                	<field name="common_bom_id" attrs="{'invisible':[('bom_id','=',False)]}" readonly="1"/>
+	                </field>
 	                <!-- add name to the components list -->
 	                <xpath expr="//page/field/tree/field[@name='product_id']" position="before">
                     	<field name="sequence" widget="handle"/>
                     	<field name="code"/>
 	                	<field name="name"/>
+	                	<field name="common_bom_id"/>
 	                </xpath>
+	                <notebook position="inside">
+                        <!-- <page string="Clone BOMs" attrs="{'invisible':[('is_common','=',False)]}"> -->
+                        <page string="Clone BOMs">
+                            <field name="clone_bom_ids" widget="one2many_list">
+                                <tree string="Clone BOMs" create='false' delete='false'>
+	                				<field name="common_bom_id"/>
+			                    	<field name="code"/>
+				                	<field name="name"/>
+                                    <field name="product_id" context="{'default_supply_method':'produce'}" on_change="onchange_product_id(product_id, name)"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom" on_change="onchange_uom(product_id, product_uom)" groups="product.group_uom"/>
+                                    <field name="name" invisible="1"/>
+                                    <field name="date_start"/>
+                                    <field name="date_stop"/>
+                                </tree>
+                            </field>
+                        </page>	                
+	                </notebook>
+	                <!-- make the fields to readonly  for the BOM having common BOM
+	                except product_qty,name,code,sequence,date_start,date_stop -->
+	                <field name="product_id" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="routing_id" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="type" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="bom_lines" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="position" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="bom_id" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="sequence" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="active" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="product_rounding" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
+	                <field name="product_efficiency" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field>
 	            </data>
         	</field>
        	</record>
+		<record id="metro_mrp_bom_pe_form_view" model="ir.ui.view">
+            <field name="name">metro_mrp_bom_pe_form_view</field>
+            <field name="model">mrp.bom</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="product_extended.mrp_bom_form_view_product_extended"/>
+            <field name="arch" type="xml">
+	            <data>
+	                <field name="standard_price" position="attributes">
+	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
+	                </field> 
+	            </data>
+	        </field>
+	    </record>      	
+       	
 	<!-- Add BOM Name to display -->       	 
 		<record id="metro_mrp_bom_tree_view" model="ir.ui.view">
             <field name="name">metro_mrp_bom_tree_view</field>
@@ -35,6 +104,7 @@
 	                	<attribute name="invisible">0</attribute>
 	                </field>
 	                <field name="name" position="before">
+	                	<field name="is_common"/>
 	                	<field name="code"/>
 	                </field>
 	            </data>
@@ -53,6 +123,8 @@
 	                	<attribute name="groups"/>
 	                </field>
 	                <field name="name" position="before">
+	                	<field name="is_common"/>
+	                	<field name="common_bom_id"/>
 	                	<field name="code"/>
 	                </field>
 	            </data>

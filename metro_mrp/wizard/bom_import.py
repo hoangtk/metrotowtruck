@@ -82,7 +82,7 @@ class bom_import(osv.osv_memory):
         order = self.browse(cr,uid,ids[0],context=context)
         #get the uploaded data
         import_data = base64.decodestring(order.import_file)
-        excel_data = xlrd.open_workbook(file_contents=import_data,formatting_info=True)
+        excel_data = xlrd.open_workbook(file_contents=import_data)
         sheet = excel_data.sheets()[0]
         row_cnt = sheet.nrows
         
@@ -125,8 +125,12 @@ class bom_import(osv.osv_memory):
             row_data = sheet.row_values(i);
             #=========validate the level_no============
             level_no = row_data[level_no_idx]
+            #first line level_no must be 'root'
+            if i == 1 and level_no != root_level_no:
+                raise osv.except_osv(_('Error!'), _('level_no of first line row must be "root"'))
             parsed_row = {}
-            if level_no != root_level_no:   
+            #for the rows not root line
+            if i > 1:
                 if level_no is not types.StringType:
                     level_no = str(level_no)
                     if level_no == '':
@@ -194,7 +198,7 @@ class bom_import(osv.osv_memory):
         bom_master = parsed_rows['root']
         if order.mrp_bom_id:
             #if from an existing bom ID, then close the window, and refresh parent to show the new data
-            mrp_bom_obj.update(cr, uid, order.mrp_bom_id, {'bom_ids':bom_master['bom_ids']}, context=context)            
+            mrp_bom_obj.write(cr, uid, order.mrp_bom_id.id, bom_master, context=context)            
             return {'type': 'ir.actions.act_window_close'}  
         else:
             #Show the created new BOM in list view

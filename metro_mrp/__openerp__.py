@@ -40,6 +40,7 @@
     'data': [
         'security/ir.model.access.csv',
         'wizard/work_order_cnc_line_done_view.xml',
+        'wizard/add_common_bom_view.xml',
         'wizard/bom_import_view.xml',
         'work_order_cnc_view.xml',
         'mrp_view.xml',
