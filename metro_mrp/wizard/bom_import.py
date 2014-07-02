@@ -97,7 +97,10 @@ class bom_import(osv.osv_memory):
         part_no_idx = 0
         bom_name_idx = 0
         quantity_idx = 0
+        common_bom_idx = -1
+        sequence_idx = -1
         id_idx = -1
+        
         try:
             # get the data column index
             level_no_idx = row_data.index('level_no')
@@ -111,6 +114,15 @@ class bom_import(osv.osv_memory):
             id_idx = row_data.index('id')
         except Exception:
             id_idx = -1 
+        try:
+            # get the 'common_bom' column index
+            common_bom_idx = row_data.index('common_bom')
+        except Exception:
+            common_bom_idx = -1   
+        try:
+            sequence_idx = row_data.index('sequence')
+        except Exception:
+            sequence_idx = -1                        
         #2 loop to check data, and put data to cache if all are OK
         '''
         the regex for the level# like: 1, 1.1, 1.1.1
@@ -121,6 +133,7 @@ class bom_import(osv.osv_memory):
         root_level_no = 'root'
         parsed_rows = {}
         prod_obj = self.pool.get('product.product')
+        bom_obj = self.pool.get('mrp.bom')
         for i in range(1,row_cnt):
             row_data = sheet.row_values(i);
             #=========validate the level_no============
@@ -159,7 +172,16 @@ class bom_import(osv.osv_memory):
                 childs.append((0, 0, parsed_row))
             #=========check the product existing============
             product = None
-            if id_idx < 0 or not row_data[id_idx] or row_data[id_idx] == '':
+            common_bom_id = None
+            common_bom = None
+            if common_bom_idx >= 0 and row_data[common_bom_idx].upper() == 'Y':
+                #find the common bom
+                ids = bom_obj.search(cr,uid,[('code','=',row_data[part_no_idx]),('is_common','=',True)],context=context)
+                if not ids or len(ids) == 0:
+                    raise osv.except_osv(_('Error!'), _('the common BOM of row %s does not exist'%(i+1,)))
+                common_bom_id = ids[0]
+                common_bom = bom_obj.browse(cr, uid, common_bom_id, context=context)
+            elif id_idx < 0 or not row_data[id_idx] or row_data[id_idx] == '':
                 #if there is no id data, then use default_code to get product id
                 ids = prod_obj.search(cr,uid,[('default_code','=',row_data[part_no_idx])],context=context)
                 if not ids or len(ids) == 0:
@@ -178,19 +200,44 @@ class bom_import(osv.osv_memory):
                 quantity = str(quantity)
                 if quantity == '':
                     quantity = '0'
-            print float(quantity)
             if not pattern_number.match(quantity) or float(quantity) == 0:
                 raise osv.except_osv(_('Error!'), _('the quantity of row %s must be a number and larger than zero!'%(i+1,)))
             
-            #=========set the row data============
+            #=========check the bom name============
             bom_name = row_data[bom_name_idx]
-            if not bom_name or bom_name == '':
-                bom_name = product.name
-            parsed_row.update({'product_id':product.id,
-                             'product_uom':product.uom_id.id,
-                            'name':bom_name,
-                            'code':level_no,
-                            'product_qty':quantity,})
+            if (not bom_name or bom_name == ''):
+                if product:
+                    bom_name = product.name
+                elif common_bom:
+                    bom_name = common_bom.name
+                    
+            #=========check the sequence============
+            sequence = 0
+            if sequence_idx >= 0:
+                sequence = row_data[sequence_idx]
+                pattern_number = re.compile(r'\d+\.*\d*$')
+                if sequence is not types.StringType:
+                    sequence = str(sequence)
+                    if sequence == '':
+                        sequence = '0'
+                if sequence != '0' and not pattern_number.match(sequence):
+                    raise osv.except_osv(_('Error!'), _('the sequence of row %s must be a number!'%(i+1,)))
+            
+            
+            #=========set the row data============
+                    
+            if common_bom_id:
+                parsed_row.update({'create_from_common':True,
+                                   'common_bom_id':common_bom_id,
+                                'name':'[%s]%s'%(level_no,bom_name),
+                                'product_qty':quantity,
+                                'sequence':int(float(sequence))})
+            else:
+                parsed_row.update({'product_id':product.id,
+                                 'product_uom':product.uom_id.id,
+                                'name':'[%s]%s'%(level_no,bom_name),
+                                'product_qty':quantity,
+                                'sequence':int(float(sequence))})
             parsed_rows.update({level_no:parsed_row})
         
         #having mrp_bom_id: do top BOM updating
@@ -213,4 +260,19 @@ class bom_import(osv.osv_memory):
                 'context':context,
             }   
 
+class mrp_bom(osv.osv):
+    _inherit = 'mrp.bom'  
+    def create(self, cr, uid, vals, context=None):
+        if 'create_from_common' in vals and 'common_bom_id' in vals:
+            if context is None:
+                context = {}
+            ctx_clone = context.copy()
+            ctx_clone.update({'add_common_bom':True})
+            bom_obj = self.pool.get('mrp.bom')
+            #clone the data
+            clone_bom_id = bom_obj.copy(cr, uid, vals['common_bom_id'], context=ctx_clone)        
+            bom_obj.write(cr, uid, [clone_bom_id], vals, context=ctx_clone)            
+            return clone_bom_id
+        else:
+            return super(mrp_bom,self).create(cr, uid, vals, context)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

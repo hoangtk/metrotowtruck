@@ -7,11 +7,28 @@
             <field name="type">form</field>
             <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
             <field name="arch" type="xml">
-	            <data>
+	            <data>     
 	            	<!-- remove the groups attribute, make the name fields visible to all users  -->
-	                <field name="name" position="attributes">
-	                	<attribute name="groups"/>
+	                <field name="name" position="replace">
 	                </field>
+	                <field name="code" position="replace">
+	                </field>
+	                
+	            	<!-- make the 'Reference' and 'Name' as the title -->
+	            	<xpath expr="//group" position="before">	    	
+	                    <div class="oe_title">
+	                        <h1>
+	                        	<label for="name" class="oe_edit_only" string="BOM"/>
+	                            <field name="code" class="oe_inline"/>
+	                            <label string=" - "/>
+	                            <field name="name" class="oe_inline"/>
+	                        </h1>
+	                    </div>
+	                    <div class="oe_right oe_button_box" name="buttons">
+	                        <button name="attachment_tree_view" string="Documents" type="object"/>
+	                    </div>
+	            	</xpath>
+                    	       
 	                <!-- the common BOM flag -->
 	                <field name="type" position="after">
 	                	<field name="is_common" attrs="{'invisible':[('bom_id','!=',False)]}" onchange='onchange_is_common(is_common,bom_id)'/>
@@ -25,7 +42,6 @@
 	                	<field name="common_bom_id"/>
 	                </xpath>
 	                <notebook position="inside">
-                        <!-- <page string="Clone BOMs" attrs="{'invisible':[('is_common','=',False)]}"> -->
                         <page string="Clone BOMs">
                             <field name="clone_bom_ids" widget="one2many_list">
                                 <tree string="Clone BOMs" create='false' delete='false'>

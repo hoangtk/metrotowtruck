@@ -76,7 +76,7 @@ class add_common_bom(osv.osv_memory):
             #clone the data
             clone_bom_id = bom_obj.copy(cr, uid, line.common_bom_id.id, context=ctx_clone)        
             upt_data = {'bom_id':data.mrp_bom_id.id, 'name':line.name,'code':line.code,'product_qty':line.product_qty}
-            bom_obj.write(cr, uid, clone_bom_id, upt_data, context=ctx_clone)
+            bom_obj.write(cr, uid, [clone_bom_id], upt_data, context=ctx_clone)
             
         return {'type': 'ir.actions.act_window_close'}   
 

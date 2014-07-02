@@ -71,8 +71,30 @@ class sale_product(osv.osv):
             project_id = self.pool.get('project.project').create(cr, uid, vals, context=context)
             self.write(cr, uid, sale_product_id.id, {'project_ids':[(4, project_id)]},context=context)
     def button_create_mfg_order(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state':'draft'})                  
-
+        self.write(cr, uid, ids, {'state':'draft'})      
+            
+    def attachment_tree_view(self, cr, uid, ids, context):
+        project_ids = self.pool.get('project.project').search(cr, uid, [('mfg_ids', 'in', ids)])
+        task_ids = self.pool.get('project.task').search(cr, uid, [('project_id','in',project_ids)])
+        domain = [
+             '|','|', 
+             '&', ('res_model', '=', 'sale.product'), ('res_id', 'in', ids),
+             '&', ('res_model', '=', 'project.project'), ('res_id', 'in', project_ids),
+             '&', ('res_model', '=', 'project.task'), ('res_id', 'in', task_ids)
+        ]
+        res_id = ids and ids[0] or False
+        return {
+            'name': _('Attachments'),
+            'domain': domain,
+            'res_model': 'ir.attachment',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'tree,form',
+            'view_type': 'form',
+            'view_id': False,
+            'limit': 80,
+            'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
+        }
+          
 class mttl_serials(osv.osv):
     _inherit = "mttl.serials"
     _columns = {

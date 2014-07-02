@@ -7,30 +7,96 @@ from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from lxml import etree
 class mrp_bom(osv.osv):
     _inherit = 'mrp.bom'
-    _columns = {
-                'is_common': fields.boolean('Common?'),
-                'clone_bom_ids': fields.one2many('mrp.bom','common_bom_id','Clone BOMs'),
-                'common_bom_id': fields.many2one('mrp.bom','Common BOM',ondelete='cascade'),
-                }
-    _defaults = {
-        'is_common' : False,
-    }    
+    def _get_full_name(self, cr, uid, ids, name=None, args=None, context=None):
+        if context == None:
+            context = {}
+        res = {}
+        for elmt in self.browse(cr, uid, ids, context=context):
+            res[elmt.id] = self._get_one_full_name(elmt)
+        return res
+
+    def _get_one_full_name(self, elmt, level=20):
+        if level<=0:
+            return '...'
+        if elmt.bom_id:
+            parent_path = self._get_one_full_name(elmt.bom_id, level-1) + " / "
+        else:
+            parent_path = ''
+        return parent_path + elmt.name  
+       
     def _check_product(self, cr, uid, ids, context=None):
         """
             Override original one, to allow to have multiple lines with same Part Number
         """
-        return True 
+        return True   
+    _columns = {
+                'is_common': fields.boolean('Common?'),
+                'clone_bom_ids': fields.one2many('mrp.bom','common_bom_id','Clone BOMs'),
+                'common_bom_id': fields.many2one('mrp.bom','Common BOM',ondelete='cascade'),
+                'code': fields.char('Reference', size=16, required=True, readonly=True),
+                'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
+                }
+    _defaults = {
+        'is_common' : False,
+    }
+    _order = "sequence asc, id desc"
+    _sql_constraints = [
+        ('code_uniq', 'unique(code)', 'Reference must be unique!'),
+    ] 
     _constraints = [
         (_check_product, 'BoM line product should not be same as BoM product.', ['product_id']),
-    ] 
+        ] 
+    '''
+    SQL to update current code
+    update mrp_bom set code = to_char(id,'0000')
+    '''
+    def default_get(self, cr, uid, fields_list, context=None):
+        values = super(mrp_bom,self).default_get(cr, uid, fields_list, context)
+        values.update({'code':self.pool.get('ir.sequence').get(cr, uid, 'mrp.bom')})
+        return values
+    #add the code return in the name
+    def name_get(self, cr, user, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if not len(ids):
+            return []
+        result = []
+        for bom in self.browse(cr, user, ids, context=context):
+            if bom.id <= 0:
+                result.append((bom.id,''))
+                continue
+            result.append((bom.id,'[%s]%s'%(bom.code,self._get_one_full_name(bom))))
+                          
+        return result
+    #add the code search in the searching
+    def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+        if not args:
+            args = []
+        if name:
+            ids = self.search(cr, user, [('code','=',name)]+ args, limit=limit, context=context)
+            if not ids:
+                ids = self.search(cr, user, [('name','=',name)]+ args, limit=limit, context=context)
+            if not ids:
+                ids = set()
+                ids.update(self.search(cr, user, args + [('code',operator,name)], limit=limit, context=context))
+                if not limit or len(ids) < limit:
+                    # we may underrun the limit because of dupes in the results, that's fine
+                    ids.update(self.search(cr, user, args + [('name',operator,name)], limit=(limit and (limit-len(ids)) or False) , context=context))
+                ids = list(ids)
+        else:
+            ids = self.search(cr, user, args, limit=limit, context=context)
+        result = self.name_get(cr, user, ids, context=context)
+        return result            
     def copy_data(self, cr, uid, id, default=None, context=None):
         res = super(mrp_bom,self).copy_data(cr, uid, id, default=default, context=context)
         if res:
-            res.update({'clone_bom_ids':False,'bom_id':False})
+            res.update({'clone_bom_ids':False,'bom_id':False,'code':self.pool.get('ir.sequence').get(cr, uid, 'mrp.bom')})
         return res    
     def write(self, cr, uid, ids, vals, context=None):
-        if isinstance(ids, (int, long)):
-            ids = [ids]    
+        if isinstance(ids,(int,long)):
+            ids = [ids]
         comp_to_master = 'bom_id' in vals and vals['bom_id'] == False
         if comp_to_master:
             #For the component changing to master BOM, the common bom id will be clear automatically.
@@ -102,6 +168,27 @@ class mrp_bom(osv.osv):
     def fields_get(self, cr, uid, allfields=None, context=None, write_access=True):
         resu = super(mrp_bom,self).fields_get(cr, uid, allfields, context, write_access)
         return resu
+    def attachment_tree_view(self, cr, uid, ids, context):
+        project_ids = self.pool.get('project.project').search(cr, uid, [('bom_id', 'in', ids)])
+        task_ids = self.pool.get('project.task').search(cr, uid, ['|',('bom_id', 'in', ids),('project_id','in',project_ids)])
+        domain = [
+             '|','|', 
+             '&', ('res_model', '=', 'mrp.bom'), ('res_id', 'in', ids),
+             '&', ('res_model', '=', 'project.project'), ('res_id', 'in', project_ids),
+             '&', ('res_model', '=', 'project.task'), ('res_id', 'in', task_ids)
+        ]
+        res_id = ids and ids[0] or False
+        return {
+            'name': _('Attachments'),
+            'domain': domain,
+            'res_model': 'ir.attachment',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'tree,form',
+            'view_type': 'form',
+            'view_id': False,
+            'limit': 80,
+            'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
+        }    
 '''
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         result = super(mrp_bom,self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu)

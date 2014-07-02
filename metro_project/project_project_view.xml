@@ -16,6 +16,7 @@
 			                    <label for="bom_id"/>
 			                    <div>
 			                        <field name="bom_id" class="oe_inline"/> 
+				            		<button string="Import BOM" name="%(metro_mrp.action_view_bom_import)d" type="action"/>
 			                    </div>	                    		
                     		</group>
                     		<group>
@@ -23,7 +24,7 @@
                     		</group>
                     	</group>
                     	<label for='components'/>
-	                    <field name="components" widget='one2many_tree'/>
+	                    <field name="bom_components" widget='one2many_tree'/>
                     </page>
             	</page>
             </field>
@@ -34,10 +35,34 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
-				<field name="planned_hours" position="after">
-					<field name="bom_id"/>
-					<field name="product_id"/>
-				</field>          	         
+				<field name="description" position="replace">
+				</field>
+				<xpath expr="//notebook" position="before">
+					<field name="description" attrs="{'readonly':[('state','=','done')]}" placeholder="Add a Description..."/>
+				</xpath>
+				<xpath expr="//page[@string='Description']" position="attributes">
+					<attribute name="string">Work Hours</attribute>
+					<attribute name="name">work_hours</attribute>
+				</xpath>
+				<xpath expr="//page[@string='Extra Info']"  position="before">
+                    <page string="Bill of Material" name="bom">
+			            <!-- <field name="is_project_bom"/> --> 
+                    	<group>
+                    		<group>
+			                    <label for="bom_id"/>
+			                    <div>			                    
+			                        <field name="bom_id" class="oe_inline"/> 
+				            		<button string="Import BOM" name="%(metro_mrp.action_view_bom_import)d" type="action"/>
+			                    </div>	                    		
+                    		</group>
+                    		<group>
+	                    		<field name="product_id"/>
+                    		</group>
+                    	</group>
+                    	<label for='components'/>
+	                    <field name="components" widget='one2many_tree'/>
+                    </page>
+				</xpath>        	         
             </field>
         </record>           
     </data>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <!-- Sequences for purchase.order --> 
+        <record id="seq_type_mrp_bom" model="ir.sequence.type">
+            <field name="name">MRP BOM</field>
+            <field name="code">mrp.bom</field>
+        </record>
+        <record id="seq_mrp_bom" model="ir.sequence">
+            <field name="name">MRP BOM</field>
+            <field name="code">mrp.bom</field>
+            <field name="padding">4</field>
+        </record>
+    </data>
+</openerp>

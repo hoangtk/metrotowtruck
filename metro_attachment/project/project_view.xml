@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="arch" type="xml">
                 <notebook position="inside">
-                    <page string="Attachments">
+                    <page string="Documents">
                         <field name="attachment_lines" nolabel="1" colspan="4"
                                 context="{'o2m_attach': True}">
                            <tree string="Attachment">

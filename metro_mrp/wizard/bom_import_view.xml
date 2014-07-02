@@ -40,17 +40,17 @@
             id="mrp.menu_mrp_product_form" 
             action="mrp.product_supply_method_produce"
             parent="mrp.menu_mrp_bom"
-            sequence="12"/>    
-            
+            sequence="12"/>  
+              
         <record id="mrp_bom_import_form_view" model="ir.ui.view">
             <field name="name">mrp_bom_import_form_view</field>
             <field name="model">mrp.bom</field>
-            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="inherit_id" ref="metro_mrp_bom_form_view"/>
             <field name="arch" type="xml">
-            	<field name="company_id" position="after">
+            	<div name="buttons" position="inside">
             		<button string="Import BOM" name="%(action_view_bom_import)d" type="action" attrs="{'invisible':[('bom_id','!=',False)]}"/>
-            	</field>
+            	</div>
             </field>
-        </record>
+        </record>  
     </data>
 </openerp>
