@@ -36,6 +36,7 @@ Add a specific View for Supplier
     'depends': ['product','stock'],#TO REMOVE joomlaconnector for standard
     'data': [
         'product_view.xml',
+        'res_partner_view.xml',
     ],
     'test': [],
     'demo': [],

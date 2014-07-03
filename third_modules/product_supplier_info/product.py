@@ -60,6 +60,7 @@ class product_supplierinfo(osv.osv):
         return {'value': {'product_id': prod.product_tmpl_id.id}}
     
     _columns={
+        'name' : fields.many2one('res.partner', 'Supplier', required=False,domain = [('supplier','=',True)], ondelete='cascade', help="Supplier of this product"),              
         'product_id' : fields.many2one('product.template', 'Product', select=1, ondelete='cascade', required=True),
         'product_product_id' : fields.function(_calc_products, type='many2one', relation='product.product', 
                                                string='Product', multi="product_info", store=True,fnct_inv=_product_product_write,),

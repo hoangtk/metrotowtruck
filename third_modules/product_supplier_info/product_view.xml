@@ -45,6 +45,9 @@
             <field name="model">product.supplierinfo</field>
             <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
             <field name="arch" type="xml">
+                <field name="name" position="attributes">
+                	<attribute name="required">1</attribute>
+                </field>
                 <xpath expr="//field[@name='sequence']" position="before">
                     <!-- <field name="product_id" invisible="1"/> -->
                     <!-- <field name="product_product_id" on_change="onchange_product_product_id(product_product_id)"  invisible="not context.get('use_product_product')"/> -->
