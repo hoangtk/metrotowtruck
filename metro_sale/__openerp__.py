@@ -45,6 +45,7 @@
         'sale_report.xml',
         'sale_product_view.xml',
         'crm_view.xml',
+        'sale_product_workflow.xml'
     ],
     'test': [],
     'demo': [],

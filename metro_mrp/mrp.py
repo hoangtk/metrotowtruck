@@ -208,7 +208,23 @@ class mrp_bom(osv.osv):
             result['arch'] = etree.tostring(eview, pretty_print=True)
                         
         return result        
-'''     
+'''  
+class mrp_production(osv.osv):
+    _inherit = 'mrp.production'
+    _columns = {
+        'mfg_ids': fields.many2many('sale.product', 'mrp_prod_id_rel','mrp_prod_id','mfg_id',string='MFG IDs',),
+    }    
+    def _default_stock_location(self, cr, uid, context=None):
+        loc_ids = self.pool.get('stock.location').search(cr, uid, [('usage','=','internal')], context=context)
+        if loc_ids:
+            return loc_ids[0]
+        else:
+            return False
+    _defaults = {
+        'location_src_id': _default_stock_location,
+        'location_dest_id': _default_stock_location
+    }    
+               
 class product_product(osv.osv):
     _inherit = "product.product"
         

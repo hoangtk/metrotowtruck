@@ -12,6 +12,15 @@
                 <field name="res_name" />
                 <field name="attach_type_id"/>
         	</field>
+        	<field name="create_date" position="attributes">
+                <attribute name="groups" />
+        	</field>
+        	<field name="write_date" position="attributes">
+                <attribute name="groups" />
+        	</field>
+        	<field name="company_id" position="attributes">
+                <attribute name="groups">base.group_multi_company"</attribute>
+        	</field>
         </field>
     </record>
     <!-- Add resource data search -->

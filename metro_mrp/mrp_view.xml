@@ -26,6 +26,7 @@
 	                    </div>
 	                    <div class="oe_right oe_button_box" name="buttons">
 	                        <button name="attachment_tree_view" string="Documents" type="object"/>
+	                        <button name="%(mrp.action2)d" string="Bill of Materials Structure" type="action"/>
 	                    </div>
 	            	</xpath>
                     	       
@@ -128,7 +129,7 @@
        	</record>
 	<!-- Add BOM Name to display -->       	 
 		<record id="metro_mrp_bom_component_tree_view" model="ir.ui.view">
-            <field name="name">"metro_mrp_bom_component_tree_view"</field>
+            <field name="name">metro_mrp_bom_component_tree_view</field>
             <field name="model">mrp.bom</field>
             <field name="inherit_id" ref="mrp.mrp_bom_component_tree_view"/>
             <field name="arch" type="xml">
@@ -145,8 +146,49 @@
 	                </field>
 	            </data>
         	</field>
-       	</record>       	
-       	       	
+       	</record> 
+	<!-- Manufacture Production Order -->       	      	
+		<record id="metro_mrp_production_form_view" model="ir.ui.view">
+            <field name="name">metro_mrp_production_form_view</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+	            <data>
+	            	<!-- Add the date related fields-->
+	                <field name="date_start" position="replace">
+	                </field>
+	                <field name="date_finished" position="replace">
+	                </field>
+                    <field name="date_planned" position="after">
+                    	<field name="date_start"/>
+                    	<field name="date_finished"/>
+                    	<field name="hour_total"/>
+                    	<field name="cycle_total"/>
+                    </field>
+                    <!-- adjust the location field position -->
+	                <xpath expr="//group[@groups='stock.group_locations']" position="replace">
+	                </xpath>
+                    <field name="origin" position="after">
+                    	<field name="mfg_ids" domain="[('state','in',('confirmed','engineer'))]" widget="many2many_tags"/>
+                        <field name="location_src_id" domain="[('usage','=','internal')]" on_change="location_id_change(location_src_id,location_dest_id)"/>
+                        <field name="location_dest_id" domain="[('usage','=','internal')]"/>
+                    </field>
+                    <!-- Only the products with 'Manufacture' supply method can be produce-->
+                    <field name="product_id" position="replace">
+                    	<field name="product_id" on_change="product_id_change(product_id)" 
+                    	domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]" class="oe_inline"/>                    	
+                    </field>
+	            </data>
+        	</field>
+       	</record>
+        <!-- Fix the BOM structure tree displaying issue, add the view_type&view_mode -->                           
+        <record id="mrp.action2" model="ir.actions.act_window">
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">mrp.bom</field>
+            <field name="view_type">tree</field>
+            <field name="view_mode">tree</field>
+        </record>
+                                                   	       	
 	<!-- Add 'material' field to product -->                                 
 		<record id="bom_product_mfg_view" model="ir.ui.view">
             <field name="name">bom_product_mfg_view</field>

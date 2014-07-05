@@ -473,6 +473,7 @@ class stock_inventory_line(osv.osv):
         'state': fields.related('inventory_id','state',type='selection',selection=(('draft', 'Draft'), ('cancel','Cancelled'), ('confirm','Confirmed'), ('done', 'Done')),
                                 string='Status',readonly=True),
     }
+    #override the parent's _default_stock_location, to avoid the location reading right issue under multi company's environment 
     def _default_stock_location(self, cr, uid, context=None):
         loc_ids = self.pool.get('stock.location').search(cr, uid, [('usage','=','internal')], context=context)
         if loc_ids:
@@ -483,29 +484,35 @@ class stock_inventory_line(osv.osv):
     _defaults = {
         'location_id': _default_stock_location
     }    
-#stock physical inventroy move
-#class stock_inventory_move(osv.osv):
-#    _name = "stock.inventory.move"
-##    _table = "stock_inventory_move_rel"
-#    _table = "stock_move"
-#    _columns = {   
-#        'inventory_id': fields.many2one('stock.inventory','Inventory Referance'),
-#        'inventory_state': fields.related('inventory_id','Inventory State',type='selection',selection=(('draft', 'Draft'), ('cancel','Cancelled'), ('confirm','Confirmed'), ('done', 'Done')),
-#                                string='Status',readonly=True),
-#        'move_id': fields.many2one('stock.move','Inventory Referance'),
-#        'product_id': fields.related('move_id','product_id',type='many2one',relation="product.product",String="Product",readonly=True,),
-#        'product_qty': fields.related('move_id','product_qty',type='float',String="Quantity",readonly=True,),
-#        'location_id': fields.related('move_id','location_id',type='many2one',relation="stock.location",String="Source Location",readonly=True,),
-#        'location_dest_id': fields.related('move_id','location_dest_id',type='many2one',relation="stock.location",String="Destination Location",readonly=True,),
-#        'state': fields.related('move_id','state',type='selection',selection=[('draft', 'New'),
-#                                   ('cancel', 'Cancelled'),
-#                                   ('waiting', 'Waiting Another Move'),
-#                                   ('confirmed', 'Waiting Availability'),
-#                                   ('assigned', 'Available'),
-#                                   ('done', 'Done'),
-#                                   ],String="Destination Location",readonly=True,),
-#    }
-           
+
+from openerp.addons.procurement.procurement import stock_warehouse_orderpoint as stock_warehouse_orderpoint_sup
+
+def stock_warehouse_orderpoint_default_get(self, cr, uid, fields, context=None):
+    res = super(stock_warehouse_orderpoint_sup, self).default_get(cr, uid, fields, context)
+    # default 'warehouse_id' and 'location_id'
+    if 'warehouse_id' not in res:
+        '''
+        override the parent's logic, to avoid the warehouse reading right issue under multi company's environment
+        '''
+#            warehouse = self.pool.get('ir.model.data').get_object(cr, uid, 'stock', 'warehouse0', context)
+        warehouse_ids = self.pool.get('stock.warehouse').search(cr, uid, [],context=context)
+        res['warehouse_id'] = warehouse_ids[0]
+    if 'location_id' not in res:
+        warehouse = self.pool.get('stock.warehouse').browse(cr, uid, res['warehouse_id'], context)
+        res['location_id'] = warehouse.lot_stock_id.id
+    return res
+
+stock_warehouse_orderpoint_sup.default_get = stock_warehouse_orderpoint_default_get      
+
+class stock_warehouse_orderpoint(osv.osv):
+    _inherit = "stock.warehouse.orderpoint"
+    def create(self, cr, uid, vals, context=None):
+        if not 'product_uom' in vals:
+            prod = self.pool.get('product.product').browse(cr, uid, vals['product_id'], context=context)
+            if prod:
+                vals.update({'product_uom':prod.uom_id.id})
+        return super(stock_warehouse_orderpoint,self).create(cr, uid, vals, context)
+      
 def deal_args(obj,args):  
     new_args = []
     for arg in args:

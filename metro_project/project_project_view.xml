@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
             	<page name="team" position="before">
                     <page string="MFG IDs" name="mfg_ids">
-	                    <field name="mfg_ids"/>
+	                    <field name="mfg_ids" domain="[('state','in',('confirmed','engineer'))]"/>
                     </page>
                     <page string="Bill of Material" name="bom">
                     	<group>
@@ -17,7 +17,8 @@
 			                    <div>
 			                        <field name="bom_id" class="oe_inline"/> 
 				            		<button string="Import BOM" name="%(metro_mrp.action_view_bom_import)d" type="action"/>
-			                    </div>	                    		
+			                    </div>
+								<field name="single_mrp_prod_order"/>  		
                     		</group>
                     		<group>
 	                    		<field name="product_id"/>
