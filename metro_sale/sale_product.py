@@ -30,6 +30,8 @@ class sale_product(osv.osv):
                    ('manufacture','Manufacture'),
                    ('done','Done'),
                    ('cancelled','Cancel')], 'Status', track_visibility='onchange'),
+        'config_change_ids': fields.related('mto_design_id','change_ids',type='one2many', relation='mto.design.change', string='Changes'),
+        'date_planned': fields.date('Scheduled Date', required=True, select=True, readonly=True, states=STATES_COL),        
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
@@ -37,6 +39,23 @@ class sale_product(osv.osv):
     _defaults = {'state':'draft',
                  'active':True,'name':'/'}
     _order = 'id desc'
+    
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        res = super(sale_product,self).copy_data(cr, uid, id, default=default, context=context)
+        if res:
+            res.update({'name': self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/',
+                        'serial_id':None,
+                        'project_ids':None,
+                        'mrp_prod_ids':None})
+        return res 
+        
+    def create(self, cr, uid, data, context=None):       
+        if data.get('name','/')=='/':
+            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'
+                        
+        resu = super(sale_product, self).create(cr, uid, data, context)
+        return resu 
+            
     def create(self, cr, uid, data, context=None):       
         if data.get('name','/')=='/':
             data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'
@@ -103,7 +122,8 @@ class sale_product(osv.osv):
                 'product_qty':1,
                 'product_uom':sale_product_id.product_id.uom_id.id,
                 'routing_id':sale_product_id.bom_id.routing_id and sale_product_id.bom_id.routing_id.id or False,
-                'origin':sale_product_id.name,}
+                'origin':sale_product_id.name,
+                'date_planned':sale_product_id.date_planned}
         mrp_prod_id = self.pool.get('mrp.production').create(cr, uid, vals, context=context)
         self.write(cr, uid, sale_product_id.id, {'mrp_prod_ids':[(4, mrp_prod_id)]},context=context)  
         return mrp_prod_id

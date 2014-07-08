@@ -50,28 +50,41 @@ class project_project(osv.osv):
                     raise osv.except_osv(_('Error!'), _('Project "%s" can not be close, the task "%s" is opening.'%(proj.name,task.name)))
         resu = super(project_project,self).set_done(cr, uid, ids, context)
         '''
-        after project is done, trigger the 'act_button_manufacture' of the project's sale product
+        after project is done, trigger the 'act_button_manufacture' of the project's sale product ID
         ''' 
         wf_service = netsvc.LocalService("workflow")
         sale_prod_obj = self.pool.get('sale.product')  
         for proj in self.browse(cr, uid, ids):
             vals = {'bom_id':proj.bom_id.id, 'product_id':proj.bom_id.product_id.id}
+            #the product quantity for the manufacture order.
+            prod_cnt = 0
+            #the date_planned for the new manufacture
+            date_planned = None
+            new_mfg_prod_order_id = None
             if proj.single_mrp_prod_order:
                 #generate one single mrp production order for all MFG IDs
-                new_mfg_prod_order_id = None
                 for mfg_id in proj.mfg_ids:
                     if not mfg_id.mrp_prod_ids:
                         #find one sale_product without mrp production order, generate one order and get the order id
                         sale_prod_obj.write(cr, uid, mfg_id.id, vals, context=context)
                         new_mfg_prod_order_id = sale_prod_obj.create_mfg_order(cr, uid, mfg_id.id, context=context)
-                        self.pool.get('mrp.production').write(cr, uid, [new_mfg_prod_order_id], {'origin':proj.name}, context=context)
+                        prod_cnt += 1
+                        date_planned = mfg_id.date_planned
                         break
                 if new_mfg_prod_order_id:
                     vals.update({'mrp_prod_ids':[(4, new_mfg_prod_order_id)]})
             
             for mfg_id in proj.mfg_ids:
-                sale_prod_obj.write(cr, uid, mfg_id.id, vals, context=context)
-                wf_service.trg_validate(uid, 'sale.product', mfg_id.id, 'button_manufacture', cr)
+                if not mfg_id.mrp_prod_ids:
+                    sale_prod_obj.write(cr, uid, mfg_id.id, vals, context=context)
+                    wf_service.trg_validate(uid, 'sale.product', mfg_id.id, 'button_manufacture', cr)
+                    prod_cnt += 1
+                    if not date_planned or mfg_id.date_planned < date_planned:
+                        date_planned = mfg_id.date_planned
+                        
+            if new_mfg_prod_order_id:
+                mrp_order_vals = {'origin':proj.name,'product_qty':prod_cnt, 'date_planned':date_planned}
+                self.pool.get('mrp.production').write(cr, uid, [new_mfg_prod_order_id], mrp_order_vals, context=context)                    
                                 
         return resu
         

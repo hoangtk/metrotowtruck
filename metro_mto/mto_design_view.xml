@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  product_custom_attributes for OpenERP
-  Copyright (C) 2011-2013 Akretion (http://www.akretion.com/)
-  @author: Benoît GUILLOT <benoit.guillot@akretion.com>
-  The licence is in the file __openerp__.py
--->
-
 <openerp>
     <data>
 <!--  product Configuration -->
@@ -60,7 +53,10 @@
                         </page>
 	                    <page string="Images">
 	                        <field name="multi_images" widget="image_multi"/>
-	                    </page>                                               		
+	                    </page>
+	                    <page string="Changes">
+				        	<field name="change_ids"/>
+	                    </page> 		
                     </notebook>
                     <footer>
                         <button name="save_and_close_design" string="Save and Close" type="object" class="oe_highlight"/>
@@ -82,6 +78,95 @@
                 
          <menuitem
              action="mto_design_form_action" id="menu_mto_design_form"
-             parent="metro_mto.menu_mto_design" sequence="1"/>            
+             parent="metro_mto.menu_mto_design" sequence="1"/>
+                  
+<!-- product configuration changing log -->        
+		<record id="mto_design_change_source_view_tree" model="ir.ui.view">
+		    <field name="name">mto.design.change.source.tree</field>
+		    <field name="model">mto.design.change.source</field>
+		    <field name="arch" type="xml">
+		        <tree string="Product Configuration Changing Sources" editable="bottom">
+		            <field name="name"/>
+		            <field name="active"/>
+		        </tree>
+		    </field>
+		</record>
+		<record id="mto_design_change_source_view_form" model="ir.ui.view">
+		    <field name="name">mto.design.change.source.form</field>
+		    <field name="model">mto.design.change.source</field>
+		    <field name="arch" type="xml">
+		        <form string="Product Configuration Changing Sources" version="7.0">
+		            <group>
+		                <field name="name"/>
+		                <field name="active"/>
+		            </group>
+		        </form>
+		    </field>
+		</record>
+		<!-- meto.design.change -->
+		<record id="mto_design_change_view_tree" model="ir.ui.view">
+		    <field name="name">mto.design.change.tree</field>
+		    <field name="model">mto.design.change</field>
+		    <field name="arch" type="xml">
+		        <tree string="Product Configuration Changing">
+	       			<field name="name"/>
+	       			<field name="source_id"/>
+	       			<field name="change_date"/>
+	       			<field name="user_id"/>
+	       			<field name="cost_diff"/>
+		        </tree>
+		    </field>
+		</record>
+		<record id="mto_design_change_view_form" model="ir.ui.view">
+		    <field name="name">mto.design.change.form</field>
+		    <field name="model">mto.design.change</field>
+		    <field name="arch" type="xml">
+		        <form string="Product Configuration Changing" version="7.0">
+		            <group>
+	        			<field name="name"/>
+	        			<field name="source_id"/>
+	        			<field name="change_date"/>
+	        			<field name="user_id"/>
+	        			<field name="cost_diff"/>
+		            </group>
+		            <label for="change_list"/>
+	        		<field name="change_list"/>
+		        </form>
+		    </field>
+		</record>	
+					        			
+		<!-- mto.design.change.source -->
+		<record id="mto_design_change_source_view_tree" model="ir.ui.view">
+		    <field name="name">mto.design.change.source.tree</field>
+		    <field name="model">mto.design.change.source</field>
+		    <field name="arch" type="xml">
+		        <tree string="Product Configuration Changing Sources" editable="bottom">
+		            <field name="name"/>
+		            <field name="active"/>
+		        </tree>
+		    </field>
+		</record>
+		<record id="mto_design_change_source_view_form" model="ir.ui.view">
+		    <field name="name">mto.design.change.source.form</field>
+		    <field name="model">mto.design.change.source</field>
+		    <field name="arch" type="xml">
+		        <form string="Product Configuration Changing Sources" version="7.0">
+		            <group>
+		                <field name="name"/>
+		                <field name="active"/>
+		            </group>
+		        </form>
+		    </field>
+		</record>
+		<record id="mto_design_change_source_action" model="ir.actions.act_window">
+		    <field name="name">Change Sources</field>
+		    <field name="res_model">mto.design.change.source</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+		</record>
+		
+		<menuitem action="mto_design_change_source_action" id="menu_mto_design_change_source" 
+		parent="metro_mto.menu_mto_design" sequence="20"/>
+		                      
     </data>
 </openerp>

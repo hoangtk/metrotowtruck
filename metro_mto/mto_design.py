@@ -4,6 +4,7 @@ from openerp.tools import resolve_attr
 from tools.translate import translate
 from lxml import etree
 import openerp.addons.decimal_precision as dp
+import time
 
 class mto_design(osv.osv):
     _name = "mto.design"
@@ -14,6 +15,7 @@ class mto_design(osv.osv):
         'description': fields.text('Description'),
         'multi_images': fields.text("Multi Images"),
         'design_tmpl_id': fields.many2one('attribute.set', 'Template', domain=[('type','=','design')], required=True),
+        'change_ids': fields.one2many('mto.design.change','mto_design_id', string='Changes')
     }    
     _defaults={'name':'/'}
     def _attr_grp_ids(self, cr, uid, ids, field_names, arg=None, context=None):
@@ -141,5 +143,37 @@ class mto_design(osv.osv):
             weight_total = design.design_tmpl_id.weight_standard + weight_total
             cr.execute("""update mto_design set
                     list_price=%s, weight=%s where id=%s""", (price_total, weight_total, design.id))
-            
-       
+
+    
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        res = super(mto_design,self).copy_data(cr, uid, id, default=default, context=context)
+        if res:
+            res.update({'change_ids':False})
+        return res  
+                
+class mto_design_change(osv.osv):
+    _name = "mto.design.change"
+    _description = "Product Configuration Changing Log"
+    _order = "change_date desc"
+    _columns = {
+        'mto_design_id': fields.many2one('mto.design','Configuration',required=True),
+        'name': fields.char('Reason', size=128,required=True),
+        'source_id': fields.many2one('mto.design.change.source','Source',required=True),
+        'change_date': fields.date('Change Date',required=True),
+        'user_id': fields.many2one('res.users','Responsible User',required=False),
+        'cost_diff': fields.float('Cost Changing'),
+        'change_list': fields.text('Changing List',required=True),      
+    }
+    _defaults={'change_date': lambda *args: time.strftime('%Y-%m-%d'),
+               'user_id':lambda obj, cr, uid, context: uid,}
+        
+class mto_design_change_source(osv.osv):
+    _name = "mto.design.change.source"
+    _description = "Changing Sources"
+    _columns = {
+        'name': fields.char('Source Name', size=64, required=True),
+        'active': fields.boolean('Active'),
+    }
+    _defaults = {
+        'active': lambda *a: 1,
+    }         

@@ -211,19 +211,40 @@ class mrp_bom(osv.osv):
 '''  
 class mrp_production(osv.osv):
     _inherit = 'mrp.production'
+    _order = 'id desc'
     _columns = {
         'mfg_ids': fields.many2many('sale.product', 'mrp_prod_id_rel','mrp_prod_id','mfg_id',string='MFG IDs',),
+        'location_src_id': fields.property(
+            'stock.location',
+            type='many2one',
+            relation='stock.location',
+            string="Raw Materials Location",
+            view_load=True,
+            required=True,
+            readonly=True, 
+            states={'draft':[('readonly',False)]},
+            help="Location where the system will look for components."),
+        'location_dest_id': fields.property(
+            'stock.location',
+            type='many2one',
+            relation='stock.location',
+            string="Finished Products Location",
+            view_load=True,
+            required=True,
+            readonly=True, 
+            states={'draft':[('readonly',False)]},
+            help="Location where the system will stock the finished products."),
     }    
-    def _default_stock_location(self, cr, uid, context=None):
-        loc_ids = self.pool.get('stock.location').search(cr, uid, [('usage','=','internal')], context=context)
-        if loc_ids:
-            return loc_ids[0]
-        else:
-            return False
-    _defaults = {
-        'location_src_id': _default_stock_location,
-        'location_dest_id': _default_stock_location
-    }    
+#    def _default_stock_location(self, cr, uid, context=None):
+#        loc_ids = self.pool.get('stock.location').search(cr, uid, [('usage','=','internal')], context=context)
+#        if loc_ids:
+#            return loc_ids[0]
+#        else:
+#            return False
+#    _defaults = {
+#        'location_src_id': _default_stock_location,
+#        'location_dest_id': _default_stock_location
+#    }    
                
 class product_product(osv.osv):
     _inherit = "product.product"

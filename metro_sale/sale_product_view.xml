@@ -8,6 +8,7 @@
             <tree string="Sale Product IDs">
                 <field name="name"/>
                 <field name="source"/>
+			    <field name="date_planned"/>	
                 <field name="mto_design_id"/>
                 <field name="product_id"/>
                 <field name="bom_id"/>
@@ -47,6 +48,7 @@
 	            	<group>
 	            		<group>
 			                <field name="source"/>
+			                <field name="date_planned"/>			                
 			                <field name="mto_design_id"/>
 			                <field name="product_id" on_change="product_id_change(product_id)" 
                     			domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]" 
@@ -61,7 +63,10 @@
 			                <field name="create_date"/>
 			                <!-- <field name="active" groups="mrp.group_mrp_manager"/> -->
 	            		</group>
-	            	</group>     
+	            	</group>
+		        	<label for="config_change_ids"/>
+		        	<field name="config_change_ids" readonly="1"/>
+		        	<label for="note"/>  
 		        	<field name="note" placeholder="Description..."/>           
                 </sheet>
                 <div class="oe_chatter">
@@ -78,9 +83,25 @@
                 <search string="Search Sale Products">
                     <field name="name" string="ID"/>
 	                <field name="mto_design_id"/>
+	                <field name="product_id"/>
 	                <field name="state"/>
-	                <field name="note"/>
+	                <field name="source"/>
                     <field name="create_uid" />
+                    
+                    <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter icon="terp-document-new" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                    <separator/>
+                    <filter icon="terp-document-new" name="engineer" string="Engineering" domain="[('state','=','engineer')]"/>
+                    <filter icon="terp-document-new" name="manufacture" string="Manufacture" domain="[('state','=','manufacture')]"/>
+                    <separator/>
+                    <filter icon="terp-document-new" name="done" string="Done" domain="[('state','=','done')]"/>
+                    <filter icon="terp-document-new" name="cancelled" string="Cancel" domain="[('state','=','cancelled')]"/>
+                    
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-partner" context="{'group_by':'state'}"/>
+                        <filter string="Source" icon="terp-partner" context="{'group_by':'source'}"/>
+                        <filter string="Product" icon="terp-partner" context="{'group_by':'product_id'}"/>
+                    </group>
                 </search>
             </field>
     </record>   
@@ -127,6 +148,6 @@
             </field>
          </field>
 	</record>  
-	  
+	
     </data>
 </openerp>
