@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>   
+    <data>  
+        <record id="metro_view_project_tree" model="ir.ui.view">
+            <field name="name">metro_view_project_tree</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="arch" type="xml">
+            	<field name="name" position='after'>
+            		<field name="mfg_ids" widget='many2many_tags'/>
+            	</field>
+        	</field>    
+       	</record> 
         <record model="ir.ui.view" id="metro_project_form_view">
             <field name="name">metro_project_form_view</field>
             <field name="model">project.project</field>

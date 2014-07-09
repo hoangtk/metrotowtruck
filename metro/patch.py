@@ -183,7 +183,46 @@ def _sequence_next(self, cr, uid, seq_ids, context=None):
     return interpolated_prefix + '%%0%sd' % seq['padding'] % seq['number_next'] + interpolated_suffix
     
 ir_sequence._next =  _sequence_next
-   
+
+'''
+Add the 'domain_fnct' to one2many field's property, to handle the dynamic domain
+'''
+from openerp.osv import fields
+def one2many_get(self, cr, obj, ids, name, user=None, offset=0, context=None, values=None):
+    if context is None:
+        context = {}
+    if self._context:
+        context = context.copy()
+    context.update(self._context)
+    if values is None:
+        values = {}
+
+    res = {}
+    for id in ids:
+        res[id] = []
+
+    domain = self._domain(obj) if callable(self._domain) else self._domain
+    '''
+    Add the domain_fnct support for dynamic domain, used by mrp_bom.bom_routing_ids
+    the original domain can accept function by code: "domain = self._domain(obj) if callable(self._domain) else self._domain"
+    , but that domain method will only accept one 'self' parameter (self._domain(obj)) 
+    For the new method signature, it wil accept parameters: self, cr, uid, ids, field_name, context
+    Then we can use 'ids' to return the domain dynamically
+    '''
+    if hasattr(self,'domain_fnct') and self.domain_fnct:
+        domain = domain + self.domain_fnct(obj,cr,user,ids,name,context=None)
+    ids2 = obj.pool.get(self._obj).search(cr, user, domain + [(self._fields_id, 'in', ids)], limit=self._limit, context=context)
+    for r in obj.pool.get(self._obj)._read_flat(cr, user, ids2, [self._fields_id], context=context, load='_classic_write'):
+        if r[self._fields_id] in res:
+            res[r[self._fields_id]].append(r['id'])
+    return res
+    
+fields.one2many.get =  one2many_get
+
+
+'''
+Add the report download file name support
+'''   
 from osv import fields,osv,orm    
 class ir_action_report_xml(osv.osv):
     _name="ir.actions.report.xml"

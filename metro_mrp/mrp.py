@@ -28,13 +28,22 @@ class mrp_bom(osv.osv):
         """
             Override original one, to allow to have multiple lines with same Part Number
         """
-        return True   
+        return True  
+
+    def _domain_bom_routing(self, cr, uid, ids, field_name, context=None):
+        domain = []
+        if field_name == 'bom_routing_ids':
+            bom = self.read(cr, uid, ids[0], ['routing_id'],context=context)
+            if bom.get('routing_id'):
+                domain = domain + [('routing_id','=',bom.get('routing_id')[0])]
+        return domain 
     _columns = {
                 'is_common': fields.boolean('Common?'),
                 'clone_bom_ids': fields.one2many('mrp.bom','common_bom_id','Clone BOMs'),
                 'common_bom_id': fields.many2one('mrp.bom','Common BOM',ondelete='cascade'),
                 'code': fields.char('Reference', size=16, required=True, readonly=True),
                 'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
+                'bom_routing_ids': fields.one2many('mrp.bom.routing', 'bom_id', string='Routing BOM Matrix', domain_fnct=_domain_bom_routing),
                 }
     _defaults = {
         'is_common' : False,
@@ -234,7 +243,7 @@ class mrp_production(osv.osv):
             readonly=True, 
             states={'draft':[('readonly',False)]},
             help="Location where the system will stock the finished products."),
-    }    
+    }
 #    def _default_stock_location(self, cr, uid, context=None):
 #        loc_ids = self.pool.get('stock.location').search(cr, uid, [('usage','=','internal')], context=context)
 #        if loc_ids:
@@ -245,6 +254,25 @@ class mrp_production(osv.osv):
 #        'location_src_id': _default_stock_location,
 #        'location_dest_id': _default_stock_location
 #    }    
+
+class mrp_bom_routing(osv.osv):
+    _name = 'mrp.bom.routing'
+    _order = 'id desc'
+    '''
+    bom_comp_id:
+    the component is the BOM that need manufacture, can be:
+    1.same as bom_id
+    2.the sub bom_id's sub BOM having bom_lines
+    '''    
+    _columns = {
+        'bom_id': fields.many2one('mrp.bom', string='BOM', required=True),
+        'routing_id': fields.many2one('mrp.routing', string='Routing', required=True),
+        'routing_workcenter_id': fields.many2one('mrp.routing.workcenter', string='Routing Work Center', required=True ),
+        'bom_comp_id': fields.many2one('mrp.bom', string='BOM Component', required=True ),
+    }
+    _sql_constraints = [
+        ('routing_wc_comp_uniq', 'unique(routing_workcenter_id,bom_comp_id)', 'You can not add duplicated "Routing Work Center"-"Component" with same BOM and Routing!'),
+    ]
                
 class product_product(osv.osv):
     _inherit = "product.product"
