@@ -11,7 +11,7 @@ class sale_product(osv.osv):
     STATES_COL = {'draft':[('readonly',False)]}
     
     _columns = {
-        'name': fields.char('ID', size=8, required=True, readonly=True),
+        'name': fields.char('ID', size=8, required=True),
         'note': fields.text('Description', ),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
@@ -37,7 +37,8 @@ class sale_product(osv.osv):
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
     ]
     _defaults = {'state':'draft',
-                 'active':True,'name':'/'}
+                 'active':True,
+                 'name':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/',}
     _order = 'id desc'
     
     def copy_data(self, cr, uid, id, default=None, context=None):
@@ -49,19 +50,13 @@ class sale_product(osv.osv):
                         'mrp_prod_ids':None})
         return res 
         
-    def create(self, cr, uid, data, context=None):       
-        if data.get('name','/')=='/':
-            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'
-                        
-        resu = super(sale_product, self).create(cr, uid, data, context)
-        return resu 
-            
-    def create(self, cr, uid, data, context=None):       
-        if data.get('name','/')=='/':
-            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'
-                        
-        resu = super(sale_product, self).create(cr, uid, data, context)
-        return resu    
+#    def create(self, cr, uid, data, context=None):       
+#        if data.get('name','/')=='/':
+#            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'
+#                        
+#        resu = super(sale_product, self).create(cr, uid, data, context)
+#        return resu 
+    
     def write(self, cr, uid, ids, vals, context=None):
         if context is None:
             context = {}

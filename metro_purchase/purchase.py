@@ -329,6 +329,10 @@ class purchase_order(osv.osv):
         
         return True    
     def action_cancel_draft(self, cr, uid, ids, context=None):
+        for po in self.browse(cr, uid, ids, context=context):
+            if po.state not in('cancel','sent','confirmed'):
+                raise osv.except_osv(_('Error!'), 
+                    _('Only purchase order with cancel/sent/confirmed can be deleted!'))                
         resu = super(purchase_order,self).action_cancel_draft(cr,uid,ids,context)
         lines = self._get_lines(cr,uid,ids,context=context)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'draft'},context)
