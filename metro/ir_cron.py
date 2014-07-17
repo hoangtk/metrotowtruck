@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Copyright (C) 2004-TODAY OpenERP S.A. <http://www.openerp.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,28 @@
 #    GNU Affero General Public License for more details.
 #
 #    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 
-import work_order_cnc_line_done
-import bom_import
-import add_common_bom
-import wo_material_request
+from openerp.osv import fields, osv
+from openerp.tools.translate import _
+
+def str2tuple(s):
+    return eval('tuple(%s)' % (s or ''))
+
+class ir_cron(osv.osv):
+    _inherit = "ir.cron"
+
+    def manual_run(self, cr, uid, ids, context):
+        cron_id = ids[0]
+        cron_data = self.browse(cr, uid, cron_id, context=context)
+        args = str2tuple(cron_data.args)
+        model = self.pool.get(cron_data.model)
+        if model and hasattr(model, cron_data.function):
+            method = getattr(model, cron_data.function)
+            method(cr, uid, *args)
+        return True
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-

@@ -24,8 +24,8 @@
 				<button name="pur_req_reject" states="confirmed" string="Reject" groups="metro_purchase.group_pur_req_checker"/>
 				<button name="%(act_pur_req_po)d" string="Generate PO" type="action" groups="metro_purchase.group_pur_req_buyer"
 					attrs="{'invisible': ['&amp;',('state','!=','approved'),'|',('state','!=','in_purchase'),('full_gen_po','=',True)]}" class="oe_highlight"/>
-				<button name="pur_req_done" string="Done"  groups="metro_purchase.group_pur_req_buyer" 
-					attrs="{'invisible': ['|',('full_gen_po','=',False),('state','!=','in_purchase')]}" class="oe_highlight"/>
+				<!-- <button name="pur_req_done" string="Done"  groups="metro_purchase.group_pur_req_buyer" 
+					attrs="{'invisible': ['|',('full_gen_po','=',False),('state','!=','in_purchase')]}" class="oe_highlight"/> -->
 				<button name="pur_req_cancel" states="draft,confirmed,approved,rejected,in_purchase" string="Cancel"/>
 				<button name="action_cancel_draft" states="cancel" string="Set to Draft" type="object" />
                 <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,in_purchase,done"/>
@@ -57,6 +57,7 @@
                         <field name="product_id" on_change="onchange_product_id(product_id,contexxt)"/>
                         <field name="product_qty"/>
                         <field name="po_info" />
+                        <field name="product_qty_remain" readonly="1"/>
                         <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
                         <field name="date_required"/>
                         <field name="inv_qty"/>
@@ -68,19 +69,23 @@
                     </tree>
                     <form string="Products" version="7.0">
                         <group>
-                       		<field name="product_id" on_change="onchange_product_id(product_id)"/>
-                            <field name="product_qty"/>
-                        	<field name="po_info" />
-                            <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
-                            <field name="date_required" />
-                            <field name="inv_qty" />
-                        	<field name="req_emp_id"/>
-                       		<field name="req_dept_id"/>
-                            <field name="req_reason" />
-                        	<field name="req_ticket_no"/>
-                        	<field name="generated_po"/>
-                      		<field name="po_lines_ids" />
+                        	<group>
+	                       		<field name="product_id" on_change="onchange_product_id(product_id)"/>
+	                            <field name="product_qty"/>
+	                            <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
+	                            <field name="date_required" />
+	                            <field name="inv_qty" />
+                        	</group>
+                        	<group>
+	                        	<field name="req_emp_id"/>
+	                       		<field name="req_dept_id"/>
+	                            <field name="req_reason" />
+	                        	<field name="req_ticket_no"/>
+	                        	<field name="product_qty_remain" readonly="1"/>
+	                        	<field name="generated_po"/>
+                        	</group>
                         </group>
+                      	<field name="po_lines_ids" context="{'form_view_ref': 'metro_purchase.metro_po_line_full_form', 'tree_view_ref': 'metro_purchase.metro_po_line_full_tree'}"/>
                     </form>
                 </field>
 

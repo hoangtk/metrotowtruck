@@ -236,7 +236,7 @@
             <field name="name">req.line.tree</field>
             <field name="model">material.request.line</field>
             <field name="arch" type="xml">
-                <tree colors="grey:state == 'cancel';red:(state not in ('cancel','done'))" string="Moves">
+                <tree colors="grey:state == 'cancel';green:state == 'done'" string="Moves">
                     <field name="picking_id"/>
                     <field name="mr_date_order"/>
                     <field name="mr_dept_id"/>

@@ -36,6 +36,7 @@ class pur_req_po_line(osv.osv_memory):
         'wizard_id' : fields.many2one('pur.req.po', string="Wizard"),
         'product_id': fields.many2one('product.product', 'Product' ,required=True),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
+        'product_qty_remain': fields.float('Quantity Remain', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price')),
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
         'date_required': fields.date('Date Required',required=True),
@@ -47,7 +48,13 @@ class pur_req_po_line(osv.osv_memory):
         'supplier_prod_code': fields.char(string='Supplier Product Code', required=False),
         'supplier_delay' : fields.integer(string='Supplier Lead Time', required=False),        
     }
-    
+    def _check_product_qty(self, cursor, user, ids, context=None):
+        for line in self.browse(cursor, user, ids, context=context):
+            if line.product_qty > line.product_qty_remain:
+                raise osv.except_osv(_('Warning!'), _("Product '%s' max po quantity is %s, you can not purchae %s"%(line.product_id.default_code + '-' + line.product_id.name, line.product_qty_remain, line.product_qty)))
+        return True    
+    _constraints = [(_check_product_qty,'Product quantity exceeds the remaining quantity',['product_qty'])]
+        
     def onchange_lead(self, cr, uid, ids, change_type, changes_value, context=None):
         date_order = fields.date.context_today(self,cr,uid,context=context)
         res = {'value':{}}
@@ -57,7 +64,6 @@ class pur_req_po_line(osv.osv_memory):
         if change_type == 'supplier_delay':
             date_required = datetime.strptime(date_order, DEFAULT_SERVER_DATE_FORMAT) + relativedelta(days=changes_value)
             date_required = datetime.strftime(date_required,DEFAULT_SERVER_DATE_FORMAT)
-            print res['value']
             res['value'].update({'date_required':date_required})
         return res    
 
@@ -149,9 +155,9 @@ class pur_req_po(osv.osv_memory):
         if req:             
             for line in req.line_ids:
                 if not line.generated_po:
-                    line_data.append({'product_id': line.product_id.id, 'product_qty': line.product_qty, 'price_unit':line.product_id.standard_price, 
+                    line_data.append({'product_id': line.product_id.id, 'product_qty': line.product_qty_remain, 'price_unit':line.product_id.standard_price, 
                                     'product_uom_id':line.product_uom_id.id, 'date_required': line.date_required,'inv_qty':line.inv_qty,
-                                    'req_line_id':line.id, 'req_reason':line.req_reason})
+                                    'req_line_id':line.id, 'req_reason':line.req_reason, 'product_qty_remain': line.product_qty_remain})
             res.update({'line_ids': line_data})
         return res
 
@@ -194,6 +200,13 @@ class pur_req_po(osv.osv_memory):
                        'name':(line.req_reason or ''),
                        'supplier_prod_id':line.supplier_prod_id, 'supplier_prod_name':line.supplier_prod_name, 
                        'supplier_prod_code':line.supplier_prod_code,'supplier_delay':line.supplier_delay,}
+            #add the move_dest_id for the po_line
+            procurement_id = line.req_line_id.procurement_ids and line.req_line_id.procurement_ids[0] or False
+            if procurement_id:
+                if procurement_id.move_id:
+                    po_line.update({'move_dest_id': procurement_id.move_id.id})
+                if procurement_id.mfg_id:
+                    po_line.update({'mfg_id': procurement_id.mfg_id.id})
                 
             po_lines.append(po_line);
         po_data['lines']=po_lines

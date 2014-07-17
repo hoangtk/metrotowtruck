@@ -690,7 +690,8 @@ class purchase_order_line(osv.osv):
         'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
         'price_subtotal_withtax': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
         'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
-        'product_uom_base_qty': fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity', multi="rec_info"),        
+        'product_uom_base_qty': fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity', multi="rec_info"),
+        'mfg_id': fields.many2one('sale.product', string='MFG ID'),        
     }  
     _order = "order_id desc"
     _defaults = {

@@ -2,3 +2,4 @@
 import work_order_cnc
 import wizard
 import mrp
+import procurement

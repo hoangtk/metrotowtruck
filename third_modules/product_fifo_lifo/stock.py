@@ -477,7 +477,7 @@ class stock_move(osv.osv):
                         move_list[match.price_unit_mrp] = product_qty
                     tuples.append((match.move_in_id.id, product_qty, match.price_unit_mrp))
                     product_qty = product_qty - match.mrp_qty
-                elif match.qty > product_qty:
+                elif match.mrp_qty > product_qty:
                     matching_obj.write(cr, uid, match.id, {'mrp_qty': match.mrp_qty - product_qty})
                     tuples.append((match.move_in_id.id, product_qty, match.price_unit_mrp))
                     product_qty = 0
@@ -506,6 +506,8 @@ class stock_move(osv.osv):
             for loop in range(looplen):
                 move_price = 0
                 for product, stock in components.items():
+                    if not product in product_toconsume:
+                        continue
                     qty, price = product_toconsume[product], 0
                     for i in range(len(stock)):
                         if qty == 0:
