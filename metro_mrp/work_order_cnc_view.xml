@@ -42,7 +42,7 @@
 	                        <field name="is_whole_plate" />
 	                        <field name="state"/>                       
 		                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
-		                    type="action" states="confirmed" icon="terp-gtk-jump-to-ltr"/>
+		                    type="action" states="confirmed" icon="terp-check"/>
 	                        <field name="mr_id"/>     
 	                    </tree>
 	                    <form string="Work Items" version="7.0">

@@ -329,6 +329,10 @@ class purchase_order(osv.osv):
         
         return True    
     def action_cancel_draft(self, cr, uid, ids, context=None):
+        for po in self.browse(cr, uid, ids, context=context):
+            if po.state not in('cancel','sent','confirmed'):
+                raise osv.except_osv(_('Error!'), 
+                    _('Only purchase order with cancel/sent/confirmed can be deleted!'))                
         resu = super(purchase_order,self).action_cancel_draft(cr,uid,ids,context)
         lines = self._get_lines(cr,uid,ids,context=context)
         self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'draft'},context)
@@ -690,7 +694,8 @@ class purchase_order_line(osv.osv):
         'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
         'price_subtotal_withtax': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account'),multi='amount_line',),
         'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
-        'product_uom_base_qty': fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity', multi="rec_info"),        
+        'product_uom_base_qty': fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity', multi="rec_info"),
+        'mfg_id': fields.many2one('sale.product', string='MFG ID'),        
     }  
     _order = "order_id desc"
     _defaults = {

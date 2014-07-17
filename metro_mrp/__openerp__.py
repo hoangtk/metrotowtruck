@@ -36,11 +36,18 @@
         
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "sale", "metro_stock"],
+    'depends': ["metro", "sale", "metro_stock", "product_manufacturer", "document", "mrp_operations", "procurement", "mrp"],
     'data': [
         'security/ir.model.access.csv',
         'wizard/work_order_cnc_line_done_view.xml',
+        'wizard/wo_material_request_view.xml',
         'work_order_cnc_view.xml',
+        'mrp_view.xml',
+        'mrp_sequence.xml',
+        'wizard/add_common_bom_view.xml',
+        'wizard/bom_import_view.xml',
+        'mrp_workflow.xml',
+        'pdm.xml'
     ],
     'test': [],
     'demo': [],

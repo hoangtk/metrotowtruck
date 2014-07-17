@@ -1,12 +1,21 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
-    <record model="ir.ui.view" id="view_sale_product_form">
-    	<field name="name">view_sale_product_form</field>
+    <record model="ir.ui.view" id="view_sale_product_tree">
+    	<field name="name">view_sale_product_tree</field>
     	<field name="model">sale.product</field>
     	<field name="arch" type="xml">
-            <tree string="Sale Product IDs" editable="top">
+            <tree string="Sale Product IDs">
                 <field name="name"/>
+                <field name="source"/>
+			    <field name="date_planned"/>	
+                <field name="mto_design_id"/>
+                <field name="product_id"/>
+                <field name="bom_id"/>
+                <field name="project_ids" widget='many2many_tags'/>
+                <field name="mrp_prod_ids" widget='many2many_tags'/>
+                <field name="serial_id"/>
+                <field name="state"/>
                 <field name="note"/>
                 <field name="create_uid"/>
                 <field name="create_date"/>
@@ -14,18 +23,90 @@
             </tree>    	
     	</field>
     </record>
+    <record model="ir.ui.view" id="view_sale_product_form">
+    	<field name="name">view_sale_product_form</field>
+    	<field name="model">sale.product</field>
+    	<field name="arch" type="xml">
+            <form string="Sale Product IDs" version="7.0">
+                <header>
+                    <button name="button_confirm" states="draft" string="Confirm"/>
+                    <button name="button_cancel" states="confirmed" string="Cancel"/>
+                    <button name="button_engineer" states="confirmed" string="Create Project"/>
+                    <button name="button_manufacture" states="confirmed" string="Create Manfacture Order"/>
+                    <button name="action_cancel_draft" states="cancelled" string="Set to Draft" type="object"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,engineer,manufacture,done" readonly="1"/>
+                </header>   
+                <sheet>    	
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" class="oe_inline"/>
+                        </h1>
+                    </div>
+                    <div class="oe_right oe_button_box" name="buttons">
+                        <button name="attachment_tree_view" string="Documents" type="object"/>
+                    </div>
+	            	<group>
+	            		<group>
+			                <field name="source"/>
+			                <field name="date_planned"/>			                
+			                <field name="mto_design_id"/>
+			                <field name="product_id" on_change="product_id_change(product_id)" 
+                    			domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]" 
+                    			class="oe_inline"/>
+			                <field name="bom_id" domain="[('product_id','=',product_id)]"/>
+	            		</group>
+	            		<group>
+			                <field name="project_ids" widget='many2many_tags'/>
+                			<field name="mrp_prod_ids" widget='many2many_tags'/>
+                			<field name="serial_id"/>
+			                <field name="create_uid"/>
+			                <field name="create_date"/>
+			                <!-- <field name="active" groups="mrp.group_mrp_manager"/> -->
+	            		</group>
+	            	</group>
+		        	<label for="config_change_ids"/>
+		        	<field name="config_change_ids" readonly="1"/>
+		        	<label for="note"/>  
+		        	<field name="note" placeholder="Description..."/>           
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div> 
+            </form>    	
+    	</field>
+    </record>    
     <record model="ir.ui.view" id="view_sale_product_filter">
             <field name="name">view_sale_product_filter</field>
             <field name="model">sale.product</field>
             <field name="arch" type="xml">
                 <search string="Search Sale Products">
                     <field name="name" string="ID"/>
+	                <field name="mto_design_id"/>
+	                <field name="product_id"/>
+	                <field name="state"/>
+	                <field name="source"/>
                     <field name="create_uid" />
+                    
+                    <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter icon="terp-document-new" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                    <separator/>
+                    <filter icon="terp-document-new" name="engineer" string="Engineering" domain="[('state','=','engineer')]"/>
+                    <filter icon="terp-document-new" name="manufacture" string="Manufacture" domain="[('state','=','manufacture')]"/>
+                    <separator/>
+                    <filter icon="terp-document-new" name="done" string="Done" domain="[('state','=','done')]"/>
+                    <filter icon="terp-document-new" name="cancelled" string="Cancel" domain="[('state','=','cancelled')]"/>
+                    
+                    <group expand="0" string="Group By...">
+                        <filter string="Status" icon="terp-partner" context="{'group_by':'state'}"/>
+                        <filter string="Source" icon="terp-partner" context="{'group_by':'source'}"/>
+                        <filter string="Product" icon="terp-partner" context="{'group_by':'product_id'}"/>
+                    </group>
                 </search>
             </field>
     </record>   
     <record model="ir.actions.act_window" id="action_sale_product">
-        <field name="name">Sale Product IDs</field>
+        <field name="name">MFG IDs</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">sale.product</field>
         <field name="view_type">form</field>
@@ -35,7 +116,7 @@
 
     <menuitem
         id="menu_sale_product_mrp"
-        sequence="102"
+        sequence="1"
         parent="mrp.menu_mrp_manufacturing"
         action="action_sale_product"
         groups="mrp.group_mrp_user"/>
@@ -45,6 +126,28 @@
         sequence="101"
         parent="stock.menu_stock_configuration"
         action="action_sale_product"
-        groups="base.group_user"/>        
+        groups="base.group_user"/>     
+<!-- Add mfg id to serial view -->    
+	<record id="mttl_serials_tree_mfg_id" model="ir.ui.view">
+		<field name="name">mttl_serials_tree_mfg_id</field>
+        <field name="model">mttl.serials</field>
+        <field name="inherit_id" ref="metro_serial.mttl_serials_tree"/>
+        <field name="arch" type="xml">
+            <field name="serial" position="after">
+                <field name="mfg_id_id"/>
+            </field>
+         </field>
+	</record>     
+	<record id="mttl_serials_form_mfg_id" model="ir.ui.view">
+		<field name="name">mttl_serials_form_mfg_id</field>
+        <field name="model">mttl.serials</field>
+        <field name="inherit_id" ref="metro_serial.mttl_serials_form"/>
+        <field name="arch" type="xml">
+            <field name="serial" position="after">
+                <field name="mfg_id_id"/>
+            </field>
+         </field>
+	</record>  
+	
     </data>
 </openerp>

@@ -165,26 +165,20 @@ class pur_req_line(osv.osv):
         res = {}
         for id in ids:
             res[id] = {}.fromkeys(field_names, 0.0)
-        for f in field_names:
-            if f == 'generated_po':
-                for req_line in self.browse(cr, uid, ids, context=context):
-                    generated_po = False
-                    if req_line.po_lines_ids:
-                        for po_line in req_line.po_lines_ids:
-                            if po_line.state != 'cancel':
-                                generated_po = True
-                                break
-                    res[req_line.id][f] = generated_po 
-            if f == 'po_info':
-                for req_line in self.browse(cr, uid, ids, context=context):
-#                    po_str = None
-                    po_str = 0
-                    if req_line.po_lines_ids:
-                        for po_line in req_line.po_lines_ids:
-                            if po_line.state != 'cancel':
-#                                po_str += ((po_str or '') and ':') + po_line.product_qty + '@' + po_line.order_id.name
-                                po_str = po_line.product_qty
-                    res[req_line.id][f] = po_str 
+        for req_line in self.browse(cr, uid, ids, context=context):
+            generated_po = False
+            req_qty = req_line.product_qty
+            po_qty = 0
+            po_qty_str = ''
+            if req_line.po_lines_ids:
+                for po_line in req_line.po_lines_ids:
+                    if po_line.state != 'cancel':
+                        po_qty += po_line.product_qty
+                        po_qty_str += ((po_qty_str or '') and '; ') + '%s@%s'%(po_line.product_qty, po_line.order_id.name)
+                generated_po = po_qty == req_qty
+            res[req_line.id]['generated_po'] = generated_po 
+            res[req_line.id]['product_qty_remain'] = req_qty - po_qty
+            res[req_line.id]['po_info'] = po_qty_str
         return res    
     _columns = {
         'req_id' : fields.many2one('pur.req','Purchase Requisition', ondelete='cascade'),
@@ -199,7 +193,9 @@ class pur_req_line(osv.osv):
         'company_id': fields.related('req_id','company_id',type='many2one',relation='res.company',String='Company',store=True,readonly=True),
         'po_lines_ids' : fields.one2many('purchase.order.line','req_line_id','Purchase Order Lines',readonly=True),
         'generated_po': fields.function(_po_info, multi='po_info', string='PO Generated', type='boolean', help="It indicates that this products has PO generated"),
-        'po_info': fields.function(_po_info, multi='po_info',type='float',string='PO Quantity',readonly=True),   
+        'product_qty_remain': fields.function(_po_info, multi='po_info', string='Qty Remaining', type='float', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'procurement_ids': fields.one2many("procurement.order",'pur_req_line_id','Procurements'),
+        'po_info': fields.function(_po_info, multi='po_info',type='char',string='PO Quantity',readonly=True),   
         'req_ticket_no': fields.char('Requisition Ticket#', size=10),
         'order_warehouse_id': fields.related('req_id','warehouse_id',type='many2one',relation='stock.warehouse',string='Warehouse',readonly=True),
         'order_user_id': fields.related('req_id','user_id',type='many2one',relation='res.users',string='Requester',readonly=True),
@@ -208,7 +204,7 @@ class pur_req_line(osv.osv):
                                       selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
                 
     }
-    
+    _rec_name = 'product_id'
     
     def onchange_product_id(self, cr, uid, ids, product_id, context=None):
         """ Changes UoM,inv_qty if product_id changes.

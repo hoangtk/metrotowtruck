@@ -7,13 +7,9 @@
          <field name="model">product.supplierinfo</field>
          <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
          <field name="arch" type="xml">
-            <field name="name" position="replace">
-                <field name="name" on_change="get_currency(name)"
-                context="{'default_customer': 0, 'search_default_supplier': 1, 
-                'default_supplier': 1}"/>
+            <field name="name" position="attributes">
+            	<attribute name='on_change'>get_currency(name)</attribute>
             </field>
-            
-         
             <field name="company_id" position="after">
                 <field name="currency" group="base.group_multi_currency"/>
             </field>

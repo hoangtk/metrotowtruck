@@ -9,6 +9,25 @@
             <field name="client_order_ref" position="after">
                 <field name="checkbox"/>
             </field>
+			<xpath expr="//page[@string='Other Information']" position="before">
+				<page name="contact_log" string="Contacts Log">
+					<field name="contact_log_ids" widget="one2many_list" context="{'op_name':name}"/>
+				</page>
+			</xpath>    
+			<xpath expr="//field[@name='order_line']/form//div[@name='discount']" position="after">
+				<field name="mto_design_id"/>
+			</xpath>    
+			<xpath expr="//field[@name='order_line']/form/field[@name='name']" position="after">
+				<label for="serial_ids"/>
+                <field name="serial_ids"/>
+			</xpath>       
+			<xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+				<field name="mto_design_id"/>
+                <field name="serial_ids" widget="many2many_tags"/>
+			</xpath>
+            <field name="partner_id" position="attributes">
+                <attribute name="domain">[('customer','=',True),('is_company','=',True)]</attribute>
+            </field>
          </field>
        </record>  
        

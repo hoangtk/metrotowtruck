@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_work_order_cnc,work.order.cnc,model_work_order_cnc,mrp.group_mrp_user,1,1,1,1
 access_work_order_cnc_line,work.order.cnc.line,model_work_order_cnc_line,mrp.group_mrp_user,1,1,1,1
+access_mrp_bom_routing_operation,mrp.bom.routing.operation,model_mrp_bom_routing_operation,mrp.group_mrp_user,1,1,1,1

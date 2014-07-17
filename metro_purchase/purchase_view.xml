@@ -28,9 +28,9 @@
                 <xpath expr="//button[@name='view_picking']" position="replace" >
                 	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}"/>
                 </xpath>                       
-                <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
+<!--                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
-                </xpath>         
+                </xpath>   -->       
                  <xpath expr="//field[@name='payment_term_id']" position="replace" >
                 </xpath> 
                  <xpath expr="//field[@name='shipped']" position="replace" >
@@ -101,7 +101,9 @@
                 </xpath>     
                 <xpath expr="//tree/field[@name='product_qty']" position="after">
                 	<field name="receive_qty"/>
-                	<field name="return_qty"/>
+                	<field name="return_qty"/>      	
+            		<field name="mfg_id" readonly="1"/>
+            		<field name="move_dest_id" readonly="1"/>
                 </xpath>
                 <!-- set fields readonly --> 
                 <field name="order_line" position="attributes">
@@ -109,6 +111,7 @@
                 </field>   
                 <field name="partner_id" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                	<attribute name="domain">[('supplier','=',True),('is_company','=',True)]</attribute>
                 </field>                
                 <field name="pricelist_id" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
@@ -200,6 +203,10 @@
                 	<field name="product_uom_base_qty"/>
                 	<field name="product_uom_base"/>
                 </field>
+            	<field name="date_planned" position="after">            	
+            		<field name="mfg_id" readonly="1"/>
+            		<field name="move_dest_id" readonly="1"/>
+            	</field>
             </field>
         </record>
           
@@ -305,7 +312,11 @@
 	                <field name="product_qty"/>
 	                <field name="product_uom"/>
                     <field name="price_unit"/>
-                    <field name="price_subtotal"/>
+                    <field name="price_subtotal"/>          
+	               	<field name="receive_qty"/>
+	               	<field name="return_qty"/>      	                    	
+            		<field name="mfg_id" readonly="1"/>
+            		<field name="move_dest_id" readonly="1"/>
                     <field name="state"/>
                     <field name="create_uid"/> 
                     <field name="create_date" widget="date"/>                  
@@ -386,6 +397,10 @@
                                 <field name="create_date"/>
                             </group>                            
 	                 		<group>
+			                	<field name="receive_qty"/>
+			                	<field name="return_qty"/>      	
+			            		<field name="mfg_id" readonly="1"/>
+			            		<field name="move_dest_id" readonly="1"/>	                 		
 	                			<field name="name"/>
 	                		</group>
 	                	</group>
