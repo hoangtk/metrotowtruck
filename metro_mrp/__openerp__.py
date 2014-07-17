@@ -36,7 +36,7 @@
         
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "sale", "metro_stock", "product_manufacturer", "document", "mrp_operations", "procurement"],
+    'depends': ["metro", "sale", "metro_stock", "product_manufacturer", "document", "mrp_operations", "procurement", "mrp"],
     'data': [
         'security/ir.model.access.csv',
         'wizard/work_order_cnc_line_done_view.xml',

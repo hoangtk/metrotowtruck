@@ -36,7 +36,7 @@
         
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["metro", "project_issue", "metro_attachment", "multi_image", "metro_sale", "mrp"],
+    'depends': ["metro", "project_issue", "metro_attachment", "multi_image", "metro_sale", "metro_mrp"],
     'data': [
         'project_issue_view.xml',    
         'project_project_view.xml',    
