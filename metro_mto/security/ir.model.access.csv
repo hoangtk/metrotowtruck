@@ -10,3 +10,4 @@ access_base_custom_attributes_attribute_set_noone,metro_mto_attribute_set,base_c
 access_base_custom_attributes_attribute_set_user,metro_mto_attribute_set,base_custom_attributes.model_attribute_set,base.group_user,1,0,0,0
 access_mto_design_change,mto.design.change,model_mto_design_change,base.group_user,1,1,1,1
 access_mto_design_change_source,mto.design.change.source,model_mto_design_change_source,base.group_user,1,1,1,1
+access_mto_design_wiz,mto.design.change.wiz,model_mto_design_wiz,base.group_user,1,1,1,1
