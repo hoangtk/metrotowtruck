@@ -38,6 +38,9 @@
         'security/ir.model.access.csv',
         'mto_attribute_view.xml',
         'mto_design_view.xml',
+        'wizard/mto_design_wiz_view.xml',
+        'mto_design_report.xml',
+        'wizard/file_down_view.xml'
     ],
     'test': [],
     'demo': [],
