@@ -27,7 +27,7 @@ class mto_design(osv.osv):
     
     def open_designment(self, cr, uid, ids, context=None):
         ir_model_data_obj = self.pool.get('ir.model.data')
-        ir_model_data_id = ir_model_data_obj.search(cr, uid, [['model', '=', 'ir.ui.view'], ['name', '=', 'mto_design_form_view']], context=context)
+        ir_model_data_id = ir_model_data_obj.search(cr, uid, [['model', '=', 'ir.ui.view'], ['name', '=', 'mto_design_form_view_normal']], context=context)
         if ir_model_data_id:
             res_id = ir_model_data_obj.read(cr, uid, ir_model_data_id, fields=['res_id'])[0]['res_id']
         grp_ids = self._attr_grp_ids(cr, uid, [ids[0]], [], None, context)[ids[0]]
@@ -85,7 +85,19 @@ class mto_design(osv.osv):
         return result    
     def save_and_close_design(self, cr, uid, ids, context=None):
         return {'type': 'ir.actions.act_window_close'}
-    
+    def act_pdf(self, cr, uid, ids, context=None):
+        if not ids:
+            return False 
+        if context is None:
+            context = {}        
+        datas = {
+                 'model': 'mto.design',
+                 'ids': ids,
+                 'form': self.read(cr, uid, ids[0], context=context),
+#                'form': self.browse(cr, uid, ids[0], context=context),
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'mto.design.print', 'datas': datas, 'nodestroy': True}
+        
     def onchange_template(self, cr, uid, ids, design_tmpl_id, context=None):
         vals = {'list_price': 0, 'weight': 0}
         if design_tmpl_id and design_tmpl_id > 0:
@@ -111,6 +123,46 @@ class mto_design(osv.osv):
         resu = super(mto_design, self).write(cr, uid, ids, vals, context=context)
         self.update_price(cr, uid, ids, context)
         return resu
+    def _get_attr_pw_name(self, design, attr):
+        price_attr, weight_attr = self._get_attr_pw(design, attr)
+        name = attr.field_description
+        price_str = ''
+        weight_str = ''
+        if price_attr and price_attr != 0:
+            price_str = '%s%s%s'%((price_attr > 0 and '+' or '-'),attr.currency_id.symbol,abs(price_attr))
+        if weight_attr and weight_attr != 0:
+            weight_str = '%s%skg'%((weight_attr > 0 and '+' or '-'),abs(weight_attr))
+        if price_str != '' or weight_str != '':                    
+            if weight_str != '':
+                weight_str = '%s%s'%((price_str != '') and "," or "",weight_str)
+            name = '%s(%s%s)'%(name,price_str,weight_str)
+        return name           
+    #get one attribute's price and weight
+    def _get_attr_pw(self, design, attr):
+        price = 0
+        weight = 0
+        if attr.attribute_type == "select":
+            price = resolve_attr(design,'%s.price'%(attr.name))
+            weight = resolve_attr(design,'%s.weight'%(attr.name))
+        elif attr.attribute_type == "multiselect":
+            options = resolve_attr(design,attr.name)
+            for opt in options:
+                price = price + resolve_attr(opt,'price')
+                weight = weight + resolve_attr(opt,'weight')
+        if price is None:
+            price = 0
+        if weight is None:
+            weight = 0            
+        return price, weight
+    #get one group's price and weight
+    def _get_attr_grp_pw(self, design, grp):
+        price = 0
+        weight = 0
+        for attr in grp.attribute_ids:
+            price_attr, weight_attr = self._get_attr_pw(design, attr)
+            price += price_attr
+            weight += weight_attr
+        return price, weight      
     def update_price(self, cr, uid, ids, context=None):
         #update the price and weight by  the selected options
         if isinstance(ids,(int,long)):
@@ -120,36 +172,20 @@ class mto_design(osv.osv):
             price_total = 0
             weight_total = 0
             for grp in design.design_tmpl_id.attribute_group_ids:
-                for attr in grp.attribute_ids:
-                    price = 0
-                    weight = 0
-                    if attr.attribute_type == "select":
-                        price = resolve_attr(design,'%s.price'%(attr.name))
-                        weight = resolve_attr(design,'%s.weight'%(attr.name))
-                    elif attr.attribute_type == "multiselect":
-                        options = resolve_attr(design,attr.name)
-                        for opt in options:
-                            price = price + resolve_attr(opt,'price')
-                            weight = weight + resolve_attr(opt,'weight')
-#                    elif attr.attribute_type == "boolean":
-#                        is_selected = resolve_attr(design,attr.name)
-#                        if is_selected:
-#                            price = attr.price_standard
-#                            weight = attr.weight_standard
-#                    else:
-                    price_total = price_total + price
-                    weight_total = weight_total + weight
+                price_grp, weight_grp = self._get_attr_grp_pw(design, grp)
+                price_total = price_total + price_grp
+                weight_total = weight_total + weight_grp
             price_total = design.design_tmpl_id.price_standard + price_total
             weight_total = design.design_tmpl_id.weight_standard + weight_total
             cr.execute("""update mto_design set
-                    list_price=%s, weight=%s where id=%s""", (price_total, weight_total, design.id))
-
-    
+                    list_price=%s, weight=%s where id=%s""", (price_total, weight_total, design.id))    
     def copy_data(self, cr, uid, id, default=None, context=None):
         res = super(mto_design,self).copy_data(cr, uid, id, default=default, context=context)
         if res:
             res.update({'change_ids':False})
         return res  
+    def get_report_name(self, cr, uid, id, rpt_name, context=None):
+        return "Product Configuration"    
                 
 class mto_design_change(osv.osv):
     _name = "mto.design.change"

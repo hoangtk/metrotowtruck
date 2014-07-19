@@ -77,12 +77,14 @@
             <field name="context">{"force_model": 'mto.design', 'default_type':'design'}</field>
             <field name="domain">[('model_id.name','=','mto.design')]</field>
         </record>
-        <record id="design_template_form_action_tree" model="ir.actions.act_window.view"> 
+        <record id="design_template_form_action_tree" model="ir.actions.act_window.view">
+        	<field name="sequence">1</field> 
             <field name="view_mode">tree</field>
             <field name="view_id" ref="design_template_tree_view"/>
         	<field name="act_window_id" ref="design_template_form_action"/>
         </record> 
         <record id="design_template_form_action_form" model="ir.actions.act_window.view"> 
+        	<field name="sequence">2</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="design_template_form_view"/>
         	<field name="act_window_id" ref="design_template_form_action"/>
@@ -156,11 +158,13 @@
             <field name="domain">[('model_id.name','=','mto.design')]</field>
         </record>
         <record id="parameter_group_form_action_tree" model="ir.actions.act_window.view"> 
+        	<field name="sequence">1</field>
             <field name="view_mode">tree</field>
             <field name="view_id" ref="parameter_group_tree_view"/>
         	<field name="act_window_id" ref="parameter_group_form_action"/>
         </record>
         <record id="parameter_group_form_action_form" model="ir.actions.act_window.view"> 
+        	<field name="sequence">2</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="parameter_group_form_view"/>
         	<field name="act_window_id" ref="parameter_group_form_action"/>
@@ -168,7 +172,7 @@
              
          <menuitem
              action="parameter_group_form_action" id="menu_parameter_group_form"
-             parent="menu_mto_design" sequence="12"/>    
+             parent="menu_mto_design" sequence="12" groups="base.group_no_one"/>    
     
     <!-- Parameter VIEW -->
 
@@ -254,11 +258,13 @@
             <field name="help"></field>
         </record>
         <record id="parameter_form_action_tree" model="ir.actions.act_window.view"> 
+        	<field name="sequence">1</field>
             <field name="view_mode">tree</field>
             <field name="view_id" ref="parameter_tree_view"/>
         	<field name="act_window_id" ref="parameter_form_action"/>
         </record> 
         <record id="parameter_form_action_form" model="ir.actions.act_window.view"> 
+        	<field name="sequence">2</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="parameter_form_view"/>
         	<field name="act_window_id" ref="parameter_form_action"/>
