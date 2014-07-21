@@ -53,6 +53,7 @@ class purchase_order(osv.osv):
         ('except_invoice', 'Invoice Exception'),
         ('wait_receipt', 'Waitting Receipt'),
         ('done', 'Done'),
+        ('done_except', 'Done with Exception'),
         ('cancel', 'Cancelled'),
         ('cancel_except', 'Cancelled with Exception')
     ] 
@@ -558,8 +559,32 @@ class purchase_order(osv.osv):
     
     def button_manual_done(self, cr, uid, ids, context=None):
         assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        po = self.browse(cr, uid, ids[0], context=context)
+        ready_done = True
+        if po.state == 'approved' and po.shipped and po.invoiced and po.paid_done:
+            for po_line in po.order_line:
+                if po_line.product_qty > po_line.invoice_qty:
+                    #no invoice quantity completely, then can not be done
+                    ready_done = False
+                    break
+            if ready_done:
+                for inv in po.invoice_ids:
+                    if inv.state not in('cancel', 'paid'):
+                        #if there are invoices with other states, then that invoices need to process to cancel or paid, then the purchase order can be done
+                        ready_done = False
+                        break  
+        else:
+            ready_done = False          
+        if not ready_done:
+                raise osv.except_osv(_('Error!'),
+                                     _('The PO only can be done when it is approved, shipped, invoiced and paid completely'))          
         self.write(cr,uid,ids,{'state':'done'},context)
-        self._update_po_lines(cr,uid,ids,{'state':'done'},context)   
+        self._update_po_lines(cr,uid,ids,{'state':'done'},context)
+
+    def button_done_except(self, cr, uid, ids, context=None):
+        assert len(ids) == 1, 'This option should only be used for a single order at a time'
+        self.write(cr,uid,ids,{'state':'done_except'},context)
+        self._update_po_lines(cr,uid,ids,{'state':'done_except'},context)
         
     def picking_done(self, cr, uid, ids, context=None):
         ids_done = []
@@ -585,6 +610,7 @@ class purchase_order_line(osv.osv):
         ('changing_confirmed', 'Changing Waiting Approval'),
         ('changing_rejected', 'Changing Rejected'),
         ('done', 'Done'),
+        ('done_except', 'Done with Exception'),
         ('cancel', 'Cancelled'),
         ('cancel_except', 'Cancelled with Exception')
     ]
