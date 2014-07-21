@@ -98,6 +98,7 @@
                  	<button name="%(act_purchase_changing_reject)d" states="changing_confirmed" string="Reject Changing" type="action" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_to_changing_approved" states="changing_confirmed" string="Approve Changing" type="object" groups="metro_purchase.group_pur_req_manager"/>
                  	<button name="button_manual_done" states="approved,wait_receipt" string="Manual Done" type="object" groups="metro_purchase.group_pur_req_manager" confirm="Are you sure you want to make this purchase order done manually?"/>
+                 	<button name="button_done_except" states="approved,wait_receipt" string="Done With Exception" type="object" groups="metro_purchase.group_pur_req_manager" confirm="Are you sure you want to finish this purchase order with exception?"/>
                 </xpath>     
                 <xpath expr="//tree/field[@name='product_qty']" position="after">
                 	<field name="receive_qty"/>

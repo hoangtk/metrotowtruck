@@ -209,7 +209,7 @@
             id="menu_shipment_main_action"
             name="Shipping"
             parent="metro.mttl_metro"
-            sequence="1"/>
+            sequence="10"/>
         
         <menuitem
             action="shipment_shipment_view"

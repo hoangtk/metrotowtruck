@@ -125,7 +125,7 @@
             <field name="view_id" ref="metro_holiday_calendar"/>
         </record>
         
-        <menuitem id="menu_metro_holiday_calendar_main_action"  name="Calendars" parent="metro.mttl_metro" sequence="1" />
+        <menuitem id="menu_metro_holiday_calendar_main_action"  name="Calendars" parent="metro.mttl_metro" sequence="20" />
         <menuitem id="menu_metro_holiday_calendar_action" parent="menu_metro_holiday_calendar_main_action" action="metro_holiday_calendar_action" sequence="1"/>   
         <menuitem id="menu_metro_hr_holiday_calendar_action" parent="hr.menu_hr_main" action="metro_holiday_calendar_action"/>
 	</data>
