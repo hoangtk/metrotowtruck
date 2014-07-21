@@ -52,7 +52,7 @@ class project_task(base_stage, osv.osv):
     _inherit = "project.task"    
     _columns = {
         'project_type': fields.related('project_id', 'project_type', type='selection', 
-                                       selection=[('','Simple'),('simple','Simple'),('software','Software'),('engineer','Engineering')], 
+                                       selection=[('','Simple'),('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD')], 
                                        string='Project Type', select=1),
     }
     def email_send(self, cr, uid, ids, vals, context=None):
