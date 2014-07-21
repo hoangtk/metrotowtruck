@@ -99,7 +99,7 @@ class sale_product(osv.osv):
     def create_project(self, cr, uid, id, context=None):
         sale_product_id = self.browse(cr, uid, id, context=context)
         if not sale_product_id.project_ids:
-            vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,))}
+            vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,)),'type':'engineer'}
             project_id = self.pool.get('project.project').create(cr, uid, vals, context=context)
             self.write(cr, uid, sale_product_id.id, {'project_ids':[(4, project_id)],'state':'engineer'},context=context)
             return project_id

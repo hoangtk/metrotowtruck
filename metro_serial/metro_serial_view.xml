@@ -2,7 +2,7 @@
 <openerp>
     <data>
 		
-		<menuitem id="menu_mttl_serials" name="Serial" parent="metro.mttl_metro"/>
+		<menuitem id="menu_mttl_serials" name="Serial" parent="metro.mttl_metro"  sequence="30"/>
 		<menuitem id="menu_mttl_serial_config" name="Serial" 
 		    parent="metro.menu_mttl_config" groups="group_metro_serial_manager"/>
 

@@ -116,7 +116,7 @@
             id="menu_warranty_main_action"
             name="Warranty"
             parent="metro.mttl_metro"
-            sequence="2"/>
+            sequence="40"/>
        
         <menuitem
             action="action_warranty_form_view"
