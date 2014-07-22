@@ -22,17 +22,33 @@
 from openerp.osv import fields,osv
 from openerp.addons.base_status.base_stage import base_stage
 from openerp.tools.translate import _
+from openerp.addons.project import project as project_super
+_PROJ_TYPES = [('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD')]
+
 '''
 1.Add 'type' field to extend the project's usage
-2.Project can not be closed if there are opening tasks 
+2.Project can not be closed if there are opening tasks
+3.When do creation, set the state list by project_type
 '''
 class project_project(osv.osv):
     _inherit = 'project.project'
     _order = 'id desc'
     _columns = {
-        'project_type': fields.selection([('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD')],string='Type',),
+        'project_type': fields.selection(_PROJ_TYPES,string='Type',),
     }
-    _defaults = {'project_type':'simple'}
+    
+    def _get_default_states(self, cr, uid, context):
+        domain = []
+        if context and context.has_key('default_project_type') and context['default_project_type']:
+            domain += ['|',('project_type','=',context['default_project_type'])]
+        domain +=  [('case_default','=',1)]
+        ids = self.pool.get('project.task.type').search(cr, uid, domain, context=context)
+        return ids
+    
+    _defaults = {'project_type':'simple',
+                 'type_ids': _get_default_states,
+                 }
+    
     def set_done(self, cr, uid, ids, context=None):        
         if isinstance(ids, (int,long)):
             ids = [ids]
@@ -44,16 +60,21 @@ class project_project(osv.osv):
                 if task.state != 'done':
                     raise osv.except_osv(_('Error!'), _('Project "%s" can not be close, the task "%s" is opening.'%(proj.name,task.name)))
         resu = super(project_project,self).set_done(cr, uid, ids, context) 
-        return resu   
+        return resu
+   
 '''
 1.Sending email to the assignee when creating and writing
+2.Imrpove the group by state, to add the 'project_type' domain to return all the states related to the project type
+3.Add multi images
 '''    
 class project_task(base_stage, osv.osv):
     _inherit = "project.task"    
     _columns = {
         'project_type': fields.related('project_id', 'project_type', type='selection', 
-                                       selection=[('','Simple'),('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD')], 
+                                       selection=_PROJ_TYPES, 
                                        string='Project Type', select=1),
+
+        'multi_images': fields.text("Multi Images"),                
     }
     def email_send(self, cr, uid, ids, vals, context=None):
         email_tmpl_obj = self.pool.get('email.template')
@@ -82,4 +103,52 @@ class project_task(base_stage, osv.osv):
         if resu.has_key('project_id') and default_project_type:            
             project_ids = self.pool.get('project.project').search(cr, uid, [('project_type','=',default_project_type)], context=context)
             resu['project_id']['domain'] = [('id','in',project_ids)]
-        return resu           
+        return resu 
+         
+    def _resolve_project_type_from_context(self, cr, uid, context=None):
+        """ Returns the project_type from the type context
+            key. Returns None if it cannot be resolved.
+        """
+        if context is None:
+            context = {}
+        return context.get('default_project_type')   
+     
+    def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
+        stage_obj = self.pool.get('project.task.type')
+        order = stage_obj._order
+        access_rights_uid = access_rights_uid or uid
+        if read_group_order == 'stage_id desc':
+            order = '%s desc' % order
+        search_domain = []
+        project_id = self._resolve_project_id_from_context(cr, uid, context=context)
+        if project_id:
+            search_domain += ['|', ('project_ids', '=', project_id)]
+        search_domain += [('id', 'in', ids)]
+        # johnw, 07/22/2014, retrieve type from the context (if set: choose 'type' or 'both')
+        #begin                
+        project_type = self._resolve_project_type_from_context(cr, uid, context=context)
+        if type:
+            type_domain = ['|', ('project_type', '=', project_type), ('project_type', '=', 'all')]
+            search_domain.insert(0, '|')
+            search_domain += type_domain
+        #end
+        stage_ids = stage_obj._search(cr, uid, search_domain, order=order, access_rights_uid=access_rights_uid, context=context)
+        result = stage_obj.name_get(cr, access_rights_uid, stage_ids, context=context)
+        # restore order of the search
+        result.sort(lambda x,y: cmp(stage_ids.index(x[0]), stage_ids.index(y[0])))
+    
+        fold = {}
+        for stage in stage_obj.browse(cr, access_rights_uid, stage_ids, context=context):
+            fold[stage.id] = stage.fold or False
+        return result, fold       
+    
+    _group_by_full = {
+        'stage_id': _read_group_stage_ids,
+        'user_id': project_super.task._read_group_user_id,
+    }     
+class project_task_type(osv.osv):
+    _inherit = 'project.task.type'
+    _columns = {
+        'project_type': fields.selection(_PROJ_TYPES+[('all','All')],string='Type',),
+    }      
+    _defaults={'project_type':'simple'}

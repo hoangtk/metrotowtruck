@@ -129,6 +129,15 @@
             <field name="act_window_id" ref="action_view_task_engineer"/>
         </record>
         <menuitem action="action_view_task_engineer" id="menu_action_view_task_engineer" parent="menu_eng_engingeering" sequence="2"/>
-                 
+<!-- My Engineer Tasks -->        
+        <record id="action_view_task_engineer_my" model="ir.actions.act_window">
+            <field name="name">My Engineer Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_mode">kanban,tree,form,calendar,gantt,graph</field>
+            <field name="search_view_id" ref="project.view_task_search_form"/>
+            <field name="domain">[('user_id','=',uid),('project_type','=','engineer')]</field>
+            <field name="context">{'default_project_type':'engineer'}</field>
+        </record>               
+        <menuitem action="action_view_task_engineer_my" id="menu_action_view_task_engineer_my" parent="menu_eng_engingeering" sequence="3"/>
     </data>
 </openerp>
