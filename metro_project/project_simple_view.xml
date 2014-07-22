@@ -28,7 +28,13 @@
 				<xpath expr="//page[@string='Description']" position="attributes">
 					<attribute name="string">Work Hours</attribute>
 					<attribute name="name">work_hours</attribute>
-				</xpath>      	         
+				</xpath>      	
+				<!-- Add multi images -->
+				<page string='Extra Info' position='after'>
+                    <page string="Images">
+                        <field name="multi_images" widget="image_multi"/>
+                    </page>
+				</page>         
             </field>
         </record>    
 <!-- the original projects menu only display the simple projects -->
@@ -36,6 +42,7 @@
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
             <field name="domain">['|',('project_type','=',False),('project_type','=','simple')]</field>
+            <field name="context">{'default_project_type':'simple'}</field>
         </record>
 <!-- the original tasks menu only display the simple projects -->
         <record id="project.action_view_task" model="ir.actions.act_window">
@@ -44,5 +51,26 @@
             <field name="domain">[('project_type','=','simple')]</field>
             <field name="context">{'default_project_type':'simple'}</field>
         </record>             
+
+<!-- Add project_type to project.task.type tree view -->
+        <record id="task_type_tree_extend" model="ir.ui.view">
+            <field name="name">task_type_tree_extend</field>
+            <field name="model">project.task.type</field>
+            <field name="inherit_id" ref="project.task_type_tree"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//tree" position="attributes">
+            		<attribute name="editable">top</attribute>
+            	</xpath>
+            	<field name="name" position="before">
+            		<field name="sequence"/>
+            	</field>
+            	<field name="state" position="after">
+            		<field name="project_type"/>
+            		<field name="case_default"/>
+            		<field name="fold"/>
+            		<field name="description"/>
+            	</field>
+            </field>
+        </record>        
     </data>
 </openerp>
