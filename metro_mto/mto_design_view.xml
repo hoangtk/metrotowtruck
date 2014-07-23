@@ -38,7 +38,7 @@
                 	<sheet>
                    	<group>
                    		<group>
-	                    	<field name="name"/>
+	                    	<field name="name" readonly="1"/>
 	                    	<field name="design_tmpl_id" readonly="1"/>
                     	</group>
                     	<group>

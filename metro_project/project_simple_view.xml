@@ -6,18 +6,33 @@
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="arch" type="xml">
-            	<field name="name" position="after">
-            		<field name="project_type" invisible="1"/>
+            	<field name="partner_id" position="before">
+            		<!-- <field name="project_type" invisible="1"/> -->
+            		<field name="project_type"/>
             	</field>
             </field>
-        </record>    
+        </record> 
+        <record model="ir.ui.view" id="metro_project_simple_tree_view">
+            <field name="name">metro_project_simple_tree_view</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="arch" type="xml">
+            	<field name="name" position="after">
+            		<!-- <field name="project_type" invisible="1"/> -->
+            		<field name="project_type"/>
+            	</field>
+            </field>
+        </record>           
+
+         
         <record model="ir.ui.view" id="metro_project_task_simple_form_view">
             <field name="name">metro_project_task_simple_form_view</field>
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
             	<field name="name" position="after">
-            		<field name="project_type" invisible="1"/>
+            		<!-- <field name="project_type" invisible="1"/> -->
+            		<field name="project_type" readonly="1"/>
             	</field>
             	<!-- move description to main page from the 'Work Hours' page. -->
 				<field name="description" position="replace">
@@ -34,24 +49,49 @@
                     <page string="Images">
                         <field name="multi_images" widget="image_multi"/>
                     </page>
-				</page>         
+				</page>
+            	<field name="project_id" position="after">
+            		<field name="private"/>
+            	</field>         
             </field>
         </record>    
 <!-- the original projects menu only display the simple projects -->
-        <record id="project.open_view_project_all" model="ir.actions.act_window">
+<!--         <record id="project.open_view_project_all" model="ir.actions.act_window">
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
             <field name="domain">['|',('project_type','=',False),('project_type','=','simple')]</field>
             <field name="context">{'default_project_type':'simple'}</field>
-        </record>
+        </record> -->
 <!-- the original tasks menu only display the simple projects -->
-        <record id="project.action_view_task" model="ir.actions.act_window">
+<!--         <record id="project.action_view_task" model="ir.actions.act_window">
             <field name="name">Tasks</field>
             <field name="res_model">project.task</field>
             <field name="domain">[('project_type','=','simple')]</field>
             <field name="context">{'default_project_type':'simple'}</field>
-        </record>             
-
+        </record>    -->         
+<!-- remove the kanban view -->
+        <record id="project.action_view_task" model="ir.actions.act_window">
+            <field name="name">Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_mode">tree,form,calendar,gantt,graph</field>
+        </record>         
+<!--         <record id="project.open_view_task_list_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">kanban</field>
+            <field name="act_window_id" ref="project.action_view_task"/>
+        </record> -->
+<!-- remove the kanban view from 'My Tasks', and remove the context parameters, to same as the simple task screen-->
+    <record model="ir.actions.act_window" id="project_gtd.open_gtd_task">
+        <field name="name">My Tasks</field>
+        <field name="res_model">project.task</field>
+        <field name="search_view_id" ref="project_gtd.view_task_gtd_search"/>
+        <!-- <field name="context">{'set_editable':True,'set_visible':True,'gtd':True,'user_invisible':True, "search_default_open": 1}</field> -->
+        <field name="context">{'user_invisible':True, "search_default_open": 1}</field>
+        <field name="domain">[('user_id','=',uid)]</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,calendar,gantt,graph</field>
+    </record>    
+            
 <!-- Add project_type to project.task.type tree view -->
         <record id="task_type_tree_extend" model="ir.ui.view">
             <field name="name">task_type_tree_extend</field>
@@ -71,6 +111,12 @@
             		<field name="description"/>
             	</field>
             </field>
-        </record>        
+        </record>       
+<!-- Disable the top project menu to all users  -->
+        <!-- Top menu item -->
+<!--         <menuitem name="Project"
+            id="base.menu_main_pm"
+            groups="base.group_no_one"
+            sequence="40"/>   -->       
     </data>
 </openerp>

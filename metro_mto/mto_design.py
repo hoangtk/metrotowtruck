@@ -9,7 +9,7 @@ import time
 class mto_design(osv.osv):
     _name = "mto.design"
     _columns = {
-        'name': fields.char('Configuration#', size=64,required=True,readonly=True),
+        'name': fields.char('Configuration#', size=64,required=True,readonly=False),
         'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), required=True),
         'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Stock Weight')),
         'description': fields.text('Description'),

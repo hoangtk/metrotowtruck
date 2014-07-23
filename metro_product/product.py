@@ -426,7 +426,15 @@ class product_template(osv.osv):
 			('end','End of Lifecycle'),
 			('obsolete','Obsolete')], 'Status', track_visibility='onchange'), 
 		'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Base price to compute the customer price. Sometimes called the catalog price."),
-		'standard_price': fields.float('Cost', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Cost price of the product used for standard stock valuation in accounting and used as a base price on purchase orders.", groups="base.group_user"),			     
+		'standard_price': fields.float('Cost', digits_compute=dp.get_precision('Product Price'), track_visibility='onchange', help="Cost price of the product used for standard stock valuation in accounting and used as a base price on purchase orders.", groups="base.group_user"),
+		'procure_method': fields.property(False, type='selection', view_load=True, string="Procurement Method", required=True, 
+			selection = [('make_to_stock','Make to Stock'),('make_to_order','Make to Order')],
+			help="Make to Stock: When needed, the product is taken from the stock or we wait for replenishment. \nMake to Order: When needed, the product is purchased or produced.", 
+			),
+		'supply_method': fields.property(False, type='selection', view_load=True, string="Supply Method", required=True, 
+			selection = [('produce','Manufacture'),('buy','Buy')],
+			help="Manufacture: When procuring the product, a manufacturing order or a task will be generated, depending on the product type. \nBuy: When procuring the product, a purchase order will be generated.", 
+			),								     
         }
 
 	_defaults = {

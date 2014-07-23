@@ -22,3 +22,4 @@ import project_issue
 import project_simple
 import project_engineer
 import project_gtd
+import report
