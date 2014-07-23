@@ -73,8 +73,8 @@ class project_task(base_stage, osv.osv):
         'project_type': fields.related('project_id', 'project_type', type='selection', 
                                        selection=_PROJ_TYPES, 
                                        string='Project Type', select=1),
-
-        'multi_images': fields.text("Multi Images"),                
+        'multi_images': fields.text("Multi Images"),
+        'private': fields.boolean("Private"),                
     }
     def email_send(self, cr, uid, ids, vals, context=None):
         email_tmpl_obj = self.pool.get('email.template')
