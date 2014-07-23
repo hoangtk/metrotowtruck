@@ -37,7 +37,8 @@ class contact_log(osv.osv):
         'date': fields.datetime('Contact Date',required=True),
         'person': fields.char('Person',size=32,required=False),
         'duration': fields.float('Hours'),
-        'description': fields.text('Description',required=True),      
+        'description': fields.text('Description',required=True),   
+        'mto_design_wiz_id': fields.many2one('mto.design.wiz','Config Log'),   
     }
     '''
     the 'op_name','op_contact_name' comes from the view xml field like below:
