@@ -672,14 +672,20 @@ class stock_move(osv.osv):
                     price_amount += match[1] * match[2]
                     amount += match[1]
                 #Write price on out move
-                if product_avail[product.id] >= product_uom_qty and product.cost_method in ['fifo', 'lifo']:
-                    if amount > 0:
-                        self.write(cr, uid, move.id, {'price_unit': price_amount / amount}, context=context)
-                        product_obj.write(cr, uid, product.id, {'standard_price': price_amount / product_uom_qty}, context=ctx)
-                    else:
-                        raise osv.except_osv(_('Error'), _("Something went wrong finding stock moves ") + str(tuples) + str(self.search(cr, uid, [('company_id','=', company_id), ('qty_remaining', '>', 0), ('state', '=', 'done'), 
-                                             ('location_id.usage', '!=', 'internal'), ('location_dest_id.usage', '=', 'internal'), ('product_id', '=', product.id)], 
-                                       order = 'date, id', context=context)) + str(move_qty) + str(move_uom) + str(move.company_id.currency_id.id))
+                #johnw, 07/29/2014, when do fifo/lifo, only when there avail (amount>0) moves, otherwise goto other ways
+#                if product_avail[product.id] >= product_uom_qty and product.cost_method in ['fifo', 'lifo']:
+#                    if amount > 0:
+#                        self.write(cr, uid, move.id, {'price_unit': price_amount / amount}, context=context)
+#                        product_obj.write(cr, uid, product.id, {'standard_price': price_amount / product_uom_qty}, context=ctx)
+#                    else:
+##                        raise osv.except_osv(_('Error'), _("Something went wrong finding stock moves ") + str(tuples) + str(self.search(cr, uid, [('company_id','=', company_id), ('qty_remaining', '>', 0), ('state', '=', 'done'), 
+##                                             ('location_id.usage', '!=', 'internal'), ('location_dest_id.usage', '=', 'internal'), ('product_id', '=', product.id)], 
+##                                       order = 'date, id', context=context)) + str(move_qty) + str(move_uom) + str(move.company_id.currency_id.id))
+#                        raise osv.except_osv(_('Error'), _("Something went wrong finding stock moves, \n move_id:%s \n product:%s,%s \n move_qty:%s \n moves in: %s \n")%(move.id,product.id,product.default_code,move_qty,tuples,))
+                if product_avail[product.id] >= product_uom_qty and product.cost_method in ['fifo', 'lifo'] and amount > 0:
+                    self.write(cr, uid, move.id, {'price_unit': price_amount / amount}, context=context)
+                    product_obj.write(cr, uid, product.id, {'standard_price': price_amount / product_uom_qty}, context=ctx)
+                
                 else:
                     new_price = uom_obj._compute_price(cr, uid, product.uom_id.id, product.standard_price, move_uom)
                     self.write(cr, uid, move.id, {'price_unit': new_price}, context=ctx)
