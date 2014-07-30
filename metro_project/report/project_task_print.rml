@@ -48,6 +48,33 @@
       <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="3,2" stop="3,-1"/>
       <lineStyle kind="LINEAFTER" colorName="#e6e6e6" start="3,2" stop="3,-1"/>
       <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="0,3" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="1,3" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="2,3" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="3,3" stop="3,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#e6e6e6" start="3,3" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="0,4" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="1,4" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="2,4" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="3,4" stop="3,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#e6e6e6" start="3,4" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="0,5" stop="0,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="1,5" stop="1,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="2,5" stop="2,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="3,5" stop="3,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#e6e6e6" start="3,5" stop="3,-1"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
       <blockTopPadding length="1"/>
       <blockBottomPadding length="1"/>
       <blockLeftPadding length="1"/>
@@ -141,10 +168,24 @@
           <para style="P2">[[ task.user_id.name ]]</para>
         </td>
         <td>
-          <para style="P1">Priority:</para>
+          <para style="P1">Planned Hours:</para>
         </td>
         <td>
-          <para style="P2">[[ get_priority(task.priority) ]]</para>
+          <para style="P2">[[ task.planned_hours ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Employees:</para>
+        </td>
+        <td>
+          <para style="P2">[[get_emp_names(task.emp_ids)]]</para>
+        </td>
+        <td>
+          <para style="P1">Spent Hours:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.effective_hours]]</para>
         </td>
       </tr>
       <tr>
@@ -159,6 +200,34 @@
         </td>
         <td>
           <para style="P2">[[ task.timebox_id.name ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Priority:</para>
+        </td>
+        <td>
+          <para style="P2">[[ get_priority(task.priority) ]]</para>
+        </td>
+        <td>
+          <para style="P1">Date Start</para>
+        </td>
+        <td>
+          <para style="P2">[[ formatLang(task.date_start,date='True') ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Stage:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.stage_id.name ]]</para>
+        </td>
+        <td>
+          <para style="P1">Date End</para>
+        </td>
+        <td>
+          <para style="P2">[[ formatLang(task.date_end,date='True') ]]</para>
         </td>
       </tr>
     </blockTable>
