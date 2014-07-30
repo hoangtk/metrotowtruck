@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data> 
-        <menuitem
+<!--         <menuitem
             id="menu_tasks_gtd_main_action"
             name="Tasks"
             parent="metro.mttl_metro"
-            sequence="5"/>
+            sequence="5"/> -->
 <!-- GTD tasks view -->            
         <record id="action_view_task_gtd" model="ir.actions.act_window">
             <field name="name">GTD Tasks</field>
@@ -34,7 +34,7 @@
             <field name="view_mode">tree</field>
             <field name="act_window_id" ref="action_view_task_gtd"/>
         </record>            
-        <menuitem action="action_view_task_gtd" id="menu_tasks_gtd" parent="menu_tasks_gtd_main_action" sequence="1"/>
+        <!-- <menuitem action="action_view_task_gtd" id="menu_tasks_gtd" parent="menu_tasks_gtd_main_action" sequence="1"/> -->
         
 <!-- GTD projects view -->         
         <record id="open_view_project_gtd" model="ir.actions.act_window">
@@ -60,7 +60,7 @@
                 </p>
             </field>
         </record>
-		<menuitem action="open_view_project_gtd" id="menu_projects_gtd" parent="menu_tasks_gtd_main_action" sequence="2"/> 
+		<!-- <menuitem action="open_view_project_gtd" id="menu_projects_gtd" parent="menu_tasks_gtd_main_action" sequence="2"/>  -->
         		
 <!-- Menus from project_gtd module -->
 	    <record model="ir.actions.act_window" id="tasks_gtd_my_action">
@@ -73,7 +73,7 @@
 	        <field name="view_mode">kanban,tree,form,calendar,gantt,graph</field>
 	    </record>
     
-		<menuitem id="menu_tasks_gtd_mytasks" 
+<!-- 		<menuitem id="menu_tasks_gtd_mytasks" 
 			parent="menu_tasks_gtd_main_action" 
 			action="tasks_gtd_my_action" 
 			sequence="3"/>   
@@ -90,6 +90,6 @@
 			parent="menu_tasks_gtd_main_action" 
 			action="project_gtd.open_gtd_timebox_tree" 
 			groups="project.group_project_manager"
-			sequence="5"/>
+			sequence="5"/> -->
     </data>
 </openerp>

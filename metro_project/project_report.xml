@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <report auto="False" id="report_project_task_print" model="project.task"
+        <report auto="False" id="report_project_task_print" model="project.task" header="True"
                 name="project.task.print" rml="metro_project/report/project_task_print.rml"
                 usage="default" string="Project Task"/>        
+        <report auto="False" id="report_project_task_list" model="project.task" header="False"
+                name="project.task.list" rml="metro_project/report/project_task_list.rml"
+                usage="default" string="Task List"/>                  
     </data>
 </openerp>

@@ -41,7 +41,7 @@ class project_project(osv.osv):
         domain = []
         if context and context.has_key('default_project_type') and context['default_project_type']:
             domain += ['|',('project_type','=',context['default_project_type'])]
-        domain +=  [('case_default','=',1)]
+        domain +=  ['|',('project_type','=','all'),('case_default','=',1)]
         ids = self.pool.get('project.task.type').search(cr, uid, domain, context=context)
         return ids
     
@@ -49,6 +49,13 @@ class project_project(osv.osv):
                  'type_ids': _get_default_states,
                  }
     
+    def onchange_project_type(self,cr, uid, ids, project_type, context=None):
+        if not project_type:
+            return {}
+        domain =  ['|','|',('project_type','=',project_type),('project_type','=','all'), ('case_default','=',1)]
+        ids = self.pool.get('project.task.type').search(cr, uid, domain, context=context)
+        return {'value':{'type_ids': ids}}
+            
     def set_done(self, cr, uid, ids, context=None):        
         if isinstance(ids, (int,long)):
             ids = [ids]
@@ -74,16 +81,26 @@ class project_task(base_stage, osv.osv):
                                        selection=_PROJ_TYPES, 
                                        string='Project Type', select=1),
         'multi_images': fields.text("Multi Images"),
-        'private': fields.boolean("Private"),                
+        'private': fields.boolean("Private"),     
+        'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees")           
     }
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(project_task,self).default_get(cr, uid, fields_list, context=context)
+        #only keep the default project setting for the simple project
+        if context.get('default_project_type') and context.get('default_project_type') != 'simple' and resu.get('project_id'):
+            resu.pop('project_id')
+        return resu
     def email_send(self, cr, uid, ids, vals, context=None):
         email_tmpl_obj = self.pool.get('email.template')
         #send email to assignee
         if 'user_id' in vals:
-            tmpl_ids = self.pool.get('email.template').search(cr, uid, [('name','=','project_task_assignee')])
-            if tmpl_ids:
-                for id in ids:
-                    email_tmpl_obj.send_mail(cr, uid, tmpl_ids[0], id, force_send=True, context=context)
+            assignee = self.pool.get('res.users').browse(cr, uid, vals['user_id'], context=context)
+            #only send email when user have email setup
+            if assignee.email:
+                tmpl_ids = self.pool.get('email.template').search(cr, uid, [('name','=','project_task_assignee')])
+                if tmpl_ids:
+                    for id in ids:
+                        email_tmpl_obj.send_mail(cr, uid, tmpl_ids[0], id, force_send=True, context=context)
         return True
     
     def create(self, cr, uid, vals, context=None):

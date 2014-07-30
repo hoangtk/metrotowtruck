@@ -29,9 +29,13 @@ class project_task_print(report_sxw.rml_parse):
         self.localcontext.update({
             'time': time,
             'get_priority':self.get_priority,
+            'get_emp_names':self.get_emp_names,
         })
     def get_priority(self,priority):
-        return self._get_sellection_name('project.task','priority',priority)        
+        return self._get_sellection_name('project.task','priority',priority)  
+    def get_emp_names(self,emps):
+        emp_names = [emp.name for emp in emps]
+        return ', '.join(emp_names)              
     #get the selection display value by the selection key(field_value)
     def _get_sellection_name(self,model_name,field_name,field_value):
         field_sel = self.pool.get(model_name)._columns[field_name].selection
@@ -45,6 +49,7 @@ class project_task_print(report_sxw.rml_parse):
         trans_result = trans_obj._get_source(self.cr, self.uid, trans_name, 'selection', self.localcontext.get('lang'), trans_src)
         return trans_result   
 report_sxw.report_sxw('report.project.task.print','project.task','addons/metro_project/report/project_task_print.rml',parser=project_task_print)
+report_sxw.report_sxw('report.project.task.list','project.task','addons/metro_project/report/project_task_list.rml',parser=project_task_print)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

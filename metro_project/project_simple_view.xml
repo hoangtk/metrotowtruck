@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
             	<field name="partner_id" position="before">
             		<!-- <field name="project_type" invisible="1"/> -->
-            		<field name="project_type"/>
+            		<field name="project_type" on_change="onchange_project_type(project_type)"/>
             	</field>
             </field>
         </record> 
@@ -24,6 +24,36 @@
             </field>
         </record>           
 
+
+        <record model="ir.ui.view" id="metro_project_task_tree_view">
+            <field name="name">metro_project_task_tree_view</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_tree2"/>
+            <field name="arch" type="xml">
+            	<field name="project_id" position="after">
+            		<field name="project_type"/>
+            	</field>
+            	<field name="planned_hours" position="attributes">
+            		<attribute name="string">Planned Hours</attribute>
+            		<attribute name="widget">float_time</attribute>
+            	</field>
+            	<field name="effective_hours" position="attributes">
+            		<attribute name="string">Spent Hours</attribute>
+            		<attribute name="invisible">False</attribute>
+            	</field>
+            	<field name="remaining_hours" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field>
+            	<field name="date_start" position="attributes">
+            		<attribute name="groups"></attribute>
+            		<attribute name="widget">date</attribute>
+            	</field>
+            	<field name="date_end" position="attributes">
+            		<attribute name="groups"></attribute>
+            		<attribute name="widget">date</attribute>
+            	</field>
+            </field>
+        </record>
          
         <record model="ir.ui.view" id="metro_project_task_simple_form_view">
             <field name="name">metro_project_task_simple_form_view</field>
@@ -50,9 +80,33 @@
                         <field name="multi_images" widget="image_multi"/>
                     </page>
 				</page>
+				<!-- Add private field -->
             	<field name="project_id" position="after">
             		<field name="private"/>
+            	</field>  
+            	<!-- set project id as required -->
+            	<field name="project_id" position="attributes">
+            		<attribute name="required">True</attribute>
             	</field>         
+            	<!-- remove "options='{"no_open": True}'" allow to view user info -->
+            	<field name="user_id" position="replace">
+            		<field name="user_id" attrs="{'readonly':[('state','in',['done', 'cancelled'])]}"/>
+            	</field>
+            	<field name="user_id" position="after">
+            		<field name="emp_ids" widget="many2many_tags"/>
+            	</field>
+            	<field name="planned_hours" position="attributes">
+            		<attribute name="string">Planned Hours</attribute>
+            	</field>
+            	<field name="effective_hours" position="attributes">
+            		<attribute name="string">Spent Hours</attribute>
+            	</field>
+            	<field name="date_start" position="attributes">
+            		<attribute name="widget">date</attribute>
+            	</field>
+            	<field name="date_end" position="attributes">
+            		<attribute name="widget">date</attribute>
+            	</field>
             </field>
         </record>    
 <!-- the original projects menu only display the simple projects -->
@@ -68,7 +122,14 @@
             <field name="res_model">project.task</field>
             <field name="domain">[('project_type','=','simple')]</field>
             <field name="context">{'default_project_type':'simple'}</field>
-        </record>    -->         
+        </record>    --> 
+<!-- the original projects menu default project type is 'simple' -->       
+        <record id="project.open_view_project_all" model="ir.actions.act_window">
+            <field name="name">Projects</field>
+            <field name="res_model">project.project</field>
+            <field name="context">{'default_project_type':'simple'}</field>
+        </record>
+         
 <!-- remove the kanban view -->
         <record id="project.action_view_task" model="ir.actions.act_window">
             <field name="name">Tasks</field>
