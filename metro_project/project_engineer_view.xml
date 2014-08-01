@@ -44,7 +44,7 @@
                     	<label for='components'/>
 	                    <field name="bom_components" widget='one2many_tree'/>
                     	<label for='mfg_ids'/>
-	                    <field name="mfg_ids" domain="[('state','in',('confirmed','engineer'))]"/>
+	                    <field name="mfg_ids" domain="[('state','in',('confirmed','engineer','manufacture'))]"/>
                     </page>
             	</page>
             </field>

@@ -41,6 +41,7 @@
         'security/ir.model.access.csv',
         'wizard/work_order_cnc_line_done_view.xml',
         'wizard/wo_material_request_view.xml',
+        'wizard/mo_actions_view.xml',
         'work_order_cnc_view.xml',
         'mrp_view.xml',
         'mrp_sequence.xml',
@@ -48,6 +49,7 @@
         'wizard/bom_import_view.xml',
         'mrp_workflow.xml',
         'pdm.xml'
+        
     ],
     'test': [],
     'demo': [],
