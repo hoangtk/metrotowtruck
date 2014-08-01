@@ -102,6 +102,9 @@
 	                <field name="product_efficiency" position="attributes">
 	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
 	                </field>
+	                <xpath expr="//field[@name='bom_lines']/tree" position="attributes">
+	                	<attribute name="editable"></attribute>
+	                </xpath>
 	            </data>
         	</field>
        	</record>
@@ -263,8 +266,8 @@
 		        		<field name="wo_next_ids" widget="many2many_tags"/>
                     </xpath> -->
                     <!-- hide the 'Produce' button -->
-                    <button name="%(mrp.act_mrp_product_produce)d" position="replace">
-                    </button>
+<!--                     <button name="%(mrp.act_mrp_product_produce)d" position="replace">
+                    </button> -->
 	            </data>
         	</field>
        	</record>

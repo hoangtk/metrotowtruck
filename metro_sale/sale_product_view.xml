@@ -32,6 +32,11 @@
                     <button name="button_confirm" states="draft" string="Confirm"/>
                     <button name="button_cancel" states="confirmed" string="Cancel"/>
                     <button name="button_engineer" states="confirmed" string="Create Project"/>
+                    <!-- <button name="create_project" string="Create Project" type="object"
+                    	attrs="{'invisible':['|',('project_ids','=',True),('state','!=','manufacture')]}"/> -->
+                    <field name="has_project" invisible="1"/>
+                    <button name="create_project" string="Create Project" type="object"
+                    	attrs="{'invisible':['|',('has_project','=',True),('state','!=','manufacture')]}"/>
                     <button name="button_manufacture" states="confirmed" string="Create Manfacture Order"/>
                     <button name="action_cancel_draft" states="cancelled" string="Set to Draft" type="object"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,engineer,manufacture,done" readonly="1"/>
@@ -53,7 +58,7 @@
 			                <field name="product_id" on_change="product_id_change(product_id)" 
                     			domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]" 
                     			class="oe_inline"/>
-			                <field name="bom_id" domain="[('product_id','=',product_id)]"/>
+			                <field name="bom_id" domain="[('product_id','=',product_id),('bom_lines','!=',False)]"/>
 	            		</group>
 	            		<group>
 			                <field name="project_ids" widget='many2many_tags'/>

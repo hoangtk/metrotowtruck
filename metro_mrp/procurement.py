@@ -29,7 +29,8 @@ from openerp import netsvc
 class procurement_order(osv.osv):
     _inherit = 'procurement.order'
     _columns = {
-        'mfg_id': fields.many2one('sale.product', string='MFG ID'),
+#        'mfg_id': fields.many2one('sale.product', string='MFG ID'),
+        'mfg_ids': fields.many2many('sale.product', 'proc_mfg_id_rel','proc_id','mfg_id',string='MFG IDs',),
     }
     
     def make_mo(self, cr, uid, ids, context=None):
@@ -46,21 +47,7 @@ class procurement_order(osv.osv):
             res_id = procurement.move_id.id
             newdate = datetime.strptime(procurement.date_planned, '%Y-%m-%d %H:%M:%S') - relativedelta(days=procurement.product_id.produce_delay or 0.0)
             newdate = newdate - relativedelta(days=company.manufacturing_lead)
-#            produce_id = production_obj.create(cr, uid, {
-#                'origin': procurement.origin,
-#                'product_id': procurement.product_id.id,
-#                'product_qty': procurement.product_qty,
-#                'product_uom': procurement.product_uom.id,
-#                'product_uos_qty': procurement.product_uos and procurement.product_uos_qty or False,
-#                'product_uos': procurement.product_uos and procurement.product_uos.id or False,
-#                'location_src_id': procurement.location_id.id,
-#                'location_dest_id': procurement.location_id.id,
-#                'bom_id': procurement.bom_id and procurement.bom_id.id or False,
-#                'date_planned': newdate.strftime('%Y-%m-%d %H:%M:%S'),
-#                'move_prod_id': res_id,
-#                'company_id': procurement.company_id.id,
-#            })
-            #add the mfg_ids, johnw@07/14/2014
+
             produce_id = production_obj.create(cr, uid, {
                 'origin': procurement.origin,
                 'product_id': procurement.product_id.id,
@@ -74,7 +61,8 @@ class procurement_order(osv.osv):
                 'date_planned': newdate.strftime('%Y-%m-%d %H:%M:%S'),
                 'move_prod_id': res_id,
                 'company_id': procurement.company_id.id,
-                'mfg_ids': procurement.mfg_id and [(4,procurement.mfg_id.id)] or False,                
+                #add the mfg_ids, johnw@07/14/2014
+                'mfg_ids': procurement.mfg_ids and [(4,mfg_id.id) for mfg_id in procurement.mfg_ids] or False,                
             })
 
 
@@ -82,7 +70,19 @@ class procurement_order(osv.osv):
             self.write(cr, uid, [procurement.id], {'state': 'running', 'production_id': produce_id})   
             bom_result = production_obj.action_compute(cr, uid,
                     [produce_id], properties=[x.id for x in procurement.property_ids])
-            wf_service.trg_validate(uid, 'mrp.production', produce_id, 'button_confirm', cr)
+            #by johnw, 07/31/2014, Under the ID logic, do not confirm the MO automatically, need the engineering work finished.
+#            wf_service.trg_validate(uid, 'mrp.production', produce_id, 'button_confirm', cr)
+            #by johnw, 07/31/2014, auto set the MFG ID's work flow to manufacture state
+            #begin
+            if procurement.mfg_ids:
+                self.pool.get('sale.product').write(cr, uid, [mfg_id.id for mfg_id in procurement.mfg_ids], {'mrp_prod_ids':[(4,produce_id)]},context=context)
+                for mfg_id in procurement.mfg_ids:
+                    if mfg_id.state == 'draft':
+                        wf_service.trg_validate(uid, 'sale.product', mfg_id.id, 'button_confirm', cr)
+                        wf_service.trg_validate(uid, 'sale.product', mfg_id.id, 'button_manufacture', cr)
+                    if mfg_id.state == 'confirmed':
+                        wf_service.trg_validate(uid, 'sale.product', mfg_id.id, 'button_manufacture', cr)
+            #end
             if res_id:
                 move_obj.write(cr, uid, [res_id],
                         {'location_id': procurement.location_id.id})
@@ -114,9 +114,52 @@ class mrp_production(osv.osv):
                     'move_id': shipment_move_id,
                     'company_id': production.company_id.id,
                     #add the mfg_id, for reading in procurement.order.make_mo(), johnw, 07/14/2014 
-                    'mfg_id': production_line.mfg_id.id,
+                    'mfg_ids': production_line.mfg_id and [(4,production_line.mfg_id.id)] or False,
                 })
         wf_service.trg_validate(uid, procurement_order._name, procurement_id, 'button_confirm', cr)
         return procurement_id
+    
+
+class sale_order(osv.osv):
+    _inherit = 'sale.order'
+    #override this method in sale_stock.sale_order, to add the mfg ids to the procurement order    
+    def _prepare_order_line_procurement(self, cr, uid, order, line, move_id, date_planned, context=None):
+        #get the bom_id
+        props = line.property_ids and [prop.id for prop in line.property_ids] or None
+        bom_obj = self.pool.get('mrp.bom')
+        bom_id = bom_obj._bom_find(cr, uid, line.product_id.id, False, props)
+        #create MFG id by sales order
+        mfg_id_vals = {'source':'sale',
+                       'date_planned': date_planned,
+                       'mto_design_id': line.mto_design_id and line.mto_design_id.id or False,
+                       'product_id': line.product_id.id,
+                       'bom_id': bom_id,
+                       'note':line.name}
+        new_mfg_ids = []
+        for i in range(0,line.product_uom_qty):
+            new_mfg_ids.append((4,self.pool.get('sale.product').create(cr, uid, mfg_id_vals)))
+        return {
+            'name': line.name,
+            'origin': order.name,
+            'date_planned': date_planned,
+            'product_id': line.product_id.id,
+            'product_qty': line.product_uom_qty,
+            'product_uom': line.product_uom.id,
+            'product_uos_qty': (line.product_uos and line.product_uos_qty)\
+                    or line.product_uom_qty,
+            'product_uos': (line.product_uos and line.product_uos.id)\
+                    or line.product_uom.id,
+            'location_id': order.shop_id.warehouse_id.lot_stock_id.id,
+            'procure_method': line.type,
+            'move_id': move_id,
+            'company_id': order.company_id.id,
+            'note': line.name,
+            #add the property_ids, to fix the matching BOM issue in mrp_bom.action_compute() caused by the procurement.order.property_ids missing
+            'property_ids': line.property_ids and [(4,prop.id) for prop in line.property_ids] or False,
+            #mfg ids
+            'mfg_ids': new_mfg_ids,
+            #bom_id
+            'bom_id': bom_id
+        }    
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

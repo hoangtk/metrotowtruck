@@ -9,7 +9,11 @@ class sale_product(osv.osv):
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     
     STATES_COL = {'draft':[('readonly',False)]}
-    
+    def _has_project(self,cr,uid,ids,fld_name,arg,context=None):
+        res = {}
+        for mfg_id in self.browse(cr, uid, ids, context=context):
+            res[mfg_id.id] = mfg_id.project_ids and len(mfg_id.project_ids) > 0
+        return res
     _columns = {
         'name': fields.char('ID', size=8, required=True),
         'note': fields.text('Description', ),
@@ -22,6 +26,8 @@ class sale_product(osv.osv):
         'product_id': fields.many2one('product.product',string='Product', track_visibility='onchange',readonly=True, states=STATES_COL),
         'bom_id': fields.many2one('mrp.bom',string='BOM', track_visibility='onchange',readonly=True, states=STATES_COL),
         'project_ids': fields.many2many('project.project','project_id_rel','mfg_id','project_id',string='Engineering Project',readonly=True, track_visibility='onchange'),
+        #used on the view, since the many2many field already return True when test its value
+        'has_project': fields.function(_has_project,string='Has Project',type='boolean'),
         'mrp_prod_ids': fields.many2many('mrp.production','mrp_prod_id_rel','mfg_id','mrp_prod_id',string='Manufacture Order',readonly=True, track_visibility='onchange'),
         'state': fields.selection([
                    ('draft','Draft'),
@@ -97,11 +103,18 @@ class sale_product(osv.osv):
         return super(sale_product,self).unlink(cr, uid, ids, context=context)
     
     def create_project(self, cr, uid, id, context=None):
+        if isinstance(id,list):
+            id = id[0]
         sale_product_id = self.browse(cr, uid, id, context=context)
         if not sale_product_id.project_ids:
-            vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,)),'type':'engineer'}
+            vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,)),
+                    'project_type':'engineer',
+                    'bom_id':sale_product_id.bom_id.id}
             project_id = self.pool.get('project.project').create(cr, uid, vals, context=context)
-            self.write(cr, uid, sale_product_id.id, {'project_ids':[(4, project_id)],'state':'engineer'},context=context)
+            vals = {'project_ids':[(4, project_id)]}
+            if sale_product_id.state == 'confirmed':
+                vals.update({'state':'engineer'})
+            self.write(cr, uid, sale_product_id.id, vals,context=context)
             return project_id
         else:
             return sale_product_id.project_ids[0].id
