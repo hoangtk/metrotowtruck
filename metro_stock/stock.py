@@ -284,12 +284,13 @@ class stock_move(osv.osv):
         return super(stock_move,self).search(cr, user, new_args, offset, limit, order, context, count)  
 
     def action_done(self, cr, uid, ids, context=None):
-        super(stock_move,self).action_done(cr, uid, ids, context) 
+        resu = super(stock_move,self).action_done(cr, uid, ids, context) 
         move_ids = []
         for move in self.browse(cr, uid, ids, context=context):
-            if move.state not in ('done','cancel'):
+            if move.state == 'done':
                 move_ids.append(move.id)     
-        self.write(cr, uid, ids, {'date': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}, context=context)
+        self.write(cr, uid, move_ids, {'date': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}, context=context)
+        return resu
 
 from openerp.addons.stock import stock_picking as stock_picking_super
       

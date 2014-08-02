@@ -7,6 +7,8 @@ from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from lxml import etree
 from openerp.addons.mrp.mrp import rounding as mrp_rounding
 from openerp import tools
+from openerp.tools import float_compare
+
 class mrp_bom(osv.osv):
     _inherit = 'mrp.bom'
     def _get_full_name(self, cr, uid, ids, name=None, args=None, context=None):
@@ -28,9 +30,16 @@ class mrp_bom(osv.osv):
        
     def _check_product(self, cr, uid, ids, context=None):
         """
-            Override original one, to allow to have multiple lines with same Part Number
+            Override original one, only check the duplicated products on same BOM level, the duplicated products under variance BOM level are allowed
         """
-        return True  
+        all_prod = []
+        res = True
+        for bom in self.browse(cr, uid, ids, context=context):
+            if bom.product_id.id in all_prod:
+                res = False
+                break
+            all_prod.append(bom.product_id.id)
+        return res
 
     def _domain_bom_routing(self, cr, uid, ids, field_name, context=None):
         domain = []
@@ -39,6 +48,7 @@ class mrp_bom(osv.osv):
             if bom.get('routing_id'):
                 domain = domain + [('routing_id','=',bom.get('routing_id')[0])]
         return domain 
+    
     _columns = {
                 'is_common': fields.boolean('Common?'),
                 'clone_bom_ids': fields.one2many('mrp.bom','common_bom_id','Clone BOMs'),
@@ -55,7 +65,7 @@ class mrp_bom(osv.osv):
         ('code_uniq', 'unique(code)', 'Reference must be unique!'),
     ] 
     _constraints = [
-        (_check_product, 'BoM line product should not be same as BoM product.', ['product_id']),
+        (_check_product, 'BoM line product should not be duplicate under one BoM.', ['product_id']),
         ] 
     '''
     SQL to update current code
@@ -431,6 +441,106 @@ class mrp_production(osv.osv):
         })
         production.write({'picking_id': picking_id}, context=context)
         return picking_id    
+    '''
+    1.add the 'consume_move_id' when matching the wo.product_lines and consume moves
+    '''
+    def action_produce(self, cr, uid, production_id, production_qty, production_mode, context=None):
+        """ To produce final product based on production mode (consume/consume&produce).
+        If Production mode is consume, all stock move lines of raw materials will be done/consumed.
+        If Production mode is consume & produce, all stock move lines of raw materials will be done/consumed
+        and stock move lines of final product will be also done/produced.
+        @param production_id: the ID of mrp.production object
+        @param production_qty: specify qty to produce
+        @param production_mode: specify production mode (consume/consume&produce).
+        @return: True
+        """
+        stock_mov_obj = self.pool.get('stock.move')
+        production = self.browse(cr, uid, production_id, context=context)
+
+        produced_qty = 0
+        for produced_product in production.move_created_ids2:
+            if (produced_product.scrapped) or (produced_product.product_id.id != production.product_id.id):
+                continue
+            produced_qty += produced_product.product_qty
+        if production_mode in ['consume','consume_produce']:
+            consumed_data = {}
+
+            # Calculate already consumed qtys
+            for consumed in production.move_lines2:
+                if consumed.scrapped:
+                    continue
+                if not consumed_data.get(consumed.product_id.id, False):
+                    consumed_data[consumed.product_id.id] = 0
+                consumed_data[consumed.product_id.id] += consumed.product_qty
+
+            # Find product qty to be consumed and consume it
+            for scheduled in production.product_lines:
+
+                # total qty of consumed product we need after this consumption
+                total_consume = ((production_qty + produced_qty) * scheduled.product_qty / production.product_qty)
+
+                # qty available for consume and produce
+                qty_avail = scheduled.product_qty - consumed_data.get(scheduled.product_id.id, 0.0)
+
+                if qty_avail <= 0.0:
+                    # there will be nothing to consume for this raw material
+                    continue
+
+#                raw_product = [move for move in production.move_lines if move.product_id.id==scheduled.product_id.id]
+                #johnw, 07/11/2014, add the 'consume_move_id' when matching the wo.product_lines and consume moves
+                #begin
+                raw_product = [move for move in production.move_lines if move.product_id.id==scheduled.product_id.id and move.id==scheduled.consume_move_id.id]
+                #end
+                if raw_product:
+                    # qtys we have to consume
+                    qty = total_consume - consumed_data.get(scheduled.product_id.id, 0.0)
+                    if float_compare(qty, qty_avail, precision_rounding=scheduled.product_id.uom_id.rounding) == 1:
+                        # if qtys we have to consume is more than qtys available to consume
+                        prod_name = scheduled.product_id.name_get()[0][1]
+                        raise osv.except_osv(_('Warning!'), _('You are going to consume total %s quantities of "%s".\nBut you can only consume up to total %s quantities.') % (qty, prod_name, qty_avail))
+                    if qty <= 0.0:
+                        # we already have more qtys consumed than we need
+                        continue
+
+                    raw_product[0].action_consume(qty, raw_product[0].location_id.id, context=context)
+
+        if production_mode == 'consume_produce':
+            # To produce remaining qty of final product
+            #vals = {'state':'confirmed'}
+            #final_product_todo = [x.id for x in production.move_created_ids]
+            #stock_mov_obj.write(cr, uid, final_product_todo, vals)
+            #stock_mov_obj.action_confirm(cr, uid, final_product_todo, context)
+            produced_products = {}
+            for produced_product in production.move_created_ids2:
+                if produced_product.scrapped:
+                    continue
+                if not produced_products.get(produced_product.product_id.id, False):
+                    produced_products[produced_product.product_id.id] = 0
+                produced_products[produced_product.product_id.id] += produced_product.product_qty
+
+            for produce_product in production.move_created_ids:
+                produced_qty = produced_products.get(produce_product.product_id.id, 0)
+                subproduct_factor = self._get_subproduct_factor(cr, uid, production.id, produce_product.id, context=context)
+                rest_qty = (subproduct_factor * production.product_qty) - produced_qty
+
+                if rest_qty < production_qty:
+                    prod_name = produce_product.product_id.name_get()[0][1]
+                    raise osv.except_osv(_('Warning!'), _('You are going to produce total %s quantities of "%s".\nBut you can only produce up to total %s quantities.') % (production_qty, prod_name, rest_qty))
+                if rest_qty > 0 :
+                    stock_mov_obj.action_consume(cr, uid, [produce_product.id], (subproduct_factor * production_qty), context=context)
+
+        for raw_product in production.move_lines2:
+            new_parent_ids = []
+            parent_move_ids = [x.id for x in raw_product.move_history_ids]
+            for final_product in production.move_created_ids2:
+                if final_product.id not in parent_move_ids:
+                    new_parent_ids.append(final_product.id)
+            for new_parent_id in new_parent_ids:
+                stock_mov_obj.write(cr, uid, [raw_product.id], {'move_history_ids': [(4,new_parent_id)]})
+
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'mrp.production', production_id, 'button_produce_done', cr)
+        return True    
 from openerp.addons.mrp.mrp import mrp_production as mrp_prod_patch        
 def mrp_prod_action_confirm(self, cr, uid, ids, context=None):
     """ Confirms production order.

@@ -24,5 +24,6 @@ import bom_import
 import add_common_bom
 import wo_material_request
 import mo_actions
+import mrp_product_produce
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
