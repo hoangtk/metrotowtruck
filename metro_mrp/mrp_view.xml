@@ -265,9 +265,13 @@
 		        		<field name="wo_pre_ids" widget="many2many_tags"/>
 		        		<field name="wo_next_ids" widget="many2many_tags"/>
                     </xpath> -->
-                    <!-- hide the 'Produce' button -->
-<!--                     <button name="%(mrp.act_mrp_product_produce)d" position="replace">
-                    </button> -->
+                    <!-- show the move's state -->
+                    <xpath expr="//field[@name='move_lines']/tree/field[@name='state']" position='attributes'>
+                    	<attribute name="invisible">0</attribute>
+                    </xpath>
+                    <xpath expr="//field[@name='move_lines2']/tree/field[@name='state']" position='attributes'>
+                    	<attribute name="invisible">0</attribute>
+                    </xpath>
 	            </data>
         	</field>
        	</record>

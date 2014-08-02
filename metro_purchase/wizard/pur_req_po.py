@@ -205,8 +205,8 @@ class pur_req_po(osv.osv_memory):
             if procurement_id:
                 if procurement_id.move_id:
                     po_line.update({'move_dest_id': procurement_id.move_id.id})
-                if procurement_id.mfg_id:
-                    po_line.update({'mfg_id': procurement_id.mfg_id.id})
+                if procurement_id.mfg_ids and len(procurement_id.mfg_ids) > 0:
+                    po_line.update({'mfg_id': procurement_id.mfg_ids[0].id})
                 
             po_lines.append(po_line);
         po_data['lines']=po_lines

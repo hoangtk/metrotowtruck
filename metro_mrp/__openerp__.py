@@ -48,7 +48,8 @@
         'wizard/add_common_bom_view.xml',
         'wizard/bom_import_view.xml',
         'mrp_workflow.xml',
-        'pdm.xml'
+        'pdm.xml',
+        'procurement_view.xml'
         
     ],
     'test': [],
