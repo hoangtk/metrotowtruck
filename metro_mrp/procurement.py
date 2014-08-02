@@ -124,21 +124,24 @@ class sale_order(osv.osv):
     _inherit = 'sale.order'
     #override this method in sale_stock.sale_order, to add the mfg ids to the procurement order    
     def _prepare_order_line_procurement(self, cr, uid, order, line, move_id, date_planned, context=None):
-        #get the bom_id
-        props = line.property_ids and [prop.id for prop in line.property_ids] or None
-        bom_obj = self.pool.get('mrp.bom')
-        bom_id = bom_obj._bom_find(cr, uid, line.product_id.id, False, props)
-        #create MFG id by sales order
-        mfg_id_vals = {'source':'sale',
-                       'date_planned': date_planned,
-                       'mto_design_id': line.mto_design_id and line.mto_design_id.id or False,
-                       'product_id': line.product_id.id,
-                       'bom_id': bom_id,
-                       'note':line.name}
-        new_mfg_ids = []
-        for i in range(0,line.product_uom_qty):
-            new_mfg_ids.append((4,self.pool.get('sale.product').create(cr, uid, mfg_id_vals)))
-        return {
+#        return {
+#            'name': line.name,
+#            'origin': order.name,
+#            'date_planned': date_planned,
+#            'product_id': line.product_id.id,
+#            'product_qty': line.product_uom_qty,
+#            'product_uom': line.product_uom.id,
+#            'product_uos_qty': (line.product_uos and line.product_uos_qty)\
+#                    or line.product_uom_qty,
+#            'product_uos': (line.product_uos and line.product_uos.id)\
+#                    or line.product_uom.id,
+#            'location_id': order.shop_id.warehouse_id.lot_stock_id.id,
+#            'procure_method': line.type,
+#            'move_id': move_id,
+#            'company_id': order.company_id.id,
+#            'note': line.name,
+#        }
+        proc_ord_vals = {
             'name': line.name,
             'origin': order.name,
             'date_planned': date_planned,
@@ -154,12 +157,30 @@ class sale_order(osv.osv):
             'move_id': move_id,
             'company_id': order.company_id.id,
             'note': line.name,
-            #add the property_ids, to fix the matching BOM issue in mrp_bom.action_compute() caused by the procurement.order.property_ids missing
-            'property_ids': line.property_ids and [(4,prop.id) for prop in line.property_ids] or False,
-            #mfg ids
-            'mfg_ids': new_mfg_ids,
-            #bom_id
-            'bom_id': bom_id
-        }    
+        }        
+        if line.type == 'make_to_order' and line.product_id.supply_method == 'produce':
+            #get the bom_id
+            props = line.property_ids and [prop.id for prop in line.property_ids] or None
+            bom_obj = self.pool.get('mrp.bom')
+            bom_id = bom_obj._bom_find(cr, uid, line.product_id.id, False, props)
+            #create MFG id by sales order
+            mfg_id_vals = {'source':'sale',
+                           'date_planned': date_planned,
+                           'mto_design_id': line.mto_design_id and line.mto_design_id.id or False,
+                           'product_id': line.product_id.id,
+                           'bom_id': bom_id,
+                           'note':line.name}
+            new_mfg_ids = []
+            for i in range(0,line.product_uom_qty):
+                new_mfg_ids.append((4,self.pool.get('sale.product').create(cr, uid, mfg_id_vals)))
+            proc_ord_vals.update({
+                                #add the property_ids, to fix the matching BOM issue in mrp_bom.action_compute() caused by the procurement.order.property_ids missing
+                                'property_ids': line.property_ids and [(4,prop.id) for prop in line.property_ids] or False,
+                                #mfg ids
+                                'mfg_ids': new_mfg_ids,
+                                #bom_id
+                                'bom_id': bom_id                                  
+                                  })
+        return proc_ord_vals
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -241,10 +241,10 @@
                     </field>
                     <!-- add the mfg ID displaying -->
                     <xpath expr="//field[@name='move_lines']//field[@name='state']" position='after'>
-                    	<field name="mr_sale_prod_id"/>
+                    	<field name="mr_sale_prod_id" string='MFG ID'/>
                     </xpath>
                     <xpath expr="//field[@name='move_lines2']//field[@name='state']" position='after'>
-                    	<field name="mr_sale_prod_id"/>
+                    	<field name="mr_sale_prod_id" string='MFG ID'/>
                     </xpath>
                     <!-- add the work order extended fields -->
                     <xpath expr="//field[@name='workcenter_lines']/form//field[@name='hour']" position="after">
