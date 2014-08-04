@@ -68,8 +68,23 @@ class procurement_order(osv.osv):
 
             res[procurement.id] = produce_id
             self.write(cr, uid, [procurement.id], {'state': 'running', 'production_id': produce_id})   
-            bom_result = production_obj.action_compute(cr, uid,
-                    [produce_id], properties=[x.id for x in procurement.property_ids])
+            '''by johnw, 08/04/2014, 
+            Under the ID logic, do not computer the MO automatically to generate the product and move lines
+            Need the engineering work finished, then the BOM and routing will be confirmed, then can do computing
+            Now the only we can do is to find a BOM automatically, but it can be change after the engineering
+            ''' 
+            #begin
+#            bom_result = production_obj.action_compute(cr, uid,
+#                    [produce_id], properties=[x.id for x in procurement.property_ids])
+            bom_obj = self.pool.get("mrp.bom")
+            props = procurement.property_ids and [prop.id for prop in procurement.property_ids] or None
+            bom_id = bom_obj._bom_find(cr, uid, procurement.product_id.id, procurement.product_uom.id, props)
+            if bom_id:
+                bom_point = bom_obj.browse(cr, uid, bom_id, context=context)
+                routing_id = bom_point.routing_id.id or False
+                self.write(cr, uid, [produce_id], {'bom_id': bom_id, 'routing_id': routing_id})
+            #end
+                           
             #by johnw, 07/31/2014, Under the ID logic, do not confirm the MO automatically, need the engineering work finished.
 #            wf_service.trg_validate(uid, 'mrp.production', produce_id, 'button_confirm', cr)
             #by johnw, 07/31/2014, auto set the MFG ID's work flow to manufacture state
@@ -168,7 +183,7 @@ class sale_order(osv.osv):
                            'mto_design_id': line.mto_design_id and line.mto_design_id.id or False,
                            'product_id': line.product_id.id,
                            'bom_id': bom_id,
-                           'so_id': line.order_id,
+                           'so_id': line.order_id.id,
                            'note':line.name}
             new_mfg_ids = []
             for i in range(0,line.product_uom_qty):

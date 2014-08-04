@@ -31,7 +31,7 @@ class wkf_instance(osv.osv):
             res_obj = self.pool.get(inst.res_type)
             res_names = res_obj.name_get(cr, uid, [inst.res_id], context=context)
             if res_names:
-                res[inst.id] = res_names[0][0]
+                res[inst.id] = res_names[0][1]
 #            res_obj = self.pool.get(inst.res_type)
 #            res_names = res_obj.read(cr, uid, [inst.res_id], [res_obj._rec_name],context=context)
 #            if res_names:
@@ -40,6 +40,19 @@ class wkf_instance(osv.osv):
     _columns = {
         'res_name': fields.function(_get_res_name,type='char',string='Res Name')
     }
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        if isinstance(ids, (int, long)):
+                    ids = [ids]
+        reads = self.read(cr, uid, ids, ['res_type', 'res_name'], context=context)
+        res = []
+        for record in reads:
+            name = record['res_type']
+            if record['res_name']:
+                name = name + '@' + record['res_name']
+            res.append((record['id'], name))
+        return res    
 
 wkf_instance()
 

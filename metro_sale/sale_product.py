@@ -21,7 +21,7 @@ class sale_product(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the product without removing it.", track_visibility='onchange'),
         'source': fields.selection( [('sale', 'Sales'), ('stock', 'Stocking'), ('other', 'Others')],'Source', required=True,readonly=True, states=STATES_COL),
-        'so_id':  fields.many2one('sale.order', 'Sale Order', readonly=True),
+        'so_id':  fields.many2one('sale.order', 'Sales Order', readonly=True),
         'serial_id': fields.many2one('mttl.serials', 'Product Serial',readonly=True, states={'done':[('readonly',False)]}),
         'mto_design_id': fields.many2one('mto.design', 'Configuration', readonly=True, states=STATES_COL),
         'product_id': fields.many2one('product.product',string='Product', track_visibility='onchange',readonly=True, states=STATES_COL),
@@ -54,7 +54,8 @@ class sale_product(osv.osv):
             res.update({'name': self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/',
                         'serial_id':None,
                         'project_ids':None,
-                        'mrp_prod_ids':None})
+                        'mrp_prod_ids':None,
+                        'so_id':None,})
         return res 
         
 #    def create(self, cr, uid, data, context=None):       
@@ -138,6 +139,10 @@ class sale_product(osv.osv):
         return mrp_prod_id
                                             
     def action_confirm(self, cr, uid, ids, context=None):
+        id = ids[0]
+        sale_product_id = self.browse(cr,uid,id,context=context)
+        if not sale_product_id.product_id or not sale_product_id.bom_id:
+            raise osv.except_osv(_('Error'),_("The product and BOM are required for ID to confirm!"))
         self.write(cr, uid, ids, {'state':'confirmed'})
         
     def action_engineer(self, cr, uid, ids, context=None):
@@ -158,6 +163,13 @@ class sale_product(osv.osv):
                 raise osv.except_osv(_('Error'),_("This ID '%s' already have related projects or manufacture order, can not be cancel!"%(sale_product_id.name,)))
         self.write(cr, uid, ids, {'state':'cancelled'})
         
+    def wkf_cancel(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        self.action_cancel(cr, uid, ids, context=context)
+        for id in ids:
+            wf_service.trg_validate(uid, 'sale.product', id, 'button_cancel', cr)
+        return True
+                
     def action_draft(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'draft'})
          

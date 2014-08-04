@@ -31,15 +31,14 @@
             <form string="Sale Product IDs" version="7.0">
                 <header>
                     <button name="button_confirm" states="draft" string="Confirm"/>
-                    <button name="button_cancel" states="confirmed" string="Cancel"/>
                     <button name="button_engineer" states="confirmed" string="Create Project"/>
-                    <!-- <button name="create_project" string="Create Project" type="object"
-                    	attrs="{'invisible':['|',('project_ids','=',True),('state','!=','manufacture')]}"/> -->
                     <field name="has_project" invisible="1"/>
                     <button name="create_project" string="Create Project" type="object"
                     	attrs="{'invisible':['|',('has_project','=',True),('state','!=','manufacture')]}"/>
                     <button name="button_manufacture" states="confirmed" string="Create Manfacture Order"/>
                     <button name="action_cancel_draft" states="cancelled" string="Set to Draft" type="object"/>
+                    <!-- the workflow activity 'act_manufacture' is a subflow, can not be trigger by the signal 'button_cancel, so have to call python code direct-->
+                    <button name="wkf_cancel" states="confirmed,engineer,manufacture" string="Cancel" type="object"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,engineer,manufacture,done" readonly="1"/>
                 </header>   
                 <sheet>    	
