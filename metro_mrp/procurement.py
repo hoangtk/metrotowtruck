@@ -62,7 +62,9 @@ class procurement_order(osv.osv):
                 'move_prod_id': res_id,
                 'company_id': procurement.company_id.id,
                 #add the mfg_ids, johnw@07/14/2014
-                'mfg_ids': procurement.mfg_ids and [(4,mfg_id.id) for mfg_id in procurement.mfg_ids] or False,                
+                'mfg_ids': procurement.mfg_ids and [(4,mfg_id.id) for mfg_id in procurement.mfg_ids] or False, 
+                #add the routing_id, johnw@07/14/2014    
+                'routing_id': procurement.bom_id and procurement.bom_id.routing_id and procurement.bom_id.routing_id.id or False,           
             })
 
 
@@ -71,19 +73,9 @@ class procurement_order(osv.osv):
             '''by johnw, 08/04/2014, 
             Under the ID logic, do not computer the MO automatically to generate the product and move lines
             Need the engineering work finished, then the BOM and routing will be confirmed, then can do computing
-            Now the only we can do is to find a BOM automatically, but it can be change after the engineering
             ''' 
-            #begin
 #            bom_result = production_obj.action_compute(cr, uid,
 #                    [produce_id], properties=[x.id for x in procurement.property_ids])
-            bom_obj = self.pool.get("mrp.bom")
-            props = procurement.property_ids and [prop.id for prop in procurement.property_ids] or None
-            bom_id = bom_obj._bom_find(cr, uid, procurement.product_id.id, procurement.product_uom.id, props)
-            if bom_id:
-                bom_point = bom_obj.browse(cr, uid, bom_id, context=context)
-                routing_id = bom_point.routing_id.id or False
-                self.write(cr, uid, [produce_id], {'bom_id': bom_id, 'routing_id': routing_id})
-            #end
                            
             #by johnw, 07/31/2014, Under the ID logic, do not confirm the MO automatically, need the engineering work finished.
 #            wf_service.trg_validate(uid, 'mrp.production', produce_id, 'button_confirm', cr)
