@@ -21,6 +21,7 @@ class sale_product(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the product without removing it.", track_visibility='onchange'),
         'source': fields.selection( [('sale', 'Sales'), ('stock', 'Stocking'), ('other', 'Others')],'Source', required=True,readonly=True, states=STATES_COL),
+        'so_id':  fields.many2one('sale.order', 'Sale Order', readonly=True),
         'serial_id': fields.many2one('mttl.serials', 'Product Serial',readonly=True, states={'done':[('readonly',False)]}),
         'mto_design_id': fields.many2one('mto.design', 'Configuration', readonly=True, states=STATES_COL),
         'product_id': fields.many2one('product.product',string='Product', track_visibility='onchange',readonly=True, states=STATES_COL),

@@ -102,9 +102,9 @@
 	                <field name="product_efficiency" position="attributes">
 	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
 	                </field>
-	                <xpath expr="//field[@name='bom_lines']/tree" position="attributes">
+<!-- 	                <xpath expr="//field[@name='bom_lines']/tree" position="attributes">
 	                	<attribute name="editable"></attribute>
-	                </xpath>
+	                </xpath> -->
 	            </data>
         	</field>
        	</record>

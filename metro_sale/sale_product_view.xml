@@ -12,6 +12,7 @@
                 <field name="mto_design_id"/>
                 <field name="product_id"/>
                 <field name="bom_id"/>
+                <field name="so_id"/>
                 <field name="project_ids" widget='many2many_tags'/>
                 <field name="mrp_prod_ids" widget='many2many_tags'/>
                 <field name="serial_id"/>
@@ -61,6 +62,7 @@
 			                <field name="bom_id" domain="[('product_id','=',product_id),('bom_lines','!=',False)]"/>
 	            		</group>
 	            		<group>
+                			<field name="so_id"/>
 			                <field name="project_ids" widget='many2many_tags'/>
                 			<field name="mrp_prod_ids" widget='many2many_tags'/>
                 			<field name="serial_id"/>

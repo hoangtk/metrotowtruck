@@ -118,7 +118,6 @@ class mrp_production(osv.osv):
                 })
         wf_service.trg_validate(uid, procurement_order._name, procurement_id, 'button_confirm', cr)
         return procurement_id
-    
 
 class sale_order(osv.osv):
     _inherit = 'sale.order'
@@ -169,6 +168,7 @@ class sale_order(osv.osv):
                            'mto_design_id': line.mto_design_id and line.mto_design_id.id or False,
                            'product_id': line.product_id.id,
                            'bom_id': bom_id,
+                           'so_id': line.order_id,
                            'note':line.name}
             new_mfg_ids = []
             for i in range(0,line.product_uom_qty):
