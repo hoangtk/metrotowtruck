@@ -631,10 +631,6 @@ def mrp_prod_action_compute(self, cr, uid, ids, properties=None, context=None):
         wo_ids = []
         for line in results2:
             line['production_id'] = production.id
-            #add the wo code, by johnw, 07/11/2014
-            #begin
-            line['code'] = self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line')
-            #end
             wo_new_id = workcenter_line_obj.create(cr, uid, line)
             wo_ids.append(wo_new_id)
         #add by johnw@07/1102014, update the wo_pre_ids and wo_next_ids
@@ -712,6 +708,7 @@ class mrp_production_workcenter_line(osv.osv):
         'has_pre_ids': fields.function(_has_pre_wo, type='boolean', string='Has Pre WO'),
         'wo_pre_ids': fields.many2many('mrp.production.workcenter.line', 'mrp_wo_flow','wo_next_id','wo_pre_id', string='Previous WOs', domain="[('production_id','=',production_id),('bom_id','=',bom_id),]"),
         'wo_next_ids': fields.many2many('mrp.production.workcenter.line', 'mrp_wo_flow','wo_pre_id','wo_next_id', string='Next WOs', domain="[('production_id','=',production_id),('bom_id','=',bom_id),]"),
+        #add 'ready' state
         'state': fields.selection([('draft','Draft'),('ready','Ready'),('cancel','Cancelled'),('pause','Pending'),('startworking', 'In Progress'),('done','Finished')],'Status', readonly=True,
                                  help="* When a work order is created it is set in 'Draft' status.\n" \
                                        "* When user sets work order in start mode that time it will be set in 'In Progress' status.\n" \
@@ -720,6 +717,7 @@ class mrp_production_workcenter_line(osv.osv):
                                        "* When order is completely processed that time it is set in 'Finished' status."),
         
     }
+    _defaults = {'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line') or '/',}
     #add the code return in the name
     def name_get(self, cr, user, ids, context=None):
         if context is None:

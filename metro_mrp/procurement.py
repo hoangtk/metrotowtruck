@@ -47,7 +47,15 @@ class procurement_order(osv.osv):
             res_id = procurement.move_id.id
             newdate = datetime.strptime(procurement.date_planned, '%Y-%m-%d %H:%M:%S') - relativedelta(days=procurement.product_id.produce_delay or 0.0)
             newdate = newdate - relativedelta(days=company.manufacturing_lead)
-
+            #get the bom_id and routing id, johnw, 08/04/2014
+            #begin
+            bom_id = procurement.bom_id and procurement.bom_id.id or False
+            if not bom_id:
+                props = procurement.property_ids and [prop.id for prop in procurement.property_ids] or None
+                bom_id = self.pool.get('mrp.bom')._bom_find(cr, uid, procurement.product_id.id, procurement.product_uom.id, props)
+            routing_id = bom_id and self.pool.get('mrp.bom').browse(cr,uid,bom_id,context=context).routing_id.id or False
+            #end
+            
             produce_id = production_obj.create(cr, uid, {
                 'origin': procurement.origin,
                 'product_id': procurement.product_id.id,
@@ -57,14 +65,15 @@ class procurement_order(osv.osv):
                 'product_uos': procurement.product_uos and procurement.product_uos.id or False,
                 'location_src_id': procurement.location_id.id,
                 'location_dest_id': procurement.location_id.id,
-                'bom_id': procurement.bom_id and procurement.bom_id.id or False,
+#                'bom_id': procurement.bom_id and procurement.bom_id.id or False,
+                'bom_id': bom_id,
                 'date_planned': newdate.strftime('%Y-%m-%d %H:%M:%S'),
                 'move_prod_id': res_id,
                 'company_id': procurement.company_id.id,
                 #add the mfg_ids, johnw@07/14/2014
                 'mfg_ids': procurement.mfg_ids and [(4,mfg_id.id) for mfg_id in procurement.mfg_ids] or False, 
                 #add the routing_id, johnw@07/14/2014    
-                'routing_id': procurement.bom_id and procurement.bom_id.routing_id and procurement.bom_id.routing_id.id or False,           
+                'routing_id': routing_id,           
             })
 
 
