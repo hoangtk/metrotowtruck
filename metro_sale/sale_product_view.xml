@@ -16,6 +16,7 @@
                 <field name="project_ids" widget='many2many_tags'/>
                 <field name="mrp_prod_ids" widget='many2many_tags'/>
                 <field name="serial_id"/>
+                <field name="analytic_account_id"/>
                 <field name="state"/>
                 <field name="note"/>
                 <field name="create_uid"/>
@@ -65,6 +66,7 @@
 			                <field name="project_ids" widget='many2many_tags'/>
                 			<field name="mrp_prod_ids" widget='many2many_tags'/>
                 			<field name="serial_id"/>
+                			<field name="analytic_account_id" readonly="1"/>
 			                <field name="create_uid"/>
 			                <field name="create_date"/>
 			                <!-- <field name="active" groups="mrp.group_mrp_manager"/> -->

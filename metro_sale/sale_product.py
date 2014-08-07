@@ -38,7 +38,8 @@ class sale_product(osv.osv):
                    ('done','Done'),
                    ('cancelled','Cancel')], 'Status', track_visibility='onchange'),
         'config_change_ids': fields.related('mto_design_id','change_ids',type='one2many', relation='mto.design.change', string='Changes'),
-        'date_planned': fields.date('Scheduled Date', required=True, select=True, readonly=True, states=STATES_COL),        
+        'date_planned': fields.date('Scheduled Date', required=True, select=True, readonly=True, states=STATES_COL),    
+        'analytic_account_id': fields.many2one('account.analytic.account', 'Contract/Analytic', help="Link this MFG ID to an analytic account if you need financial management on it. ", ondelete="restrict"),    
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
@@ -57,7 +58,17 @@ class sale_product(osv.osv):
                         'mrp_prod_ids':None,
                         'so_id':None,})
         return res 
+    def create_analytic_account(self, cr, uid, mfg_id, context=None):
+        id_data = self.browse(cr, uid, mfg_id, context=context)
+        ana_act_id = self.pool.get('account.analytic.account').create(cr, uid, {'name':'ID%s-COST'%(id_data.name,)},context=context)
+        return ana_act_id
         
+    def create(self, cr, uid, vals, context=None):
+        mfg_id = super(sale_product, self).create(cr, uid, vals, context=context)
+        ana_act_id = self.create_analytic_account(cr, uid, mfg_id, context=context)
+        self.write(cr, uid, [mfg_id], {'analytic_account_id':ana_act_id}, context=context)
+        return mfg_id
+                
 #    def create(self, cr, uid, data, context=None):       
 #        if data.get('name','/')=='/':
 #            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'

@@ -501,8 +501,9 @@ class mrp_production(osv.osv):
                     if qty <= 0.0:
                         # we already have more qtys consumed than we need
                         continue
-
-                    raw_product[0].action_consume(qty, raw_product[0].location_id.id, context=context)
+                    #below calling method will cause some stock_move's sub classes can not be called, like metro_stock.stock_move.action_done(),_create_account_move_line()
+#                    raw_product[0].action_consume(qty, raw_product[0].location_id.id, context=context)
+                    stock_mov_obj.action_consume(cr, uid, [raw_product[0].id], qty, raw_product[0].location_id.id, context=context)
 
         if production_mode == 'consume_produce':
             # To produce remaining qty of final product

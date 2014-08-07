@@ -218,8 +218,8 @@ class material_request_line(osv.osv):
     def _workflow_signal(self, cr, uid, ids, signal, context=None):
         #override in order to fire the workflow signal on given stock.picking workflow instance
         #instead of it's own workflow (which is not existing)
-        return self.pool.get('stock.move')._workflow_signal(cr, uid, ids, signal, context=context)    
-
+        return self.pool.get('stock.move')._workflow_signal(cr, uid, ids, signal, context=context)  
+    
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
         new_args = deal_args(self,args)
@@ -290,7 +290,22 @@ class stock_move(osv.osv):
             if move.state == 'done':
                 move_ids.append(move.id)     
         self.write(cr, uid, move_ids, {'date': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}, context=context)
-        return resu
+        return resu  
+    def _create_account_move_line(self, cr, uid, move, matches, src_account_id, dest_account_id, reference_amount, reference_currency_id, type='', context=None):
+        val = super(stock_move,self)._create_account_move_line(cr, uid, move, matches, src_account_id, dest_account_id, reference_amount, reference_currency_id, type, context)
+        #check if this move is a material request line move 
+        mr_line = self.pool.get('material.request.line').browse(cr, uid, move.id, context=context)
+        if mr_line.mr_sale_prod_id:
+            #set the analytic_account_id to debit_line, the detail data ref _create_account_move_line() in product_fifo_lifo.stock.py
+            if mr_line.mr_sale_prod_id.analytic_account_id and val and val[0]:
+                if mr_line.pick_type == 'mr':
+                    #debit dict data 
+                    mline_data = val[0][2]
+                else:
+                    #credit dict data 
+                    mline_data = val[1][2]
+                mline_data.update({'analytic_account_id':mr_line.mr_sale_prod_id.analytic_account_id.id})
+        return val
 
 from openerp.addons.stock import stock_picking as stock_picking_super
       
