@@ -157,25 +157,36 @@
     </record>    
             
 <!-- Add project_type to project.task.type tree view -->
-        <record id="task_type_tree_extend" model="ir.ui.view">
-            <field name="name">task_type_tree_extend</field>
-            <field name="model">project.task.type</field>
-            <field name="inherit_id" ref="project.task_type_tree"/>
-            <field name="arch" type="xml">
-            	<xpath expr="//tree" position="attributes">
-            		<attribute name="editable">top</attribute>
-            	</xpath>
-            	<field name="name" position="before">
-            		<field name="sequence"/>
-            	</field>
-            	<field name="state" position="after">
-            		<field name="project_type"/>
-            		<field name="case_default"/>
-            		<field name="fold"/>
-            		<field name="description"/>
-            	</field>
-            </field>
-        </record>       
+    <record id="task_type_tree_extend" model="ir.ui.view">
+        <field name="name">task_type_tree_extend</field>
+        <field name="model">project.task.type</field>
+        <field name="inherit_id" ref="project.task_type_tree"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//tree" position="attributes">
+        		<attribute name="editable">top</attribute>
+        	</xpath>
+        	<field name="name" position="before">
+        		<field name="sequence"/>
+        	</field>
+        	<field name="state" position="after">
+        		<field name="project_type"/>
+        		<field name="case_default"/>
+        		<field name="fold"/>
+        		<field name="description"/>
+        	</field>
+        </field>
+    </record>       
+<!-- improve the task searching filters -->
+    <record id="view_task_search_form_extend" model="ir.ui.view">
+        <field name="name">"view_task_search_form_extend"</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+        	<field name="project_id" position="after">
+        		<field name="stage_id" domain="[]"/>
+        	</field>
+        </field>
+    </record>         
 <!-- Disable the top project menu to all users  -->
         <!-- Top menu item -->
 <!--         <menuitem name="Project"

@@ -78,8 +78,8 @@
     				<field name="name"/>
     				<field name="design_tmpl_id"/>
     				<field name="design_id"/>  
-                    <field name="datas" filename="datas_fname"/>
-                    <field name="datas_fname" invisible="1"/> 
+<!--                     <field name="datas" filename="datas_fname"/>
+                    <field name="datas_fname" invisible="1"/> --> 
     				<field name="store"/>      
     				<field name="create_uid"/>    
     				<field name="create_date"/>

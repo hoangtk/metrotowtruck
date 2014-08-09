@@ -182,3 +182,16 @@ class project_task_type(osv.osv):
         'project_type': fields.selection(_PROJ_TYPES+[('all','All')],string='Type',),
     }      
     _defaults={'project_type':'simple'}
+#    def name_get(self, cr, uid, ids, context=None):
+#        if not ids:
+#            return []
+#        if isinstance(ids, (int, long)):
+#                    ids = [ids]
+#        reads = self.read(cr, uid, ids, ['name', 'project_type'], context=context)
+#        res = []
+#        for record in reads:
+#            name = record['name']
+#            if record['project_type']:
+#                name +=  '[' + record['project_type'] + ']'
+#            res.append((record['id'], name))
+#        return res    

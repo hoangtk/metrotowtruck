@@ -52,6 +52,7 @@
 			<field name="inherit_id" ref="hr.view_employee_tree"/>
 			<field name="arch" type="xml">
 				<field name="name" position="before">
+					<field name="image_small" widget="image"/>
 					<field name="emp_code"/>
 				</field>
 				<field name="name" position="after">

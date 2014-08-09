@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
-        <report auto="False" id="report_project_task_print" model="project.task" header="True"
-                name="project.task.print" rml="metro_project/report/project_task_print.rml"
-                usage="default" string="Project Task"/>        
+    <data>  
+        <report auto="False" id="report_project_task_sheet" model="project.task" header="False"
+                name="project.task.sheet" rml="metro_project/report/project_task_sheet.rml"
+                usage="default" string="Task Sheet"/>       
         <report auto="False" id="report_project_task_list" model="project.task" header="False"
                 name="project.task.list" rml="metro_project/report/project_task_list.rml"
-                usage="default" string="Task List"/>                  
+                usage="default" string="Task List"/> 
+        <report auto="False" id="report_project_task_print" model="project.task" header="False"
+                name="project.task.print" rml="metro_project/report/project_task_print.rml"
+                usage="default" string="Task"/>    
+<!-- task by assignee -->                
+        <report auto="False" id="report_task_group_by_assignee" model="task.group" header="False"
+                name="task.group.by_assignee" rml="metro_project/report/task_group_by_assignee.rml"
+                usage="default" string="Tasks by Assignee"/>
+        <report auto="False" id="report_task_group_by_employee" model="task.group" header="False"
+                name="task.group.by_employee" rml="metro_project/report/task_group_by_employee.rml"
+                usage="default" string="Tasks by Employee"/>                                                            
     </data>
 </openerp>

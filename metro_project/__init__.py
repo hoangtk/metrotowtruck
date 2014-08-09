@@ -24,3 +24,4 @@ import project_engineer
 import project_gtd
 import project_mfg
 import report
+import wizard
