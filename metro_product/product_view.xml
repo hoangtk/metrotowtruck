@@ -161,6 +161,9 @@
 	            		red:(virtual_available and virtual_available&lt;0);blue:virtual_available&gt;=0 and state in ('draft', 'end', 'obsolete');black:virtual_available&gt;=0 and state not in ('draft', 'end', 'obsolete')
 	            	</attribute>
 	            </xpath>
+	            <field name='company_id' position="attributes">
+	            	<attribute name="invisible">0</attribute>
+	            </field>
             </field>
         </record>
         

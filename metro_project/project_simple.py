@@ -23,7 +23,7 @@ from openerp.osv import fields,osv
 from openerp.addons.base_status.base_stage import base_stage
 from openerp.tools.translate import _
 from openerp.addons.project import project as project_super
-_PROJ_TYPES = [('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD')]
+_PROJ_TYPES = [('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD'),('mfg','Manufacture')]
 
 '''
 1.Add 'type' field to extend the project's usage
@@ -87,9 +87,22 @@ class project_task(base_stage, osv.osv):
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(project_task,self).default_get(cr, uid, fields_list, context=context)
         #only keep the default project setting for the simple project
-        if context.get('default_project_type') and context.get('default_project_type') != 'simple' and resu.get('project_id'):
-            resu.pop('project_id')
+#        if context.get('default_project_type') and context.get('default_project_type') != 'simple' and resu.get('project_id'):
+#            resu.pop('project_id')
+            
+        if context.get('default_project_type') and not resu.get('project_id'):
+            proj_xml_id = ''
+            if context.get('default_project_type') == 'gtd':
+                proj_xml_id = 'project_gtd'
+            if context.get('default_project_type') == 'software':
+                proj_xml_id = 'project_software'
+            if context.get('default_project_type') == 'mfg':
+                proj_xml_id = 'project_mfg'
+            if proj_xml_id != '':
+                result = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_project', proj_xml_id)
+                resu.update({'project_id':result[1]})
         return resu
+    
     def email_send(self, cr, uid, ids, vals, context=None):
         email_tmpl_obj = self.pool.get('email.template')
         #send email to assignee

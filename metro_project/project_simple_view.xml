@@ -61,8 +61,7 @@
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
             	<field name="name" position="after">
-            		<!-- <field name="project_type" invisible="1"/> -->
-            		<field name="project_type" readonly="1"/>
+            		<field name="project_type" invisible="1"/>
             	</field>
             	<!-- move description to main page from the 'Work Hours' page. -->
 				<field name="description" position="replace">
@@ -101,15 +100,16 @@
             	<field name="effective_hours" position="attributes">
             		<attribute name="string">Spent Hours</attribute>
             	</field>
-            	<field name="date_start" position="attributes">
-            		<attribute name="widget">date</attribute>
-            	</field>
-            	<field name="date_end" position="attributes">
-            		<attribute name="widget">date</attribute>
-            	</field>
             	<xpath expr="//field[@name='work_ids']/tree/field[@name='date']" position='attributes'>
             		<attribute name='widget'>date</attribute>
             	</xpath>
+            	<!-- move date fields together -->
+            	<group string="Gantt View" position="replace"/>
+            	<field name="date_deadline" position="after">
+            		<field name="date_start" widget="date"/>
+            		<field name="date_end" widget="date"/>
+            		<field name="create_date" widget="date"/>
+            	</field>            	
             </field>
         </record>    
 <!-- the original projects menu only display the simple projects -->

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>             
+<!-- Manufacture Tasks view and menu -->                
+        <record model="ir.ui.view" id="project_task_mfg_form_view">
+            <field name="name">project_task_mfg_form_view</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+           	<!-- add work order id -->
+            	<field name="planned_hours" position="before">
+            		<field name="workorder_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            	</field>                 
+			<!-- Add employee_id to task's work hours -->
+				<xpath expr="//field[@name='work_ids']/tree/field[@name='name']" position="after">
+					<field name="employee_id"/>
+            		<field name="mfg_ids" widget="many2many_tags"/>
+				</xpath>    
+			<!-- hide project_id for mfg task -->
+				<field name="project_id" position="attributes">
+					<attribute name="attrs">{'invisible':[('project_type','=','mfg')]}</attribute>
+				</field>
+            </field>
+        </record> 
+        <record id="action_view_task_mfg" model="ir.actions.act_window">
+            <field name="name">Manufacture Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_mode">kanban,tree,form,calendar,gantt,graph</field>
+            <field name="search_view_id" ref="project.view_task_search_form"/>
+            <field name="domain">[('project_type','=','mfg')]</field>
+            <field name="context">{'default_project_type':'mfg'}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a new task.
+              </p><p>
+                OpenERP's project management allows you to manage the pipeline
+                of tasks in order to get things done efficiently. You can
+                track progress, discuss on tasks, attach documents, etc.
+              </p>
+            </field>
+        </record>
+        <record id="open_view_task_mfg_list_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="0"/>
+            <field name="view_mode">kanban</field>
+            <field name="act_window_id" ref="action_view_task_mfg"/>
+        </record>
+        <record id="open_view_task_mfg_list_tree" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="act_window_id" ref="action_view_task_mfg"/>
+        </record>
+        <menuitem action="action_view_task_mfg" id="menu_action_view_task_mfg" parent="mrp.menu_mrp_manufacturing" sequence="10" groups="mrp.group_mrp_user"/>
+                
+<!-- My Engineer Tasks -->        
+        <record id="action_view_task_mfg_my" model="ir.actions.act_window">
+            <field name="name">My Manufacture Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_mode">kanban,tree,form,calendar,gantt,graph</field>
+            <field name="search_view_id" ref="project.view_task_search_form"/>
+            <field name="domain">[('user_id','=',uid),('project_type','=','mfg')]</field>
+            <field name="context">{'default_project_type':'mfg'}</field>
+        </record>
+        <menuitem action="action_view_task_mfg_my" id="menu_action_view_task_mfg_my" parent="mrp.menu_mrp_manufacturing" sequence="11" groups="mrp.group_mrp_user"/>
+<!-- Add manufacture task list to work order page -->
+		<record id="metro_mrp_production_workcenter_form_view" model="ir.ui.view">
+            <field name="name">metro_mrp_production_workcenter_form_view</field>
+            <field name="model">mrp.production.workcenter.line</field>
+            <field name="inherit_id" ref="mrp_operations.mrp_production_workcenter_form_view_inherit"/>
+            <field name="arch" type="xml">   
+	        	<page string="Information" position="after">
+	        		<page string="Tasks">
+	        			<field name="task_ids" context="{'default_project_type':'mfg'}"/>
+	        		</page>
+	        	</page>
+            </field>
+         </record>      
+    </data>
+</openerp>
