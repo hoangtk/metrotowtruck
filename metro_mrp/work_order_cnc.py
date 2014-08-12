@@ -57,11 +57,33 @@ class work_order_cnc(osv.osv):
                 if line.state == 'done':
                     raise osv.except_osv(_('Invalid Action!'), _('Action was blocked, there are done work order lines!'))
         return True
-                    
     def action_confirm(self, cr, uid, ids, context=None):
         self._set_state(cr, uid, ids, 'confirmed',context)
         return True
         
+    #TODO, for the feature connecting with the MRP
+    '''                   
+    def action_confirm(self, cr, uid, ids, context=None):
+        #check the related parts
+        line_obj = self.pool.get("work.order.cnc.line")
+        for cnc in self.browse(cr, uid, ids, context=context):
+            if not cnc.wo_cnc_lines:
+                raise osv.except_osv(_('Error!'), _("Missing CNC work order lines!"))
+            #check lines
+            for line in cnc.wo_cnc_lines:
+                if not line_obj.check_cnc_line(cr, uid, line, context=context):
+                    return False
+            #check line's material consuming moves
+            consume_move_lines = line_obj.get_consume_move_lines(cr, uid, [line.id for line in cnc.wo_cnc_lines], 
+                                                                 mfg_ids = [mfg_id.id for mfg_id in cnc.sale_product_ids], context=context)
+            for line_id, move_ids in consume_move_lines.items():
+                if not move_ids:
+                    ln_file_name = line_obj.read(cr, uid, line_id, ['file_name'],context=context)['file_name']
+                    raise osv.except_osv(_('Error!'), _("Finding manufacture consuming move failed,  file name is '%s'"%(ln_file_name,)))
+                    
+        self._set_state(cr, uid, ids, 'confirmed',context)
+        return True
+    '''
     def action_cancel(self, cr, uid, ids, context=None):
         self._check_done_lines(cr,uid,ids,context)
         #set the cancel state
@@ -110,6 +132,8 @@ class work_order_cnc_line(osv.osv):
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
         'mr_id': fields.many2one('material.request','MR#', readonly=True),
         'is_whole_plate': fields.boolean('Whole Plate', readonly=True),
+        #connection with the mrp order's components
+        'wo_comp_ids': fields.many2many('mrp.wo.comp', string="Part List", readonly=False),
     }
 
     _defaults = {
@@ -124,8 +148,73 @@ class work_order_cnc_line(osv.osv):
         (_check_size,
             'You must assign a serial number for this product.',
             ['plate_length','plate_width','plate_height','percent_usage','percent_usage_theory']),]
-                        
+    #TODO, for the feature connecting with the MR
+    '''
+    def check_cnc_line(self, cr, uid, cnc_line, product_id = None, context=None):
+        #must define the line's part list
+        if not cnc_line.wo_comp_ids:
+            raise osv.except_osv(_('Error!'), _("Line - %s must add the part list!"%(cnc_line.file_name,)))
+        #All part list of a line must have same product to consume
+        comp_material_prod_id = None
+        for comp in cnc_line.wo_comp_ids:
+            #The component must have bom lines to include the raw materials
+            if not comp.comp_id.bom_lines:
+                raise osv.except_osv(_('Error!'), _("Line - %s, Component - %s, must be a BOM component with bom lines!"%(cnc_line.file_name,comp.comp_id.name)))
+            for bom_prod in comp.comp_id.bom_lines:
+                #only check the component with raw material
+                if bom_prod.bom_lines:
+                    continue
+                if not comp_material_prod_id:
+                    comp_material_prod_id = bom_prod.product_id.id
+                elif comp_material_prod_id != bom_prod.product_id.id:
+                    raise osv.except_osv(_('Error!'), _("Line - %s, all components should consume same material!"%(cnc_line.file_name,)))
+        if not comp_material_prod_id:
+            raise osv.except_osv(_('Error!'), _("Line - %s, all components must contains raw material in bom lines!"%(cnc_line.file_name,)))
+        #check product_id parameter, it should be same as the component's product
+        if product_id and comp_material_prod_id != product_id:
+            prod_names = self.pool.get('product.product').name_get(cr, uid, [product_id,comp_material_prod_id], context=context)
+            names = {}
+            for name in prod_names:
+                names.update({name[0]:name[1]})
+            raise osv.except_osv(_('Error!'), _("Product - '%s' is not same as component's product '%s', please correct it"%(names[product_id], names[comp_material_prod_id])))
+            
+        return True
+    '''
+    #TODO, for the feature connecting with the MR
+#    def get_consume_move_lines(self, cr, uid, cnc_line_ids, mfg_ids=None, context=None):
+#        #get the MO's consuming move lines by cnc line's part list       
+#        sql = '''
+#        select distinct a.id, d.consume_move_id
+#        from work_order_cnc_line a
+#        join mrp_wo_comp_work_order_cnc_line_rel b
+#            on a.id = b.work_order_cnc_line_id
+#        join mrp_wo_comp c
+#            on c.id = b.mrp_wo_comp_id
+#        join mrp_production_product_line d
+#            on c.comp_id = d.parent_bom_id and c.mo_id = d.production_id
+#        '''
+#        where = 'where a.id = ANY(%s)'
+#        args = (cnc_line_ids,)
+#        if not mfg_ids:
+#            sql += '\n join stock_move e on d.consume_move_id = e.id and e.sale_product_id = ANY(%s)'
+#            args = (cnc_line_ids,cnc_line_ids)
+#        
+#        sql += '\n' + where        
+#        cr.execute(sql, args)
+#        res=dict.fromkeys(cnc_line_ids,[])
+#        for data in cr.fetchall():
+#            res[data[0]].append(data[1])
+#        return res     
+               
     def action_done(self, cr, uid, ids, context=None):
+        #TODO, for the feature connecting with the MR
+        '''
+        cnc_obj = self.pool.get('cnc.workorder')
+        #loop to check the line's data
+        for line in self.browse(cr, uid, ids, context=context):
+            if not cnc_obj.check_cnc_line(cr, uid, line, product_id = context.get('product_id'), context=context):
+                return False
+        '''
         #set the done data
         vals = {'state':'done','product_id':context.get('product_id'),'date_finished':context.get('date_finished'),'is_whole_plate':context.get('is_whole_plate')}
         if not context:
@@ -155,7 +244,7 @@ class work_order_cnc_line(osv.osv):
         if context.get("is_whole_plate"):
             self.pool.get('plate.material').update_plate_whole_qty(cr, uid, context.get('product_id'), -1, context=context)
         return True
-
+    
     #get the material request price
     def _get_mr_prod_price(self, cr, uid, product, context = None):
         result = {}
@@ -255,7 +344,62 @@ class work_order_cnc_line(osv.osv):
                 'prodlot_id': mr_line.prodlot_id.id,
             }
         self.pool.get('stock.picking').do_partial(cr, uid, [mr_id], partial_data, context=context)
-            
+    #TODO, for the feature connecting with the MRP
+    '''
+    def make_material_requisition(self, cr, uid, cnc_line_ids, context = None):
+        mr_obj = self.pool.get("material.request")
+        mr_line_obj = self.pool.get("material.request.line")
+        #create material requisition
+        mr_name = self.pool.get('ir.sequence').get(cr, uid, 'material.request') or '/'
+        mr_name += ' from CNC'
+        mr_vals = {'type':'mr','mr_dept_id':context.get('mr_dept_id'),'name':mr_name,'date':fields.datetime.now()}
+        mr_id = mr_obj.create(cr, uid, mr_vals, context=context)
+        #get the employee id
+        mr_emp_id = None
+        user = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+        if user.employee_ids:
+            mr_emp_id = user.employee_ids[0].id
+        #get the MO's consuming move lines
+        #check line's material consuming moves
+        cnc_line_data = self.pool.get('work.order.cnc.line').browse(cr,uid,cnc_line_ids[0],context=context)
+        mfg_ids = [mfg_id.id for mfg_id in cnc_line_data.order_id.sale_product_ids]
+        consume_move_lines = self.get_consume_move_lines(cr, uid, cnc_line_ids,mfg_ids, context=context)
+        for line_id, move_ids in consume_move_lines.items():
+            if not move_ids:
+                ln_file_name = self.read(cr, uid, line_id, ['file_name'],context=context)['file_name']
+                raise osv.except_osv(_('Error!'), _("Finding manufacture consuming move failed,  file name is '%s'"%(ln_file_name,)))
+        #update the consume moves
+        mr_line_ids = []
+        for line_id,move_ids in consume_move_lines.items():
+            ln_file_name = self.read(cr, uid, line_id, ['file_name'])['file_name']
+            mr_line_vals = {'picking_id':mr_id,
+                            'name':'CNC_' + ln_file_name,
+                            'mr_emp_id':mr_emp_id,
+                            'mr_notes':'CNC Work Order Finished',}
+            mr_line_obj.write(cr, uid, move_ids, mr_line_vals, context=context)
+            mr_line_ids += move_ids
+        #update cnc lines mr_id
+        self.pool.get('work.order.cnc.line').write(cr,uid,cnc_line_ids,{'mr_id':mr_id},context=context)
+        
+        #do material auto confirm and assign
+        mr_line_obj.action_confirm(cr, uid, mr_line_ids)
+        mr_line_obj.force_assign(cr, uid, mr_line_ids)
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'stock.picking', mr_id, 'button_confirm', cr)
+                
+        #do auto deliver
+        partial_data = {
+            'delivery_date' : time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        }
+        for mr_line in mr_line_obj.browse(cr, uid, mr_line_ids, context=context):
+            partial_data['move%s' % (mr_line.id)] = {
+                'product_id': mr_line.product_id.id,
+                'product_qty': mr_line.product_qty,
+                'product_uom': mr_line.product_uom.id,
+                'prodlot_id': mr_line.prodlot_id.id,
+            }
+        self.pool.get('stock.picking').do_partial(cr, uid, [mr_id], partial_data, context=context)      
+    '''
     def _check_changing(self, cr, uid, ids, context=None):
         lines = self.read(cr, uid, ids, ['state','file_name'], context=context)
         for s in lines:

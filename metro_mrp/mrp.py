@@ -8,6 +8,7 @@ from lxml import etree
 from openerp.addons.mrp.mrp import rounding as mrp_rounding
 from openerp import tools
 from openerp.tools import float_compare
+import openerp.addons.decimal_precision as dp
 
 class mrp_bom(osv.osv):
     _inherit = 'mrp.bom'
@@ -41,12 +42,18 @@ class mrp_bom(osv.osv):
             all_prod.append(bom.product_id.id)
         return res
 
-    def _domain_bom_routing(self, cr, uid, ids, field_name, context=None):
+    def _domain_bom_routing(self, cr=None, uid=None, ids=None, field_name=None, context=None):
+        if cr is None:
+            return []
         domain = []
         if field_name == 'bom_routing_ids':
             bom = self.read(cr, uid, ids[0], ['routing_id'],context=context)
             if bom.get('routing_id'):
                 domain = domain + [('routing_id','=',bom.get('routing_id')[0])]
+        if field_name == 'comp_routing_workcenter_ids':
+            bom = self.browse(cr, uid, ids[0], context=context)
+            if bom.bom_id and bom.bom_id.routing_id:
+                domain = domain + [('routing_id','=',bom.bom_id.routing_id.id)]
         return domain 
     
     _columns = {
@@ -55,7 +62,12 @@ class mrp_bom(osv.osv):
                 'common_bom_id': fields.many2one('mrp.bom','Common BOM',ondelete='cascade'),
                 'code': fields.char('Reference', size=16, required=True, readonly=True),
                 'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
+                #for top bom, define the work cetner and the components relationship
                 'bom_routing_ids': fields.one2many('mrp.bom.routing.operation', 'bom_id', string='Routing BOM Matrix', domain_fnct=_domain_bom_routing),
+                #for the component, define the sub components related work center from parent bom's routing definition, 
+                #only show for the bom components(bom_id is not false)
+                'comp_routing_workcenter_ids': fields.many2many('mrp.routing.workcenter','mrp_bom_routing_operation','bom_comp_id','routing_workcenter_id',
+                                                                string='Work Centers', domain=_domain_bom_routing)
                 }
     _defaults = {
         'is_common' : False,
@@ -316,6 +328,7 @@ class mrp_bom(osv.osv):
 class mrp_bom_routing_operation(osv.osv):
     _name = 'mrp.bom.routing.operation'
     _order = 'id desc'
+    _rec_name = 'bom_comp_id'
     '''
     bom_comp_id:
     the component is the BOM that need manufacture, can be:
@@ -327,10 +340,20 @@ class mrp_bom_routing_operation(osv.osv):
         'routing_id': fields.many2one('mrp.routing', string='Routing', required=True),
         'routing_workcenter_id': fields.many2one('mrp.routing.workcenter', string='Routing Work Center', required=True ),
         'bom_comp_id': fields.many2one('mrp.bom', string='BOM Component', required=True ),
+        'consume_material': fields.boolean('Consume Material')
     }
     _sql_constraints = [
         ('routing_wc_comp_uniq', 'unique(routing_workcenter_id,bom_comp_id)', 'You can not add duplicated "Routing Work Center"-"Component" with same BOM and Routing!'),
     ]
+    _defaults = {'consume_material': True}
+    def create(self, cr, uid, vals, context=None):
+        if vals.has_key('bom_comp_id'):
+            #added from the bom components screen
+            if not vals.has_key('bom_id'):
+                bom_comp = self.pool.get('mrp.bom').browse(cr, uid, vals['bom_comp_id'],context=context)
+                vals['bom_id'] = bom_comp.bom_id.id
+                vals['routing_id'] = bom_comp.bom_id.routing_id
+        super(mrp_bom_routing_operation,self).create(cr, uid, vals, context=context)
 
 class mrp_routing_workcenter(osv.osv):
     _inherit = 'mrp.routing.workcenter'
@@ -368,6 +391,7 @@ class mrp_production(osv.osv):
             domain=[('state','not in', ('done', 'cancel'))], readonly=True, states={'draft':[('readonly',False)]}),
         'move_lines2': fields.many2many('material.request.line', 'mrp_production_move_ids', 'production_id', 'move_id', 'Consumed Products',
             domain=[('state','in', ('done', 'cancel'))], readonly=True, states={'draft':[('readonly',False)]}),
+        'comp_lines': fields.one2many('mrp.wo.comp', 'mo_id', string='Components'),  
                 
     }
     def copy(self, cr, uid, id, default=None, context=None):
@@ -542,6 +566,44 @@ class mrp_production(osv.osv):
         wf_service = netsvc.LocalService("workflow")
         wf_service.trg_validate(uid, 'mrp.production', production_id, 'button_produce_done', cr)
         return True    
+
+    def action_compute(self, cr, uid, ids, properties=None, context=None):
+        resu = super(mrp_production,self).action_compute(cr, uid, ids, properties, context)
+        #generate work order's components
+        bom_oper_obj = self.pool.get('mrp.bom.routing.operation')
+        wo_comp_obj = self.pool.get('mrp.wo.comp')
+        for mo in self.browse(cr, uid, ids, context=context):
+            if not mo.workcenter_lines:
+                continue            
+            for wo in mo.workcenter_lines:
+                domain = [('bom_id','=',wo.bom_id.id),('routing_id','=',wo.routing_id.id,),('routing_workcenter_id','=',wo.routing_operation_id.id)]                
+                comp_ids = bom_oper_obj.search(cr, uid, domain, context=context)
+                for comp in bom_oper_obj.browse(cr, uid, comp_ids, context=context):
+                    vals = {'mo_id':mo.id, 'wo_id':wo.id, 'comp_id': comp.bom_comp_id.id, 'bom_route_oper_id': comp.id, 'qty': comp.bom_comp_id.product_qty*mo.product_qty}
+                    wo_comp_obj.create(cr, uid, vals, context=context)
+                    
+        return resu
+
+class mrp_wo_comp(osv.osv):
+    _name = 'mrp.wo.comp'    
+    _columns = {
+        'mo_id': fields.many2one('mrp.production', string='Manufacture Order', required=True),
+        'wo_id': fields.many2one('mrp.production.workcenter.line', string='Work Order', required=True),
+        'comp_id': fields.many2one('mrp.bom', string='Component', required=True ),
+        #related bom/routing matrix id, can be empty if user add this component manually
+        'bom_route_oper_id': fields.many2one('mrp.bom.routing.operation', string='Bom Routing Matrix'),
+        #quantity need to be manufacture, from the bom definition if craeated by system
+        'qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        #quantity done
+        'qty_done': fields.float('Quantity Done', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'state': fields.selection([('draft','Draft'),('cancel','Cancelled'),('startworking', 'In Progress'),('done','Finished')], string = 'Status'),
+        'note': fields.text('Description', ),
+        'mfg_ids': fields.related('mo_id,','mfg_ids',type='many2many',relation='sale.product', rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs',),
+    }
+    _sql_constraints = [
+        ('wo_comp_uniq', 'unique(wo_id,comp_id)', 'You can not add duplicated "Work Order Component" with same WorkOrder and Component!'),
+    ]
+                  
 from openerp.addons.mrp.mrp import mrp_production as mrp_prod_patch        
 def mrp_prod_action_confirm(self, cr, uid, ids, context=None):
     """ Confirms production order.
@@ -684,7 +746,7 @@ class mrp_production_workcenter_line(osv.osv):
         select b.id, c.consume_move_id
         from mrp_bom_routing_operation a
         join mrp_production_workcenter_line b 
-            on a.bom_id = b.bom_id and a.routing_id = b.routing_id and a.routing_workcenter_id = b.routing_operation_id
+            on a.bom_id = b.bom_id and a.routing_id = b.routing_id and a.routing_workcenter_id = b.routing_operation_id and a.consume_material = true
         join mrp_production_product_line c
             on b.production_id = c.production_id and a.bom_comp_id = c.parent_bom_id
         where b.id = ANY(%s)
@@ -716,7 +778,8 @@ class mrp_production_workcenter_line(osv.osv):
                                        "* When work order is in running mode, during that time if user wants to stop or to make changes in order then can set in 'Pending' status.\n" \
                                        "* When the user cancels the work order it will be set in 'Canceled' status.\n" \
                                        "* When order is completely processed that time it is set in 'Finished' status."),
-        
+        #the work order related components from bom, can generated from mrp_bom_workcenter_operation when executing action_compute()
+        'comp_lines': fields.one2many('mrp.wo.comp', 'wo_id', string='Components'),  
     }
     _defaults = {'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line') or '/',}
     #add the code return in the name
@@ -784,8 +847,7 @@ class mrp_production_workcenter_line(osv.osv):
                         res = False
                         break
         return res
-    
-    
+                
 class mrp_production_product_line(osv.osv):
     _inherit = 'mrp.production.product.line'
     _columns = {

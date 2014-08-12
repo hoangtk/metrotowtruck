@@ -30,7 +30,9 @@
     					</group>
     				</group>
     				<field name="wo_cnc_lines">
-	                    <tree string="Work Items" editable="bottom">
+    					<tree string="Work Items" editable="bottom">    					
+	                    <!-- #TODO, for the feature connecting with the MR
+	                    <tree string="Work Items"> -->
 	                        <field name="file_name"/>
 	                        <field name="plate_length"/>
 	                        <field name="plate_width" />
@@ -59,10 +61,17 @@
 	                        	<group>
 	                        		<field name="percent_usage_theory"/>
 		                            <field name="percent_usage" />
-		                        	<field name="product_id"/>
 		                            <field name="date_finished" />
+		                        	<field name="product_id"/>
+	                        		<field name="is_whole_plate" />
 		                            <field name="state" />
+	                        		<field name="mr_id"/>
+				                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
+				                    type="action" states="confirmed" icon="terp-check"/>     
 	                            </group>
+	                        	<group colspan="4">
+	                        		<field name="wo_comp_ids"/>
+	                        	</group>
 	                        </group>
 	                    </form>    					
     				</field>

@@ -29,6 +29,10 @@
 	                        <button name="%(mrp.action2)d" string="Bill of Materials Structure" type="action"/>
 	                    </div>
 	            	</xpath>
+                	<!-- add the component's routing workcenters from parent bom's routing definition, only show in the bom components(bom_id is not false) -->
+<!--                 	<field name="routing_id" position='before'>
+                		<field name="comp_routing_workcenter_ids" readonly="1" widget='many2many_tags' attrs="{'invisible':[('bom_id','=',False)]}"/>
+                	</field> -->
                     	       
 	                <!-- the common BOM flag -->
 	                <field name="type" position="after">
@@ -40,6 +44,8 @@
                     	<field name="sequence" widget="handle"/>
                     	<field name="code"/>
 	                	<field name="name"/>
+	                	<!-- add the component's routing workcenters -->
+	                	<!-- <field name="comp_routing_workcenter_ids" widget='many2many_tags'/> -->
 	                	<field name="common_bom_id"/>
 	                </xpath>
 	                <notebook position="inside">
@@ -66,6 +72,7 @@
                         			<field name='routing_id' invisible='1'/>        			
                         			<field name='routing_workcenter_id' domain="[('routing_id','=',routing_id)]"/>
                         			<field name='bom_comp_id' domain="[('bom_lines','!=',False),('bom_id','child_of',bom_id)]"/>
+                        			<field name='consume_material'/>        		
                         		</tree>
                         	</field>
                         </page>	                
@@ -277,6 +284,13 @@
                     <xpath expr="//field[@name='move_lines2']/tree/field[@name='state']" position='attributes'>
                     	<attribute name="invisible">0</attribute>
                     </xpath>
+                    <!-- Add work order's components -->
+                    <xpath expr="//page[@string='Work Orders']" position='after'>
+		        		<page string="Components">
+		        			<field name="comp_lines" readonly="1"/>
+		        		</page>
+                    </xpath>
+	        		
 	            </data>
         	</field>
        	</record>
@@ -324,6 +338,9 @@
                                   <field name="hour"/>
                               </tree>
 		        		</field>
+	        		</page>
+	        		<page string="Components">
+	        			<field name="comp_lines" readonly="1"/>
 	        		</page>
 	        	</page>
 	        	
@@ -491,5 +508,61 @@
 	            </data>
         	</field>
        	</record>
+       	
+    <!-- Manufacture order / Work order 's components list -->
+        <record id="mrp_wo_comp_view_tree" model="ir.ui.view">
+            <field name="name">mrp.wo.comp.tree</field>
+            <field name="model">mrp.wo.comp</field>
+            <field name="arch" type="xml">
+    				<tree string="WO Components" editable="top">
+    					<field name="mo_id"/>
+    					<field name="mfg_ids" widget='many2many_tags'/>
+    					<field name="wo_id"/>
+    					<field name="comp_id"/>
+    					<field name="bom_route_oper_id"/>
+    					<field name="qty"/>
+    					<field name="qty_done"/>
+    					<field name="note"/>
+    					<field name="state"/>
+    				</tree>
+            </field>
+        </record>
+        <record id="mrp_wo_comp_view_form" model="ir.ui.view">
+            <field name="name">mrp.wo.comp.form</field>
+            <field name="model">mrp.wo.comp</field>
+            <field name="arch" type="xml">
+                <form string="WO Components" version="7.0">
+                    <group>
+    					<field name="mo_id"/>
+    					<field name="mfg_ids" widget='many2many_tags'/>
+    					<field name="wo_id"/>
+    					<field name="comp_id"/>
+    					<field name="bom_route_oper_id"/>
+    					<field name="qty"/>
+    					<field name="qty_done"/>
+    					<field name="note"/>
+    					<field name="state"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="mrp_wo_comp_view_search" model="ir.ui.view">
+            <field name="name">mrp.wo.comp.search</field>
+            <field name="model">mrp.wo.comp</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="mo_id"/>
+    				<field name="mfg_ids" widget='many2many_tags'/>
+                    <field name="wo_id"/>
+    				<field name="comp_id"/>
+    				<field name="mfg_ids"/>
+               </search>
+            </field>
+        </record>    
+
+
+	        			
+	        			    
 	</data>	  
 </openerp>
