@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
            	<!-- add work order id -->
             	<field name="planned_hours" position="before">
+            		<field name="id"/>
             		<field name="workorder_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             	</field>                 
 			<!-- Add employee_id to task's work hours -->
@@ -19,7 +20,11 @@
 			<!-- hide project_id for mfg task -->
 				<field name="project_id" position="attributes">
 					<attribute name="attrs">{'invisible':[('project_type','=','mfg')]}</attribute>
-				</field>
+				</field>              
+			<!-- Add context parameter to task's work hours -->
+				<xpath expr="//field[@name='work_ids']/tree/field[@name='name']" position="attributes">
+					<attribute name="default_task_id">id</attribute>
+				</xpath>
             </field>
         </record> 
         <record id="action_view_task_mfg" model="ir.actions.act_window">

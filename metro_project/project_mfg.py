@@ -50,7 +50,13 @@ class project_task_work(osv.osv):
         'employee_id': fields.many2one('hr.employee', 'Employee', ondelete='cascade', ),
         'mfg_ids': fields.many2many('sale.product', 'task_id_rel','task_id','mfg_id',string='MFG IDs',),
     }    
-    
+
+    def default_get(self, cr, uid, fields_list, context=None):
+        res = super(project_task_work,self).default_get(cr, uid, fields_list, context=context)
+        if not res:
+            res = {}
+        if "task_id" in  fields_list:
+            res.update({'task_id':11})
     def get_emp_related_details(self, cr, uid, emp_id):
         res = {}
         emp_obj = self.pool.get('hr.employee')

@@ -26,6 +26,8 @@ from openerp.osv import fields, osv
 from openerp import tools
 from openerp.tools.translate import _
 from openerp.addons.account_analytic_plans import account_analytic_plans
+import openerp.addons.decimal_precision as dp
+
 '''
 1.Allow to update analytic plan instance
 2.Add 'Instances' tag page to analytic plan screen
@@ -151,6 +153,11 @@ account_analytic_plans.account_move_line.create_analytic_lines = create_analytic
 
 class account_move_line(osv.osv):
     _inherit = "account.move.line"
+    _columns = {
+                'quantity': fields.float('Quantity', digits_compute= dp.get_precision('Product Unit of Measure'),
+                            help="The optional quantity expressed by this line, eg: number of product sold. The quantity is not a legal requirement but is very useful for some reports."),
+            }
+        
 
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
@@ -192,4 +199,7 @@ stock_picking()
 class account_analytic_line(osv.osv):
     _inherit = 'account.analytic.line'
     _order = 'id desc'
+    _columns = {
+                'unit_amount': fields.float('Quantity', digits_compute= dp.get_precision('Product Unit of Measure'), help='Specifies the amount of quantity to count.'),    
+                }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
