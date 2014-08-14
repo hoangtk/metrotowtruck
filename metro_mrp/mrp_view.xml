@@ -301,17 +301,31 @@
             <field name="model">mrp.production.workcenter.line</field>
             <field name="inherit_id" ref="mrp_operations.mrp_production_workcenter_form_view_inherit"/>
             <field name="arch" type="xml">
+            	<field name="name" position="replace"/>
+            	<xpath expr="//group" position="before">	
+            		<!-- make the 'Reference' and 'Name' as the title -->    	
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" class="oe_inline"/>
+                            <label string=" - "/>
+                            <field name="name" class="oe_inline"/>
+                        </h1>
+                    </div>
+                    
+                    <div class="oe_right oe_button_box" name="buttons">
+                		<button name="wo_docs" string="Documents" type="object"/>
+                    </div>
+            	</xpath>
+	            	            
             	<!--  add the BOM/Routing/Operation info to manufacture order's work center line -->
 	        	<field name="production_state" position="after">
 	        		<field name="bom_id"/>
 	        		<field name="routing_id"/>
 	        		<field name="routing_operation_id"/>
-	        		<field name="code"/>
 	        	</field>
 	        	<!-- Add the material request fields -->
                 <button name="button_pause" position="after">
                 	<button name="%(action_wo_material_request)d" string="Material Request" states="startworking" type="action"/>
-                	<button name="wo_docs" string="Documents" type="object"/>
                 </button>
 	        	<page string="Information" position="after">
 	        		<page string="Material">

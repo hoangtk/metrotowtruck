@@ -394,10 +394,14 @@ class mrp_production(osv.osv):
         'comp_lines': fields.one2many('mrp.wo.comp', 'mo_id', string='Components'),  
                 
     }
+
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
         default.update({
+            'workcenter_lines' : [],
+            'date_start' : None,
+            'date_finished' : None,
             'workcenter_lines' : [],
         })
         return super(mrp_production, self).copy(cr, uid, id, default, context)
@@ -598,7 +602,7 @@ class mrp_wo_comp(osv.osv):
         'qty_done': fields.float('Quantity Done', digits_compute=dp.get_precision('Product Unit of Measure')),
         'state': fields.selection([('draft','Draft'),('cancel','Cancelled'),('startworking', 'In Progress'),('done','Finished')], string = 'Status'),
         'note': fields.text('Description', ),
-        'mfg_ids': fields.related('mo_id,','mfg_ids',type='many2many',relation='sale.product', rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs',),
+        'mfg_ids': fields.related('mo_id','mfg_ids',type='many2many',relation='sale.product', rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs',),
     }
     _sql_constraints = [
         ('wo_comp_uniq', 'unique(wo_id,comp_id)', 'You can not add duplicated "Work Order Component" with same WorkOrder and Component!'),

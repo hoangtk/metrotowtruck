@@ -26,7 +26,7 @@ class work_order_cnc(osv.osv):
     _columns = {
         'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'note': fields.text('Description', required=False),
-        'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',string="IDs",readonly=True, states={'draft':[('readonly',False)]}),
+        'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',string="MFG IDs",readonly=True, states={'draft':[('readonly',False)]}),
         'wo_cnc_lines': fields.one2many('work.order.cnc.line','order_id','CNC Work Order Lines',readonly=True, states={'draft':[('readonly',False)]}),
         'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True),

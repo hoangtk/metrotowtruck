@@ -23,6 +23,7 @@
 		    				<field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/>
 		    				<field name="create_uid"/>
 		    				<field name="create_date"/>
+		    				<field name="id"/>
 		    				<field name="company_id" groups="base.group_multi_company" widget="selection"/>
     					</group>
     					<group>
@@ -89,6 +90,7 @@
     	<field name="arch" type="xml">
             <tree fonts="bold:message_unread==True" colors="blue:state == 'confirmed';green:state == 'done';grey:state == 'cancel';" string="CNC Work Orders">
                 <field name="message_unread" invisible="1"/>
+		    	<field name="id"/>
                 <field name="name"/>
                 <field name="sale_product_ids" widget="many2many_tags"/>
                 <field name="create_uid"/>
@@ -104,6 +106,7 @@
             <field name="model">work.order.cnc</field>
             <field name="arch" type="xml">
                 <search string="Search CNC Work Orders">
+                    <field name="id"/>
                     <field name="name" string="CNC Work Orders"/>
                     <field name="sale_product_ids"/>
                     <field name="product_id"/>

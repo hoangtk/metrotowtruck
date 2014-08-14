@@ -50,8 +50,6 @@ class project_task_work(osv.osv):
         'employee_id': fields.many2one('hr.employee', 'Employee', ondelete='cascade', ),
         'mfg_ids': fields.many2many('sale.product', 'task_id_rel','task_id','mfg_id',string='MFG IDs',),
     }    
-class project_work(osv.osv):
-    _inherit = "project.task.work"
     
     def get_emp_related_details(self, cr, uid, emp_id):
         res = {}
@@ -96,22 +94,24 @@ Improve the timesheet account analytic generating logic, replace the account ana
 def _project_timesheet_create(self, cr, uid, vals, context=None):
     timesheet_obj = self.pool.get('hr.analytic.timesheet')
     task_obj = self.pool.get('project.task')
-    uom_obj = self.pool.get('product.uom')
-
+    uom_obj = self.pool.get('product.uom')        
     vals_line = {}
     if not context:
         context = {}
     if not context.get('no_analytic_entry',False):
         task_obj = task_obj.browse(cr, uid, vals['task_id'])
+        #check mfg_ids, employee_id, they are required for mfg task working hours
+        if task_obj.project_type == 'mfg':
+            #mfg_ids structure is like: 'mfg_ids': [[6, False, [392, 391]]
+            if len(vals.get('mfg_ids')[0][2]) <= 0:
+                raise osv.except_osv(_('Error!'),_('The MFG IDs are required for the work order task\'s working hour!'))
+            if not vals.get('employee_id',False):
+                raise osv.except_osv(_('Error!'),_('The Employees are required for the work order task\'s working hour!'))
         #johnw, 08/08/2014, Use the employee to get data, if user set the employee
         result = {}
         if vals.get('employee_id',False):
             result = self.get_emp_related_details(cr, uid, vals.get('employee_id', uid))
         else:
-            #the employee id is required for mfg task's working hour
-            if task_obj.project_type == 'mfg':
-                raise osv.except_osv(_('Error!'),
-                     _('Please define employee for the work order working hour!'))
             result = self.get_user_related_details(cr, uid, vals.get('user_id', uid))
             #update the employee_id as the user related employee if user do not supply employee
             vals['employee_id'] = result['employee_id']
@@ -159,6 +159,7 @@ def _project_timesheet_create(self, cr, uid, vals, context=None):
             _add_ana_line()
         else:
             mfg_ids = vals.get('mfg_ids',False)
+            
             #mfg_ids structure is like: 'mfg_ids': [[6, False, [392, 391]]
             if mfg_ids and mfg_ids[0][2] and len(mfg_ids[0][2]) > 0:
                 mfg_ids = mfg_ids[0][2]
