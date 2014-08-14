@@ -20,13 +20,14 @@
                 </xpath>            
                  <xpath expr="//button[@name='action_cancel']" position="attributes" >
                  	<attribute name="states">approved,except_picking,except_invoice,rejected,changing,changing_rejected</attribute>
+                 	<attribute name="groups">metro_purchase.group_pur_req_manager</attribute>
                 </xpath>             
                 <xpath expr="//button[@name='picking_ok']" position="replace" >
                 </xpath>             
                 <xpath expr="//button[@name='invoice_ok']" position="replace" >
                 </xpath>                
                 <xpath expr="//button[@name='view_picking']" position="replace" >
-                	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}"/>
+                	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}" groups="stock.group_stock_user"/>
                 </xpath>                       
 <!--                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
