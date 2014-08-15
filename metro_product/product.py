@@ -94,7 +94,7 @@ class product_attribute_line(osv.osv):
 	_sql_constraints =[('name_uniq', 'unique(product_id, attribute_id)','You can use an attribute on a Product once !')]
 	
 product_attribute_line()
-
+	
 class product_product(osv.osv):
 	_inherit = "product.product"
 	
@@ -132,7 +132,33 @@ class product_product(osv.osv):
 		names = self.name_get(cr, uid, ids, context=context)
 		for name in names:
 			res[name[0]] = name[1]
-		return res			
+		return res		
+	def _product_available(self, cr, uid, ids, field_names=None, arg=False, context=None):
+		""" Finds the incoming and outgoing quantity of product.
+		@return: Dictionary of values
+		"""
+		if not field_names:
+			field_names = []
+		if context is None:
+			context = {}
+		res = {}
+		for id in ids:
+			res[id] = {}.fromkeys(field_names, 0.0)
+		for f in field_names:
+			c = context.copy()
+			#add the columns display on GUI for user sort and query
+			if f in ('qty_available','qty_onhand'):
+				c.update({ 'states': ('done',), 'what': ('in', 'out') })
+			if f in ('virtual_available','qty_virtual'):
+				c.update({ 'states': ('confirmed','waiting','assigned','done'), 'what': ('in', 'out') })
+			if f in ('incoming_qty','qty_in'):
+				c.update({ 'states': ('confirmed','waiting','assigned'), 'what': ('in',) })
+			if f in ('outgoing_qty','qty_out'):
+				c.update({ 'states': ('confirmed','waiting','assigned'), 'what': ('out',) })
+			stock = self.get_product_available(cr, uid, ids, context=c)
+			for id in ids:
+				res[id][f] = stock.get(id, 0.0)
+		return res		
 	_columns = {
 		'attribute_line' : fields.one2many('product.attribute.line', 'product_id','Attributes'),
 		'cn_name': fields.char(string=u'Chinese Name', size=128, track_visibility='onchange'),
@@ -146,9 +172,36 @@ class product_product(osv.osv):
 		'default_code' : fields.char('Internal Reference', size=64, select=True, required=True),
 		'partner_ref' : fields.function(_product_partner_ref, type='char', string='Customer ref'),
         'part_no_external': fields.char(string=u'External Part#', size=32, help="The external part#, may be from engineering, purchase..."),
-		'qty_available': fields.function(stock_product._product_available, multi='qty_available',
+        #add the field qty_onhand, qty_virtual, qty_in, qty_out, to store them into database, then user can sort and query them on GUI
+        #they are corresponding to the original columns: qty_available, virtual_available, incoming_qty, outgoing_qty
+        #replace the xml view with the new columns, and other program also read from the original qty function columns
+		'qty_onhand': fields.function(_product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
 			string='Quantity On Hand',
+             store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+			 ),
+		'qty_virtual': fields.function(_product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Forecasted Quantity',
+             store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+             ),
+		'qty_in': fields.function(_product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Incoming',
+             store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+             ),
+		'qty_out': fields.function(_product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Outgoing',
+             store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+             ),		
+		'qty_available': fields.function(_product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Quantity On Hand(FUNC)',
 			help="Current quantity of products.\n"
 				 "In a context with a single Stock Location, this includes "
 				 "goods stored at this Location, or any of its children.\n"
@@ -159,13 +212,10 @@ class product_product(osv.osv):
 				 "stored in the Stock Location of the Warehouse of this Shop, "
 				 "or any of its children.\n"
 				 "Otherwise, this includes goods stored in any Stock Location "
-				 "with 'internal' type.",
-                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
-						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
-				 ),
-		'virtual_available': fields.function(stock_product._product_available, multi='qty_available',
+				 "with 'internal' type."),
+		'virtual_available': fields.function(_product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
-			string='Forecasted Quantity',
+			string='Forecasted Quantity(FUNC)',
 			help="Forecast quantity (computed as Quantity On Hand "
 				 "- Outgoing + Incoming)\n"
 				 "In a context with a single Stock Location, this includes "
@@ -177,13 +227,10 @@ class product_product(osv.osv):
 				 "stored in the Stock Location of the Warehouse of this Shop, "
 				 "or any of its children.\n"
 				 "Otherwise, this includes goods stored in any Stock Location "
-				 "with 'internal' type.",
-                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
-						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
-                 ),
-		'incoming_qty': fields.function(stock_product._product_available, multi='qty_available',
+				 "with 'internal' type."),
+		'incoming_qty': fields.function(_product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
-			string='Incoming',
+			string='Incoming(FUNC)',
 			help="Quantity of products that are planned to arrive.\n"
 				 "In a context with a single Stock Location, this includes "
 				 "goods arriving to this Location, or any of its children.\n"
@@ -194,13 +241,10 @@ class product_product(osv.osv):
 				 "arriving to the Stock Location of the Warehouse of this "
 				 "Shop, or any of its children.\n"
 				 "Otherwise, this includes goods arriving to any Stock "
-				 "Location with 'internal' type.",
-                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
-						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
-                 ),
-		'outgoing_qty': fields.function(stock_product._product_available, multi='qty_available',
+				 "Location with 'internal' type."),
+		'outgoing_qty': fields.function(_product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
-			string='Outgoing',
+			string='Outgoing(FUNC)',
 			help="Quantity of products that are planned to leave.\n"
 				 "In a context with a single Stock Location, this includes "
 				 "goods leaving this Location, or any of its children.\n"
@@ -211,10 +255,7 @@ class product_product(osv.osv):
 				 "leaving the Stock Location of the Warehouse of this "
 				 "Shop, or any of its children.\n"
 				 "Otherwise, this includes goods leaving any Stock "
-				 "Location with 'internal' type.",
-                 store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
-						'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
-                 ),		
+				 "Location with 'internal' type."),			
 	}
 	_defaults = {
 		'default_code': generate_seq,
