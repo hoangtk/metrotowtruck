@@ -165,7 +165,9 @@ class product_product(osv.osv):
 		'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 		'safe_qty': fields.float('Minimal Inventory'),
-		'safe_warn': fields.boolean('Warn Inventory'),
+#		'safe_warn': fields.boolean('Safe Warn'),
+		'max_qty': fields.float('Maximal Inventory'),
+		'property_prod_loc': fields.property('stock.location', type='many2one', relation='stock.location', string="Location", view_load=True, ),		
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
 		'mfg_standard': fields.char(string=u'Manufacture Standard', size=32, help="The manufacture standard name, like GB/T5782-86"),
@@ -259,7 +261,6 @@ class product_product(osv.osv):
 	}
 	_defaults = {
 		'default_code': generate_seq,
-		'safe_warn': True,
 	}
 #	_sql_constraints = [
 #		('cn_name', 'unique (cn_name)', _('Product Chinese Name must be unique!'))
@@ -289,18 +290,65 @@ class product_product(osv.osv):
 				product_id = self.search(cr, uid, [('name', '=', vals['name'])])
 			if product_id:
 				raise osv.except_osv(_('Error!'), _('Product Name must be unique!'))	
-		return True	
+		return True
+		
+	#auto update order point by the product min/max qty fields
+	def _orderpoint_update(self, cr, uid, ids, vals, context=None):
+		if 'safe_qty' in vals or 'max_qty' in vals or 'property_prod_loc' in vals:
+			wh_obj = self.pool.get('stock.warehouse')
+			op_obj = self.pool.get('stock.warehouse.orderpoint')
+			
+			min_qty = 'safe_qty' in vals and vals['safe_qty'] or -1
+			max_qty = 'max_qty' in vals and vals['max_qty'] or 0
+			location_id = 'property_prod_loc' in vals and vals['property_prod_loc'] or -1
+			upt_op_ids = []
+			for prod in self.browse(cr, uid, ids, context=context):
+				if location_id <= 0:
+					location_id = prod.property_prod_loc
+					if location_id:
+						location_id = location_id.id
+				if not prod.orderpoint_ids:
+					#for new order point, must have min qty and loc, otherwise then miss it.
+					if min_qty <= 0 or location_id <= 0:
+						continue
+					wh_ids = wh_obj.search(cr, uid, [('lot_stock_id','=',location_id)],context=context)
+					op_vals = {'product_id':prod.id,
+							'product_uom':prod.uom_id.id,
+							'product_min_qty':min_qty, 
+							'product_max_qty':max_qty,
+							'warehouse_id':wh_ids and wh_ids[0] or False,
+							'location_id':location_id,
+							}
+					op_obj.create(cr, uid, op_vals, context=context)
+				else:
+					upt_op_ids.append(prod.orderpoint_ids[0].id)
+			#update the order point
+			if upt_op_ids:
+				upt_vals = {}
+				if min_qty > 0:
+					upt_vals.update({'product_min_qty':min_qty})
+				if max_qty > 0:
+					upt_vals.update({'product_max_qty':max_qty})
+				if location_id > 0:
+					upt_vals.update({'location_id':location_id})
+				op_obj.write(cr, uid, upt_op_ids, upt_vals, context=context)
+		return True
+		
 	def create(self, cr, uid, vals, context=None):
 		if context is None:
 			context = {}
 		self._check_write_vals(cr,uid,vals,context=context)
-		return super(product_product, self).create(cr, uid, vals, context)
+		new_id = super(product_product, self).create(cr, uid, vals, context)
+		self._orderpoint_update(cr, uid, [new_id], vals, context)
+		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		if context is None:
 			context = {}
 		self._check_write_vals(cr,uid,vals,ids=ids,context=context)
-		return super(product_product, self).write(cr, uid, ids, vals, context=context)
+		resu = super(product_product, self).write(cr, uid, ids, vals, context=context)
+		self._orderpoint_update(cr, uid, ids, vals, context)
+		return resu
 	
 	def get_sequence(self, cr, uid, ids, context=None):
 		if context is None:
@@ -414,6 +462,8 @@ class product_product(osv.osv):
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
 
+		'''
+		comment @ 08/15/2014, will use the OE's order point, so ingore  this paramter from action action_product_inventory_warning
 		#add the available restriction
 		if context and context.get('inv_warn_restrict'):
 			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
@@ -424,7 +474,7 @@ class product_product(osv.osv):
 				if qty['qty_available'] < qty['safe_qty']:
 					new_ids.append(qty['id'])	
 			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
-				
+		'''		
 		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
 		if not default:

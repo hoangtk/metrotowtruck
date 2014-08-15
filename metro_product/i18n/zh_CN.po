@@ -144,6 +144,16 @@ msgid "Minimal Inventory"
 msgstr "最小库存"
 
 #. module: metro_product
+#: field:product.product,max_qty:0
+msgid "Maximal Inventory"
+msgstr "最大库存"
+
+#. module: metro_product
+#: field:product.product,property_prod_loc:0
+msgid "Location"
+msgstr "库位"
+
+#. module: metro_product
 #: model:ir.ui.menu,name:metro_product.metro_menu_product_attribute_category_metro
 msgid "Product Attribute Category"
 msgstr "Product Attribute Category"
