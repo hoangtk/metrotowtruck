@@ -165,7 +165,7 @@ class product_product(osv.osv):
 		'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
 		'create_date': fields.datetime('Creation Date', readonly=True, select=True),
 		'safe_qty': fields.float('Minimal Inventory'),
-#		'safe_warn': fields.boolean('Safe Warn'),
+		'safe_warn': fields.boolean('Safe Warn'),
 		'max_qty': fields.float('Maximal Inventory'),
 		'property_prod_loc': fields.property('stock.location', type='many2one', relation='stock.location', string="Location", view_load=True, ),		
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
@@ -462,8 +462,6 @@ class product_product(osv.osv):
 		#get the search result		
 		ids = super(product_product,self).search(cr, user, new_args, offset, limit, order, context, count)
 
-		'''
-		comment @ 08/15/2014, will use the OE's order point, so ingore  this paramter from action action_product_inventory_warning
 		#add the available restriction
 		if context and context.get('inv_warn_restrict'):
 			ids = super(product_product,self).search(cr, user, new_args, offset, None, order, context, count)
@@ -474,7 +472,7 @@ class product_product(osv.osv):
 				if qty['qty_available'] < qty['safe_qty']:
 					new_ids.append(qty['id'])	
 			ids = super(product_product,self).search(cr, user, [('id','in',new_ids)], offset, limit, order, context, count)		
-		'''		
+		
 		return ids
 	def copy(self, cr, uid, id, default=None, context=None):
 		if not default:

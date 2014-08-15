@@ -164,6 +164,7 @@
             		            
 	            <field name="virtual_available" position="after">
 	            	<field name="safe_qty"/>
+                    <field name="safe_warn"/>
 	            </field>
 	            <field name='lst_price' position="replace">
 	            </field>
@@ -350,6 +351,7 @@
 				<!-- add the safe qty columns -->
                 <field name="virtual_available" position="after">
                     <field name="safe_qty"/>
+                    <field name="safe_warn"/>
                     <field name="max_qty"/>
 	            	<field name="property_prod_loc"/>
                 </field>             
@@ -385,8 +387,8 @@
             		<filter string="Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',True)]"/>
             		<filter string="No Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',False)]"/>
             		<separator/>
-            		<filter string="No Onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;=',0)]"/>
-            		<filter string="Negative Onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;',0)]"/>
+            		<filter string="No Onhand" icon="terp-accessories-archiver" domain="[('qty_onhand','&lt;=',0)]"/>
+            		<filter string="Negative Onhand" icon="terp-accessories-archiver" domain="[('qty_onhand','&lt;',0)]"/>
             	</filter>
             </field>
         </record>
@@ -423,7 +425,7 @@
             </field>		
 		</record>
 <!-- inventory warning -->
-<!--         <record id="action_product_inventory_warning" model="ir.actions.act_window">
+        <record id="action_product_inventory_warning" model="ir.actions.act_window">
             <field name="name">Inventory Warning</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">product.product</field>
@@ -432,11 +434,11 @@
             <field name="context">{'inv_warn_restrict':True}</field>
             <field name="domain">[('purchase_ok','=',True),('safe_warn','=',True)]</field>
             <field name="search_view_id" ref="product.product_search_form_view"/>
-        </record>	 -->
-<!--  	    <menuitem
+        </record>	
+ 	    <menuitem
 	        id="menu_product_inventory_warning"
 	        sequence="2"
 	        parent="purchase.menu_procurement_management"
-	        action="action_product_inventory_warning"/>   -->
+	        action="action_product_inventory_warning"/>  
 	</data>		    
 </openerp>	
