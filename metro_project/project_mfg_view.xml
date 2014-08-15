@@ -9,12 +9,12 @@
             <field name="arch" type="xml">
            	<!-- add work order id -->
             	<field name="planned_hours" position="before">
-            		<field name="id"/>
+            		<field name="id" invisible="1"/>
             		<field name="workorder_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             	</field>                 
-			<!-- Add employee_id to task's work hours -->
+			<!-- Add emp_ids/mfg_ids to task's work hours -->
 				<xpath expr="//field[@name='work_ids']/tree/field[@name='name']" position="after">
-					<field name="employee_id"/>
+					<field name="emp_ids" widget="many2many_tags"/>
             		<field name="mfg_ids" widget="many2many_tags"/>
 				</xpath>    
 			<!-- hide project_id for mfg task -->
@@ -22,8 +22,8 @@
 					<attribute name="attrs">{'invisible':[('project_type','=','mfg')]}</attribute>
 				</field>              
 			<!-- Add context parameter to task's work hours -->
-				<xpath expr="//field[@name='work_ids']/tree/field[@name='name']" position="attributes">
-					<attribute name="default_task_id">id</attribute>
+				<xpath expr="//field[@name='work_ids']" position="attributes">
+					<attribute name="context">{'task_employee_ids':emp_ids,'workorder_id':workorder_id}</attribute>
 				</xpath>
             </field>
         </record> 

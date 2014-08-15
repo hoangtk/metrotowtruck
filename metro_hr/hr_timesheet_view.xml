@@ -19,7 +19,7 @@
             <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
             <field name="arch" type="xml">
             	<field name="user_id" position="after">
-            		<field name="employee_id" options='{"no_open": True}'/>
+            		<field name="employee_id"/>
             	</field>
             	<field name="unit_amount" position="attributes">
             		<attribute name="context">{'employee_id':employee_id}</attribute>
