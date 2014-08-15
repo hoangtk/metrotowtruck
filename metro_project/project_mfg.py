@@ -55,11 +55,11 @@ class project_task_work(osv.osv):
         res = super(project_task_work,self).default_get(cr, uid, fields_list, context=context)
         if not res:
             res = {}
-        if 'workorder_id' in context:
+        if context.get('workorder_id',False):
             wo_data = self.pool.get('mrp.production.workcenter.line').browse(cr, uid, context['workorder_id'], context=context)
             mfg_ids = [mfg_id.id for mfg_id in wo_data.production_id.mfg_ids]
             res.update({'mfg_ids':mfg_ids})
-        if 'task_employee_ids' in context:
+        if context.get('task_employee_ids',False):
             #task_employee_ids structure is like: 'task_employee_ids': [[6, False, [392, 391]]
             res.update({'emp_ids':context['task_employee_ids'][0][2]})
         return res
