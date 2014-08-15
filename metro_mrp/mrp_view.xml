@@ -29,6 +29,10 @@
 	                        <button name="%(mrp.action2)d" string="Bill of Materials Structure" type="action"/>
 	                    </div>
 	            	</xpath>
+                	<!-- add the component's routing workcenters from parent bom's routing definition, only show in the bom components(bom_id is not false) -->
+<!--                 	<field name="routing_id" position='before'>
+                		<field name="comp_routing_workcenter_ids" readonly="1" widget='many2many_tags' attrs="{'invisible':[('bom_id','=',False)]}"/>
+                	</field> -->
                     	       
 	                <!-- the common BOM flag -->
 	                <field name="type" position="after">
@@ -40,6 +44,8 @@
                     	<field name="sequence" widget="handle"/>
                     	<field name="code"/>
 	                	<field name="name"/>
+	                	<!-- add the component's routing workcenters -->
+	                	<!-- <field name="comp_routing_workcenter_ids" widget='many2many_tags'/> -->
 	                	<field name="common_bom_id"/>
 	                </xpath>
 	                <notebook position="inside">
@@ -66,6 +72,7 @@
                         			<field name='routing_id' invisible='1'/>        			
                         			<field name='routing_workcenter_id' domain="[('routing_id','=',routing_id)]"/>
                         			<field name='bom_comp_id' domain="[('bom_lines','!=',False),('bom_id','child_of',bom_id)]"/>
+                        			<field name='consume_material'/>        		
                         		</tree>
                         	</field>
                         </page>	                
@@ -102,6 +109,9 @@
 	                <field name="product_efficiency" position="attributes">
 	                	<attribute name="attrs">{'readonly':[('common_bom_id','!=',False)]}</attribute>
 	                </field>
+	                <xpath expr="//field[@name='bom_lines']/tree" position="attributes">
+	                	<attribute name="editable"></attribute>
+	                </xpath>
 	            </data>
         	</field>
        	</record>
@@ -236,12 +246,17 @@
                     	<field name="product_id" on_change="product_id_change(product_id)" 
                     	domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]" class="oe_inline"/>                    	
                     </field>
+                    <!-- Only show the selected product's top bom -->
+                    <field name="bom_id" position="attributes">
+                    	<attribute name="domain">[('product_id','=',product_id),('bom_id','=',False)]</attribute>
+                    </field>
+                    
                     <!-- add the mfg ID displaying -->
                     <xpath expr="//field[@name='move_lines']//field[@name='state']" position='after'>
-                    	<field name="mr_sale_prod_id"/>
+                    	<field name="mr_sale_prod_id" string='MFG ID'/>
                     </xpath>
                     <xpath expr="//field[@name='move_lines2']//field[@name='state']" position='after'>
-                    	<field name="mr_sale_prod_id"/>
+                    	<field name="mr_sale_prod_id" string='MFG ID'/>
                     </xpath>
                     <!-- add the work order extended fields -->
                     <xpath expr="//field[@name='workcenter_lines']/form//field[@name='hour']" position="after">
@@ -262,9 +277,20 @@
 		        		<field name="wo_pre_ids" widget="many2many_tags"/>
 		        		<field name="wo_next_ids" widget="many2many_tags"/>
                     </xpath> -->
-                    <!-- hide the 'Produce' button -->
-                    <button name="%(mrp.act_mrp_product_produce)d" position="replace">
-                    </button>
+                    <!-- show the move's state -->
+                    <xpath expr="//field[@name='move_lines']/tree/field[@name='state']" position='attributes'>
+                    	<attribute name="invisible">0</attribute>
+                    </xpath>
+                    <xpath expr="//field[@name='move_lines2']/tree/field[@name='state']" position='attributes'>
+                    	<attribute name="invisible">0</attribute>
+                    </xpath>
+                    <!-- Add work order's components -->
+                    <xpath expr="//page[@string='Work Orders']" position='after'>
+		        		<page string="Components">
+		        			<field name="comp_lines" readonly="1"/>
+		        		</page>
+                    </xpath>
+	        		
 	            </data>
         	</field>
        	</record>
@@ -275,17 +301,31 @@
             <field name="model">mrp.production.workcenter.line</field>
             <field name="inherit_id" ref="mrp_operations.mrp_production_workcenter_form_view_inherit"/>
             <field name="arch" type="xml">
+            	<field name="name" position="replace"/>
+            	<xpath expr="//group" position="before">	
+            		<!-- make the 'Reference' and 'Name' as the title -->    	
+                    <div class="oe_title">
+                        <h1>
+                            <field name="code" class="oe_inline"/>
+                            <label string=" - "/>
+                            <field name="name" class="oe_inline"/>
+                        </h1>
+                    </div>
+                    
+                    <div class="oe_right oe_button_box" name="buttons">
+                		<button name="wo_docs" string="Documents" type="object"/>
+                    </div>
+            	</xpath>
+	            	            
             	<!--  add the BOM/Routing/Operation info to manufacture order's work center line -->
 	        	<field name="production_state" position="after">
 	        		<field name="bom_id"/>
 	        		<field name="routing_id"/>
 	        		<field name="routing_operation_id"/>
-	        		<field name="code"/>
 	        	</field>
 	        	<!-- Add the material request fields -->
                 <button name="button_pause" position="after">
                 	<button name="%(action_wo_material_request)d" string="Material Request" states="startworking" type="action"/>
-                	<button name="wo_docs" string="Documents" type="object"/>
                 </button>
 	        	<page string="Information" position="after">
 	        		<page string="Material">
@@ -312,6 +352,9 @@
                                   <field name="hour"/>
                               </tree>
 		        		</field>
+	        		</page>
+	        		<page string="Components">
+	        			<field name="comp_lines" readonly="1"/>
 	        		</page>
 	        	</page>
 	        	
@@ -385,9 +428,9 @@
                     <button name="button_start_working" string="Ready Start" states="ready" icon="terp-gtk-jump-to-ltr" help="Start Working"/>
 	        	</button>
 	        	<!-- allow to cancel order in ready state -->
-	        	<button name="button_cancel" position="attributes">
+	        	<xpath expr="//field[@name='workcenter_lines']/form//button[@name='button_cancel']" position="attributes">
 	        		<attribute name="states">draft,ready,startworking</attribute>
-	        	</button>        	
+	        	</xpath>        	
 	        </field>
 	    </record>
 	    <record id="metro_mrp_production_wo_flow_tree_view" model="ir.ui.view">
@@ -479,5 +522,61 @@
 	            </data>
         	</field>
        	</record>
+       	
+    <!-- Manufacture order / Work order 's components list -->
+        <record id="mrp_wo_comp_view_tree" model="ir.ui.view">
+            <field name="name">mrp.wo.comp.tree</field>
+            <field name="model">mrp.wo.comp</field>
+            <field name="arch" type="xml">
+    				<tree string="WO Components" editable="top">
+    					<field name="mo_id"/>
+    					<field name="mfg_ids" widget='many2many_tags'/>
+    					<field name="wo_id"/>
+    					<field name="comp_id"/>
+    					<field name="bom_route_oper_id"/>
+    					<field name="qty"/>
+    					<field name="qty_done"/>
+    					<field name="note"/>
+    					<field name="state"/>
+    				</tree>
+            </field>
+        </record>
+        <record id="mrp_wo_comp_view_form" model="ir.ui.view">
+            <field name="name">mrp.wo.comp.form</field>
+            <field name="model">mrp.wo.comp</field>
+            <field name="arch" type="xml">
+                <form string="WO Components" version="7.0">
+                    <group>
+    					<field name="mo_id"/>
+    					<field name="mfg_ids" widget='many2many_tags'/>
+    					<field name="wo_id"/>
+    					<field name="comp_id"/>
+    					<field name="bom_route_oper_id"/>
+    					<field name="qty"/>
+    					<field name="qty_done"/>
+    					<field name="note"/>
+    					<field name="state"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="mrp_wo_comp_view_search" model="ir.ui.view">
+            <field name="name">mrp.wo.comp.search</field>
+            <field name="model">mrp.wo.comp</field>
+            <field name="arch" type="xml">
+                <search string="Search">
+                    <field name="mo_id"/>
+    				<field name="mfg_ids" widget='many2many_tags'/>
+                    <field name="wo_id"/>
+    				<field name="comp_id"/>
+    				<field name="mfg_ids"/>
+               </search>
+            </field>
+        </record>    
+
+
+	        			
+	        			    
 	</data>	  
 </openerp>

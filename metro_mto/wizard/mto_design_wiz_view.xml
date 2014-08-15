@@ -6,6 +6,7 @@
             <field name="model">mto.design.wiz</field>
             <field name="arch" type="xml">
                <form string="Product Configuration Wizard" version="7.0">
+               		<separator string='Please select configuration template'/>
     				<field name="design_tmpl_id"/>
                     <footer>
                         <button name="act_config" string="Config" type="object" class="oe_highlight"/>
@@ -78,8 +79,8 @@
     				<field name="name"/>
     				<field name="design_tmpl_id"/>
     				<field name="design_id"/>  
-                    <field name="datas" filename="datas_fname"/>
-                    <field name="datas_fname" invisible="1"/> 
+<!--                     <field name="datas" filename="datas_fname"/>
+                    <field name="datas_fname" invisible="1"/> --> 
     				<field name="store"/>      
     				<field name="create_uid"/>    
     				<field name="create_date"/>

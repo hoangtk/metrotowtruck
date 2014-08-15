@@ -44,7 +44,7 @@
                     	<label for='components'/>
 	                    <field name="bom_components" widget='one2many_tree'/>
                     	<label for='mfg_ids'/>
-	                    <field name="mfg_ids" domain="[('state','in',('confirmed','engineer'))]"/>
+	                    <field name="mfg_ids" domain="[('state','in',('confirmed','engineer','manufacture'))]"/>
                     </page>
             	</page>
             </field>
@@ -82,7 +82,6 @@
             <field name="arch" type="xml">
 				<xpath expr="//page[@string='Extra Info']"  position="before">
                     <page string="Bill of Material" name="bom" attrs="{'invisible':[('project_type','!=','engineer')]}">
-			            <!-- <field name="is_project_bom"/> --> 
                     	<group>
                     		<group>
 			                    <label for="bom_id"/>

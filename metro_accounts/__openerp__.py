@@ -11,7 +11,7 @@
     'website': 'PY Solutions',
     'images': [],
     'depends': [
-        'account','purchase','account_voucher'
+        'account','purchase','account_voucher','account_analytic_plans'
     ],
     'data':[
        "account_invoice_metro.xml",
@@ -19,7 +19,8 @@
        "account_invoice_view.xml",
        "invoice_payment_view.xml",
        "account_move_view.xml",
-       "wizard/account_move_batch.xml"
+       "wizard/account_move_batch.xml",
+       "account_analytic_view.xml"
         ],
     'demo': [],
     'test': [],

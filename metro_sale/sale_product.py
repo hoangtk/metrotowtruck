@@ -9,7 +9,11 @@ class sale_product(osv.osv):
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     
     STATES_COL = {'draft':[('readonly',False)]}
-    
+    def _has_project(self,cr,uid,ids,fld_name,arg,context=None):
+        res = {}
+        for mfg_id in self.browse(cr, uid, ids, context=context):
+            res[mfg_id.id] = mfg_id.project_ids and len(mfg_id.project_ids) > 0
+        return res
     _columns = {
         'name': fields.char('ID', size=8, required=True),
         'note': fields.text('Description', ),
@@ -17,11 +21,14 @@ class sale_product(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the product without removing it.", track_visibility='onchange'),
         'source': fields.selection( [('sale', 'Sales'), ('stock', 'Stocking'), ('other', 'Others')],'Source', required=True,readonly=True, states=STATES_COL),
+        'so_id':  fields.many2one('sale.order', 'Sales Order', readonly=True),
         'serial_id': fields.many2one('mttl.serials', 'Product Serial',readonly=True, states={'done':[('readonly',False)]}),
         'mto_design_id': fields.many2one('mto.design', 'Configuration', readonly=True, states=STATES_COL),
         'product_id': fields.many2one('product.product',string='Product', track_visibility='onchange',readonly=True, states=STATES_COL),
         'bom_id': fields.many2one('mrp.bom',string='BOM', track_visibility='onchange',readonly=True, states=STATES_COL),
         'project_ids': fields.many2many('project.project','project_id_rel','mfg_id','project_id',string='Engineering Project',readonly=True, track_visibility='onchange'),
+        #used on the view, since the many2many field already return True when test its value
+        'has_project': fields.function(_has_project,string='Has Project',type='boolean'),
         'mrp_prod_ids': fields.many2many('mrp.production','mrp_prod_id_rel','mfg_id','mrp_prod_id',string='Manufacture Order',readonly=True, track_visibility='onchange'),
         'state': fields.selection([
                    ('draft','Draft'),
@@ -31,7 +38,8 @@ class sale_product(osv.osv):
                    ('done','Done'),
                    ('cancelled','Cancel')], 'Status', track_visibility='onchange'),
         'config_change_ids': fields.related('mto_design_id','change_ids',type='one2many', relation='mto.design.change', string='Changes'),
-        'date_planned': fields.date('Scheduled Date', required=True, select=True, readonly=True, states=STATES_COL),        
+        'date_planned': fields.date('Scheduled Date', required=True, select=True, readonly=True, states=STATES_COL),    
+        'analytic_account_id': fields.many2one('account.analytic.account', 'Contract/Analytic', help="Link this MFG ID to an analytic account if you need financial management on it. ", ondelete="restrict"),    
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
@@ -47,9 +55,20 @@ class sale_product(osv.osv):
             res.update({'name': self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/',
                         'serial_id':None,
                         'project_ids':None,
-                        'mrp_prod_ids':None})
+                        'mrp_prod_ids':None,
+                        'so_id':None,})
         return res 
+    def create_analytic_account(self, cr, uid, mfg_id, context=None):
+        id_data = self.browse(cr, uid, mfg_id, context=context)
+        ana_act_id = self.pool.get('account.analytic.account').create(cr, uid, {'name':'ID%s-COST'%(id_data.name,)},context=context)
+        return ana_act_id
         
+    def create(self, cr, uid, vals, context=None):
+        mfg_id = super(sale_product, self).create(cr, uid, vals, context=context)
+        ana_act_id = self.create_analytic_account(cr, uid, mfg_id, context=context)
+        self.write(cr, uid, [mfg_id], {'analytic_account_id':ana_act_id}, context=context)
+        return mfg_id
+                
 #    def create(self, cr, uid, data, context=None):       
 #        if data.get('name','/')=='/':
 #            data['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/'
@@ -97,11 +116,18 @@ class sale_product(osv.osv):
         return super(sale_product,self).unlink(cr, uid, ids, context=context)
     
     def create_project(self, cr, uid, id, context=None):
+        if isinstance(id,list):
+            id = id[0]
         sale_product_id = self.browse(cr, uid, id, context=context)
         if not sale_product_id.project_ids:
-            vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,)),'type':'engineer'}
+            vals = {'name':('ENG Project for ID %s'%(sale_product_id.name,)),
+                    'project_type':'engineer',
+                    'bom_id':sale_product_id.bom_id.id}
             project_id = self.pool.get('project.project').create(cr, uid, vals, context=context)
-            self.write(cr, uid, sale_product_id.id, {'project_ids':[(4, project_id)],'state':'engineer'},context=context)
+            vals = {'project_ids':[(4, project_id)]}
+            if sale_product_id.state == 'confirmed':
+                vals.update({'state':'engineer'})
+            self.write(cr, uid, sale_product_id.id, vals,context=context)
             return project_id
         else:
             return sale_product_id.project_ids[0].id
@@ -124,6 +150,10 @@ class sale_product(osv.osv):
         return mrp_prod_id
                                             
     def action_confirm(self, cr, uid, ids, context=None):
+        id = ids[0]
+        sale_product_id = self.browse(cr,uid,id,context=context)
+        if not sale_product_id.product_id or not sale_product_id.bom_id:
+            raise osv.except_osv(_('Error'),_("The product and BOM are required for ID to confirm!"))
         self.write(cr, uid, ids, {'state':'confirmed'})
         
     def action_engineer(self, cr, uid, ids, context=None):
@@ -144,6 +174,13 @@ class sale_product(osv.osv):
                 raise osv.except_osv(_('Error'),_("This ID '%s' already have related projects or manufacture order, can not be cancel!"%(sale_product_id.name,)))
         self.write(cr, uid, ids, {'state':'cancelled'})
         
+    def wkf_cancel(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        self.action_cancel(cr, uid, ids, context=context)
+        for id in ids:
+            wf_service.trg_validate(uid, 'sale.product', id, 'button_cancel', cr)
+        return True
+                
     def action_draft(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'draft'})
          

@@ -146,9 +146,25 @@
 	            	<field name="create_uid"/>
 	            	<field name="create_date"/>
 	            </field>
+	            <!-- hide the function qty fields, display the fields stored in database -->
+            	<field name="qty_available" position="attributes">
+            		<attribute name="invisible">1</attribute>
+            	</field>
+            	<field name="qty_available" position="before">
+            		<field name="qty_onhand"/>
+            	</field>
+            	<field name="virtual_available" position="attributes">
+            		<attribute name="invisible">1</attribute>
+            	</field>
+            	<field name="virtual_available" position="before">
+            		<field name="qty_in"/>
+            		<field name="qty_out"/>
+            		<field name="qty_virtual"/>
+            	</field>         	
+            		            
 	            <field name="virtual_available" position="after">
 	            	<field name="safe_qty"/>
-	            	<field name="safe_warn"/>
+                    <field name="safe_warn"/>
 	            </field>
 	            <field name='lst_price' position="replace">
 	            </field>
@@ -161,6 +177,9 @@
 	            		red:(virtual_available and virtual_available&lt;0);blue:virtual_available&gt;=0 and state in ('draft', 'end', 'obsolete');black:virtual_available&gt;=0 and state not in ('draft', 'end', 'obsolete')
 	            	</attribute>
 	            </xpath>
+	            <field name='company_id' position="attributes">
+	            	<attribute name="invisible">0</attribute>
+	            </field>
             </field>
         </record>
         
@@ -297,10 +316,46 @@
             <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
             <field name="arch" type="xml">
             <data>	
+            	<!-- hide the function qty fields, display the fields stored in database -->            	
+            	<xpath expr="//label[@for='qty_available']" position="replace">
+            		<label for="qty_onhand"/>
+            	</xpath>
+            	<field name="qty_available" position="attributes">
+            		<attribute name="invisible">1</attribute>
+            	</field>
+            	<field name="qty_available" position="before">
+            		<field name="qty_onhand" class="oe_inline"/>
+            	</field>
+            	
+            	<field name="incoming_qty" position="attributes">
+            		<attribute name="invisible">1</attribute>
+            	</field>
+            	<field name="incoming_qty" position="before">
+            		<field name="qty_in" class="oe_inline"/>
+            	</field>
+            	
+            	<field name="outgoing_qty" position="attributes">
+            		<attribute name="invisible">1</attribute>
+            	</field>
+            	<field name="outgoing_qty" position="before">
+            		<field name="qty_out" class="oe_inline"/>
+            	</field>
+            	
+            	<field name="virtual_available" position="attributes">
+            		<attribute name="invisible">1</attribute>
+            	</field>
+            	<field name="virtual_available" position="before">
+            		<field name="qty_virtual" class="oe_inline"/>
+            	</field>
+            	
+				<!-- add the safe qty columns -->
                 <field name="virtual_available" position="after">
                     <field name="safe_qty"/>
                     <field name="safe_warn"/>
-                </field>
+                    <field name="max_qty"/>
+	            	<field name="property_prod_loc"/>
+                </field>             
+                
            		<group name="store" position="replace">
             		<group name="store" string="Storage Location">
                         <field name="loc_pos_code"/>
@@ -332,8 +387,8 @@
             		<filter string="Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',True)]"/>
             		<filter string="No Print Barcode" icon="terp-accessories-archiver" domain="[('is_print_barcode','=',False)]"/>
             		<separator/>
-            		<filter string="No Onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;=',0)]"/>
-            		<filter string="Negative Onhand" icon="terp-accessories-archiver" domain="[('qty_available','&lt;',0)]"/>
+            		<filter string="No Onhand" icon="terp-accessories-archiver" domain="[('qty_onhand','&lt;=',0)]"/>
+            		<filter string="Negative Onhand" icon="terp-accessories-archiver" domain="[('qty_onhand','&lt;',0)]"/>
             	</filter>
             </field>
         </record>

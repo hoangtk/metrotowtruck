@@ -7,6 +7,9 @@ from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from lxml import etree
 from openerp.addons.mrp.mrp import rounding as mrp_rounding
 from openerp import tools
+from openerp.tools import float_compare
+import openerp.addons.decimal_precision as dp
+
 class mrp_bom(osv.osv):
     _inherit = 'mrp.bom'
     def _get_full_name(self, cr, uid, ids, name=None, args=None, context=None):
@@ -28,24 +31,43 @@ class mrp_bom(osv.osv):
        
     def _check_product(self, cr, uid, ids, context=None):
         """
-            Override original one, to allow to have multiple lines with same Part Number
+            Override original one, only check the duplicated products on same BOM level, the duplicated products under variance BOM level are allowed
         """
-        return True  
+        all_prod = []
+        res = True
+        for bom in self.browse(cr, uid, ids, context=context):
+            if bom.product_id.id in all_prod:
+                res = False
+                break
+            all_prod.append(bom.product_id.id)
+        return res
 
-    def _domain_bom_routing(self, cr, uid, ids, field_name, context=None):
+    def _domain_bom_routing(self, cr=None, uid=None, ids=None, field_name=None, context=None):
+        if cr is None:
+            return []
         domain = []
         if field_name == 'bom_routing_ids':
             bom = self.read(cr, uid, ids[0], ['routing_id'],context=context)
             if bom.get('routing_id'):
                 domain = domain + [('routing_id','=',bom.get('routing_id')[0])]
+        if field_name == 'comp_routing_workcenter_ids':
+            bom = self.browse(cr, uid, ids[0], context=context)
+            if bom.bom_id and bom.bom_id.routing_id:
+                domain = domain + [('routing_id','=',bom.bom_id.routing_id.id)]
         return domain 
+    
     _columns = {
                 'is_common': fields.boolean('Common?'),
                 'clone_bom_ids': fields.one2many('mrp.bom','common_bom_id','Clone BOMs'),
                 'common_bom_id': fields.many2one('mrp.bom','Common BOM',ondelete='cascade'),
                 'code': fields.char('Reference', size=16, required=True, readonly=True),
                 'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
+                #for top bom, define the work cetner and the components relationship
                 'bom_routing_ids': fields.one2many('mrp.bom.routing.operation', 'bom_id', string='Routing BOM Matrix', domain_fnct=_domain_bom_routing),
+                #for the component, define the sub components related work center from parent bom's routing definition, 
+                #only show for the bom components(bom_id is not false)
+                'comp_routing_workcenter_ids': fields.many2many('mrp.routing.workcenter','mrp_bom_routing_operation','bom_comp_id','routing_workcenter_id',
+                                                                string='Work Centers', domain=_domain_bom_routing)
                 }
     _defaults = {
         'is_common' : False,
@@ -55,7 +77,7 @@ class mrp_bom(osv.osv):
         ('code_uniq', 'unique(code)', 'Reference must be unique!'),
     ] 
     _constraints = [
-        (_check_product, 'BoM line product should not be same as BoM product.', ['product_id']),
+        (_check_product, 'BoM line product should not be duplicate under one BoM.', ['product_id']),
         ] 
     '''
     SQL to update current code
@@ -306,6 +328,7 @@ class mrp_bom(osv.osv):
 class mrp_bom_routing_operation(osv.osv):
     _name = 'mrp.bom.routing.operation'
     _order = 'id desc'
+    _rec_name = 'bom_comp_id'
     '''
     bom_comp_id:
     the component is the BOM that need manufacture, can be:
@@ -317,10 +340,20 @@ class mrp_bom_routing_operation(osv.osv):
         'routing_id': fields.many2one('mrp.routing', string='Routing', required=True),
         'routing_workcenter_id': fields.many2one('mrp.routing.workcenter', string='Routing Work Center', required=True ),
         'bom_comp_id': fields.many2one('mrp.bom', string='BOM Component', required=True ),
+        'consume_material': fields.boolean('Consume Material')
     }
     _sql_constraints = [
         ('routing_wc_comp_uniq', 'unique(routing_workcenter_id,bom_comp_id)', 'You can not add duplicated "Routing Work Center"-"Component" with same BOM and Routing!'),
     ]
+    _defaults = {'consume_material': True}
+    def create(self, cr, uid, vals, context=None):
+        if vals.has_key('bom_comp_id'):
+            #added from the bom components screen
+            if not vals.has_key('bom_id'):
+                bom_comp = self.pool.get('mrp.bom').browse(cr, uid, vals['bom_comp_id'],context=context)
+                vals['bom_id'] = bom_comp.bom_id.id
+                vals['routing_id'] = bom_comp.bom_id.routing_id
+        super(mrp_bom_routing_operation,self).create(cr, uid, vals, context=context)
 
 class mrp_routing_workcenter(osv.osv):
     _inherit = 'mrp.routing.workcenter'
@@ -358,12 +391,17 @@ class mrp_production(osv.osv):
             domain=[('state','not in', ('done', 'cancel'))], readonly=True, states={'draft':[('readonly',False)]}),
         'move_lines2': fields.many2many('material.request.line', 'mrp_production_move_ids', 'production_id', 'move_id', 'Consumed Products',
             domain=[('state','in', ('done', 'cancel'))], readonly=True, states={'draft':[('readonly',False)]}),
+        'comp_lines': fields.one2many('mrp.wo.comp', 'mo_id', string='Components'),  
                 
     }
+
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
         default.update({
+            'workcenter_lines' : [],
+            'date_start' : None,
+            'date_finished' : None,
             'workcenter_lines' : [],
         })
         return super(mrp_production, self).copy(cr, uid, id, default, context)
@@ -431,6 +469,145 @@ class mrp_production(osv.osv):
         })
         production.write({'picking_id': picking_id}, context=context)
         return picking_id    
+    '''
+    1.add the 'consume_move_id' when matching the wo.product_lines and consume moves
+    '''
+    def action_produce(self, cr, uid, production_id, production_qty, production_mode, context=None):
+        """ To produce final product based on production mode (consume/consume&produce).
+        If Production mode is consume, all stock move lines of raw materials will be done/consumed.
+        If Production mode is consume & produce, all stock move lines of raw materials will be done/consumed
+        and stock move lines of final product will be also done/produced.
+        @param production_id: the ID of mrp.production object
+        @param production_qty: specify qty to produce
+        @param production_mode: specify production mode (consume/consume&produce).
+        @return: True
+        """
+        stock_mov_obj = self.pool.get('stock.move')
+        production = self.browse(cr, uid, production_id, context=context)
+
+        produced_qty = 0
+        for produced_product in production.move_created_ids2:
+            if (produced_product.scrapped) or (produced_product.product_id.id != production.product_id.id):
+                continue
+            produced_qty += produced_product.product_qty
+        if production_mode in ['consume','consume_produce']:
+            consumed_data = {}
+
+            # Calculate already consumed qtys
+            for consumed in production.move_lines2:
+                if consumed.scrapped:
+                    continue
+                if not consumed_data.get(consumed.product_id.id, False):
+                    consumed_data[consumed.product_id.id] = 0
+                consumed_data[consumed.product_id.id] += consumed.product_qty
+
+            # Find product qty to be consumed and consume it
+            for scheduled in production.product_lines:
+
+                # total qty of consumed product we need after this consumption
+                total_consume = ((production_qty + produced_qty) * scheduled.product_qty / production.product_qty)
+
+                # qty available for consume and produce
+                qty_avail = scheduled.product_qty - consumed_data.get(scheduled.product_id.id, 0.0)
+
+                if qty_avail <= 0.0:
+                    # there will be nothing to consume for this raw material
+                    continue
+
+#                raw_product = [move for move in production.move_lines if move.product_id.id==scheduled.product_id.id]
+                #johnw, 07/11/2014, add the 'consume_move_id' when matching the wo.product_lines and consume moves
+                #begin
+                raw_product = [move for move in production.move_lines if move.product_id.id==scheduled.product_id.id and move.id==scheduled.consume_move_id.id]
+                #end
+                if raw_product:
+                    # qtys we have to consume
+                    qty = total_consume - consumed_data.get(scheduled.product_id.id, 0.0)
+                    if float_compare(qty, qty_avail, precision_rounding=scheduled.product_id.uom_id.rounding) == 1:
+                        # if qtys we have to consume is more than qtys available to consume
+                        prod_name = scheduled.product_id.name_get()[0][1]
+                        raise osv.except_osv(_('Warning!'), _('You are going to consume total %s quantities of "%s".\nBut you can only consume up to total %s quantities.') % (qty, prod_name, qty_avail))
+                    if qty <= 0.0:
+                        # we already have more qtys consumed than we need
+                        continue
+                    #below calling method will cause some stock_move's sub classes can not be called, like metro_stock.stock_move.action_done(),_create_account_move_line()
+#                    raw_product[0].action_consume(qty, raw_product[0].location_id.id, context=context)
+                    stock_mov_obj.action_consume(cr, uid, [raw_product[0].id], qty, raw_product[0].location_id.id, context=context)
+
+        if production_mode == 'consume_produce':
+            # To produce remaining qty of final product
+            #vals = {'state':'confirmed'}
+            #final_product_todo = [x.id for x in production.move_created_ids]
+            #stock_mov_obj.write(cr, uid, final_product_todo, vals)
+            #stock_mov_obj.action_confirm(cr, uid, final_product_todo, context)
+            produced_products = {}
+            for produced_product in production.move_created_ids2:
+                if produced_product.scrapped:
+                    continue
+                if not produced_products.get(produced_product.product_id.id, False):
+                    produced_products[produced_product.product_id.id] = 0
+                produced_products[produced_product.product_id.id] += produced_product.product_qty
+
+            for produce_product in production.move_created_ids:
+                produced_qty = produced_products.get(produce_product.product_id.id, 0)
+                subproduct_factor = self._get_subproduct_factor(cr, uid, production.id, produce_product.id, context=context)
+                rest_qty = (subproduct_factor * production.product_qty) - produced_qty
+
+                if rest_qty < production_qty:
+                    prod_name = produce_product.product_id.name_get()[0][1]
+                    raise osv.except_osv(_('Warning!'), _('You are going to produce total %s quantities of "%s".\nBut you can only produce up to total %s quantities.') % (production_qty, prod_name, rest_qty))
+                if rest_qty > 0 :
+                    stock_mov_obj.action_consume(cr, uid, [produce_product.id], (subproduct_factor * production_qty), context=context)
+
+        for raw_product in production.move_lines2:
+            new_parent_ids = []
+            parent_move_ids = [x.id for x in raw_product.move_history_ids]
+            for final_product in production.move_created_ids2:
+                if final_product.id not in parent_move_ids:
+                    new_parent_ids.append(final_product.id)
+            for new_parent_id in new_parent_ids:
+                stock_mov_obj.write(cr, uid, [raw_product.id], {'move_history_ids': [(4,new_parent_id)]})
+
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_validate(uid, 'mrp.production', production_id, 'button_produce_done', cr)
+        return True    
+
+    def action_compute(self, cr, uid, ids, properties=None, context=None):
+        resu = super(mrp_production,self).action_compute(cr, uid, ids, properties, context)
+        #generate work order's components
+        bom_oper_obj = self.pool.get('mrp.bom.routing.operation')
+        wo_comp_obj = self.pool.get('mrp.wo.comp')
+        for mo in self.browse(cr, uid, ids, context=context):
+            if not mo.workcenter_lines:
+                continue            
+            for wo in mo.workcenter_lines:
+                domain = [('bom_id','=',wo.bom_id.id),('routing_id','=',wo.routing_id.id,),('routing_workcenter_id','=',wo.routing_operation_id.id)]                
+                comp_ids = bom_oper_obj.search(cr, uid, domain, context=context)
+                for comp in bom_oper_obj.browse(cr, uid, comp_ids, context=context):
+                    vals = {'mo_id':mo.id, 'wo_id':wo.id, 'comp_id': comp.bom_comp_id.id, 'bom_route_oper_id': comp.id, 'qty': comp.bom_comp_id.product_qty*mo.product_qty}
+                    wo_comp_obj.create(cr, uid, vals, context=context)
+                    
+        return resu
+
+class mrp_wo_comp(osv.osv):
+    _name = 'mrp.wo.comp'    
+    _columns = {
+        'mo_id': fields.many2one('mrp.production', string='Manufacture Order', required=True),
+        'wo_id': fields.many2one('mrp.production.workcenter.line', string='Work Order', required=True),
+        'comp_id': fields.many2one('mrp.bom', string='Component', required=True ),
+        #related bom/routing matrix id, can be empty if user add this component manually
+        'bom_route_oper_id': fields.many2one('mrp.bom.routing.operation', string='Bom Routing Matrix'),
+        #quantity need to be manufacture, from the bom definition if craeated by system
+        'qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        #quantity done
+        'qty_done': fields.float('Quantity Done', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'state': fields.selection([('draft','Draft'),('cancel','Cancelled'),('startworking', 'In Progress'),('done','Finished')], string = 'Status'),
+        'note': fields.text('Description', ),
+        'mfg_ids': fields.related('mo_id','mfg_ids',type='many2many',relation='sale.product', rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs',),
+    }
+    _sql_constraints = [
+        ('wo_comp_uniq', 'unique(wo_id,comp_id)', 'You can not add duplicated "Work Order Component" with same WorkOrder and Component!'),
+    ]
+                  
 from openerp.addons.mrp.mrp import mrp_production as mrp_prod_patch        
 def mrp_prod_action_confirm(self, cr, uid, ids, context=None):
     """ Confirms production order.
@@ -521,10 +698,6 @@ def mrp_prod_action_compute(self, cr, uid, ids, properties=None, context=None):
         wo_ids = []
         for line in results2:
             line['production_id'] = production.id
-            #add the wo code, by johnw, 07/11/2014
-            #begin
-            line['code'] = self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line')
-            #end
             wo_new_id = workcenter_line_obj.create(cr, uid, line)
             wo_ids.append(wo_new_id)
         #add by johnw@07/1102014, update the wo_pre_ids and wo_next_ids
@@ -577,7 +750,7 @@ class mrp_production_workcenter_line(osv.osv):
         select b.id, c.consume_move_id
         from mrp_bom_routing_operation a
         join mrp_production_workcenter_line b 
-            on a.bom_id = b.bom_id and a.routing_id = b.routing_id and a.routing_workcenter_id = b.routing_operation_id
+            on a.bom_id = b.bom_id and a.routing_id = b.routing_id and a.routing_workcenter_id = b.routing_operation_id and a.consume_material = true
         join mrp_production_product_line c
             on b.production_id = c.production_id and a.bom_comp_id = c.parent_bom_id
         where b.id = ANY(%s)
@@ -602,14 +775,17 @@ class mrp_production_workcenter_line(osv.osv):
         'has_pre_ids': fields.function(_has_pre_wo, type='boolean', string='Has Pre WO'),
         'wo_pre_ids': fields.many2many('mrp.production.workcenter.line', 'mrp_wo_flow','wo_next_id','wo_pre_id', string='Previous WOs', domain="[('production_id','=',production_id),('bom_id','=',bom_id),]"),
         'wo_next_ids': fields.many2many('mrp.production.workcenter.line', 'mrp_wo_flow','wo_pre_id','wo_next_id', string='Next WOs', domain="[('production_id','=',production_id),('bom_id','=',bom_id),]"),
+        #add 'ready' state
         'state': fields.selection([('draft','Draft'),('ready','Ready'),('cancel','Cancelled'),('pause','Pending'),('startworking', 'In Progress'),('done','Finished')],'Status', readonly=True,
                                  help="* When a work order is created it is set in 'Draft' status.\n" \
                                        "* When user sets work order in start mode that time it will be set in 'In Progress' status.\n" \
                                        "* When work order is in running mode, during that time if user wants to stop or to make changes in order then can set in 'Pending' status.\n" \
                                        "* When the user cancels the work order it will be set in 'Canceled' status.\n" \
                                        "* When order is completely processed that time it is set in 'Finished' status."),
-        
+        #the work order related components from bom, can generated from mrp_bom_workcenter_operation when executing action_compute()
+        'comp_lines': fields.one2many('mrp.wo.comp', 'wo_id', string='Components'),  
     }
+    _defaults = {'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line') or '/',}
     #add the code return in the name
     def name_get(self, cr, user, ids, context=None):
         if context is None:
@@ -675,8 +851,7 @@ class mrp_production_workcenter_line(osv.osv):
                         res = False
                         break
         return res
-    
-    
+                
 class mrp_production_product_line(osv.osv):
     _inherit = 'mrp.production.product.line'
     _columns = {

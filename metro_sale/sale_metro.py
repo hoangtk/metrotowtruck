@@ -11,6 +11,7 @@ class SaleOrder(osv.osv):
         'contact_log_ids': fields.many2many('contact.log', 'oppor_contact_log_rel','oppor_id','log_id',string='Contact Logs', )  
     }
     _defaults={'checkbox':True}
+    _order = 'id desc'
     def get_report_name(self, cr, uid, id, rpt_name, context=None):
         state = self.pool.get('sale.order').read(cr, uid, id, ['state'],context=context)['state']
         if state == 'draft' or state == 'sent':

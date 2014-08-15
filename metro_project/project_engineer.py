@@ -34,14 +34,7 @@ class project_project(osv.osv):
         'bom_components': fields.related('bom_id', 'bom_lines', type='one2many', relation='mrp.bom', fields_id='bom_id', string='Components', readonly=True),
     }
     
-    _defaults = {'single_mrp_prod_order':False}
-    
-    def default_get(self, cr, uid, fields, context=None):
-        res = super(project_project, self).default_get(cr, uid, fields, context)
-        # set 'single_mrp_prod_order' to true for the engineering project
-        if 'type' in res and res['type'] == 'engineer':
-            res['single_mrp_prod_order'] = True
-        return res    
+    _defaults = {'single_mrp_prod_order':True}
     
     def copy_data(self, cr, uid, id, default=None, context=None):
         res = super(project_project,self).copy_data(cr, uid, id, default=default, context=context)
@@ -82,6 +75,7 @@ class project_project(osv.osv):
                         mfg_id_new_project = mfg_id.id
                         new_mfg_prod_order_id = sale_prod_obj.create_mfg_order(cr, uid, mfg_id.id, context=context)
                         date_planned = mfg_id.date_planned
+                        wf_service.trg_validate(uid, 'sale.product', mfg_id.id, 'button_manufacture', cr)
                         break
                 if new_mfg_prod_order_id:
                     vals.update({'mrp_prod_ids':[(4, new_mfg_prod_order_id)]})

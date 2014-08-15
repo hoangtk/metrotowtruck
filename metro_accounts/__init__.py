@@ -5,3 +5,4 @@ import account_invoice
 import wizard
 import account_move
 import stock
+import account_analytic

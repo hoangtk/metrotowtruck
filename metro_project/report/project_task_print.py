@@ -50,6 +50,10 @@ class project_task_print(report_sxw.rml_parse):
         return trans_result   
 report_sxw.report_sxw('report.project.task.print','project.task','addons/metro_project/report/project_task_print.rml',parser=project_task_print)
 report_sxw.report_sxw('report.project.task.list','project.task','addons/metro_project/report/project_task_list.rml',parser=project_task_print)
+report_sxw.report_sxw('report.project.task.sheet','project.task','addons/metro_project/report/project_task_sheet.rml',parser=project_task_print)
+#tasks by group
+report_sxw.report_sxw('report.task.group.by_assignee','task.group','addons/metro_project/report/task_group_by_assignee.rml',parser=project_task_print)
+report_sxw.report_sxw('report.task.group.by_employee','task.group','addons/metro_project/report/task_group_by_employee.rml',parser=project_task_print)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

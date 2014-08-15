@@ -80,6 +80,16 @@
             <field name="act_from" ref="act_confirmed"/>
             <field name="act_to" ref="act_cancel"/>
             <field name="signal">button_cancel</field>
+        </record>
+        <record id="trans_engineer_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_engineer"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">button_cancel</field>
+        </record>
+        <record id="trans_manufacture_cancel" model="workflow.transition">
+            <field name="act_from" ref="act_manufacture"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">button_cancel</field>
         </record> 
     </data>
 </openerp>

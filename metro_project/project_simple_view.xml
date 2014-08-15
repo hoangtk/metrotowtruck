@@ -61,8 +61,7 @@
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
             	<field name="name" position="after">
-            		<!-- <field name="project_type" invisible="1"/> -->
-            		<field name="project_type" readonly="1"/>
+            		<field name="project_type" invisible="1"/>
             	</field>
             	<!-- move description to main page from the 'Work Hours' page. -->
 				<field name="description" position="replace">
@@ -101,12 +100,16 @@
             	<field name="effective_hours" position="attributes">
             		<attribute name="string">Spent Hours</attribute>
             	</field>
-            	<field name="date_start" position="attributes">
-            		<attribute name="widget">date</attribute>
-            	</field>
-            	<field name="date_end" position="attributes">
-            		<attribute name="widget">date</attribute>
-            	</field>
+            	<xpath expr="//field[@name='work_ids']/tree/field[@name='date']" position='attributes'>
+            		<attribute name='widget'>date</attribute>
+            	</xpath>
+            	<!-- move date fields together -->
+            	<group string="Gantt View" position="replace"/>
+            	<field name="date_deadline" position="after">
+            		<field name="date_start" widget="date"/>
+            		<field name="date_end" widget="date"/>
+            		<field name="create_date" widget="date"/>
+            	</field>            	
             </field>
         </record>    
 <!-- the original projects menu only display the simple projects -->
@@ -154,25 +157,36 @@
     </record>    
             
 <!-- Add project_type to project.task.type tree view -->
-        <record id="task_type_tree_extend" model="ir.ui.view">
-            <field name="name">task_type_tree_extend</field>
-            <field name="model">project.task.type</field>
-            <field name="inherit_id" ref="project.task_type_tree"/>
-            <field name="arch" type="xml">
-            	<xpath expr="//tree" position="attributes">
-            		<attribute name="editable">top</attribute>
-            	</xpath>
-            	<field name="name" position="before">
-            		<field name="sequence"/>
-            	</field>
-            	<field name="state" position="after">
-            		<field name="project_type"/>
-            		<field name="case_default"/>
-            		<field name="fold"/>
-            		<field name="description"/>
-            	</field>
-            </field>
-        </record>       
+    <record id="task_type_tree_extend" model="ir.ui.view">
+        <field name="name">task_type_tree_extend</field>
+        <field name="model">project.task.type</field>
+        <field name="inherit_id" ref="project.task_type_tree"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//tree" position="attributes">
+        		<attribute name="editable">top</attribute>
+        	</xpath>
+        	<field name="name" position="before">
+        		<field name="sequence"/>
+        	</field>
+        	<field name="state" position="after">
+        		<field name="project_type"/>
+        		<field name="case_default"/>
+        		<field name="fold"/>
+        		<field name="description"/>
+        	</field>
+        </field>
+    </record>       
+<!-- improve the task searching filters -->
+    <record id="view_task_search_form_extend" model="ir.ui.view">
+        <field name="name">"view_task_search_form_extend"</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+        	<field name="project_id" position="after">
+        		<field name="stage_id" domain="[]"/>
+        	</field>
+        </field>
+    </record>         
 <!-- Disable the top project menu to all users  -->
         <!-- Top menu item -->
 <!--         <menuitem name="Project"

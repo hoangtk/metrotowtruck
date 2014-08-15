@@ -13,7 +13,7 @@ class mto_design_wiz(osv.osv):
     _name = "mto.design.wiz"
     _inherits = {'ir.attachment': 'attachment_id'}
     _columns = {
-        'design_tmpl_id': fields.many2one('attribute.set', 'Template', domain=[('type','=','design')], required=True, select=True),
+        'design_tmpl_id': fields.many2one('attribute.set', 'Configuration Template', domain=[('type','=','design')], required=True, select=True),
         'design_id': fields.many2one('mto.design', 'Configuration'),        
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True), 

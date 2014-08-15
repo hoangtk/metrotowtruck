@@ -41,13 +41,16 @@
         'security/ir.model.access.csv',
         'wizard/work_order_cnc_line_done_view.xml',
         'wizard/wo_material_request_view.xml',
+        'wizard/mo_actions_view.xml',
         'work_order_cnc_view.xml',
         'mrp_view.xml',
         'mrp_sequence.xml',
         'wizard/add_common_bom_view.xml',
         'wizard/bom_import_view.xml',
         'mrp_workflow.xml',
-        'pdm.xml'
+        'pdm.xml',
+        'procurement_view.xml'
+        
     ],
     'test': [],
     'demo': [],

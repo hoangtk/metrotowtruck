@@ -14,7 +14,7 @@
       <blockLeftPadding length="0"/>
       <blockRightPadding length="0"/>
     </blockTableStyle>
-    <blockTableStyle id="Table2">
+    <blockTableStyle id="Table1">
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
       <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="0,0" stop="0,-1"/>
@@ -80,7 +80,7 @@
       <blockLeftPadding length="1"/>
       <blockRightPadding length="1"/>
     </blockTableStyle>
-    <blockTableStyle id="Table1">
+    <blockTableStyle id="Table2">
       <blockAlignment value="LEFT"/>
       <blockValign value="TOP"/>
       <lineStyle kind="LINEBEFORE" colorName="#e6e6e6" start="0,0" stop="0,-1"/>
@@ -138,115 +138,114 @@
   </stylesheet>
   <story>
     <para style="terp_default_8">[[ repeatIn(objects,'task') ]]</para>
-    <para style="terp_default_8">
-      <font color="white"> </font>
-    </para>
-    <para style="terp_header">Task [[ task.name ]]</para>
-    <para style="terp_default_8">
-      <font color="white"> </font>
-    </para>
-    <blockTable colWidths="51.0,187.0,61.0,232.0" style="Table2">
-      <tr>
-        <td>
-          <para style="P1">Project:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.project_id.name ]]</para>
-        </td>
-        <td>
-          <para style="P1">Dead Line:</para>
-        </td>
-        <td>
-          <para style="P2">[[ formatLang(task.date_deadline,date='True') ]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P1">Assignee:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.user_id.name ]]</para>
-        </td>
-        <td>
-          <para style="P1">Planned Hours:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.planned_hours ]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P1">Employees:</para>
-        </td>
-        <td>
-          <para style="P2">[[get_emp_names(task.emp_ids)]]</para>
-        </td>
-        <td>
-          <para style="P1">Spent Hours:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.effective_hours]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P1">Context:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.context_id.name ]]</para>
-        </td>
-        <td>
-          <para style="P1">Timeframe:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.timebox_id.name ]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P1">Priority:</para>
-        </td>
-        <td>
-          <para style="P2">[[ get_priority(task.priority) ]]</para>
-        </td>
-        <td>
-          <para style="P1">Date Start</para>
-        </td>
-        <td>
-          <para style="P2">[[ formatLang(task.date_start,date='True') ]]</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P1">Stage:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.stage_id.name ]]</para>
-        </td>
-        <td>
-          <para style="P1">Date End</para>
-        </td>
-        <td>
-          <para style="P2">[[ formatLang(task.date_end,date='True') ]]</para>
-        </td>
-      </tr>
-    </blockTable>
-    <para style="terp_default_8">
-      <font color="white"> </font>
-    </para>
-    <blockTable colWidths="51.0,479.0" style="Table1">
-      <tr>
-        <td>
-          <para style="P1">Description:</para>
-        </td>
-        <td>
-          <para style="P2">[[ task.description ]]</para>
-        </td>
-      </tr>
-    </blockTable>
-    <para style="Standard">
-      <font color="white"> </font>
-    </para>
+    <section>
+      <para style="terp_header">Task [[ task.name ]]</para>
+      <para style="terp_default_8">
+        <font color="white"> </font>
+      </para>
+      <blockTable colWidths="51.0,187.0,61.0,232.0" style="Table1">
+        <tr>
+          <td>
+            <para style="P1">Project:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.project_id.name ]]</para>
+          </td>
+          <td>
+            <para style="P1">Dead Line:</para>
+          </td>
+          <td>
+            <para style="P2">[[ formatLang(task.date_deadline,date='True') ]]</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P1">Assignee:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.user_id.name ]]</para>
+          </td>
+          <td>
+            <para style="P1">Planned Hours:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.planned_hours ]]</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P1">Employees:</para>
+          </td>
+          <td>
+            <para style="P2">[[get_emp_names(task.emp_ids)]]</para>
+          </td>
+          <td>
+            <para style="P1">Spent Hours:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.effective_hours]]</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P1">Context:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.context_id.name ]]</para>
+          </td>
+          <td>
+            <para style="P1">Timeframe:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.timebox_id.name ]]</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P1">Priority:</para>
+          </td>
+          <td>
+            <para style="P2">[[ get_priority(task.priority) ]]</para>
+          </td>
+          <td>
+            <para style="P1">Date Start</para>
+          </td>
+          <td>
+            <para style="P2">[[ formatLang(task.date_start,date='True') ]]</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para style="P1">Stage:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.stage_id.name ]]</para>
+          </td>
+          <td>
+            <para style="P1">Date End</para>
+          </td>
+          <td>
+            <para style="P2">[[ formatLang(task.date_end,date='True') ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+      <para style="terp_default_8">
+        <font color="white"> </font>
+      </para>
+      <blockTable colWidths="51.0,479.0" style="Table2">
+        <tr>
+          <td>
+            <para style="P1">Description:</para>
+          </td>
+          <td>
+            <para style="P2">[[ task.description ]]</para>
+          </td>
+        </tr>
+      </blockTable>
+      <para style="Standard">
+        <font color="white"> </font>
+      </para>
+    </section>
   </story>
 </document>
 

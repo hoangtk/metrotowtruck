@@ -131,6 +131,7 @@ class stock_picking(osv.osv):
                         'credit': move_line.credit,
                         'debit': move_line.debit,
                         'account_id': move_line.account_id.id,
+                        'analytic_account_id': move_line.analytic_account_id.id,
                         }
                     
                     move_vals.get('line_id').append((0, 0, new_move_line))

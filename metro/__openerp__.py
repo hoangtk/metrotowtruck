@@ -22,7 +22,8 @@
 	   "security/metro.xml",
        "order_informer.xml",
        "cron_job_data.xml",
-       "ir_cron_view.xml"
+       "ir_cron_view.xml",
+       "workflow_view.xml"
     ],
     'installable': True,
     'auto_install': False,

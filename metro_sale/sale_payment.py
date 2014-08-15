@@ -50,8 +50,10 @@ class sale_order(osv.osv):
         'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}, help="Delivery address for current sales order."),
         'order_policy': fields.selection([
                 ('manual', 'On Demand'),
-            ], 'Create Invoice', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]},),
-        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}, help="Pricelist for current sales order."),
+                ('picking', 'On Delivery Order'),
+                ('prepaid', 'Before Delivery'),
+            ], 'Create Invoice', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]},
+            help="""On demand: A draft invoice can be created from the sales order when needed. \nOn delivery order: A draft invoice can be created from the delivery order when the products have been delivered. \nBefore delivery: A draft invoice is created from the sales order and must be paid before the products can be delivered."""),        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}, help="Pricelist for current sales order."),
         'project_id': fields.many2one('account.analytic.account', 'Contract / Analytic', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}, help="The analytic account related to a sales order."),
         'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}),
 #links to account_move        
