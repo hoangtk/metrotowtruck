@@ -168,7 +168,8 @@ class material_request_line(osv.osv):
         if not prod_id:
             return {}
         user = self.pool.get("res.users").browse(cr,uid,uid)
-        ctx = {'lang': user.lang}
+        
+        ctx = {'lang': user.lang,'location':loc_id}
 
         product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=ctx)[0]
         uos_id  = product.uos_id and product.uos_id.id or False
