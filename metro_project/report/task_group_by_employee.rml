@@ -128,7 +128,7 @@
   </stylesheet>
   <story>
     <para style="P1">[[ repeatIn(objects,'group') ]]</para>
-    <para style="P2">Employees: [[group.name]]</para>
+    <para style="P2">Employees: [[group.name]] [[formatLang(group.task_day,date='True')]]</para>
     <section>
       <para style="P1">[[ repeatIn(group.task_ids,'task') ]]</para>
       <blockTable colWidths="79.0,118.0,92.0,80.0,74.0,88.0" style="Table1">

@@ -183,8 +183,16 @@
         <field name="inherit_id" ref="project.view_task_search_form"/>
         <field name="arch" type="xml">
         	<field name="project_id" position="after">
+        		<field name="project_type"/>
         		<field name="stage_id" domain="[]"/>
+        		<field name="daily_date"
+        			filter_domain="['|',('date_start','=',False),('date_start','&lt;=', self + ' 23:59:59'),'|',('date_end','=',False),('date_end','&gt;=', self + ' 00:00:00')]"/>
+        		<filter icon="terp-go-today" string="Today's Tasks" 
+        			domain="['|',('date_start','=',False),('date_start','&lt;=',time.strftime('%%Y-%%m-%%d 23:59:59')),'|',('date_end','=',False),('date_end','&gt;=',time.strftime('%%Y-%%m-%%d 00:00:00'))]"/>
         	</field>
+<!--         	<filter name="group_project_id" position="after">
+        		<filter string="Type" name="group_project_type" icon="terp-folder-violet" domain="[]" context="{'group_by':'project_type'}"/>
+        	</filter> -->
         </field>
     </record>         
 <!-- Disable the top project menu to all users  -->
