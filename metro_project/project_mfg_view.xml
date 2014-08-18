@@ -12,6 +12,9 @@
             		<field name="id" invisible="1"/>
             		<field name="workorder_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             		<field name="workcenter_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="production_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="mfg_ids" widget="many2many_tags" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="product" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             	</field>                 
 			<!-- Add emp_ids/mfg_ids to task's work hours -->
 				<xpath expr="//field[@name='work_ids']/tree/field[@name='name']" position="after">
@@ -34,8 +37,11 @@
             <field name="inherit_id" ref="metro_project_task_tree_view"/>
             <field name="arch" type="xml">
             	<field name="project_type" position="after">
-            		<field name="workorder_id"/>
-            		<field name="workcenter_id"/>
+            		<field name="workorder_id" groups="mrp.group_mrp_user"/>
+            		<field name="workcenter_id" groups="mrp.group_mrp_user"/>
+            		<field name="production_id" groups="mrp.group_mrp_user"/>
+            		<field name="mfg_ids" groups="mrp.group_mrp_user"/>
+            		<field name="product" groups="mrp.group_mrp_user"/>
             	</field>
             </field>
         </record>      
@@ -51,6 +57,9 @@
 	        	<field name="project_type" position="after">
 	        		<field name="workorder_id"/>
 	        		<field name="workcenter_id"/>
+	        		<field name="production_id"/>
+	        		<field name="mfg_ids" widget="many2many_tags"/>
+	        		<field name="product"/>
 	        	</field>
 	        </field>
 	    </record> 

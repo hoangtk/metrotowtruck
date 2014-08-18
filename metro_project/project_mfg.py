@@ -30,7 +30,10 @@ class project_task(base_stage, osv.osv):
     _inherit = "project.task"
     _columns = {
         'workorder_id': fields.many2one('mrp.production.workcenter.line', string='Work Order'),
-        'workcenter_id': fields.related('workorder_id','workcenter_id', type='many2one', relation="mrp.workcenter", string='Work Center'),
+        'workcenter_id': fields.related('workorder_id','workcenter_id', type='many2one', relation="mrp.workcenter", string='Work Center', readonly=True),
+        'production_id': fields.related('workorder_id','production_id', type='many2one', relation="mrp.production", string='Manufacture Order', readonly=True),
+        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
+        'product':fields.related('workorder_id','product',type='many2one',relation='product.product',string='Product', readonly=True),
     }
 
     
