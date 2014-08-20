@@ -11,6 +11,10 @@
             	<field name="planned_hours" position="before">
             		<field name="id" invisible="1"/>
             		<field name="workorder_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="workcenter_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="production_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="mfg_ids" widget="many2many_tags" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
+            		<field name="product" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             	</field>                 
 			<!-- Add emp_ids/mfg_ids to task's work hours -->
 				<xpath expr="//field[@name='work_ids']/tree/field[@name='name']" position="after">
@@ -27,6 +31,39 @@
 				</xpath>
             </field>
         </record> 
+        <record model="ir.ui.view" id="project_task_mfg_tree_view">
+            <field name="name">metro_project_task_tree_view</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="metro_project_task_tree_view"/>
+            <field name="arch" type="xml">
+            	<field name="project_type" position="after">
+            		<field name="workorder_id" groups="mrp.group_mrp_user"/>
+            		<field name="workcenter_id" groups="mrp.group_mrp_user"/>
+            		<field name="production_id" groups="mrp.group_mrp_user"/>
+            		<field name="mfg_ids" groups="mrp.group_mrp_user"/>
+            		<field name="product" groups="mrp.group_mrp_user"/>
+            	</field>
+            </field>
+        </record>      
+          
+	    <record id="project_task_mfg_search_view" model="ir.ui.view">
+	        <field name="name">"view_task_search_form_extend"</field>
+	        <field name="model">project.task</field>
+	        <field name="inherit_id" ref="view_task_search_form_extend"/>
+	        <field name="arch" type="xml">
+<!-- 	        	<filter name="group_project_type" position="after">
+	        		<filter string="WorkCenter" name="group_workcenter" icon="terp-folder-violet" domain="[]" context="{'group_by':'workcenter_id'}"/>
+	        	</filter> -->
+	        	<field name="project_type" position="after">
+	        		<field name="workorder_id"/>
+	        		<field name="workcenter_id"/>
+	        		<field name="production_id"/>
+	        		<field name="mfg_ids" widget="many2many_tags"/>
+	        		<field name="product"/>
+	        	</field>
+	        </field>
+	    </record> 
+            
         <record id="action_view_task_mfg" model="ir.actions.act_window">
             <field name="name">Manufacture Tasks</field>
             <field name="res_model">project.task</field>

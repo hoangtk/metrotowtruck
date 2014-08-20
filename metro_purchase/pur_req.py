@@ -43,7 +43,25 @@ class pur_req(osv.osv):
                         full_gen_po = False
                         break
             res[req.id] = full_gen_po
-        return res    
+        return res
+    def _req_pos(self,cr,uid,ids,field_names=None, arg=False, context=None):
+        """ Finds the requisition related PO ids.
+        @return: Dictionary of values
+        """
+        if not field_names:
+            field_names = []
+        if context is None:
+            context = {}
+        res = dict.fromkeys(ids,[])
+        for req in self.browse(cr, uid, ids, context=context):
+            po_ids = []
+            for req_line in req.line_ids:
+                for po_line in req_line.po_lines_ids:
+                    if po_line.order_id.id not in po_ids:
+                        po_ids.append(po_line.order_id.id)
+            res[req.id] = po_ids
+        return res
+        
     _columns = {
         'name': fields.char('Requisition#', size=32,required=True),
         'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse',required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),    
@@ -54,7 +72,9 @@ class pur_req(osv.osv):
         'line_ids' : fields.one2many('pur.req.line','req_id','Products to Purchase',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'state': fields.selection([('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True,),
-        'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),      
+#        'po_ids' : fields.one2many('purchase.order','req_id','Related PO'),
+        #once user did merging PO, then one PO may have multi requestions, so change this field to a function field
+        'po_ids' : fields.function(_req_pos, type='one2many',relation='purchase.order',string='Related PO'),              
         'full_gen_po': fields.function(_full_gen_po, string='All products generated PO', type='boolean', help="It indicates that this requsition's all lines generated PO"),      
     }
     _defaults = {
@@ -266,13 +286,29 @@ class purchase_order(osv.osv):
     _columns = {
         'req_id' : fields.many2one('pur.req','Purchase Requisition',readonly=True)
     }
-
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'req_id':False,
+        })
+        res = super(purchase_order, self).copy_data(cr, uid, id, default, context)
+        return res  
+   
 purchase_order()
 
 class purchase_order_line(osv.osv):    
     _inherit = "purchase.order.line"
     _columns = {
                 'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition',readonly=True)}   
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'req_line_id':False,
+        })
+        res = super(purchase_order_line, self).copy_data(cr, uid, id, default, context)
+        return res    
     
 purchase_order_line()
 

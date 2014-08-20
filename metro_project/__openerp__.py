@@ -47,7 +47,8 @@
         'project_mfg_view.xml',
         'project_report.xml',
         'project_data.xml',
-        'wizard/task_print.xml'
+        'wizard/task_print.xml',
+        'board_tasks_view.xml'
     ],
     'test': [],
     'demo': [],

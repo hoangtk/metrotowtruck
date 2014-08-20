@@ -60,7 +60,7 @@
                         <field name="product_qty_remain" readonly="1"/>
                         <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
                         <field name="date_required"/>
-                        <field name="inv_qty"/>
+                        <!-- <field name="inv_qty"/> -->
                         <field name="req_emp_id"/>
                         <field name="req_dept_id"/>
                         <field name="req_reason"/>
@@ -74,7 +74,7 @@
 	                            <field name="product_qty"/>
 	                            <field name="product_uom_id" on_change="onchange_product_uom(product_id,product_uom_id,context)"/>
 	                            <field name="date_required" />
-	                            <field name="inv_qty" />
+	                            <!-- <field name="inv_qty" /> -->
                         	</group>
                         	<group>
 	                        	<field name="req_emp_id"/>

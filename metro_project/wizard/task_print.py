@@ -29,12 +29,14 @@ class task_group(osv.osv_memory):
     _columns = {
         'name': fields.char('Group', size=64, required=True),
 #        'group_task_ids': fields.one2many('task.group.tasks','group_id','Group Tasks')
-        'task_ids': fields.many2many('project.task','task_group_tasks','group_id','task_id',string='Group Tasks')
+        'task_ids': fields.many2many('project.task','task_group_tasks','group_id','task_id',string='Group Tasks'),
+        'task_day': fields.date('Day', ),
     }
 class task_print(osv.osv_memory):
     _name = "task.print"
     _columns = {
-        'print_type': fields.selection([('by_assignee','Task List By Assignee'),('by_employee','Task List By Employee')],'Type', required=True),
+        'task_day': fields.date('Day', ),
+        'print_type': fields.selection([('by_assignee','Task List By Assignee'),('by_employee','Task List By Employee')],'Type', required=True, select=False),
     }
     _defaults = {'print_type':'by_assignee'}
     
@@ -53,7 +55,6 @@ class task_print(osv.osv_memory):
         if context is None:
             context = {}    
         active_ids = context and context.get('active_ids', [])
-        active_model = context and context.get('active_model', [])
         data = self.browse(cr, uid, ids, context=context)[0]
         #set the group field name and function to get related name
         group_name_func = None
@@ -61,6 +62,13 @@ class task_print(osv.osv_memory):
             group_name_func = self._get_assignee_name
         elif data.print_type == 'by_employee':
             group_name_func = self._get_emps_name
+        #get the tasks by day
+        task_day = ''
+        if data.task_day:
+            domain_day = ['|',('date_start','=',False),('date_start','<=', data.task_day + ' 23:59:59'),'|',('date_end','=',False),('date_end','>=', data.task_day + ' 00:00:00')]
+            domain_day += [('state','!=','cancelled')]
+            active_ids = self.pool.get('project.task').search(cr, uid, domain_day, context=context)
+            task_day = data.task_day
         #get the group data
         groups = {}
         for task in self.pool.get('project.task').browse(cr, uid, active_ids, context=context):
@@ -72,7 +80,10 @@ class task_print(osv.osv_memory):
         task_group_obj = self.pool.get('task.group')
         group_ids = []
         for group_name,tasks in groups.items():
-            group_ids.append(task_group_obj.create(cr, uid, {'name':group_name,'task_ids':tasks}, context=context))
+            vals = {'name':group_name,'task_ids':tasks}
+            if task_day:
+                vals.update({'task_day':task_day})
+            group_ids.append(task_group_obj.create(cr, uid, vals, context=context))
         #print tasks by group
         if not group_ids:
             return {'type': 'ir.actions.act_window_close'}     

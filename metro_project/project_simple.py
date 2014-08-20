@@ -23,7 +23,10 @@ from openerp.osv import fields,osv
 from openerp.addons.base_status.base_stage import base_stage
 from openerp.tools.translate import _
 from openerp.addons.project import project as project_super
+from openerp.addons.metro_purchase.purchase import deal_args
+
 _PROJ_TYPES = [('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD'),('mfg','Manufacture')]
+import datetime
 
 '''
 1.Add 'type' field to extend the project's usage
@@ -75,15 +78,43 @@ class project_project(osv.osv):
 3.Add multi images
 '''    
 class project_task(base_stage, osv.osv):
-    _inherit = "project.task"    
+    _inherit = "project.task"        
+    
     _columns = {
         'project_type': fields.related('project_id', 'project_type', type='selection', 
                                        selection=_PROJ_TYPES, 
                                        string='Project Type', select=1),
         'multi_images': fields.text("Multi Images"),
         'private': fields.boolean("Private"),     
-        'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees")           
+        'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees"),
+        'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees"),
+        'daily_date':fields.function(lambda *a,**k:{}, type='date',string="Daily Task Date",),
     }
+
+    '''     
+    Replaced below code with code in project_simple_view.xml:
+    ===========
+                    <field name="daily_date" widget="calendar"
+                        filter_domain="['|',('date_start','=',False),('date_start','&lt;=', self + ' 23:59:59'),'|',('date_end','=',False),('date_end','&gt;=', self + ' 00:00:00')]"/>
+    ===========                       
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #deal the 'date' datetime field query
+        new_args = deal_args(self,args)
+        idx_daily = 0
+        args_daily = []
+        for arg in new_args:
+            #add the category improving
+            if arg[0] == 'daily_date':
+                args_daily = ['|',['date_start','=',False],['date_start','<=','%s %s'%(arg[2],'23:59:59')],'|',['date_end','=',False],['date_end','>=','%s %s'%(arg[2],'00:00:00')]]
+                new_args.pop(idx_daily)
+                new_args += args_daily
+                break
+            idx_daily += 1                           
+        #get the search result        
+        ids = super(project_task,self).search(cr, user, new_args, offset, limit, order, context, count)
+        return ids 
+    ''' 
+            
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(project_task,self).default_get(cr, uid, fields_list, context=context)
         #only keep the default project setting for the simple project
@@ -170,12 +201,15 @@ class project_task(base_stage, osv.osv):
         fold = {}
         for stage in stage_obj.browse(cr, access_rights_uid, stage_ids, context=context):
             fold[stage.id] = stage.fold or False
-        return result, fold       
+        return result, fold  
     
     _group_by_full = {
         'stage_id': _read_group_stage_ids,
         'user_id': project_super.task._read_group_user_id,
     }     
+    _defaults = {
+        'date_start': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')         
+        }
 class project_task_type(osv.osv):
     _inherit = 'project.task.type'
     _columns = {
