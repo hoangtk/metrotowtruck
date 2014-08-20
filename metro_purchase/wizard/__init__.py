@@ -24,5 +24,6 @@ import confirm_msg
 import pur_history
 import pay_po
 import pur_invoice
+import purchase_order_group
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
