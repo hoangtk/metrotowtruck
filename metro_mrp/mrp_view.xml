@@ -36,6 +36,7 @@
                     	       
 	                <!-- the common BOM flag -->
 	                <field name="type" position="after">
+	                	<field name="direct_bom_id"/>
 	                	<field name="is_common" attrs="{'invisible':[('bom_id','!=',False)]}" onchange='onchange_is_common(is_common,bom_id)'/>
 	                	<field name="common_bom_id" attrs="{'invisible':[('bom_id','=',False)]}" readonly="1"/>
 	                </field>
@@ -44,6 +45,7 @@
                     	<field name="sequence" widget="handle"/>
                     	<field name="code"/>
 	                	<field name="name"/>
+	                	<field name="direct_bom_id"/>
 	                	<!-- add the component's routing workcenters -->
 	                	<!-- <field name="comp_routing_workcenter_ids" widget='many2many_tags'/> -->
 	                	<field name="common_bom_id"/>
@@ -161,6 +163,7 @@
 	                	<attribute name="groups"/>
 	                </field>
 	                <field name="name" position="before">
+	                	<field name="direct_bom_id"/>
 	                	<field name="is_common"/>
 	                	<field name="common_bom_id"/>
 	                	<field name="code"/>

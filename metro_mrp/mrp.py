@@ -67,7 +67,12 @@ class mrp_bom(osv.osv):
                 #for the component, define the sub components related work center from parent bom's routing definition, 
                 #only show for the bom components(bom_id is not false)
                 'comp_routing_workcenter_ids': fields.many2many('mrp.routing.workcenter','mrp_bom_routing_operation','bom_comp_id','routing_workcenter_id',
-                                                                string='Work Centers', domain=_domain_bom_routing)
+                                                                string='Work Centers', domain=_domain_bom_routing),
+                #08/21/2014, the direct bom id, will be used in manufacture order, the the action_compute()-->_bom_explode() 
+                #1.user set the bom_lines of this bom, then will use bom_lines to explode the products and work centers
+                #2.if no bom_lines, then check this field 'common_bom_id', if there is a bom setted, then use this bom to do _bom_explode
+                #3.if no above 2 fields, and the 'addthis' parameter is true, then return the product line  
+                'direct_bom_id': fields.many2one('mrp.bom','Direct BOM',domain="[('product_id','=',product_id),('bom_id','=',False)]"),
                 }
     _defaults = {
         'is_common' : False,
@@ -79,6 +84,15 @@ class mrp_bom(osv.osv):
     _constraints = [
         (_check_product, 'BoM line product should not be duplicate under one BoM.', ['product_id']),
         ] 
+    def onchange_product_id(self, cr, uid, ids, product_id, name, context=None):
+        res = super(mrp_bom,self).onchange_product_id(cr, uid, ids, product_id, name, context)
+        if not res.get('value',False):
+            res['value']={}
+        #set the direct_bom_id
+        if product_id:
+            direct_bom_id = self._bom_find(cr, uid, product_id, None, properties=None)
+            res['value'].update({'direct_bom_id':direct_bom_id})
+        return res  
     '''
     SQL to update current code
     update mrp_bom set code = to_char(id,'0000')
@@ -251,7 +265,10 @@ class mrp_bom(osv.osv):
             else:
                 phantom = False
         if not phantom:
-            if addthis and not bom.bom_lines:
+#            if addthis and not bom.bom_lines:
+            #+++John Wang, 09/21/2014+++# add the direct_bom_id checking
+            if addthis and not bom.bom_lines and not bom.direct_bom_id:
+                #+++John Wang, 07/10/2014+++# add the bom_id and parent_bom_id to supply the product's bom info
 #                result.append(
 #                {
 #                    'name': bom.product_id.name,
@@ -261,7 +278,6 @@ class mrp_bom(osv.osv):
 #                    'product_uos_qty': bom.product_uos and bom.product_uos_qty * factor or False,
 #                    'product_uos': bom.product_uos and bom.product_uos.id or False,
 #                })
-                #+++John Wang, 07/10/2014+++# add the bom_id and parent_bom_id to supply the product's bom info
                 result.append(
                 {
                     'parent_bom_id': bom.bom_id and bom.bom_id.id or False,
@@ -281,6 +297,7 @@ class mrp_bom(osv.osv):
                     d, m = divmod(factor, wc_use.workcenter_id.capacity_per_cycle)
                     mult = (d + (m and 1.0 or 0.0))
                     cycle = mult * wc_use.cycle_nbr
+                    #+++John Wang, 07/10/2014+++# add the routing_workcenter_id to supply the routing operation's info later.
 #                    result2.append({
 #                        'name': tools.ustr(wc_use.name) + ' - '  + tools.ustr(bom.product_id.name),
 #                        'workcenter_id': wc.id,
@@ -288,7 +305,6 @@ class mrp_bom(osv.osv):
 #                        'cycle': cycle,
 #                        'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
 #                    })
-                    #+++John Wang, 07/10/2014+++# add the routing_workcenter_id to supply the routing operation's info later.
                     result2.append({
                         'bom_id': bom.id,
                         'routing_id': wc_use.routing_id.id,
@@ -303,6 +319,14 @@ class mrp_bom(osv.osv):
                 res = self._bom_explode(cr, uid, bom2, factor, properties, addthis=True, level=level+10)
                 result = result + res[0]
                 result2 = result2 + res[1]
+            #+++John Wang, 08/21/2014+++# add the direct_bom_id field handling code
+            ###begin###
+            if not bom.bom_lines and bom.direct_bom_id:
+                res = self._bom_explode(cr, uid, bom.direct_bom_id, factor, properties, addthis=True, level=level+10)
+                result = result + res[0]
+                result2 = result2 + res[1]
+            ###end###
+                                
         return result, result2        
 '''
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
