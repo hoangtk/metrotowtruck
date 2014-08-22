@@ -85,7 +85,41 @@ class hr_employee(osv.osv):
 		emp_code = '%03d'%(emp_id[0] + 1,)
 		values.update({'emp_code':emp_code})
 		return values
-	
+	#add the emp_code return in the name
+	def name_get(self, cr, user, ids, context=None):
+		if context is None:
+			context = {}
+		if isinstance(ids, (int, long)):
+			ids = [ids]
+		if not len(ids):
+			return []
+		result = []
+		for data in self.browse(cr, user, ids, context=context):
+			if data.id <= 0:
+				result.append((data.id,''))
+				continue
+			result.append((data.id,'[%s]%s'%(data.emp_code,data.name)))
+						  
+		return result
+	#add the emp_code search in the searching
+	def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+		if not args:
+			args = []
+		if name:
+			ids = self.search(cr, user, [('emp_code','=',name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = self.search(cr, user, [('name','=',name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = set()
+				ids.update(self.search(cr, user, args + [('emp_code',operator,name)], limit=limit, context=context))
+				if not limit or len(ids) < limit:
+					# we may underrun the limit because of dupes in the results, that's fine
+					ids.update(self.search(cr, user, args + [('name',operator,name)], limit=(limit and (limit-len(ids)) or False) , context=context))
+				ids = list(ids)
+		else:
+			ids = self.search(cr, user, args, limit=limit, context=context)
+		result = self.name_get(cr, user, ids, context=context)
+		return result 	
 	def sync_clock(self, cr, uid, ids=None, context=None):
 		_logger.info('begining sync_clock...')
 		if not context:
