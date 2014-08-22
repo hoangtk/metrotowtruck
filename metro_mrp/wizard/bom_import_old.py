@@ -100,7 +100,6 @@ class bom_import(osv.osv_memory):
         common_bom_idx = -1
         sequence_idx = -1
         id_idx = -1
-        direct_bom_find_idx = -1
         
         try:
             # get the data column index
@@ -123,84 +122,7 @@ class bom_import(osv.osv_memory):
         try:
             sequence_idx = row_data.index('sequence')
         except Exception:
-            sequence_idx = -1    
-        try:
-            direct_bom_find_idx = row_data.index('direct_bom_find')
-        except Exception:
-            direct_bom_find_idx = -1              
-            
-        header_idxs={'level_no_idx':level_no_idx,
-                     'part_no_idx':part_no_idx,
-                     'bom_name_idx':bom_name_idx,
-                     'quantity_idx':quantity_idx,
-                     'common_bom_idx':common_bom_idx,
-                     'sequence_idx':sequence_idx,
-                     'id_idx':id_idx,
-                     'direct_bom_find_idx':direct_bom_find_idx}
-                    
-        #2 find all of the rows with level_no starting with 'root_'
-        root_level_prefix = 'root_'
-        #root bom row range, format:{rboom1_level_no:(row_start,row_end),...rboomn_level_no:(row_start,row_end)}
-        root_boms = {}
-        curr_root_level = None
-        curr_root_row_start = None
-        for i in range(1,row_cnt):
-            row_data = sheet.row_values(i);
-            level_no = row_data[level_no_idx]
-            #first line level_no must be a root boom
-            if i == 1 and not level_no.startswith(root_level_prefix):
-                raise osv.except_osv(_('Error!'), _('First row must be a root boom, the level_no should start with "root_"'))
-            if level_no.startswith(root_level_prefix):
-                if root_boms.get(level_no,False):
-                    raise osv.except_osv(_('Error!'), _('Root BOM level_no "%s" is duplicated with others'%(level_no,)))
-                if curr_root_row_start:
-                    root_boms[curr_root_level]=(curr_root_row_start, i-1)
-                curr_root_level = level_no
-                curr_root_row_start = i
-        if curr_root_level and not root_boms.get(curr_root_level,False):
-            root_boms[curr_root_level]=(curr_root_row_start, row_cnt-1)
-        #for the existing boom, only add import one root boom
-        if order.mrp_bom_id and len(root_boms) > 1:
-            raise osv.except_osv(_('Error!'), _('Only can import one bom to existing BOM!'))
-            
-        #loop the root boom to import boom
-        mrp_bom_obj = self.pool.get('mrp.bom')
-        new_bom_ids = []
-        for rbom_level_no, rbom_row in root_boms.items():
-            parsed_rows = self._parse_bom(cr, uid, sheet, rbom_level_no, rbom_row[0], rbom_row[1], header_idxs, context=context)
-            #having mrp_bom_id: do top BOM updating
-            bom_master = parsed_rows[rbom_level_no]
-            if order.mrp_bom_id:
-                #if from an existing bom ID, then close the window, and refresh parent to show the new data
-                mrp_bom_obj.write(cr, uid, order.mrp_bom_id.id, bom_master, context=context)        
-                #for existing bomm updating, there will be only one BOOM, so return abort loop and return direct    
-                return {'type': 'ir.actions.act_window_close'} 
-            else:
-                #Show the created new BOM in list view
-                new_bom_id = mrp_bom_obj.create(cr, uid, bom_master, context=context)
-                new_bom_ids.append(new_bom_id)
-
-        #Show the created new BOM in list view
-        return {
-            'domain': "[('id', '=', %s)]"%(new_bom_ids,),
-            'name': _('MRP BOM'),
-            'view_type':'form',
-            'view_mode':'tree,form',
-            'res_model': 'mrp.bom',
-            'type':'ir.actions.act_window',
-            'context':context,
-        }
-            
-    def _parse_bom(self,cr, uid, sheet,root_level_no,start_row,end_row, header_idxs, context=None):     
-        level_no_idx = header_idxs['level_no_idx']
-        part_no_idx = header_idxs['part_no_idx']
-        bom_name_idx = header_idxs['bom_name_idx']
-        quantity_idx = header_idxs['quantity_idx']
-        common_bom_idx = header_idxs['common_bom_idx']
-        sequence_idx = header_idxs['sequence_idx']
-        id_idx = header_idxs['id_idx']
-        direct_bom_find_idx = header_idxs['direct_bom_find_idx']
-                                        
+            sequence_idx = -1                        
         #2 loop to check data, and put data to cache if all are OK
         '''
         the regex for the level# like: 1, 1.1, 1.1.1
@@ -208,19 +130,20 @@ class bom_import(osv.osv_memory):
         [1-9]+\d*$ : the suffix must be a number, and greater than zero 
         '''
         level_pattern = re.compile(r'L([1-9]+\d*\.)*[1-9]+\d*$')
+        root_level_no = 'root'
         parsed_rows = {}
         prod_obj = self.pool.get('product.product')
         bom_obj = self.pool.get('mrp.bom')
-        for i in range(start_row,end_row+1):
+        for i in range(1,row_cnt):
             row_data = sheet.row_values(i);
             #=========validate the level_no============
             level_no = row_data[level_no_idx]
-            #first line level_no must be root_level_no
-            if i == start_row and level_no != root_level_no:
-                raise osv.except_osv(_('Error!'), _('level_no of bom first line row must be "%s"'%(root_level_no,)))
+            #first line level_no must be 'root'
+            if i == 1 and level_no != root_level_no:
+                raise osv.except_osv(_('Error!'), _('level_no of first line row must be "root"'))
             parsed_row = {}
             #for the rows not root line
-            if i > start_row:
+            if i > 1:
                 if level_no is not types.StringType:
                     level_no = str(level_no)
                     if level_no == '':
@@ -239,7 +162,7 @@ class bom_import(osv.osv_memory):
                     if parent_level_no not in parsed_rows:
                         raise osv.except_osv(_('Error!'), _('level_no %s at row %s can not find the parent BOM'%(level_no, i+1,)))
                 else:
-                    parent_level_no = root_level_no
+                    parent_level_no = 'root'
                 #add to parent row's childs
                 parent_level_row = parsed_rows.get(parent_level_no)
                 childs = parent_level_row.get('bom_lines')
@@ -262,7 +185,7 @@ class bom_import(osv.osv_memory):
                 #if there is no id data, then use default_code to get product id
                 ids = prod_obj.search(cr,uid,[('default_code','=',row_data[part_no_idx])],context=context)
                 if not ids or len(ids) == 0:
-                    raise osv.except_osv(_('Error!'), _('the product[%s] of row %s does not exist'%(row_data[part_no_idx], i+1,)))
+                    raise osv.except_osv(_('Error!'), _('the product of row %s does not exist'%(i+1,)))
                 product = prod_obj.browse(cr, uid, ids[0], context=context)
             else:
                 product = prod_obj.browse(cr, uid, row_data[id_idx], context=context)
@@ -300,36 +223,42 @@ class bom_import(osv.osv_memory):
                 if sequence != '0' and not pattern_number.match(sequence):
                     raise osv.except_osv(_('Error!'), _('the sequence of row %s must be a number!'%(i+1,)))
             
+            
             #=========set the row data============
+                    
             if common_bom_id:
                 parsed_row.update({'create_from_common':True,
                                    'common_bom_id':common_bom_id,
-                                #'name':'[%s]%s'%(level_no,bom_name),
-                                'name':bom_name,
+                                'name':'[%s]%s'%(level_no,bom_name),
                                 'product_qty':quantity,
                                 'sequence':int(float(sequence))})
             else:
                 parsed_row.update({'product_id':product.id,
                                  'product_uom':product.uom_id.id,
-                                #'name':'[%s]%s'%(level_no,bom_name),
-                                'name':bom_name,
+                                'name':'[%s]%s'%(level_no,bom_name),
                                 'product_qty':quantity,
-                                'sequence':int(float(sequence)),
-                                'direct_bom_find':True})
-                #=========check and set the direct_bom_find============
-                if direct_bom_find_idx >= 0:
-                    flag = row_data[direct_bom_find_idx]
-                    if not flag:
-                        flag = ''
-                    flag = flag.lower()
-                    if flag in ('n','0','no'):
-                        parsed_row.update({'direct_bom_find':False})
-                    
-                    parsed_row.update()
+                                'sequence':int(float(sequence))})
             parsed_rows.update({level_no:parsed_row})
-        #return data
-        return parsed_rows
- 
+        
+        #having mrp_bom_id: do top BOM updating
+        mrp_bom_obj = self.pool.get('mrp.bom')
+        bom_master = parsed_rows['root']
+        if order.mrp_bom_id:
+            #if from an existing bom ID, then close the window, and refresh parent to show the new data
+            mrp_bom_obj.write(cr, uid, order.mrp_bom_id.id, bom_master, context=context)            
+            return {'type': 'ir.actions.act_window_close'}  
+        else:
+            #Show the created new BOM in list view
+            new_bom_id = mrp_bom_obj.create(cr, uid, bom_master, context=context)
+            return {
+                'domain': "[('id', '=', %s)]"%(new_bom_id,),
+                'name': _('MRP BOM'),
+                'view_type':'form',
+                'view_mode':'tree,form',
+                'res_model': 'mrp.bom',
+                'type':'ir.actions.act_window',
+                'context':context,
+            }   
 
 class mrp_bom(osv.osv):
     _inherit = 'mrp.bom'  
@@ -345,10 +274,5 @@ class mrp_bom(osv.osv):
             bom_obj.write(cr, uid, [clone_bom_id], vals, context=ctx_clone)            
             return clone_bom_id
         else:
-            #if importing need to find direct bom and no bom lines, then system will search the existing bom, and set the direct_bom_id
-            if vals.get('direct_bom_find',False) and not vals.get('bom_lines'):
-                direct_bom_id = self._bom_find(cr, uid, vals['product_id'], None, properties=None)
-                if direct_bom_id:
-                    vals.update({'direct_bom_id':direct_bom_id})
             return super(mrp_bom,self).create(cr, uid, vals, context)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

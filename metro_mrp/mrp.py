@@ -70,7 +70,7 @@ class mrp_bom(osv.osv):
                                                                 string='Work Centers', domain=_domain_bom_routing),
                 #08/21/2014, the direct bom id, will be used in manufacture order, the the action_compute()-->_bom_explode() 
                 #1.user set the bom_lines of this bom, then will use bom_lines to explode the products and work centers
-                #2.if no bom_lines, then check this field 'common_bom_id', if there is a bom setted, then use this bom to do _bom_explode
+                #2.if no bom_lines, then check this field 'direct_bom_id', if there is a bom setted, then use this bom to do _bom_explode
                 #3.if no above 2 fields, and the 'addthis' parameter is true, then return the product line  
                 'direct_bom_id': fields.many2one('mrp.bom','Direct BOM',domain="[('product_id','=',product_id),('bom_id','=',False)]"),
                 }
