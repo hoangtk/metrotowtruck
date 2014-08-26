@@ -578,8 +578,8 @@ class purchase_order(osv.osv):
         if not ready_done:
                 raise osv.except_osv(_('Error!'),
                                      _('The PO only can be done when it is approved, shipped, invoiced and paid completely'))          
-        self.write(cr,uid,ids,{'state':'done'},context)
-        self._update_po_lines(cr,uid,ids,{'state':'done'},context)
+
+        self.wkf_done(cr, uid, ids, context=context)
 
     def button_done_except(self, cr, uid, ids, context=None):
         assert len(ids) == 1, 'This option should only be used for a single order at a time'

@@ -52,6 +52,23 @@ class project_project(osv.osv):
                  'type_ids': _get_default_states,
                  }
     
+    #add the ID return in the name
+    def name_get(self, cr, user, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if not len(ids):
+            return []
+        result = []
+        for data in self.browse(cr, user, ids, context=context):
+            if data.id <= 0:
+                result.append((data.id,''))
+                continue
+            result.append((data.id,'[%s]%s'%(data.id,data.name)))
+                          
+        return result    
+    
     def onchange_project_type(self,cr, uid, ids, project_type, context=None):
         if not project_type:
             return {}
@@ -90,7 +107,22 @@ class project_task(base_stage, osv.osv):
         'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees"),
         'daily_date':fields.function(lambda *a,**k:{}, type='date',string="Daily Task Date",),
     }
-
+    #add the ID return in the name
+    def name_get(self, cr, user, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if not len(ids):
+            return []
+        result = []
+        for data in self.browse(cr, user, ids, context=context):
+            if data.id <= 0:
+                result.append((data.id,''))
+                continue
+            result.append((data.id,'[%s]%s'%(data.id,data.name)))
+                          
+        return result
     '''     
     Replaced below code with code in project_simple_view.xml:
     ===========
@@ -122,14 +154,13 @@ class project_task(base_stage, osv.osv):
 #            resu.pop('project_id')
             
         if context.get('default_project_type') and not resu.get('project_id'):
-            proj_xml_id = ''
-            if context.get('default_project_type') == 'gtd':
-                proj_xml_id = 'project_gtd'
-            if context.get('default_project_type') == 'software':
-                proj_xml_id = 'project_software'
-            if context.get('default_project_type') == 'mfg':
-                proj_xml_id = 'project_mfg'
-            if proj_xml_id != '':
+            default_project_type = context.get('default_project_type')
+            type_xmls = {'simple':'project_simple',
+                         'gtd':'project_gtd',
+                         'software':'project_software',
+                         'mfg':'project_mfg',}
+            proj_xml_id = type_xmls.get(default_project_type)
+            if proj_xml_id:
                 result = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_project', proj_xml_id)
                 resu.update({'project_id':result[1]})
         return resu
