@@ -7,7 +7,8 @@
             <field name="view_type">form</field>
             <field name="view_mode">kanban</field>
             <field name="context">{'default_project_type':'mfg'}</field>
-            <field name="domain">[('project_type','=','mfg'),('state','not in',('cancelled','done'))]</field>
+            <!-- <field name="domain">[('project_type','=','mfg'),('state','not in',('cancelled','done'))]</field> -->
+            <field name="domain">[('project_type','=','mfg')]</field>
         </record>
         <record id="tasks_opening_simple_action" model="ir.actions.act_window">
             <field name="name">Simple Tasks</field>
@@ -15,7 +16,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">kanban</field>
             <field name="context">{'default_project_type':'simple'}</field>
-            <field name="domain">[('project_type','=','simple'),('state','not in',('cancelled','done'))]</field>
+            <field name="domain">[('project_type','=','simple')]</field>
         </record>        
         <record id="tasks_opening_eng_action" model="ir.actions.act_window">
             <field name="name">Engineer Tasks</field>
@@ -23,14 +24,14 @@
             <field name="view_type">form</field>
             <field name="view_mode">kanban</field>
             <field name="context">{'default_project_type':'engineer'}</field>
-            <field name="domain">[('project_type','=','engineer'),('state','not in',('cancelled','done'))]</field>
+            <field name="domain">[('project_type','=','engineer')]</field>
         </record>
         <record id="board_task_form" model="ir.ui.view">
             <field name="name">board.task.form</field>
             <field name="model">board.board</field>
             <field name="arch" type="xml">
                 <form string="Tasks Dashboard" version="7.0">
-                    <board style="1">
+                    <board style="2-1">
                         <column>
                             <action name="%(tasks_opening_mfg_action)d" string="Manufacture Tasks" creatable='true'/>
                             <action name="%(tasks_opening_simple_action)d" string="Simple Tasks"/>

@@ -252,6 +252,19 @@ hr_holiday_calendar()
 class res_users(osv.osv):
     _name = 'res.users'
     _inherit = 'res.users'
+    def _get_emp_image(self, cr, uid, ids, names, args, context=None):
+    	result = dict.fromkeys(ids,{'img_emp':False, 'img_emp_medium':False, 'img_emp_small':False})
+    	#get the images from employee
+    	for user in self.browse(cr, uid, ids, context=context):
+    		if user.employee_ids:
+    			#result[user.id] = tools.image_get_resized_images(user.employee_ids[0].image,medium_name='img_emp_medium',small_name='img_emp_small')
+    			result[user.id] = {'img_emp':user.employee_ids[0].image, 'img_emp_medium':user.employee_ids[0].image_medium, 'img_emp_small':user.employee_ids[0].image_small}
+    	return result
+    _columns = {
+		'img_emp': fields.function(_get_emp_image, string="Image", type="binary", multi="_get_image",),  
+		'img_emp_medium': fields.function(_get_emp_image, string="Medium-sized image", type="binary", multi="_get_image",),  
+		'img_emp_small': fields.function(_get_emp_image, string="Small-sized image", type="binary", multi="_get_image",),  
+	}			  
     def copy(self, cr, uid, id, default=None, context=None):
 		default.update({'employee_ids':[]})
 		return super(res_users,self).copy(cr, uid, id, default, context)

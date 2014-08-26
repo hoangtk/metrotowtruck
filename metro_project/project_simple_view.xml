@@ -17,6 +17,9 @@
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project.view_project"/>
             <field name="arch" type="xml">
+            	<field name="name" position="before">
+            		<field name="id"/>
+            	</field>
             	<field name="name" position="after">
             		<!-- <field name="project_type" invisible="1"/> -->
             		<field name="project_type"/>
@@ -30,8 +33,17 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_tree2"/>
             <field name="arch" type="xml">
+            	<field name="name" position="before">
+            		<field name="id"/>
+            	</field>
             	<field name="project_id" position="after">
             		<field name="project_type"/>
+            		<field name="sequence"/>
+            		<field name="priority"/>
+            		<field name="categ_ids" widget='many2many_tags'/>
+            	</field>
+            	<field name="date_start" position="before">
+            		<field name="date_deadline"/>
             	</field>
             	<field name="planned_hours" position="attributes">
             		<attribute name="string">Planned Hours</attribute>
@@ -109,7 +121,14 @@
             		<field name="date_start" widget="date"/>
             		<field name="date_end" widget="date"/>
             		<field name="create_date" widget="date"/>
-            	</field>            	
+            	</field>          
+            	<!-- move sequence,priority to top -->
+            	<field name="sequence" position="replace"/>
+            	<field name="priority" position="replace"/>
+            	<field name="planned_hours" position="after">
+            		<field name="sequence"/>
+            		<field name="priority"/>
+            	</field>           	  	
             </field>
         </record>    
 <!-- the original projects menu only display the simple projects -->
@@ -138,6 +157,7 @@
             <field name="name">Tasks</field>
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,form,calendar,gantt,graph</field>
+            <field name="context">{'default_project_type':'simple'}</field>
         </record>         
 <!--         <record id="project.open_view_task_list_kanban" model="ir.actions.act_window.view">
             <field name="sequence" eval="10"/>
@@ -150,7 +170,7 @@
         <field name="res_model">project.task</field>
         <field name="search_view_id" ref="project_gtd.view_task_gtd_search"/>
         <!-- <field name="context">{'set_editable':True,'set_visible':True,'gtd':True,'user_invisible':True, "search_default_open": 1}</field> -->
-        <field name="context">{'user_invisible':True, "search_default_open": 1}</field>
+        <field name="context">{'user_invisible':True, "search_default_open": 1, 'default_project_type':'simple'}</field>
         <field name="domain">[('user_id','=',uid)]</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form,calendar,gantt,graph</field>
@@ -185,6 +205,8 @@
         	<field name="project_id" position="after">
         		<field name="project_type"/>
         		<field name="stage_id" domain="[]"/>
+        		<field name="priority"/>
+        		<field name="categ_ids"/>
         		<field name="daily_date"
         			filter_domain="['|',('date_start','=',False),('date_start','&lt;=', self + ' 23:59:59'),'|',('date_end','=',False),('date_end','&gt;=', self + ' 00:00:00')]"/>
         		<filter icon="terp-go-today" string="Today's Tasks" 

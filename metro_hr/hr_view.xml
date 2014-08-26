@@ -129,5 +129,39 @@
         <menuitem id="menu_metro_holiday_calendar_main_action"  name="Calendars" parent="metro.mttl_metro" sequence="20" />
         <menuitem id="menu_metro_holiday_calendar_action" parent="menu_metro_holiday_calendar_main_action" action="metro_holiday_calendar_action" sequence="1"/>   
         <menuitem id="menu_metro_hr_holiday_calendar_action" parent="hr.menu_hr_main" action="metro_holiday_calendar_action"/>
+        
+<!-- Add employee images to user -->
+		<record id="view_users_form_ext" model="ir.ui.view">
+			<field name="name">view_users_form_ext</field>
+			<field name="model">res.users</field>
+			<field name="inherit_id" ref="base.view_users_form"/>
+			<field name="arch" type="xml">
+				<data>
+					<!-- replace the image with emp image -->
+					<field name="image" position="replace">
+						<field name="img_emp" widget='image' class="oe_avatar oe_left" options='{"preview_image": "img_emp_medium"}' readonly="1"/>	
+					</field>
+					<!-- show employee list -->
+					<page string="Access Rights" position="after">
+						<page string="Employees">
+							<field name="employee_ids" readonly="1"/>
+						</page>
+					</page>
+				</data>
+			</field>
+		</record>
+		<record id="view_users_tree_ext" model="ir.ui.view">
+			<field name="name">view_users_tree_ext</field>
+			<field name="model">res.users</field>
+			<field name="inherit_id" ref="base.view_users_tree"/>
+			<field name="arch" type="xml">
+				<data>
+					<!-- replace the image with emp image -->
+					<field name="name" position="before">
+						<field name="img_emp_medium" widget='image'/>	
+					</field>
+				</data>
+			</field>
+		</record>		
 	</data>
 </openerp>	

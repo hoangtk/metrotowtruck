@@ -40,7 +40,7 @@
             		<field name="workorder_id" groups="mrp.group_mrp_user"/>
             		<field name="workcenter_id" groups="mrp.group_mrp_user"/>
             		<field name="production_id" groups="mrp.group_mrp_user"/>
-            		<field name="mfg_ids" groups="mrp.group_mrp_user"/>
+            		<field name="mfg_ids" widget="many2many_tags" groups="mrp.group_mrp_user"/>
             		<field name="product" groups="mrp.group_mrp_user"/>
             	</field>
             </field>
