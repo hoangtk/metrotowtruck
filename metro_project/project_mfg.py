@@ -33,16 +33,16 @@ class project_task(base_stage, osv.osv):
         'workcenter_id': fields.related('workorder_id','workcenter_id', type='many2one', relation="mrp.workcenter", string='Work Center', readonly=True),
         'production_id': fields.related('workorder_id','production_id', type='many2one', relation="mrp.production", string='Manufacture Order', readonly=True),
         'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
-        'product':fields.related('production_id','product',type='many2one',relation='product.product',string='Product', readonly=True),
+        'product':fields.related('production_id','product_id',type='many2one',relation='product.product',string='Product', readonly=True),
         'dept_id':fields.many2one('hr.department',string='Team',),
-        'dept_mgr_id':fields.many2one('hr.employee',string='Team Manager')
+        'dept_mgr_id':fields.many2one('hr.employee',string='Team Leader')
     }
     def onchange_dept_id(self,cr,uid,ids,dept_id,context=None):
         resu = {}
         if dept_id:
             dept = self.pool.get('hr.department').read(cr, uid, dept_id, ['manager_id'],context=context)
             manager_id = dept['manager_id']
-            emp_ids = self.pool.get('hr.employee').search(cr, uid, ['department_id','=',dept_id],context=context)
+            emp_ids = self.pool.get('hr.employee').search(cr, uid, [('department_id','=',dept_id)],context=context)
             value={'dept_mgr_id':manager_id, 'emp_ids':emp_ids}
             resu['value'] = value
         return resu

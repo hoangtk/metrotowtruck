@@ -10,12 +10,15 @@
         <report auto="False" id="report_project_task_print" model="project.task" header="False"
                 name="project.task.print" rml="metro_project/report/project_task_print.rml"
                 usage="default" string="Task"/>    
-<!-- task by assignee -->                
+<!-- task by group -->                
         <report auto="False" id="report_task_group_by_assignee" model="task.group" header="False"
                 name="task.group.by_assignee" rml="metro_project/report/task_group_by_assignee.rml"
                 usage="default" string="Tasks by Assignee"/>
         <report auto="False" id="report_task_group_by_employee" model="task.group" header="False"
                 name="task.group.by_employee" rml="metro_project/report/task_group_by_employee.rml"
-                usage="default" string="Tasks by Employee"/>                                                            
+                usage="default" string="Tasks by Employee"/>
+        <report auto="False" id="report_task_group_by_team" model="task.group" header="False"
+                name="task.group.by_team" rml="metro_project/report/task_group_by_team.rml"
+                usage="default" string="Tasks by Team"/>                                                              
     </data>
 </openerp>

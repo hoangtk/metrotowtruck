@@ -36,7 +36,7 @@ class task_print(osv.osv_memory):
     _name = "task.print"
     _columns = {
         'task_day': fields.date('Day', ),
-        'print_type': fields.selection([('by_assignee','Task List By Assignee'),('by_employee','Task List By Employee')],'Type', required=True, select=False),
+        'print_type': fields.selection([('by_assignee','Task List By Assignee'),('by_employee','Task List By Employee'),('by_team','Task List By Team')],'Type', required=True, select=False),
     }
     _defaults = {'print_type':'by_assignee'}
     
@@ -51,6 +51,12 @@ class task_print(osv.osv_memory):
                 resu += (resu != '' and ',' or '') + emp.name
         return resu
     
+    def _get_team_name(self, cr, uid, task, context=None):
+        dept_name = 'No Team'
+        if task.dept_id:
+            dept_name = task.dept_id.name    
+        return dept_name
+    
     def do_print(self, cr, uid, ids, context=None):
         if context is None:
             context = {}    
@@ -62,6 +68,8 @@ class task_print(osv.osv_memory):
             group_name_func = self._get_assignee_name
         elif data.print_type == 'by_employee':
             group_name_func = self._get_emps_name
+        elif data.print_type == 'by_team':
+            group_name_func = self._get_team_name
         #get the tasks by day
         task_day = ''
         if data.task_day:
