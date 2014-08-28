@@ -213,8 +213,20 @@
             <field name="model">mrp.production</field>
             <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
             <field name="arch" type="xml">
-                  <field name="product_id" position="after">
+                  <field name="product_id" position="before">
                    		<field name="bom_id"/>
+                   		<field name="mfg_ids" widget="many2many_tags"/>
+                  </field>
+			</field>
+        </record>      
+		<record id="mrp_production_filter_ext" model="ir.ui.view">
+            <field name="name">mrp_production_filter_ext</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.view_mrp_production_filter"/>
+            <field name="arch" type="xml">
+                  <field name="product_id" position="before">
+                   		<field name="bom_id"/>
+                   		<field name="mfg_ids"/>
                   </field>
 			</field>
         </record>
@@ -261,6 +273,10 @@
                     <xpath expr="//field[@name='move_lines2']//field[@name='state']" position='after'>
                     	<field name="mr_sale_prod_id" string='MFG ID'/>
                     </xpath>
+				<!-- remove the <form/> data of workcenter_lines -->
+                    <field name="workcenter_lines" position="attributes">
+                    	<attribute name="context">{'form_view_ref':'metro_operations.mrp_production_workcenter_form_view_inherit'}</attribute>
+                    </field> 
                     <!-- add the work order extended fields -->
                     <xpath expr="//field[@name='workcenter_lines']/form//field[@name='hour']" position="after">
 		        		<field name="bom_id"/>
@@ -269,17 +285,14 @@
                     	<field name="code"/>
 		        		<field name="wo_pre_ids" widget="many2many_tags"/>
 		        		<field name="wo_next_ids" widget="many2many_tags"/>
-                    </xpath>
+                    </xpath>      
+                                      
                     <xpath expr="//field[@name='workcenter_lines']/tree/field[@name='name']" position="before">
 		        		<field name="bom_id"/>
 		        		<field name="routing_id"/>
 		        		<field name="routing_operation_id"/>
                     	<field name="code"/>
                     </xpath>
-                    <!-- <xpath expr="//field[@name='workcenter_lines']/tree/field[@name='hour']" position="after">
-		        		<field name="wo_pre_ids" widget="many2many_tags"/>
-		        		<field name="wo_next_ids" widget="many2many_tags"/>
-                    </xpath> -->
                     <!-- show the move's state -->
                     <xpath expr="//field[@name='move_lines']/tree/field[@name='state']" position='attributes'>
                     	<attribute name="invisible">0</attribute>
@@ -322,6 +335,7 @@
 	            	            
             	<!--  add the BOM/Routing/Operation info to manufacture order's work center line -->
 	        	<field name="production_state" position="after">
+	        		<field name="mfg_ids" widget="many2many_tags"/>
 	        		<field name="bom_id"/>
 	        		<field name="routing_id"/>
 	        		<field name="routing_operation_id"/>
@@ -375,6 +389,9 @@
 	        	<field name="name" position="before">
 	        		<field name="code"/>
 	        	</field>
+	        	<field name="production_id" position="after">
+	        		<field name="mfg_ids" widget="many2many_tags"/>
+	        	</field>
 	        	<field name="workcenter_id" position="after">
 	        		<field name="bom_id"/>
 	        		<field name="routing_id"/>
@@ -386,6 +403,17 @@
 	        	</field> -->
 	        </field>
 	    </record>
+	    <record model="ir.ui.view" id="view_mrp_production_workcenter_form_view_filter_ext">
+	        <field name="name">view_mrp_production_workcenter_form_view_filter</field>
+	        <field name="model">mrp.production.workcenter.line</field>
+	        <field name="inherit_id" ref="mrp_operations.view_mrp_production_workcenter_form_view_filter"/>
+	        <field name="arch" type="xml">
+                <field name="production_id" position="after">
+                	<field name="mfg_ids"/>
+                </field>
+	        </field>
+	    </record>	    
+	    
 	<!-- work order: add the ready status -->
 		<record id="metro_mrp_production_workcenter_wo_flow_form_view" model="ir.ui.view">
             <field name="name">metro_mrp_production_workcenter_wo_flow_form_view</field>

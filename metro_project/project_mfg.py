@@ -46,7 +46,11 @@ class project_task(base_stage, osv.osv):
             value={'dept_mgr_id':manager_id, 'emp_ids':emp_ids}
             resu['value'] = value
         return resu
-
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(project_task,self).default_get(cr, uid, fields_list, context=context)
+        if context.get('force_workorder'):
+            resu.update({'workorder_id': context.get('force_workorder')})
+        return resu
     
 class mrp_production_workcenter_line(osv.osv):
     _inherit = 'mrp.production.workcenter.line'

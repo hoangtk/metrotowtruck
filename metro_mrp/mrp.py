@@ -807,7 +807,8 @@ class mrp_production_workcenter_line(osv.osv):
                                        "* When the user cancels the work order it will be set in 'Canceled' status.\n" \
                                        "* When order is completely processed that time it is set in 'Finished' status."),
         #the work order related components from bom, can generated from mrp_bom_workcenter_operation when executing action_compute()
-        'comp_lines': fields.one2many('mrp.wo.comp', 'wo_id', string='Components'),  
+        'comp_lines': fields.one2many('mrp.wo.comp', 'wo_id', string='Components'),
+        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
     }
     _defaults = {'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line') or '/',}
     #add the code return in the name
