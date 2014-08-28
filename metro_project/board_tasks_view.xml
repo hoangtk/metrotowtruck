@@ -17,7 +17,16 @@
             <field name="view_mode">kanban</field>
             <field name="context">{'default_project_type':'simple'}</field>
             <field name="domain">[('project_type','=','simple')]</field>
-        </record>        
+        </record> 
+        <record id="tasks_opening_erp_action" model="ir.actions.act_window">
+            <field name="name">ERP Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban</field>
+            <field name="context">{'default_project_type':'software'}</field>
+            <field name="domain">[('project_type','=','software'),('state','not in',('cancelled','done'))]</field>
+            <field name="domain">[('project_type','=','software')]</field>
+        </record>               
         <record id="tasks_opening_eng_action" model="ir.actions.act_window">
             <field name="name">Engineer Tasks</field>
             <field name="res_model">project.task</field>
@@ -35,6 +44,7 @@
                         <column>
                             <action name="%(tasks_opening_mfg_action)d" string="Manufacture Tasks" creatable='true'/>
                             <action name="%(tasks_opening_simple_action)d" string="Simple Tasks"/>
+                            <action name="%(tasks_opening_simple_action)d" string="ERP Tasks"/>
                             <action name="%(tasks_opening_eng_action)d" string="Engineer Tasks"/>
                         </column>
                     </board>
