@@ -5,7 +5,7 @@ from openerp import netsvc
 #the ID for the purchase requisition and the material request
 class sale_product(osv.osv):
     _name = "sale.product"
-    _description = "Sale Product"
+    _description = "MFG ID"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     
     STATES_COL = {'draft':[('readonly',False)]}
