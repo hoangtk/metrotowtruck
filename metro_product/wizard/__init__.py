@@ -21,5 +21,6 @@
 
 import product_set_printflag
 import product_batch_query
+import products_approve
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
