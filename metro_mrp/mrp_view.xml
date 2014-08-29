@@ -411,6 +411,9 @@
                 <field name="production_id" position="after">
                 	<field name="mfg_ids"/>
                 </field>
+                <field name="name" position="replace">
+                	<field name="name" string="Work Orders" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+                </field>
 	        </field>
 	    </record>	    
 	    

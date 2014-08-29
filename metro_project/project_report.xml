@@ -19,6 +19,7 @@
                 usage="default" string="Tasks by Employee"/>
         <report auto="False" id="report_task_group_by_team" model="task.group" header="False"
                 name="task.group.by_team" rml="metro_project/report/task_group_by_team.rml"
-                usage="default" string="Tasks by Team"/>                                                              
+                usage="default" string="Tasks by Team"/>      
+                                                                      
     </data>
 </openerp>
