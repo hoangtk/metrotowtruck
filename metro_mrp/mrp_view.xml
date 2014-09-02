@@ -216,6 +216,7 @@
                   <field name="product_id" position="before">
                    		<field name="bom_id"/>
                    		<field name="mfg_ids" widget="many2many_tags"/>
+                   		<field name="priority"/>
                   </field>
 			</field>
         </record>      
@@ -252,7 +253,7 @@
 	                <xpath expr="//group[@groups='stock.group_locations']" position="replace">
 	                </xpath>
                     <field name="origin" position="after">
-                    	<field name="mfg_ids" domain="[('state','in',('confirmed','engineer'))]" widget="many2many_tags" required="1"/>
+                    	<field name="mfg_ids" domain="[('state','in',('confirmed','engineer','manufacture'))]" widget="many2many_tags" required="1"/>
                         <field name="location_src_id" domain="[('usage','=','internal')]" on_change="location_id_change(location_src_id,location_dest_id)"/>
                         <field name="location_dest_id" domain="[('usage','=','internal')]"/>
                     </field>
@@ -283,6 +284,7 @@
 		        		<field name="routing_id"/>
 		        		<field name="routing_operation_id"/>
                     	<field name="code"/>
+	        			<field name="priority"/>
 		        		<field name="wo_pre_ids" widget="many2many_tags"/>
 		        		<field name="wo_next_ids" widget="many2many_tags"/>
                     </xpath>      
@@ -292,6 +294,7 @@
 		        		<field name="routing_id"/>
 		        		<field name="routing_operation_id"/>
                     	<field name="code"/>
+	        			<field name="priority"/>
                     </xpath>
                     <!-- show the move's state -->
                     <xpath expr="//field[@name='move_lines']/tree/field[@name='state']" position='attributes'>
@@ -335,6 +338,7 @@
 	            	            
             	<!--  add the BOM/Routing/Operation info to manufacture order's work center line -->
 	        	<field name="production_state" position="after">
+	        		<field name="priority"/>
 	        		<field name="mfg_ids" widget="many2many_tags"/>
 	        		<field name="bom_id"/>
 	        		<field name="routing_id"/>
@@ -389,10 +393,11 @@
 	        	<field name="name" position="before">
 	        		<field name="code"/>
 	        	</field>
-	        	<field name="production_id" position="after">
+	        	<field name="production_id" position="before">
 	        		<field name="mfg_ids" widget="many2many_tags"/>
 	        	</field>
 	        	<field name="workcenter_id" position="after">
+	        		<field name="priority"/>
 	        		<field name="bom_id"/>
 	        		<field name="routing_id"/>
 	        		<field name="routing_operation_id"/>

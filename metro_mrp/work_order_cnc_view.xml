@@ -20,7 +20,9 @@
     				<group>
     					<group>
     						<field name="can_change_ids" invisible="1"/>
-		    				<field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/>
+		    				<!-- <field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/> -->
+		    				<field name="sale_product_ids" widget="many2many_tags" required="1"/>
+		    				<field name="mfg_task_id" context="{'tree_view_ref':'metro_project.view_mfg_task_tree'}"/>
 		    				<field name="create_uid"/>
 		    				<field name="create_date"/>
 		    				<field name="id"/>

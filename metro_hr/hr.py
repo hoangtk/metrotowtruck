@@ -29,6 +29,15 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+class hr_department(osv.osv):
+	_description = "Department"
+	_inherit = 'hr.department'
+	_order = 'sequence,id'
+	_columns = {
+		#with the sequence field, then on the kanban view by department, user can change the sequence of departments.
+        'sequence': fields.integer('Sequence'),
+    }
+    
 class hr_employee(osv.osv):
 	_inherit = "hr.employee"
 

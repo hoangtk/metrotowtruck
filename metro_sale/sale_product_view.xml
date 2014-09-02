@@ -8,6 +8,7 @@
             <tree string="MFG IDs">
                 <field name="name"/>
                 <field name="source"/>
+                <field name="priority"/>
 			    <field name="date_planned"/>	
                 <field name="mto_design_id"/>
                 <field name="product_id"/>
@@ -37,6 +38,7 @@
                     <button name="create_project" string="Create Project" type="object"
                     	attrs="{'invisible':['|',('has_project','=',True),('state','!=','manufacture')]}"/>
                     <button name="button_manufacture" states="confirmed" string="Create Manfacture Order"/>
+                    <button name="action_done" states="confirmed,engineer,manufacture" type="object" string="Done"/>
                     <button name="action_cancel_draft" states="cancelled" string="Set to Draft" type="object"/>
                     <!-- the workflow activity 'act_manufacture' is a subflow, can not be trigger by the signal 'button_cancel, so have to call python code direct-->
                     <button name="wkf_cancel" states="confirmed,engineer,manufacture" string="Cancel" type="object"/>
@@ -54,6 +56,7 @@
 	            	<group>
 	            		<group>
 			                <field name="source"/>
+                			<field name="priority"/>
 			                <field name="date_planned"/>			                
 			                <field name="mto_design_id"/>
 			                <field name="product_id" on_change="product_id_change(product_id)" 

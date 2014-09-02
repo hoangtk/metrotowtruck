@@ -49,15 +49,47 @@ class project_task(base_stage, osv.osv):
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(project_task,self).default_get(cr, uid, fields_list, context=context)
         if context.get('force_workorder'):
-            resu.update({'workorder_id': context.get('force_workorder')})
+            wo_id = context.get('force_workorder')
+            priority = self.pool.get('mrp.production.workcenter.line').read(cr, uid, wo_id, ['priority'],context=context)['priority']
+            resu.update({'workorder_id': wo_id, 'priority':priority})
         return resu
-    
+    def on_change_wo(self,cr,uid,ids,wo_id,context=None):
+        resu = {}
+        if wo_id:
+            wo = self.pool.get('mrp.production.workcenter.line').read(cr, uid, wo_id, ['priority'],context=context)
+            value={'priority':wo['priority']}
+            resu['value'] = value
+        return resu
+        
 class mrp_production_workcenter_line(osv.osv):
     _inherit = 'mrp.production.workcenter.line'
 
     _columns = {
         'task_ids': fields.one2many('project.task', 'workorder_id',string='Working Tasks'),
     }
+    #add the 'update=True, mini=True' inhreited from mrp_operations.mrp_production_workcenter_line
+    def write(self, cr, uid, ids, vals, context=None, update=True):
+        resu = super(mrp_production_workcenter_line, self).write(cr, uid, ids, vals, context=context,update=update)        
+        if 'priority' in vals.keys():
+            self.set_priority(cr,uid,ids,vals['priority'],context)
+        return resu
+    
+    def set_priority(self,cr,uid,ids,priority,context=None):
+        if context is None:
+            context = {}
+        #set all of the sub manufacture orders, work orders, MFG tasks priority
+        set_ids = []
+        task_ids = []
+        for wo in self.browse(cr,uid,ids,context=context):
+            if wo.state in ('cancel','done'):
+                continue
+            set_ids.append(wo.id)
+            task_ids += [task.id for task in wo.task_ids if task.state not in ('cancelled','done')]
+        if set_ids:
+            #update work order
+             cr.execute("update mrp_production_workcenter_line set priority=%s where id  = ANY(%s)", (priority, (set_ids,)))
+             #update manufacture order
+             self.pool.get('project.task').write(cr, uid, task_ids, {'priority':priority}, context=context)
 
     def action_close(self, cr, uid, ids, context=None):
         #TODO generate the working hours time sheet 

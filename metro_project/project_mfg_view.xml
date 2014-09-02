@@ -17,7 +17,8 @@
             		<field name="id" invisible="1"/>
             		<field name="workorder_id"
             			invisible="context.get('force_workorder')"
-            			attrs="{'invisible':[('project_type','!=','mfg')],'required':[('project_type','=','mfg')]}"/>
+            			attrs="{'invisible':[('project_type','!=','mfg')],'required':[('project_type','=','mfg')]}"
+            			on_change="on_change_wo(workorder_id,context)"/>
             		<field name="workcenter_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             		<field name="production_id" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
             		<field name="mfg_ids" widget="many2many_tags" attrs="{'invisible':[('project_type','!=','mfg')]}"/>
@@ -104,7 +105,7 @@
             <field name="model">project.task</field>
             <field name="arch" type="xml">
                 <kanban default_group_by="dept_id" >
-                    <field name="color"/>
+                    <field name="stage_color"/>
                     <field name="priority"/>
                     <field name="stage_id"/>
                     <field name="user_id"/>
@@ -124,7 +125,7 @@
                     <field name="dept_mgr_id"/>
                     <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.stage_color.raw_value)} oe_kanban_card oe_kanban_global_click">
                             <div class="oe_dropdown_toggle oe_dropdown_kanban" groups="base.group_user">
                                 <span class="oe_e">í</span>
                                 <ul class="oe_dropdown_menu">
@@ -139,13 +140,13 @@
                                         <li><a name="do_open" states="draft" string="Validate planned time" type="object" class="oe_kanban_button oe_kanban_button_active">!</a></li>
                                       </ul>
                                     </li>
-                                    <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
+                                    <li><ul class="oe_kanban_colorpicker" data-field="stage_color"/></li>
                                 </ul>
                             </div>
 
                             <div class="oe_kanban_content">
                             	<div><b><field name="mfg_ids"/></b></div>
-                                <div><b><field name="name"/></b></div>
+                                <div><b><field name="name"/>[<field name="priority"/>]</b></div>
                                 <div>
                                     <field name="product"/><br/>
                                     <field name="stage_id"/><br/>
@@ -221,10 +222,10 @@
         </record>       
         <menuitem action="action_view_task_mfg_my" id="menu_action_view_task_mfg_my" parent="mrp.menu_mrp_manufacturing" sequence="11" groups="mrp.group_mrp_user"/>
 <!-- Add manufacture task list to work order page -->
-		<record id="metro_mrp_production_workcenter_form_view" model="ir.ui.view">
-            <field name="name">metro_mrp_production_workcenter_form_view</field>
+		<record id="mrp_production_workcenter_form_view_ext" model="ir.ui.view">
+            <field name="name">mrp_production_workcenter_form_view_ext</field>
             <field name="model">mrp.production.workcenter.line</field>
-            <field name="inherit_id" ref="mrp_operations.mrp_production_workcenter_form_view_inherit"/>
+            <field name="inherit_id" ref="metro_mrp.metro_mrp_production_workcenter_form_view"/>
             <field name="arch" type="xml">   
 	        	<page string="Information" position="after">
 	        		<page string="Tasks">
@@ -233,8 +234,6 @@
 	        		</page>
 	        	</page>
             </field>
-         </record>     
-         
-        
+         </record>
     </data>
 </openerp>

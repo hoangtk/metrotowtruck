@@ -104,8 +104,8 @@ class project_task(base_stage, osv.osv):
         'multi_images': fields.text("Multi Images"),
         'private': fields.boolean("Private"),     
         'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees"),
-        'emp_ids': fields.many2many("hr.employee","task_emp","task_id","emp_id",string="Employees"),
         'daily_date':fields.function(lambda *a,**k:{}, type='date',string="Daily Task Date",),
+        'stage_color':fields.related('stage_id','color',type='integer'),
     }
     #add the ID return in the name
     def name_get(self, cr, user, ids, context=None):
@@ -245,8 +245,10 @@ class project_task_type(osv.osv):
     _inherit = 'project.task.type'
     _columns = {
         'project_type': fields.selection(_PROJ_TYPES+[('all','All')],string='Type',),
+        'color': fields.integer('Color Index'),
     }      
-    _defaults={'project_type':'simple'}
+    _defaults={'project_type':'simple',
+                    'color':0}
 #    def name_get(self, cr, uid, ids, context=None):
 #        if not ids:
 #            return []
@@ -260,3 +262,6 @@ class project_task_type(osv.osv):
 #                name +=  '[' + record['project_type'] + ']'
 #            res.append((record['id'], name))
 #        return res    
+    def write(self, cr, user, ids, vals, context=None):
+        resu = super(project_task_type,self).write(cr,user,ids,vals,context=context)
+        return resu

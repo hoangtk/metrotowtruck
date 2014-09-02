@@ -206,7 +206,7 @@
         <field name="view_mode">tree,form,calendar,gantt,graph</field>
     </record>    
             
-<!-- Add project_type to project.task.type tree view -->
+<!-- Add project_type to project.task.type view -->
     <record id="task_type_tree_extend" model="ir.ui.view">
         <field name="name">task_type_tree_extend</field>
         <field name="model">project.task.type</field>
@@ -217,15 +217,27 @@
         	</xpath>
         	<field name="name" position="before">
         		<field name="sequence"/>
+        		<field name="color"/>
         	</field>
         	<field name="state" position="after">
         		<field name="project_type"/>
         		<field name="case_default"/>
         		<field name="fold"/>
         		<field name="description"/>
-        	</field>
+        	</field>   	
         </field>
     </record>       
+    <record id="task_type_edit_extend" model="ir.ui.view">
+        <field name="name">task_type_edit_extend</field>
+        <field name="model">project.task.type</field>
+        <field name="inherit_id" ref="project.task_type_edit"/>
+        <field name="arch" type="xml">
+        	<field name="state" position="after">
+        		<field name="project_type"/>
+        		<field name="color"/>
+        	</field> 	
+        </field>
+    </record>     
 <!-- improve the task searching filters -->
     <record id="view_task_search_form_extend" model="ir.ui.view">
         <field name="name">"view_task_search_form_extend"</field>

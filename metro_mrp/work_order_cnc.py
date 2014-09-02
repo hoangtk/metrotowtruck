@@ -26,7 +26,8 @@ class work_order_cnc(osv.osv):
     _columns = {
         'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'note': fields.text('Description', required=False),
-        'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',string="MFG IDs",readonly=True, states={'draft':[('readonly',False)]}),
+        'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',domain=[('state','in',('confirmed','engineer','manufacture'))],
+                                             string="MFG IDs",readonly=True, states={'draft':[('readonly',False)]}),
         'wo_cnc_lines': fields.one2many('work.order.cnc.line','order_id','CNC Work Order Lines',readonly=True, states={'draft':[('readonly',False)]}),
         'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True),
@@ -35,6 +36,7 @@ class work_order_cnc(osv.osv):
         'company_id': fields.many2one('res.company', 'Company', readonly=True),     
         'product_id': fields.related('wo_cnc_lines','product_id', type='many2one', relation='product.product', string='Product'),
         'can_change_ids' : fields.function(_get_done_info, type='boolean', string='Can Change IDs', multi="done_info"),
+        'mfg_task_id': fields.many2one('project.task', string='Manufacture Task',domain=[('project_type','=','mfg'),('state','not in',('cancelled','done'))],readonly=True, states={'draft':[('readonly',False)]}),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
@@ -42,6 +44,7 @@ class work_order_cnc(osv.osv):
         'can_change_ids': True,
     }
     _order = 'id desc'
+    
     def _set_state(self,cr,uid,ids,state,context=None):
         self.write(cr,uid,ids,{'state':state},context=context)
         line_ids = []
@@ -57,7 +60,22 @@ class work_order_cnc(osv.osv):
                 if line.state == 'done':
                     raise osv.except_osv(_('Invalid Action!'), _('Action was blocked, there are done work order lines!'))
         return True
+    
     def action_confirm(self, cr, uid, ids, context=None):
+        #CNC MFG task required parameter
+        cnc_task_required = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp.cnc.task.reuqired', '0', context=context)
+        cnc_task_required = cnc_task_required == '1' and True or False
+        for cnc_wo in self.browse(cr, uid, ids, context=context):
+            #must have cnc lines
+            if not cnc_wo.wo_cnc_lines:
+                raise osv.except_osv(_('Error!'), _('Please add work order lines for CNC work order [%s]%s')%(cnc_wo.id, cnc_wo.name))
+            #task required  checking
+            if cnc_task_required and not cnc_wo.mfg_task_id:
+                    raise osv.except_osv(_('Error!'), _('Manufacture task is required for CNC work order [%s]%s')%(cnc_wo.id, cnc_wo.name))
+            #Task and MFG ID matching
+            if cnc_wo.mfg_task_id and not self.task_id_check(cr, uid, cnc_wo.mfg_task_id.id, [mfg_id.id for mfg_id in cnc_wo.sale_product_ids], context):
+                raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
+        #set state to done
         self._set_state(cr, uid, ids, 'confirmed',context)
         return True
         
@@ -113,8 +131,44 @@ class work_order_cnc(osv.osv):
         old_data = self.read(cr,uid,id,['name'],context=context)
         default.update({
             'name': '%s (copy)'%old_data['name'],
+            'mfg_task_id': None,
         })
         return super(work_order_cnc, self).copy(cr, uid, id, default, context)    
+    def task_id_check(self, cr, uid, task_id, mfg_ids, context=None):
+        task_mfg_ids = self.pool.get('project.task').read(cr,uid,task_id,['mfg_ids'])['mfg_ids']
+        if not task_mfg_ids or not mfg_ids:
+            return False
+        #every task's MFG ID must in the CNC WO's MFG ID list
+        for task_mfg_id in task_mfg_ids:
+            if task_mfg_id not in mfg_ids:
+                return False
+        #every CNC WO's MFG ID must in the task's MFG ID list
+        for mfg_id in mfg_ids:
+            if mfg_id not in task_mfg_ids:
+                return False
+        return True
+    def write(self, cr, uid, ids, vals, context=None):
+        if not context:
+            context = {}
+        if vals.get('mfg_task_id',False):
+            #manufacture tasks must belongs to the CNC work order's MFG IDs's tasks
+            sale_product_ids = []
+            if 'sale_product_ids' in vals:
+                sale_product_ids = vals['sale_product_ids'][0][2]
+                if not self.task_id_check(cr, uid, vals['mfg_task_id'], sale_product_ids, context):
+                    raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
+            else:
+                for wo in self.read(cr, uid, ids, context=context):
+                    if not self.task_id_check(cr, uid, vals['mfg_task_id'], wo['sale_product_ids'], context):
+                        raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
+        
+        return super(work_order_cnc, self).write(cr, uid, ids, vals, context=context)  
+    def create(self, cr, uid, vals, context=None):
+        #manufacture tasks must belongs to the CNC work order's MFG IDs's tasks
+        if vals.get('mfg_task_id',False) and not self.task_id_check(cr, uid, vals['mfg_task_id'], vals['sale_product_ids'][2], context):
+                raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
+        return super(work_order_cnc, self).create(cr, uid, vals, context=context)
+    
 class work_order_cnc_line(osv.osv):
     _name = "work.order.cnc.line"
     _description = "CNC Work Order Lines"

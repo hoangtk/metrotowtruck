@@ -52,6 +52,9 @@
     ],
     'test': [],
     'demo': [],
+    'css': [
+        'static/src/css/project.css'
+    ],
     'installable': True,
     'auto_install': False,
     'application': True,
