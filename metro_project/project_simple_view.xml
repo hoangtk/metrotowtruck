@@ -188,13 +188,13 @@
                 	<attribute name="attrs">{'readonly':[('state','in',['done', 'cancelled'])]}</attribute>
                 </field> 
                 <field name="work_ids" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','in',['done', 'cancelled'])]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','!=','open')]}</attribute>
                 </field> 
                 <field name="parent_ids" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','in',['done', 'cancelled'])]}</attribute>
                 </field> 
                 <field name="child_ids" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','in',['done', 'cancelled'])]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','!=','open')]}</attribute>
                 </field> 
                 <field name="priority" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','in',['done', 'cancelled'])]}</attribute>
