@@ -238,9 +238,9 @@ class project_task(base_stage, osv.osv):
         'stage_id': _read_group_stage_ids,
         'user_id': project_super.task._read_group_user_id,
     }     
-    _defaults = {
-        'date_start': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')         
-        }
+#    _defaults = {
+#        'date_start': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')         
+#        }
 class project_task_type(osv.osv):
     _inherit = 'project.task.type'
     _columns = {

@@ -35,7 +35,8 @@ class project_task(base_stage, osv.osv):
         'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
         'product':fields.related('production_id','product_id',type='many2one',relation='product.product',string='Product', readonly=True),
         'dept_id':fields.many2one('hr.department',string='Team',),
-        'dept_mgr_id':fields.many2one('hr.employee',string='Team Leader')
+        'dept_mgr_id':fields.many2one('hr.employee',string='Team Leader'),
+        'multi_mfg_ids_search':fields.function(lambda *a,**k:{}, type='char',string="Multi MFG IDs",),
     }
     def onchange_dept_id(self,cr,uid,ids,dept_id,context=None):
         resu = {}
@@ -60,7 +61,36 @@ class project_task(base_stage, osv.osv):
             value={'priority':wo['priority']}
             resu['value'] = value
         return resu
-        
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        for arg in args:
+            #add the multi part# query
+            if arg[0] == 'multi_mfg_ids_search':
+                mfg_ids = []
+                for mfg_id in arg[2].split(','):
+                    mfg_ids.append(mfg_id.strip())
+                if mfg_ids:
+                    ids = self.pool.get('sale.product').search(cr, user, [('name','in',mfg_ids)],context=context)
+                    if ids:
+                        idx = args.index(arg)
+                        args.remove(arg)
+                        args.insert(idx, ['mfg_ids','in',ids])
+                break
+                            
+        #get the search result        
+        ids = super(project_task,self).search(cr, user, args, offset, limit, order, context, count)
+
+        return ids    
+
+#class sale_product(osv.osv):
+#    _inherit = 'sale.product'
+#    def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+#        if operator == 'in' and isinstance(name, type(u'aaa')):
+#                mfg_ids = []
+#                for mfg_id in name.split(','):
+#                    mfg_ids.append(mfg_id.strip())
+#                name = mfg_ids
+#        return super(sale_product,self).name_search( cr, user, name, args, operator, context, limit)
+            
 class mrp_production_workcenter_line(osv.osv):
     _inherit = 'mrp.production.workcenter.line'
 

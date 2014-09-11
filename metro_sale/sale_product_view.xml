@@ -60,8 +60,7 @@
 			                <field name="date_planned"/>			                
 			                <field name="mto_design_id"/>
 			                <field name="product_id" on_change="product_id_change(product_id)" 
-                    			domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]" 
-                    			class="oe_inline"/>
+                    			domain="[('bom_ids','!=',False),('bom_ids.bom_id','=',False),('supply_method','=','produce'),('type','=','product')]"/>
 			                <field name="bom_id" domain="[('product_id','=',product_id),('bom_lines','!=',False)]"/>
 	            		</group>
 	            		<group>

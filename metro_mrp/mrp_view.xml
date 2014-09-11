@@ -309,7 +309,10 @@
 		        			<field name="comp_lines" readonly="1"/>
 		        		</page>
                     </xpath>
-	        		
+	        		<!-- only show 'Produce' button on 'in_production' state -->
+	        		<button name="%(mrp.act_mrp_product_produce)d" position="attributes">
+	        			<attribute name="states">in_production</attribute>
+	        		</button>	        		
 	            </data>
         	</field>
        	</record>

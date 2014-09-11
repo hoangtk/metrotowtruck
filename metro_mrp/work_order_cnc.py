@@ -26,7 +26,7 @@ class work_order_cnc(osv.osv):
     _columns = {
         'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'note': fields.text('Description', required=False),
-        'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',domain=[('state','in',('confirmed','engineer','manufacture'))],
+        'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',
                                              string="MFG IDs",readonly=True, states={'draft':[('readonly',False)]}),
         'wo_cnc_lines': fields.one2many('work.order.cnc.line','order_id','CNC Work Order Lines',readonly=True, states={'draft':[('readonly',False)]}),
         'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
@@ -172,6 +172,40 @@ class work_order_cnc(osv.osv):
 class work_order_cnc_line(osv.osv):
     _name = "work.order.cnc.line"
     _description = "CNC Work Order Lines"
+
+    def _get_file(self, cr, uid, ids, field_names, args, context=None):
+        result = dict.fromkeys(ids, {})
+        attachment_obj = self.pool.get('ir.attachment')
+        for obj in self.browse(cr, uid, ids):
+            for field_name in field_names:
+                result[obj.id][field_name] = None
+                file_ids = attachment_obj.search(
+                    cr, uid, [('name', '=', field_name),
+                              ('res_id', '=', obj.id),
+                              ('res_model', '=', 'work.order.cnc.line')],context=context)
+                if file_ids:
+                    result[obj.id][field_name] = attachment_obj.browse(cr, uid, file_ids[0]).datas
+        return result
+
+    def _set_file(self, cr, uid, id, field_name, value, args, context=None):
+        attachment_obj = self.pool.get('ir.attachment')
+        file_ids = attachment_obj.search(
+            cr, uid, [('name', '=', field_name),
+                      ('res_id', '=', id),
+                      ('res_model', '=', 'work.order.cnc.line')])
+        file_id = None
+        if file_ids:
+            file_id = file_ids[0]
+            attachment_obj.write(cr, uid, file_id, {'datas': value})
+        else:
+            file_id = attachment_obj.create(
+                cr, uid, {'name':  field_name,
+                          'res_id': id,
+                          'type': 'binary',
+                          'res_model': 'work.order.cnc.line',
+                          'datas': value})    
+        return file_id
+    
     _columns = {
         'order_id': fields.many2one('work.order.cnc','Ref'),
         'file_name': fields.char('File Name', size=16, required=True),
@@ -186,6 +220,15 @@ class work_order_cnc_line(osv.osv):
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
         'mr_id': fields.many2one('material.request','MR#', readonly=True),
         'is_whole_plate': fields.boolean('Whole Plate', readonly=True),
+        'cnc_file_name': fields.char('CNC File'),
+        'drawing_file_name': fields.char('Drawing PDF'),
+        'doc_file_name': fields.char('Doc'),
+#        'drawing_file': fields.binary('Drawing PDF', filters="*.pdf",),
+#        'cnc_file': fields.binary('CNC File', filters="*.txt",),
+#        'doc_file': fields.binary('Doc', filters="*.doc",),
+        'drawing_file': fields.function(_get_file, fnct_inv=_set_file, string="Drawing PDF", type="binary", multi="_get_file",),
+        'cnc_file': fields.function(_get_file, fnct_inv=_set_file, string="CNC PDF", type="binary", multi="_get_file",),
+        'doc_file': fields.function(_get_file, fnct_inv=_set_file, string="Doc", type="binary", multi="_get_file",),
         #connection with the mrp order's components
         'wo_comp_ids': fields.many2many('mrp.wo.comp', string="Part List", readonly=False),
     }
