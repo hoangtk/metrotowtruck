@@ -180,7 +180,8 @@ class project_task(base_stage, osv.osv):
     
     def create(self, cr, uid, vals, context=None):
         new_id = super(project_task,self).create(cr, uid, vals ,context)
-        self.email_send(cr, uid, [new_id],vals,context)
+        if self.browse(cr,uid,new_id,context=context).project_type != 'mfg':
+            self.email_send(cr, uid, [new_id],vals,context)
         return new_id
             
     def write(self, cr, uid, ids, vals, context=None):

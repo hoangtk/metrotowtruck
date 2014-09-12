@@ -73,13 +73,17 @@ class mrp_bom(osv.osv):
                 #2.if no bom_lines, then check this field 'direct_bom_id', if there is a bom setted, then use this bom to do _bom_explode
                 #3.if no above 2 fields, and the 'addthis' parameter is true, then return the product line  
                 'direct_bom_id': fields.many2one('mrp.bom','Direct BOM',domain="[('product_id','=',product_id),('bom_id','=',False)]"),
+                #09/12/2014, the flag to tell system do not generate consuming move lines, will be used in manufacture order, the the action_compute()-->_bom_explode()
+                'no_consume': fields.boolean('No Consume'),
                 }
     _defaults = {
         'is_common' : False,
+        'no_consume' : False,
     }
     _order = "sequence asc, id desc"
     _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Reference must be unique!'),
+        ('code_uniq', 'unique(code)', 'BOM Reference must be unique!'),
+        ('name_uniq', 'unique(name)', 'BOM Name must be unique!'),
     ] 
     _constraints = [
         (_check_product, 'BoM line product should not be duplicate under one BoM.', ['product_id']),
@@ -267,7 +271,7 @@ class mrp_bom(osv.osv):
         if not phantom:
 #            if addthis and not bom.bom_lines:
             #+++John Wang, 09/21/2014+++# add the direct_bom_id checking
-            if addthis and not bom.bom_lines and not bom.direct_bom_id:
+            if addthis and not bom.bom_lines and not bom.direct_bom_id and not bom.no_consume:
                 #+++John Wang, 07/10/2014+++# add the bom_id and parent_bom_id to supply the product's bom info
 #                result.append(
 #                {
@@ -305,6 +309,20 @@ class mrp_bom(osv.osv):
 #                        'cycle': cycle,
 #                        'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
 #                    })
+                    #+++John Wang, 09/12/2014+++# get the routing work center tasks.
+                    wc_tasks = []
+                    project_mfg_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_project', 'project_mfg')[1]
+                    for wc_task in wc_use.wc_task_ids:
+                        emp_ids = self.pool.get('hr.employee').search(cr, uid, [('department_id','=',wc_task.dept_id.id)])
+                        emp_ids = [(4,emp_id) for emp_id in emp_ids]
+                        wc_task = {'project_id':project_mfg_id,
+                                   'sequence':wc_task.sequence,
+                                   'dept_id':wc_task.dept_id.id,
+                                   'dept_mgr_id':wc_task.dept_id.manager_id.id,
+                                   'emp_ids':emp_ids,
+                                   'name':'%s for %s'%(wc_task.name, bom.name,),
+                                   'planned_hours':wc_task.planned_hours}
+                        wc_tasks.append((0,0,wc_task))
                     result2.append({
                         'bom_id': bom.id,
                         'routing_id': wc_use.routing_id.id,
@@ -314,6 +332,7 @@ class mrp_bom(osv.osv):
                         'sequence': level+(wc_use.sequence or 0),
                         'cycle': cycle,
                         'hour': float(wc_use.hour_nbr*mult + ((wc.time_start or 0.0)+(wc.time_stop or 0.0)+cycle*(wc.time_cycle or 0.0)) * (wc.time_efficiency or 1.0)),
+                        'task_ids': wc_tasks
                     })
             for bom2 in bom.bom_lines:
                 res = self._bom_explode(cr, uid, bom2, factor, properties, addthis=True, level=level+10)
@@ -378,17 +397,36 @@ class mrp_bom_routing_operation(osv.osv):
                 vals['bom_id'] = bom_comp.bom_id.id
                 vals['routing_id'] = bom_comp.bom_id.routing_id
         super(mrp_bom_routing_operation,self).create(cr, uid, vals, context=context)
-
+class mrp_routing(osv.osv):
+    _inherit = 'mrp.routing'
+    _sql_constraints = [
+        ('name', 'unique(name)', 'Routing name must be unique!'),
+        ('code', 'unique(code)', 'Routing code must be unique!'),
+    ]
 class mrp_routing_workcenter(osv.osv):
     _inherit = 'mrp.routing.workcenter'
     _columns = {
         'oper_pre_ids': fields.many2many('mrp.routing.workcenter', 'route_oper_flow','oper_next_id','oper_pre_id', string='Previous Workcenters', domain="[('routing_id','=',routing_id)]"),
         'oper_next_ids': fields.many2many('mrp.routing.workcenter', 'route_oper_flow','oper_pre_id','oper_next_id', string='Next Workcenters', domain="[('routing_id','=',routing_id)]"),
+        'wc_task_ids': fields.one2many('mrp.routing.workcenter.task','routing_wc_id',string='Work center tasks')
     }
-        
+    _sql_constraints = [
+        ('name', 'unique(routing_id,name)', 'Routing work center name must be unique under one routing!'),
+    ]    
+class mrp_routing_workcenter_task(osv.osv):        
+    _name = 'mrp.routing.workcenter.task'
+    _description = "Routing work center's task"
+    _columns = {
+                'routing_wc_id': fields.many2one('mrp.routing.workcenter', 'Parent Work Center', select=True, ondelete='cascade',),
+                'name': fields.char('Task Summary', size=128, required=True, select=True),
+                'sequence': fields.integer('Sequence', select=True, help="Gives the sequence order when displaying a list of tasks."),
+                'dept_id':fields.many2one('hr.department',string='Team',),
+                'planned_hours': fields.float('Planned Hours'),
+                }
+    
 class mrp_production(osv.osv):
     _inherit = 'mrp.production'
-    _order = 'priority, date_planned asc, id desc';
+    _order = 'id desc, priority, date_planned asc';
     _columns = {
         'mfg_ids': fields.many2many('sale.product', 'mrp_prod_id_rel','mrp_prod_id','mfg_id',string='MFG IDs', readonly=True, states={'draft':[('readonly',False)]}),
         'location_src_id': fields.property(
@@ -418,10 +456,10 @@ class mrp_production(osv.osv):
         'comp_lines': fields.one2many('mrp.wo.comp', 'mo_id', string='Components'),  
         'priority': fields.selection([('4','Very Low'), ('3','Low'), ('2','Medium'), ('1','Important'), ('0','Very important')], 'Priority', 
                                      select=True,  readonly=False, states=dict.fromkeys(['cancel', 'done'], [('readonly', True)])),
-                                     
-                
+        'task_mgr_id': fields.many2one('res.users', 'Task Manager'),                
     }
-    _defaults={'priority': '2',}
+    _defaults={'priority': '2',
+                    'task_mgr_id': lambda obj, cr, uid, context: uid,}
     #add the 'update=True, mini=True' inhreited from mrp_operations.mrp_production
     def write(self, cr, uid, ids, vals, context=None, update=True, mini=True):
         resu = super(mrp_production, self).write(cr, uid, ids, vals, context=context,update=update,mini=mini)        
@@ -764,6 +802,8 @@ def mrp_prod_action_compute(self, cr, uid, ids, properties=None, context=None):
         for line in results2:
             line['production_id'] = production.id
             line['priority'] = production.priority
+            for wc_task in line['task_ids']:
+                wc_task[2].update({'priority':production.priority, 'user_id':production.task_mgr_id.id})
             wo_new_id = workcenter_line_obj.create(cr, uid, line)
             wo_ids.append(wo_new_id)
         #add by johnw@07/1102014, update the wo_pre_ids and wo_next_ids
@@ -800,10 +840,12 @@ def mrp_prod_action_compute(self, cr, uid, ids, properties=None, context=None):
     return len(results)
 
 mrp_prod_patch.action_compute = mrp_prod_action_compute
+
+from openerp.addons.mrp_operations.mrp_operations import mrp_production_workcenter_line as mrp_prod_wc
+mrp_prod_wc._order = 'id desc, priority, production_id desc, sequence asc'
         
 class mrp_production_workcenter_line(osv.osv):
     _inherit = 'mrp.production.workcenter.line'
-    _order = 'production_id desc, sequence asc, id asc'
     '''
     Get one work order's stock moving by the bom/routing/operation, join with mrp_bom_routing_operation, mrp_production_product_line
     These moves are the moves can make material requistion

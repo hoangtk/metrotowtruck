@@ -171,10 +171,10 @@
                                         <t t-esc="Math.round(record.remaining_hours.raw_value)"/>
                                     </span>
                                 </div>
-                                <div class="oe_kanban_footer_left" style="margin-top:5px;">
+<!--                                 <div class="oe_kanban_footer_left" style="margin-top:5px;">
                                     <t t-raw="record.message_summary.raw_value"/>
                                     <field name="categ_ids"/>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="oe_clear"></div>
                         </div>
@@ -239,5 +239,20 @@
 	        	</page>
             </field>
          </record>
+		<record id="metro_mrp_production_form_view" model="ir.ui.view">
+            <field name="name">metro_mrp_production_form_view</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+	            <data>
+	            	<xpath expr="//field[@name='workcenter_lines']/form/group" position="after">
+	            		<field name="task_ids" widget="one2many_list" colspan="4"/>
+	            	</xpath>
+	            </data>
+	        </field>
+	    </record>         
+         
+
+		        		         
     </data>
 </openerp>

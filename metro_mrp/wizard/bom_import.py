@@ -97,6 +97,7 @@ class bom_import(osv.osv_memory):
         part_no_idx = 0
         bom_name_idx = 0
         quantity_idx = 0
+        route_name_idx = 0
         common_bom_idx = -1
         sequence_idx = -1
         id_idx = -1
@@ -106,10 +107,13 @@ class bom_import(osv.osv_memory):
             # get the data column index
             level_no_idx = row_data.index('level_no')
             part_no_idx = row_data.index('part_no')
+            part_name_idx = row_data.index('part_name')
             bom_name_idx = row_data.index('bom_name')
             quantity_idx = row_data.index('quantity')
+            route_name_idx = row_data.index('route_name')
+            no_consume_idx = row_data.index('no_consume')
         except Exception:
-            raise osv.except_osv(_('Error!'), _('please make sure the "level_no, part_no, bom_name, quantity" columns in the column list.'))
+            raise osv.except_osv(_('Error!'), _('please make sure the "level_no, part_no, part_name, bom_name, quantity, route_name, no_consume" columns in the column list.'))
         try:
             # get the 'id' column index
             id_idx = row_data.index('id')
@@ -131,12 +135,15 @@ class bom_import(osv.osv_memory):
             
         header_idxs={'level_no_idx':level_no_idx,
                      'part_no_idx':part_no_idx,
+                     'part_name_idx':part_name_idx,
                      'bom_name_idx':bom_name_idx,
                      'quantity_idx':quantity_idx,
+                     'route_name_idx':route_name_idx,
                      'common_bom_idx':common_bom_idx,
                      'sequence_idx':sequence_idx,
                      'id_idx':id_idx,
-                     'direct_bom_find_idx':direct_bom_find_idx}
+                     'direct_bom_find_idx':direct_bom_find_idx,
+                     'no_consume_idx':no_consume_idx}
                     
         #2 find all of the rows with level_no starting with 'root_'
         root_level_prefix = 'root_'
@@ -194,12 +201,15 @@ class bom_import(osv.osv_memory):
     def _parse_bom(self,cr, uid, sheet,root_level_no,start_row,end_row, header_idxs, context=None):     
         level_no_idx = header_idxs['level_no_idx']
         part_no_idx = header_idxs['part_no_idx']
+        part_name_idx = header_idxs['part_name_idx']
         bom_name_idx = header_idxs['bom_name_idx']
         quantity_idx = header_idxs['quantity_idx']
+        route_name_idx = header_idxs['route_name_idx']
         common_bom_idx = header_idxs['common_bom_idx']
         sequence_idx = header_idxs['sequence_idx']
         id_idx = header_idxs['id_idx']
         direct_bom_find_idx = header_idxs['direct_bom_find_idx']
+        no_consume_idx = header_idxs['no_consume_idx']
                                         
         #2 loop to check data, and put data to cache if all are OK
         '''
@@ -211,6 +221,7 @@ class bom_import(osv.osv_memory):
         parsed_rows = {}
         prod_obj = self.pool.get('product.product')
         bom_obj = self.pool.get('mrp.bom')
+        route_obj = self.pool.get('mrp.routing')
         for i in range(start_row,end_row+1):
             row_data = sheet.row_values(i);
             #=========validate the level_no============
@@ -260,7 +271,10 @@ class bom_import(osv.osv_memory):
                 common_bom = bom_obj.browse(cr, uid, common_bom_id, context=context)
             elif id_idx < 0 or not row_data[id_idx] or row_data[id_idx] == '':
                 #if there is no id data, then use default_code to get product id
-                ids = prod_obj.search(cr,uid,[('default_code','=',row_data[part_no_idx])],context=context)
+                if row_data[part_no_idx] and row_data[part_no_idx].strip() != "":
+                    ids = prod_obj.search(cr,uid,[('default_code','=',row_data[part_no_idx].strip())],context=context)
+                elif row_data[part_name_idx] and row_data[part_name_idx].strip() != "":
+                    ids = prod_obj.search(cr,uid,[('name','=',row_data[part_name_idx].strip())],context=context)
                 if not ids or len(ids) == 0:
                     raise osv.except_osv(_('Error!'), _('the product[%s] of row %s does not exist'%(row_data[part_no_idx], i+1,)))
                 product = prod_obj.browse(cr, uid, ids[0], context=context)
@@ -279,6 +293,15 @@ class bom_import(osv.osv_memory):
                     quantity = '0'
             if not pattern_number.match(quantity) or float(quantity) == 0:
                 raise osv.except_osv(_('Error!'), _('the quantity of row %s must be a number and larger than zero!'%(i+1,)))
+            
+            #=========check the routing============
+            route_name = row_data[route_name_idx]
+            routing_id = None
+            if (route_name and route_name.strip() != ""):
+                route_ids = route_obj.search(cr,uid,[('name','=',route_name.strip())],context=context)
+                if not route_ids:
+                    raise osv.except_osv(_('Error!'), _('the route "%s" of row %s can be be find!'%(route_name,i+1,)))
+                routing_id = route_ids[0]
             
             #=========check the bom name============
             bom_name = row_data[bom_name_idx]
@@ -307,7 +330,8 @@ class bom_import(osv.osv_memory):
                                 #'name':'[%s]%s'%(level_no,bom_name),
                                 'name':bom_name,
                                 'product_qty':quantity,
-                                'sequence':int(float(sequence))})
+                                'sequence':int(float(sequence)),
+                                'routing_id':routing_id})
             else:
                 parsed_row.update({'product_id':product.id,
                                  'product_uom':product.uom_id.id,
@@ -315,17 +339,24 @@ class bom_import(osv.osv_memory):
                                 'name':bom_name,
                                 'product_qty':quantity,
                                 'sequence':int(float(sequence)),
-                                'direct_bom_find':True})
+                                'routing_id':routing_id})
                 #=========check and set the direct_bom_find============
                 if direct_bom_find_idx >= 0:
                     flag = row_data[direct_bom_find_idx]
                     if not flag:
                         flag = ''
                     flag = flag.lower()
-                    if flag in ('n','0','no'):
-                        parsed_row.update({'direct_bom_find':False})
-                    
-                    parsed_row.update()
+                    if flag in ('y','1','yes'):
+                        parsed_row.update({'direct_bom_find':True})
+                #=========check and set the no_consume============
+                if no_consume_idx >= 0:
+                    flag = row_data[no_consume_idx]
+                    if not flag:
+                        flag = ''
+                    flag = flag.lower()
+                    if flag in ('y','1','yes'):
+                        parsed_row.update({'no_consume':True})                        
+
             parsed_rows.update({level_no:parsed_row})
         #return data
         return parsed_rows
