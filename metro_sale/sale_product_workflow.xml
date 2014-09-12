@@ -24,13 +24,19 @@
             <field name="kind">function</field>
             <field name="action">action_engineer()</field>
         </record>
-        <record id="act_manufacture" model="workflow.activity">
+<!--         <record id="act_manufacture" model="workflow.activity">
             <field name="wkf_id" ref="sale_product"/>
             <field name="name">manufacture</field>
             <field name="kind">subflow</field>
             <field name="subflow_id" search="[('osv','=','mrp.production')]" type="int"/>
             <field name="action">action_manufacture()</field>
-        </record>                
+        </record>   -->
+        <record id="act_manufacture" model="workflow.activity">
+            <field name="wkf_id" ref="sale_product"/>
+            <field name="name">manufacture</field>
+            <field name="kind">function</field>
+            <field name="action">action_manufacture()</field>
+        </record>                        
         <record id="act_done" model="workflow.activity">
             <field name="wkf_id" ref="sale_product"/>
             <field name="name">done</field>
@@ -69,12 +75,17 @@
             <field name="act_to" ref="act_manufacture"/>
             <field name="signal">button_manufacture</field>
         </record>
-        <record id="trans_manufacture_done" model="workflow.transition">
+<!--         <record id="trans_manufacture_done" model="workflow.transition">
             <field name="act_from" ref="act_manufacture"/>
             <field name="act_to" ref="act_done"/>
             <field name="signal">subflow.done</field>
+        </record> -->
+        <record id="trans_manufacture_done" model="workflow.transition">
+            <field name="act_from" ref="act_manufacture"/>
+            <field name="act_to" ref="act_done"/>
+            <field name="signal">to_done</field>
         </record>
-        
+                
         <!-- exception transition -->
         <record id="trans_confirmed_cancel" model="workflow.transition">
             <field name="act_from" ref="act_confirmed"/>

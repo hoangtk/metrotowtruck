@@ -30,12 +30,16 @@ class project_task_print(report_sxw.rml_parse):
             'time': time,
             'get_priority':self.get_priority,
             'get_emp_names':self.get_emp_names,
+            'get_mfg_ids':self.get_mfg_ids,
         })
     def get_priority(self,priority):
         return self._get_sellection_name('project.task','priority',priority)  
     def get_emp_names(self,emps):
         emp_names = [emp.name for emp in emps]
-        return ', '.join(emp_names)              
+        return ', '.join(emp_names)  
+    def get_mfg_ids(self,mfg_ids):
+        mfg_ids_name = [mfg_id.name for mfg_id in mfg_ids]
+        return ', '.join(mfg_ids_name)                 
     #get the selection display value by the selection key(field_value)
     def _get_sellection_name(self,model_name,field_name,field_value):
         field_sel = self.pool.get(model_name)._columns[field_name].selection
@@ -54,6 +58,8 @@ report_sxw.report_sxw('report.project.task.sheet','project.task','addons/metro_p
 #tasks by group
 report_sxw.report_sxw('report.task.group.by_assignee','task.group','addons/metro_project/report/task_group_by_assignee.rml',parser=project_task_print)
 report_sxw.report_sxw('report.task.group.by_employee','task.group','addons/metro_project/report/task_group_by_employee.rml',parser=project_task_print)
-
+report_sxw.report_sxw('report.task.group.by_team','task.group','addons/metro_project/report/task_group_by_team.rml',parser=project_task_print)
+#daily task
+report_sxw.report_sxw('report.task.daily.mfg','task.group','addons/metro_project/report/task_daily_mfg.rml',parser=project_task_print)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

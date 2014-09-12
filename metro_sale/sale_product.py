@@ -5,7 +5,7 @@ from openerp import netsvc
 #the ID for the purchase requisition and the material request
 class sale_product(osv.osv):
     _name = "sale.product"
-    _description = "Sale Product"
+    _description = "MFG ID"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     
     STATES_COL = {'draft':[('readonly',False)]}
@@ -15,7 +15,7 @@ class sale_product(osv.osv):
             res[mfg_id.id] = mfg_id.project_ids and len(mfg_id.project_ids) > 0
         return res
     _columns = {
-        'name': fields.char('ID', size=8, required=True),
+        'name': fields.char('ID', size=8, required=True,readonly=True, states=STATES_COL),
         'note': fields.text('Description', ),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
@@ -39,14 +39,16 @@ class sale_product(osv.osv):
                    ('cancelled','Cancel')], 'Status', track_visibility='onchange'),
         'config_change_ids': fields.related('mto_design_id','change_ids',type='one2many', relation='mto.design.change', string='Changes'),
         'date_planned': fields.date('Scheduled Date', required=True, select=True, readonly=True, states=STATES_COL),    
-        'analytic_account_id': fields.many2one('account.analytic.account', 'Contract/Analytic', help="Link this MFG ID to an analytic account if you need financial management on it. ", ondelete="restrict"),    
+        'analytic_account_id': fields.many2one('account.analytic.account', 'Contract/Analytic', help="Link this MFG ID to an analytic account if you need financial management on it. ", ondelete="restrict"),
+        'priority': fields.selection([('4','Very Low'), ('3','Low'), ('2','Medium'), ('1','Important'), ('0','Very important')], 'Priority', select=True,readonly=False, states={'done':[('readonly',True)],'cancelled':[('readonly',True)]}),    
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'ID must be unique!'),
     ]
     _defaults = {'state':'draft',
                  'active':True,
-                 'name':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/',}
+                 'name':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'sale.product.id') or '/',
+                 'priority': '2',}
     _order = 'id desc'
     
     def copy_data(self, cr, uid, id, default=None, context=None):
@@ -91,8 +93,28 @@ class sale_product(osv.osv):
             work_order_cncs = self.pool.get('work.order.cnc').search(cr,uid,[('sale_product_ids','in',ids)],context=context)
             if work_order_cncs and len(work_order_cncs) > 0:
                 raise osv.except_osv(_('Warning !'), _("You cannot change the ID which contains CNC work orders!"))    
-        return super(sale_product, self).write(cr, uid, ids, vals, context=context)
+        resu = super(sale_product, self).write(cr, uid, ids, vals, context=context)
+        if 'priority' in vals.keys():
+            self.set_priority(cr,uid,ids,vals['priority'],context)
+        return resu
     
+    def set_priority(self,cr,uid,ids,priority,context=None):
+        if context is None:
+            context = {}
+        #set all of the sub manufacture orders
+        set_ids = []
+        mo_ids = []
+        for mfg_id in self.browse(cr,uid,ids,context=context):
+            if mfg_id.state in ('cancelled','done'):
+                continue
+            set_ids.append(mfg_id.id)
+            mo_ids += [mo.id for mo in mfg_id.mrp_prod_ids]
+        if set_ids:
+            #update MFG ID
+            cr.execute("update sale_product set priority=%s where id  = ANY(%s)", (priority, (set_ids,)))             
+            #update manufacture order
+            self.pool.get('mrp.production').set_priority(cr, uid, mo_ids, priority, context=context)
+             
     def product_id_change(self, cr, uid, ids, product_id, context=None):
         """ Finds BOM of changed product.
         @param product_id: Id of changed product.
@@ -144,7 +166,8 @@ class sale_product(osv.osv):
                 'product_uom':sale_product_id.product_id.uom_id.id,
                 'routing_id':sale_product_id.bom_id.routing_id and sale_product_id.bom_id.routing_id.id or False,
                 'origin':sale_product_id.name,
-                'date_planned':sale_product_id.date_planned}
+                'date_planned':sale_product_id.date_planned,
+                'priority':sale_product_id.priority}
         mrp_prod_id = self.pool.get('mrp.production').create(cr, uid, vals, context=context)
         self.write(cr, uid, sale_product_id.id, {'mrp_prod_ids':[(4, mrp_prod_id)]},context=context)  
         return mrp_prod_id
@@ -167,7 +190,28 @@ class sale_product(osv.osv):
         mfg_prod_id = self.create_mfg_order(cr, uid, mfg_id, context=None)
         self.write(cr, uid, ids, {'state':'manufacture'},context=context)
         return mfg_prod_id
-            
+
+    def action_done(self, cr, uid, ids, context=None, no_except=False):
+        for sale_product_id in self.browse(cr, uid, ids, context=context):
+            for proj in sale_product_id.project_ids:
+                if proj.state not in ('close','cancelled'):
+                    if not no_except:
+                        raise osv.except_osv(_('Error'),_("This ID '%s' already have opening projects, it can not be done!"%(sale_product_id.name,)))
+                    else:
+                        return False
+            for mo in sale_product_id.mrp_prod_ids:
+                if mo.state not in ('done','cancel'):
+                    if not no_except:
+                        raise osv.except_osv(_('Error'),_("This ID '%s' already have opening manufacture order, it can not be done!"%(mo.name,)))
+                    else:
+                        return False
+        self.write(cr,uid,ids,{'state':'done'})
+        
+        wf_service = netsvc.LocalService("workflow")
+        for id in ids:
+            wf_service.trg_validate(uid, 'sale.product', id, 'to_done', cr)
+        return True
+                
     def action_cancel(self, cr, uid, ids, context=None):
         for sale_product_id in self.browse(cr, uid, ids, context=context):
             if sale_product_id.project_ids or sale_product_id.mrp_prod_ids:

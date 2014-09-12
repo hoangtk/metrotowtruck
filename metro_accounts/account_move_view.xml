@@ -6,9 +6,9 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
-            	<xpath expr="//field[@name='line_id']/tree" position="attributes">
+<!--             	<xpath expr="//field[@name='line_id']/tree" position="attributes">
                      <attribute name="editable"/>
-            	</xpath>
+            	</xpath> -->
             	<xpath expr="//field[@name='line_id']/tree/field[@name='name']" position="after">
                      <field name="product_id"/>
                      <field name="quantity"/>

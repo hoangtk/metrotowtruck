@@ -46,6 +46,7 @@
         'security/ir.model.access.csv',
         'wizard/product_set_printflag.xml',
         'wizard/product_batch_query_view.xml',
+        'wizard/products_approve.xml'
     ],
     'demo_xml': [],
     'test': [],

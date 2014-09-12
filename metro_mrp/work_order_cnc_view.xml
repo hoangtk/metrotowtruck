@@ -20,7 +20,9 @@
     				<group>
     					<group>
     						<field name="can_change_ids" invisible="1"/>
-		    				<field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/>
+		    				<!-- <field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/> -->
+		    				<field name="sale_product_ids" widget="many2many_tags" required="1" domain="[('state','in',('confirmed','engineer','manufacture'))]"/>
+		    				<field name="mfg_task_id" context="{'tree_view_ref':'metro_project.view_mfg_task_tree'}"/>
 		    				<field name="create_uid"/>
 		    				<field name="create_date"/>
 		    				<field name="id"/>
@@ -31,7 +33,7 @@
     					</group>
     				</group>
     				<field name="wo_cnc_lines">
-    					<tree string="Work Items" editable="bottom">    					
+    					<tree string="Work Items">    					
 	                    <!-- #TODO, for the feature connecting with the MR
 	                    <tree string="Work Items"> -->
 	                        <field name="file_name"/>
@@ -58,10 +60,16 @@
 		                            	<field name="plate_width" class="oe_inline"/>
 		                            	<field name="plate_height" class="oe_inline"/>
 		                            </div>
-	                            </group>
-	                        	<group>
 	                        		<field name="percent_usage_theory"/>
 		                            <field name="percent_usage" />
+				                    <field name="cnc_file_name" invisible="1"/> 
+			                        <field name="cnc_file" filename="cnc_file_name"/>
+				                    <field name="drawing_file_name" invisible="1"/> 
+			                        <field name="drawing_file" filename="drawing_file_name"/>
+				                    <field name="doc_file_name" invisible="1"/> 
+			                        <field name="doc_file" filename="doc_file_name"/>
+	                            </group>
+	                        	<group>
 		                            <field name="date_finished" />
 		                        	<field name="product_id"/>
 	                        		<field name="is_whole_plate" />

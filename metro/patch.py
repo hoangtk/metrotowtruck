@@ -129,7 +129,7 @@ def saveas_ajax(self, req, data, token):
         if filename_field:
             res_filename = {}
             if id:
-                res_filename = Model.read(int(id), [filename_field], context)[0]
+                res_filename = Model.read(int(id), [filename_field], context)
             else:
                 res_filename = Model.default_get([filename_field], context)  
             if len(res_filename) > 0:
