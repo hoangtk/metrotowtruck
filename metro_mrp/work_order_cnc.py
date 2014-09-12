@@ -226,8 +226,8 @@ class work_order_cnc_line(osv.osv):
 #        'drawing_file': fields.binary('Drawing PDF', filters="*.pdf",),
 #        'cnc_file': fields.binary('CNC File', filters="*.txt",),
 #        'doc_file': fields.binary('Doc', filters="*.doc",),
+        'cnc_file': fields.function(_get_file, fnct_inv=_set_file, string="CNC Txt", type="binary", multi="_get_file",),
         'drawing_file': fields.function(_get_file, fnct_inv=_set_file, string="Drawing PDF", type="binary", multi="_get_file",),
-        'cnc_file': fields.function(_get_file, fnct_inv=_set_file, string="CNC PDF", type="binary", multi="_get_file",),
         'doc_file': fields.function(_get_file, fnct_inv=_set_file, string="Doc", type="binary", multi="_get_file",),
         #connection with the mrp order's components
         'wo_comp_ids': fields.many2many('mrp.wo.comp', string="Part List", readonly=False),
