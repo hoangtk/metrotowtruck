@@ -126,7 +126,7 @@
 
     <menuitem
         id="menu_sale_product_mrp"
-        sequence="1"
+        sequence="-1"
         parent="mrp.menu_mrp_manufacturing"
         action="action_sale_product"
         groups="mrp.group_mrp_user"/>

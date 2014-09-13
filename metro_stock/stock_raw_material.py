@@ -28,6 +28,7 @@ class plate_material(osv.osv):
     _name = "plate.material"
     _description = "Plate Material"
     _order = "product_id"
+    _inherit = ['mail.thread']
 #    def _prod_qty(self, cr, uid, ids, fields, args, context=None):
 #        result = {}
 #        prod_obj = seld.pool.get("product.product")
@@ -37,7 +38,7 @@ class plate_material(osv.osv):
         
     _columns = {
         'product_id': fields.many2one('product.product','Product', required=True),
-        'plate_whole_qty': fields.integer('Whole Quantity of Plate', required=True),
+        'plate_whole_qty': fields.integer('Whole Quantity of Plate', required=True, track_visibility='onchange'),
 #        'on_order_qty': fields.function(_prod_qty,type='float',string='On Order Quantity',digits_compute=dp.get_precision('Product Unit of Measure'),multi=prod_qty),
         'on_order_qty': fields.related('product_id','incoming_qty',type='integer',string='On Order Quantity',readonly=True),
         'notes': fields.text('Notes'),        
