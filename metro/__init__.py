@@ -10,3 +10,4 @@ import mdb
 import ir_attachment
 import ir_cron
 import workflow
+import wizard

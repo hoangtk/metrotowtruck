@@ -24,19 +24,20 @@ class work_order_cnc(osv.osv):
             result[order.id].update({'can_change_ids':can_change_ids})
         return result    
     _columns = {
-        'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)]}),
+        'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'note': fields.text('Description', required=False),
         'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',
-                                             string="MFG IDs",readonly=True, states={'draft':[('readonly',False)]}),
-        'wo_cnc_lines': fields.one2many('work.order.cnc.line','order_id','CNC Work Order Lines',readonly=True, states={'draft':[('readonly',False)]}),
-        'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
+                                             string="MFG IDs",readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'wo_cnc_lines': fields.one2many('work.order.cnc.line','order_id','CNC Work Order Lines',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True),
+        'reject_message': fields.text('Rejection Message', track_visibility='onchange'),
         'create_uid': fields.many2one('res.users','Creator',readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True),   
         'company_id': fields.many2one('res.company', 'Company', readonly=True),     
         'product_id': fields.related('wo_cnc_lines','product_id', type='many2one', relation='product.product', string='Product'),
         'can_change_ids' : fields.function(_get_done_info, type='boolean', string='Can Change IDs', multi="done_info"),
-        'mfg_task_id': fields.many2one('project.task', string='Manufacture Task',domain=[('project_type','=','mfg'),('state','not in',('cancelled','done'))],readonly=True, states={'draft':[('readonly',False)]}),
+        'mfg_task_id': fields.many2one('project.task', string='Manufacture Task',domain=[('project_type','=','mfg'),('state','not in',('cancelled','done'))],readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
@@ -112,12 +113,30 @@ class work_order_cnc(osv.osv):
         #set the cancel state
         self._set_state(cr, uid, ids, 'draft',context)
         return True
-    
+
+    def action_approve(self, cr, uid, ids, context=None):
+        #set the cancel state
+        self._set_state(cr, uid, ids, 'approved',context)
+        return True
+
     def action_done(self, cr, uid, ids, context=None):
         #set the cancel state
         self._set_state(cr, uid, ids, 'done',context)
         return True
-        
+    
+    def action_reject_callback(self, cr, uid, ids, message, context=None):
+        #set the draft state
+        self._set_state(cr, uid, ids, 'rejected',context)
+        self.write(cr,uid,ids,{'reject_message':message})
+        return True
+                    
+    def action_reject(self, cr, uid, ids, context=None):     
+        ctx = dict(context)
+        ctx.update({'confirm_title':'Confirm rejecttion message',
+                    'src_model':'work.order.cnc',
+                    "model_callback":'action_reject_callback',})
+        return self.pool.get('confirm.message').open(cr, uid, ids, ctx)
+                
     def unlink(self, cr, uid, ids, context=None):
         orders = self.read(cr, uid, ids, ['state'], context=context)
         for s in orders:
@@ -216,16 +235,13 @@ class work_order_cnc_line(osv.osv):
         'percent_usage': fields.float('Usage Percent of Manufacture(%)', required=True),
         'date_finished': fields.date('Finished Date', readonly=True),
         'product_id': fields.many2one('product.product','Product', readonly=True),
-        'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
+        'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
         'mr_id': fields.many2one('material.request','MR#', readonly=True),
         'is_whole_plate': fields.boolean('Whole Plate', readonly=True),
         'cnc_file_name': fields.char('CNC File'),
         'drawing_file_name': fields.char('Drawing PDF'),
         'doc_file_name': fields.char('Doc'),
-#        'drawing_file': fields.binary('Drawing PDF', filters="*.pdf",),
-#        'cnc_file': fields.binary('CNC File', filters="*.txt",),
-#        'doc_file': fields.binary('Doc', filters="*.doc",),
         'cnc_file': fields.function(_get_file, fnct_inv=_set_file, string="CNC Txt", type="binary", multi="_get_file",),
         'drawing_file': fields.function(_get_file, fnct_inv=_set_file, string="Drawing PDF", type="binary", multi="_get_file",),
         'doc_file': fields.function(_get_file, fnct_inv=_set_file, string="Doc", type="binary", multi="_get_file",),
@@ -500,8 +516,8 @@ class work_order_cnc_line(osv.osv):
     def _check_changing(self, cr, uid, ids, context=None):
         lines = self.read(cr, uid, ids, ['state','file_name'], context=context)
         for s in lines:
-            if s['state'] not in ['draft','cancel']:
-                raise osv.except_osv(_('Invalid Action!'), _('Only the lines in draft or cancel state can be change.\n%s')%(s['file_name'],))
+            if s['state'] not in ['draft','rejected']:
+                raise osv.except_osv(_('Invalid Action!'), _('Only the lines in draft or rejected state can be change.\n%s')%(s['file_name'],))
         
     def unlink(self, cr, uid, ids, context=None):
         self._check_changing(cr, uid, ids, context)
