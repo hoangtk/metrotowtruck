@@ -30,8 +30,8 @@ class task_group(osv.osv_memory):
     _name = "task.group"
     _columns = {
         'name': fields.char('Group', size=64, required=True),
-        'team_leader': fields.char('Team Leader', size=64, required=True),
-        'team_members': fields.char('Team Members', size=1024, required=True),
+        'team_leader': fields.char('Team Leader', size=64, required=False),
+        'team_members': fields.char('Team Members', size=1024, required=False),
 #        'group_task_ids': fields.one2many('task.group.tasks','group_id','Group Tasks')
         'task_ids': fields.many2many('project.task','task_group_tasks','group_id','task_id',string='Group Tasks'),
         'task_day': fields.date('Day', ),
