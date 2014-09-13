@@ -55,6 +55,12 @@
     'css': [
         'static/src/css/project.css'
     ],
+#    'js' : [
+#        "static/src/js/metro_project.js",
+#    ],
+#    'qweb' : [
+#        "static/src/xml/*.xml",
+#    ],
     'installable': True,
     'auto_install': False,
     'application': True,

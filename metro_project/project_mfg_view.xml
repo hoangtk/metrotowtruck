@@ -106,7 +106,7 @@
             <field name="name">project.mfg.task.kanban</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="dept_id" >
+                <kanban default_group_by="dept_id" quick_create="0">
                     <field name="stage_color"/>
                     <field name="priority"/>
                     <field name="stage_id"/>
