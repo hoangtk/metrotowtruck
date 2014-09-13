@@ -7,16 +7,23 @@
     	<field name="arch" type="xml">
     		<form string="CNC Work Order" version="7.0">
     			<header>
-    				<button name="action_confirm" string="Confirm" states="draft" class="oe_highlight" type="object"/>
-    				<button name="action_draft" string="Set to Draft" states="confirmed,in_progress,cancel" type="object"/>
-    				<button name="action_done" string="Done" states="confirmed" type="object" groups="mrp.group_mrp_manager"/>
-    				<button name="action_cancel" string="Cancel" states="draft,confirmed,in_progress" type="object"/>
-    				<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
+    				<button name="action_confirm" string="Confirm" states="draft,rejected" class="oe_highlight" type="object"/>
+    				<button name="action_approve" string="Approve" states="confirmed" class="oe_highlight" type="object" groups="mrp.group_mrp_manager"/>
+    				<button name="action_reject" string="Reject" states="confirmed" type="object" groups="mrp.group_mrp_manager"/>
+    				<button name="action_draft" string="Set to Draft" states="confirmed,cancel" type="object"/>
+    				<button name="action_draft" string="Set to Draft" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
+    				<button name="action_done" string="Done" states="approved" type="object" groups="mrp.group_mrp_manager"/>
+    				<button name="action_cancel" string="Cancel" states="draft,confirmed,rejected" type="object"/>
+    				<button name="action_cancel" string="Cancel" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
+    				<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done"/>
     			</header>
     			<!-- <sheet> -->
     				<group>
     					<h1><field name="name"/></h1>
     				</group>
+                 	<group style="color:red">
+                		<field name="reject_message" states="rejected" readonly="1"/>
+                	</group>
     				<group>
     					<group>
     						<field name="can_change_ids" invisible="1"/>
@@ -47,7 +54,7 @@
 	                        <field name="is_whole_plate" />
 	                        <field name="state"/>                       
 		                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
-		                    type="action" states="confirmed" icon="terp-check"/>
+		                    type="action" states="approved" icon="terp-check"/>
 	                        <field name="mr_id"/>     
 	                    </tree>
 	                    <form string="Work Items" version="7.0">
@@ -56,8 +63,8 @@
 		                       		<field name="file_name"/>
 		                            <label string="Size"/>
 		                            <div>
-		                            	<field name="plate_length" class="oe_inline"/>
-		                            	<field name="plate_width" class="oe_inline"/>
+		                            	<field name="plate_length" class="oe_inline"/><label string="*"/>
+		                            	<field name="plate_width" class="oe_inline"/><label string="*"/>
 		                            	<field name="plate_height" class="oe_inline"/>
 		                            </div>
 	                        		<field name="percent_usage_theory"/>
@@ -76,11 +83,11 @@
 		                            <field name="state" />
 	                        		<field name="mr_id"/>
 				                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
-				                    type="action" states="confirmed" icon="terp-check"/>     
+				                    type="action" states="approved" icon="terp-check"/>     
 	                            </group>
-	                        	<group colspan="4">
+<!-- 	                        	<group colspan="4">
 	                        		<field name="wo_comp_ids"/>
-	                        	</group>
+	                        	</group> -->
 	                        </group>
 	                    </form>    					
     				</field>
@@ -120,7 +127,9 @@
                     <field name="product_id"/>
                     <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
                     <filter icon="terp-camera_test" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
-                    <filter icon="terp-camera_test" name="in_progress" string="In Progress" domain="[('state','=','in_progress')]"/>
+                    <filter icon="terp-camera_test" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+                    <filter icon="terp-camera_test" name="rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+                    <!-- <filter icon="terp-camera_test" name="in_progress" string="In Progress" domain="[('state','=','in_progress')]"/> -->
                     <filter icon="terp-camera_test" name="done" string="Done" domain="[('state','=','done')]"/>
                     <separator/>
                     <filter icon="terp-personal-" string="Cancelled"  domain="[('state','=', 'cancel')]" help="Canceled"/>

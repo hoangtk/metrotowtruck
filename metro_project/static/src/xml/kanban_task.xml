@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="template" xml:space="preserve">
+<!-- remove the edit/delete menu from web_kanban.xml and add 'print' menu -->
+<t t-extend="KanbanView.group_header">
+    <t t-jquery="ul.oe_dropdown_menu" t-operation="replace">
+                    <ul class="oe_dropdown_menu">
+                        <li><a data-action="toggle_fold" href="#">Fold</a></li>
+                        <li><a data-action="print" href="#">Print</a></li>
+                    </ul>
+    </t>
+</t>
+
+</templates>

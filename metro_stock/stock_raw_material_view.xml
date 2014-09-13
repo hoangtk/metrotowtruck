@@ -20,14 +20,18 @@
             <field name="arch" type="xml">
                 <form string="Plate Material" version="7.0">
                 	<sheet>
-                		<group>
+               		<group>
 	                    <field name="product_id"/>
 	                    <field name="plate_whole_qty"/>
 	                    <field name="on_order_qty"/>
 	                    <field name="notes"/>
-                    	<!-- <field name="product_name"/> -->
-                    	</group>
-                    </sheet>
+	                   	<!-- <field name="product_name"/> -->
+                   	</group>
+		            <div class="oe_chatter">
+		              <field name="message_follower_ids" widget="mail_followers"/>
+		              <field name="message_ids" widget="mail_thread"/>
+		            </div>    
+                    </sheet> 		
                 </form>
             </field>
         </record>
