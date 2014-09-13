@@ -320,14 +320,14 @@ class mrp_bom(osv.osv):
                                    'dept_id':wc_task.dept_id.id,
                                    'dept_mgr_id':wc_task.dept_id.manager_id.id,
                                    'emp_ids':emp_ids,
-                                   'name':'%s for %s'%(wc_task.name, bom.name,),
+                                   'name':wc_task.name,
                                    'planned_hours':wc_task.planned_hours}
                         wc_tasks.append((0,0,wc_task))
                     result2.append({
                         'bom_id': bom.id,
                         'routing_id': wc_use.routing_id.id,
                         'routing_operation_id': wc_use.id,
-                        'name': tools.ustr(wc_use.name) + ' - '  + tools.ustr(bom.product_id.name),
+                        'name': tools.ustr(wc_use.name) + ' - '  + tools.ustr(bom.name),
                         'workcenter_id': wc.id,
                         'sequence': level+(wc_use.sequence or 0),
                         'cycle': cycle,
