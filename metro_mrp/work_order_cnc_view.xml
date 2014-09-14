@@ -7,13 +7,14 @@
     	<field name="arch" type="xml">
     		<form string="CNC Work Order" version="7.0">
     			<header>
-    				<button name="action_confirm" string="Confirm" states="draft,rejected" class="oe_highlight" type="object"/>
+    				<button name="action_confirm" string="Confirm" states="draft,rejected" class="oe_highlight" type="object" groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_approve" string="Approve" states="confirmed" class="oe_highlight" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="action_reject" string="Reject" states="confirmed" type="object" groups="mrp.group_mrp_manager"/>
-    				<button name="action_draft" string="Set to Draft" states="confirmed,cancel" type="object"/>
+    				<button name="action_draft" string="Set to Draft" states="confirmed,cancel" type="object" groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_draft" string="Set to Draft" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
-    				<button name="action_done" string="Done" states="approved" type="object" groups="mrp.group_mrp_manager"/>
-    				<button name="action_cancel" string="Cancel" states="draft,confirmed,rejected" type="object"/>
+    				<button name="action_done" string="Done" states="approved" type="object" groups="metro_mrp.group_mrp_cnc_manager"/>
+    				<button name="action_cancel" string="Cancel" states="draft,rejected" type="object"/>
+    				<button name="action_cancel" string="Cancel" states="confirmed" type="object"  groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_cancel" string="Cancel" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
     				<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done"/>
     			</header>
@@ -54,7 +55,7 @@
 	                        <field name="is_whole_plate" />
 	                        <field name="state"/>                       
 		                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
-		                    type="action" states="approved" icon="terp-check"/>
+		                    type="action" states="approved" icon="terp-check" groups="metro_mrp.group_mrp_cnc_manager"/>
 	                        <field name="mr_id"/>     
 	                    </tree>
 	                    <form string="Work Items" version="7.0">
@@ -83,7 +84,7 @@
 		                            <field name="state" />
 	                        		<field name="mr_id"/>
 				                    <button name="%(metro_mrp.action_view_cnc_line_done)d" string="Done" 
-				                    type="action" states="approved" icon="terp-check"/>     
+				                    type="action" states="approved" icon="terp-check" groups="metro_mrp.group_mrp_cnc_manager"/>     
 	                            </group>
 <!-- 	                        	<group colspan="4">
 	                        		<field name="wo_comp_ids"/>
