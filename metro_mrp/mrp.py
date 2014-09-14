@@ -83,7 +83,7 @@ class mrp_bom(osv.osv):
     _order = "sequence asc, id desc"
     _sql_constraints = [
         ('code_uniq', 'unique(code)', 'BOM Reference must be unique!'),
-        ('name_uniq', 'unique(name)', 'BOM Name must be unique!'),
+        ('name_uniq', 'unique(bom_id,name)', 'BOM Name must be unique per parent BOM!'),
     ] 
     _constraints = [
         (_check_product, 'BoM line product should not be duplicate under one BoM.', ['product_id']),
