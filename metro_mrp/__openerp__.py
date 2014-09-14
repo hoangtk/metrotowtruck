@@ -39,6 +39,7 @@
     'depends': ["metro", "sale", "metro_stock", "product_manufacturer", "document", "mrp_operations", "procurement", "mrp","project"],
     'data': [
         'security/ir.model.access.csv',
+        'security/mrp_security.xml',
         'res_config_view.xml',
         'wizard/work_order_cnc_line_done_view.xml',
         'wizard/wo_material_request_view.xml',
