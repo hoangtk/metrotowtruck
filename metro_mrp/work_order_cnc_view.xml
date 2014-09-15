@@ -51,6 +51,8 @@
 	                        <field name="plate_height"/>
 	                        <field name="percent_usage_theory"/>
 	                        <field name="percent_usage"/>
+		                    <field name="cnc_file_name"/> 
+		                    <field name="drawing_file_name"/> 
 	                        <field name="date_finished"/>
 	                        <field name="product_id"/>
 	                        <field name="is_whole_plate" />

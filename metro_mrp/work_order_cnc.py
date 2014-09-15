@@ -4,6 +4,7 @@ from openerp.tools.translate import _
 from openerp import netsvc
 import time
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.report.pyPdf import PdfFileWriter, PdfFileReader
 class work_order_cnc(osv.osv):
     _name = "work.order.cnc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -76,6 +77,9 @@ class work_order_cnc(osv.osv):
             #Task and MFG ID matching
             if cnc_wo.mfg_task_id and not self.task_id_check(cr, uid, cnc_wo.mfg_task_id.id, [mfg_id.id for mfg_id in cnc_wo.sale_product_ids], context):
                 raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
+            for cnc_line in cnc_wo.wo_cnc_lines:
+                if not cnc_line.cnc_file_name or not cnc_line.drawing_file_name:
+                    raise osv.except_osv(_('Invalid Action!'), _('The cnc line must have both "CNC File" and "Drawing PDF" files uploaded!'))
         #set state to done
         self._set_state(cr, uid, ids, 'confirmed',context)
         return True
@@ -151,6 +155,8 @@ class work_order_cnc(osv.osv):
         default.update({
             'name': '%s (copy)'%old_data['name'],
             'mfg_task_id': None,
+            'sale_product_ids': None,
+            'reject_message':None,
         })
         return super(work_order_cnc, self).copy(cr, uid, id, default, context)    
     def task_id_check(self, cr, uid, task_id, mfg_ids, context=None):
@@ -188,6 +194,32 @@ class work_order_cnc(osv.osv):
                 raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
         return super(work_order_cnc, self).create(cr, uid, vals, context=context)
     
+    def print_pdf(self, cr, uid, ids, context):
+        attachment_obj = self.pool.get('ir.attachment')
+        output = PdfFileWriter() 
+        page_cnt = 0
+        for order in self.browse(cr, uid, ids, context=context):
+            for line in order.wo_cnc_lines:
+                if line.drawing_file_name and line.drawing_file_name.lower().endswith('.pdf'):                    
+                    file_ids = attachment_obj.search(
+                        cr, uid, [('name', '=', 'drawing_file'),
+                                  ('res_id', '=', line.id),
+                                  ('res_model', '=', 'work.order.cnc.line')])
+                    if file_ids:
+                        attach_file = attachment_obj.file_get(cr, uid, file_ids[0],context=context)
+                        input = PdfFileReader(attach_file)
+                        for page in input.pages: 
+                            output.addPage(page)
+                            page_cnt += 1
+        if page_cnt > 0:
+            outputStream = file('c:/merged_pdf.pdf', "wb") 
+            output.write(outputStream) 
+            outputStream.close()
+            filedata = open('c:/merged_pdf.pdf','rb').read().encode('base64')
+            return self.pool.get('file.down').download_data(cr, uid, "merged_pdf.pdf", filedata, context)
+    
+        return False                
+                
 class work_order_cnc_line(osv.osv):
     _name = "work.order.cnc.line"
     _description = "CNC Work Order Lines"
@@ -257,10 +289,20 @@ class work_order_cnc_line(osv.osv):
             if record.state == 'draft' and (record.plate_length <= 0 or record.plate_width <= 0 or record.plate_height <= 0 or record.percent_usage <= 0 or record.percent_usage_theory <= 0):
                 raise osv.except_osv(_('Error'), _('The "Length/Width/Height/Usage Percent in Theory/Usage Percent of Manufacture" must be larger than zero\n %s.')% (record.file_name,))
         return True
+    def _check_file_name(self,cr,uid,ids,context=None):
+        for record in self.browse(cr, uid, ids, context=context):
+            same_file_name_ids = self.search(cr, uid, [('order_id','=',record.order_id.id),('id','!=',record.id),('file_name','=',record.file_name)],context=context)
+            if same_file_name_ids:
+                raise osv.except_osv(_('Error'), _('File name "%s" is duplicated under same cnc order!')% (record.file_name,))
+        return True
     _constraints = [
         (_check_size,
             'You must assign a serial number for this product.',
-            ['plate_length','plate_width','plate_height','percent_usage','percent_usage_theory']),]
+            ['plate_length','plate_width','plate_height','percent_usage','percent_usage_theory']),
+        (_check_file_name,
+            'File name is duplicated under same cnc order!',
+            ['file_name'])
+                    ]    
     #TODO, for the feature connecting with the MR
     '''
     def check_cnc_line(self, cr, uid, cnc_line, product_id = None, context=None):
@@ -535,9 +577,13 @@ class work_order_cnc_line(osv.osv):
     def copy_data(self, cr, uid, id, default=None, context=None):
         if not default:
             default = {}
+        line_data = self.browse(cr,uid,id,context=context)
         default.update({
             'date_finished': None,
             'product_id': None,
             'mr_id': None,
+            'cnc_file':line_data.cnc_file,
+            'drawing_file':line_data.drawing_file,
+            'doc_file':line_data.doc_file
         })
         return super(work_order_cnc_line, self).copy_data(cr, uid, id, default, context)        
