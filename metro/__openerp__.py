@@ -24,7 +24,8 @@
        "cron_job_data.xml",
        "ir_cron_view.xml",
        "workflow_view.xml",
-       "wizard/confirm_message_view.xml"
+       "wizard/confirm_message_view.xml",       
+        'wizard/file_down_view.xml'
     ],
     'installable': True,
     'auto_install': False,

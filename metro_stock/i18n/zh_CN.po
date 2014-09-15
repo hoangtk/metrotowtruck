@@ -1185,6 +1185,16 @@ msgstr "基本单位"
 msgid "Base Quantity"
 msgstr "基本数量"
 
+#. module: metro_stock
+#: field:material.request,mr_ticket_no:0
+msgid "Ticket#"
+msgstr "纸质单号"
+
+#. module: metro_stock
+#: field:stock.picking.in,deliver_ticket_no:0
+msgid "Deliver Ticket#"
+msgstr "送货单号"
+
 ########################manual########################
 #. module: stock
 #: view:stock.picking:0

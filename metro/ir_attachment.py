@@ -24,7 +24,9 @@ from openerp.osv import fields,osv
 from openerp import tools
 import os
 import re
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class ir_attachment(osv.osv):
     _inherit = "ir.attachment"
@@ -57,3 +59,14 @@ class ir_attachment(osv.osv):
 #        return os.path.join(tools.config['root_path'], location, cr.dbname, path)
         #handle system config paramter 'ir_attachment.location.root', to use user defined attachment root path
         return os.path.join(self._root_path(cr, uid), location, cr.dbname, path)
+
+    def file_get(self, cr, uid, id,context=None):
+        location = self.pool.get('ir.config_parameter').get_param(cr, uid, 'ir_attachment.location')
+        fname = self.read(cr, uid, id, ['store_fname'],context=context)['store_fname']
+        full_path = self._full_path(cr, uid, location, fname)
+        r = ''
+        try:
+            r = open(full_path,'rb')
+        except IOError:
+            _logger.error("_read_file reading %s",full_path)
+        return r

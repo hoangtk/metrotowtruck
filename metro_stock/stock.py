@@ -42,6 +42,7 @@ class material_request(osv.osv):
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
+        'mr_ticket_no': fields.char('Ticket#', size=16)
     }
     _defaults = {
         'type': 'mr',
@@ -458,7 +459,8 @@ class stock_picking_in(osv.osv):
             auto_join=True,
             string='Messages',
             help="Messages and communication history"),
-        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),                          
+        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
+        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16)                          
     }     
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
