@@ -16,6 +16,9 @@
             	<field name="min_date" position="after">
             		<field name="date_done" string="Date of Reception"/>
             	</field>
+            	<field name="origin" position="after">
+            		<field name="deliver_ticket_no"/>
+            	</field>
             </field>
         </record>   
 <!-- Material Request -->    
@@ -27,6 +30,7 @@
                     <field name="name" string="MR#"/>
                     <field name="mr_dept_id"/>
                     <field name="date" string="Order Date"/>
+                    <field name="mr_ticket_no"/>
                     <field name="stock_journal_id" groups="account.group_account_user"/>
                     <field name="create_uid"/>
                     <field name="state"/>
@@ -46,6 +50,9 @@
                 </xpath>
                 <xpath expr="//field[@name='date']" position="attributes">
                     <attribute name="string">Order Date</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date']" position="after">
+                    <field name="mr_ticket_no"/>
                 </xpath>
                 <xpath expr="//field[@name='move_lines']" position="replace">
                     <field name="move_lines" context="{'form_view_ref':'metro_stock.view_mat_line_form', 'tree_view_ref':'metro_stock.view_mat_line_tree', 'req_type':type}"/>
@@ -77,6 +84,9 @@
             	<xpath expr="//field[@name='name']" position="attributes">
             		<attribute name="string">MR#</attribute>
             	</xpath>
+            	<xpath expr="//field[@name='name']" position="after">
+            		<field name="mr_ticket_no"/>
+            	</xpath>            	
                 <xpath expr="//field[@name='partner_id']" position="replace">
                     <field name="mr_dept_id"/>
                     <field name="date" string="Order Date"/>
@@ -391,6 +401,9 @@
             <field name="model">stock.picking.in</field>
             <field name="inherit_id" ref="stock.view_picking_in_search"/>
             <field name="arch" type="xml">
+            	<field name="name" position="after">
+            		<field name='deliver_ticket_no'/>
+            	</field>	
                 <field name="stock_journal_id" position="before">
                 	<field name="date"/>
                 	<field name="partner_id"/>
@@ -575,6 +588,7 @@
             	</field>            	
             	<field name="origin" position="replace">
             		<field name="date_done" string="Date of Reception"/>
+            		<field name="deliver_ticket_no"/>
             	</field>          
             	<field name="stock_journal_id" position="after">
             		<field name="origin" placeholder="e.g. PO0032" class="oe_inline"/>
