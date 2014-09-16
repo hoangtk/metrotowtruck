@@ -1684,7 +1684,7 @@ msgstr "首先取消或删除采购单相关的不是'草稿/取消/完成'状�
 
 #. module: metro_purchase
 #: code:addons/metro_product/purchase.py:0
-msgid "You must first cancel all invoices in draft/cancel/paid related to this purchase order."
+msgid "You must first cancel all invoices not in draft/cancel/paid related to this purchase order."
 msgstr "首先取消或删除采购单相关的不是'草稿/取消/已付'状态的凭据！"
 
 #. module: metro_purchase

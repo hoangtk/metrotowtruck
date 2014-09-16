@@ -359,6 +359,8 @@ class stock_picking(osv.osv):
     _columns = {   
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True), 
+        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
+        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16)
     }      
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
@@ -440,7 +442,7 @@ class stock_picking_out(osv.osv):
             auto_join=True,
             string='Messages',
             help="Messages and communication history"), 
-        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),                  
+        'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
     }            
     _order = 'name desc'  
             
@@ -460,7 +462,7 @@ class stock_picking_in(osv.osv):
             string='Messages',
             help="Messages and communication history"),
         'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
-        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16)                          
+        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16)                  
     }     
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
