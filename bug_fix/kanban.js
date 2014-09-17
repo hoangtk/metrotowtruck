@@ -571,7 +571,16 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
                 self[fn]($(ev.target));
             }
         });
-
+        // Head hook
+        // Selecting records
+        /*the select/unselect all function for input checkbox(select_all) in web_kanban.xml, 09/17/2014*/
+        this.$el.on('click', '.oe_kanban_group_title_text input', function(ev) {
+            var fn = 'do_action_' + $(ev.target).data().action;
+            if (typeof(self[fn]) === 'function') {
+                self[fn]($(ev.target));
+            }
+        });
+        
         this.$el.find('.oe_kanban_add').click(function () {
             if (self.quick) {
                 return self.quick.trigger('close');
@@ -699,7 +708,7 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
             am.dialog.close();
             self.view.do_reload();
         });
-    },
+    },    
     do_action_delete: function() {
         var self = this;
         if (confirm(_t("Are you sure to remove this column ?"))) {
@@ -707,6 +716,40 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
                 self.view.do_reload();
             });
         }  
+    },
+    /*the select/unselect all function for checkbox(select_all) in web_kanban.xml, 09/17/2014*/
+    do_action_select_all: function(obj) {
+    	this.$records.find('.oe_kanban_record_selector').prop('checked',
+                $(obj).prop('checked')  || false);
+    },
+    /*the print function for 'print selected' ddlb menu, johnw, 09/17/2014*/
+    do_action_print_selected: function(obj) {
+        var self = this;  		
+		var item_ids = [];
+        this.$records.find('.oe_kanban_record_selector:checked').each(function () {
+        	data_id = parseInt($(this).attr('data-id'));
+            item_ids.push(data_id);
+        });
+        if (item_ids.length == 0) {
+            instance.web.dialog($("<div />").text(_t("You must choose at least one record.")), { title: _t("Warning"), modal: true });
+            return false;
+        };	
+        self.do_action({
+            name: _t("MFG Tasks"),
+            res_model: 'task.print',
+            src_model: 'project.task',
+            views: [[false, 'form']],
+            type: 'ir.actions.act_window',
+            target: 'new',
+			context: {'active_ids':item_ids,'default_print_type':'by_team'}
+        });
+        var am = instance.webclient.action_manager;
+        var form = am.dialog_widget.views.form.controller;
+        form.on("on_button_cancel", am.dialog, am.dialog.close);
+        form.on('record_saved', self, function() {
+            am.dialog.close();
+            self.view.do_reload();
+        });    
     },
     /*the print function for print ddlb menu, johnw, 09/13/2014*/
     do_action_print: function() {
@@ -732,7 +775,6 @@ instance.web_kanban.KanbanGroup = instance.web.Widget.extend({
             self.view.do_reload();
         });    
     }, 
-    
     do_save_sequences: function() {
         var self = this;
         if (_.indexOf(this.view.fields_keys, 'sequence') > -1) {
@@ -860,7 +902,10 @@ instance.web_kanban.KanbanRecord = instance.web.Widget.extend({
                 self.do_warn("Kanban: no action for type : " + type);
             }
         });
-
+        //for the elements click ,no need to open the record, johnw, 09/17/2014
+        this.$el.find('.oe_kanban_noaction').click(function(ev) {
+        	return
+        });        
         if (this.$el.find('.oe_kanban_global_click,.oe_kanban_global_click_edit').length) {
             this.$el.on('click', function(ev) {
                 if (!ev.isTrigger && !$._data(ev.target, 'events')) {

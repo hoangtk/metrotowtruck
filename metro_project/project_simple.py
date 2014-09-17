@@ -96,7 +96,7 @@ class project_project(osv.osv):
 '''    
 class project_task(base_stage, osv.osv):
     _inherit = "project.task"        
-    
+    _order = "sequence, date_start, name, id"
     _columns = {
         'project_type': fields.related('project_id', 'project_type', type='selection', 
                                        selection=_PROJ_TYPES, 

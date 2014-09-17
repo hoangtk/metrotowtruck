@@ -148,7 +148,7 @@
 
                             <div class="oe_kanban_content">
                             	<div><b><field name="mfg_ids"/></b></div>
-                                <div><b><field name="name"/>[<field name="priority"/>]</b></div>
+                                <div><b><field name="name"/></b></div>
                                 <div>
                                     <field name="product"/><br/>
                                     <field name="workorder_id"/><br/>
@@ -170,6 +170,8 @@
                                         <span class="oe_e">N</span>
                                         <t t-esc="Math.round(record.remaining_hours.raw_value)"/>
                                     </span>
+                                    <input type="checkbox" t-att-data-id="record.id.raw_value" 
+                                    	class="oe_kanban_record_selector oe_kanban_noaction" t-att-checked="checked" title="Select"/>
                                 </div>
 <!--                                 <div class="oe_kanban_footer_left" style="margin-top:5px;">
                                     <t t-raw="record.message_summary.raw_value"/>
