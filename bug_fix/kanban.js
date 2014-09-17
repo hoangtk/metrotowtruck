@@ -902,6 +902,10 @@ instance.web_kanban.KanbanRecord = instance.web.Widget.extend({
                 self.do_warn("Kanban: no action for type : " + type);
             }
         });
+        //for the elements click ,no need to open the record, johnw, 09/17/2014
+        this.$el.find('.oe_kanban_noaction').click(function(ev) {
+        	return
+        });        
         if (this.$el.find('.oe_kanban_global_click,.oe_kanban_global_click_edit').length) {
             this.$el.on('click', function(ev) {
                 if (!ev.isTrigger && !$._data(ev.target, 'events')) {
