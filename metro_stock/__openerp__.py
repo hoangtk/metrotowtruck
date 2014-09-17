@@ -42,6 +42,7 @@
         'wizard/stock_import_inventory_view.xml',       
         'wizard/stock_change_product_qty_view.xml',    
         'wizard/stock_return_picking_view.xml', 
+        'wizard/stock_partial_picking_view.xml', 
         'stock_view.xml',
         'stock_sequence.xml',
         'stock_wh_loc.xml',     

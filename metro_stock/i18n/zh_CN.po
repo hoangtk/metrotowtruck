@@ -1187,11 +1187,13 @@ msgstr "基本数量"
 
 #. module: metro_stock
 #: field:material.request,mr_ticket_no:0
+#: field:stock.partial.picking,mr_ticket_no:0
 msgid "Ticket#"
 msgstr "纸质单号"
 
 #. module: metro_stock
 #: field:stock.picking.in,deliver_ticket_no:0
+#: field:stock.partial.picking,deliver_ticket_no:0
 msgid "Deliver Ticket#"
 msgstr "送货单号"
 

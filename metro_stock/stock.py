@@ -42,7 +42,12 @@ class material_request(osv.osv):
         'move_lines': fields.one2many('material.request.line', 'picking_id', 'Request Products', states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}),
         'mr_dept_id': fields.many2one('hr.department', 'Department', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
-        'mr_ticket_no': fields.char('Ticket#', size=16)
+        'message_ids': fields.one2many('mail.message', 'res_id',
+            domain=lambda self: [('model', '=', 'stock.picking')],
+            auto_join=True,
+            string='Messages',
+            help="Messages and communication history"),
+        'mr_ticket_no': fields.char('Ticket#', size=16, track_visibility='onchange')
     }
     _defaults = {
         'type': 'mr',
@@ -360,7 +365,8 @@ class stock_picking(osv.osv):
         'create_uid': fields.many2one('res.users', 'Creator',readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True), 
         'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
-        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16)
+        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16, track_visibility='onchange'),
+        'mr_ticket_no': fields.char('Ticket#', size=16, track_visibility='onchange')
     }      
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
@@ -430,6 +436,21 @@ class stock_picking(osv.osv):
             if len(todo):
                 self.pool.get('stock.move').check_assign(cr, uid, todo, context=context)
         return resu       
+    def do_partial(self, cr, uid, ids, partial_datas, context=None):
+        res = super(stock_picking,self).do_partial(cr, uid, ids, partial_datas, context)
+        #get the deliver ticket no from context, transfered from stock_partial_picking
+        vals = {'deliver_ticket_no':context.get('deliver_ticket_no') and context.get('deliver_ticket_no') or None,
+                'mr_ticket_no':context.get('mr_ticket_no') and context.get('mr_ticket_no') or None,}
+        #get the delivered picking ids
+        done_pick_ids = []
+        for pick_id, done_pick_id in res.items():
+            if done_pick_id.get('delivered_picking'):
+                done_pick_ids.append(done_pick_id.get('delivered_picking'))
+        #update ticket#
+        self.write(cr, uid, done_pick_ids, vals, context=context)
+        return res
+
+    
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -461,8 +482,9 @@ class stock_picking_in(osv.osv):
             auto_join=True,
             string='Messages',
             help="Messages and communication history"),
+        #fields added to stock_picking_in/out also need add to stock_picking, since the read() method to the 2 classes are using stock_picking class, see addons/stock/stock.py.stock_picking_in
         'account_move_ids': fields.one2many('account.move', 'picking_id',string = 'Stock Accout Move', readonly=False),
-        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16)                  
+        'deliver_ticket_no': fields.char('Deliver Ticket#', size=16, track_visibility='onchange')                  
     }     
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #deal the 'date' datetime field query
