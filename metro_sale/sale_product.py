@@ -15,7 +15,7 @@ class sale_product(osv.osv):
             res[mfg_id.id] = mfg_id.project_ids and len(mfg_id.project_ids) > 0
         return res
     _columns = {
-        'name': fields.char('ID', size=8, required=True,readonly=True, states=STATES_COL),
+        'name': fields.char('MFG ID', size=8, required=True,readonly=True, states=STATES_COL),
         'note': fields.text('Description', ),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
