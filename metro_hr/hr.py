@@ -82,7 +82,8 @@ class hr_employee(osv.osv):
 		'leave_date_from': fields.function(_get_leave_status, multi='leave_status', type='date', string='From Date'),
 		'leave_date_to': fields.function(_get_leave_status, multi='leave_status', type='date', string='To Date'),
 		'emp_code': fields.char('Employee Code', size=16),
-		'emp_card_id': fields.char('Employee Card ID', size=16),		
+		'emp_card_id': fields.char('Employee Card ID', size=16),
+        'multi_images': fields.text("Multi Images"),		
 	}
 	_sql_constraints = [
 		('emp_code_uniq', 'unique(emp_code)', 'Employee Code must be unique!'),

@@ -690,8 +690,8 @@ msgstr "总计"
 #. module: metro_sale
 #: model:ir.model.fields,field_description:metro_sale.field_sale_product_name
 #: view:sale.product:0 field:sale.product,name:0
-msgid "ID"
-msgstr "ID"
+msgid "MFG ID"
+msgstr "生产ID"
 
 #. module: metro_sale
 #: field:contact.log,description:0

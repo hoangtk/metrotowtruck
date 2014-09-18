@@ -33,7 +33,7 @@
     'author': 'PureThrottle Inc.',
     'maintainer': 'PureThrottle Inc.',
     'website': 'http://www.purethrottle.com/',
-    'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet"],
+    'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image"],
     'init_xml': [],
     'update_xml': [
         'security/ir.model.access.csv',
