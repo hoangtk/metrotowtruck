@@ -6,3 +6,4 @@ import wizard
 import account_move
 import stock
 import account_analytic
+import account_voucher

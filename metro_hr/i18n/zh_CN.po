@@ -1,65 +1,94 @@
 # Translation of OpenERP Server.
 # This file contains the translation of the following modules:
-#	* metro_hr
+# 	* metro_hr
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-30 23:24+0000\n"
-"PO-Revision-Date: 2013-05-30 23:24+0000\n"
+"POT-Creation-Date: 2014-09-20 01:49+0000\n"
+"PO-Revision-Date: 2014-09-20 09:55+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
+"X-Generator: Poedit 1.5.7\n"
 
 #. module: metro_hr
-#: view:hr.employee:0
-msgid "Employment Dates"
-msgstr "就业日期"
+#: model:ir.model.fields,field_description:metro_hr.field_res_users_img_emp
+#: field:res.users,img_emp:0
+msgid "Image"
+msgstr "图片"
 
 #. module: metro_hr
-#: field:hr.employee.salaryhistory,reason:0
-msgid "Reason for Change"
-msgstr "变更原因"
+#: selection:hr.employee.holidaycalendar,holidaytype:0
+msgid "Extra Working Day"
+msgstr "额外工作日"
 
 #. module: metro_hr
-#: field:hr.employee,employment_finish:0
-msgid "Employment Finished"
-msgstr "Employment Finished"
+#: selection:hr.employee.holidaycalendar,holidaytype:0
+msgid "Dongguan Longju Holiday"
+msgstr "龙驹假期"
 
 #. module: metro_hr
-#: view:hr.employee:0
-msgid "Employment History"
-msgstr "工作经历"
+#: field:exhibit.calendar,date_stop:0
+#: field:hr.employee.holidaycalendar,date_stop:0
+#: model:ir.model.fields,field_description:metro_hr.field_exhibit_calendar_date_stop
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_holidaycalendar_date_stop
+msgid "Stop date"
+msgstr "结束日期"
 
 #. module: metro_hr
-#: field:hr.employee.salaryhistory,salary:0
-msgid "Amount (CNY)"
-msgstr "金额（万元）"
+#: field:hr.employee,emp_card_id:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_emp_card_id
+msgid "Employee Card ID"
+msgstr "卡号"
 
 #. module: metro_hr
-#: model:ir.model,name:metro_hr.model_hr_employee
-msgid "Employee"
-msgstr "员工"
+#: field:hr.employee.holidaycalendar,holidaytype:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_holidaycalendar_holidaytype
+msgid "Holiday Type"
+msgstr "假期类型"
 
 #. module: metro_hr
-#: view:hr.employee:0
-#: field:hr.employee,salaryhistory_ids:0
+#: model:ir.model,name:metro_hr.model_hr_department
+msgid "Department"
+msgstr "部门"
+
+#. module: metro_hr
+#: field:hr.employee,known_allergies:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_known_allergies
+msgid "Known Allergies"
+msgstr "已知的过敏"
+
+#. module: metro_hr
+#: view:hr.employee:0 field:hr.employee,salaryhistory_ids:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_salaryhistory_ids
 msgid "Salary History"
 msgstr "工资历史"
 
 #. module: metro_hr
-#: field:hr.employee.salaryhistory,salary_id:0
-msgid "Test"
-msgstr "Test"
+#: field:hr.analytic.timesheet,employee_id:0
+#: model:ir.model,name:metro_hr.model_hr_employee
+#: model:ir.model.fields,field_description:metro_hr.field_hr_analytic_timesheet_employee_id
+msgid "Employee"
+msgstr "员工"
 
 #. module: metro_hr
-#: field:hr.employee.salaryhistory,date:0
-msgid "Date"
-msgstr "日"
+#: field:exhibit.calendar,date_start:0
+#: field:hr.employee.holidaycalendar,date_start:0
+#: model:ir.model.fields,field_description:metro_hr.field_exhibit_calendar_date_start
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_holidaycalendar_date_start
+msgid "Start date"
+msgstr "开始日期"
+
+#. module: metro_hr
+#: field:hr.employee,hourly_rate:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_hourly_rate
+msgid "Hourly Rate"
+msgstr "小时费率"
 
 #. module: metro_hr
 #: model:ir.model,name:metro_hr.model_hr_employee_salaryhistory
@@ -67,16 +96,246 @@ msgid "Employee Salary History"
 msgstr "职工工资历史"
 
 #. module: metro_hr
+#: view:hr.analytic.timesheet:0
+msgid "{'employee_id':employee_id}"
+msgstr "{'employee_id':employee_id}"
+
+#. module: metro_hr
+#: field:hr.employee,room_no:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_room_no
+msgid "Room#"
+msgstr "宿舍号"
+
+#. module: metro_hr
+#: field:hr.employee,degree_id:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_degree_id
+msgid "Degree"
+msgstr "学历"
+
+#. module: metro_hr
+#: field:hr.employee,emergency_phone:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_emergency_phone
+msgid "Emergency Phone"
+msgstr "紧急联系电话"
+
+#. module: metro_hr
+#: view:exhibit.calendar:0
+msgid "Create a New Exhibition"
+msgstr "创建一个展览"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,reason:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_salaryhistory_reason
+msgid "Reason for Change"
+msgstr "变更原因"
+
+#. module: metro_hr
+#: model:ir.ui.menu,name:metro_hr.menu_metro_holiday_calendar_main_action
+msgid "Calendars"
+msgstr "日历"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,salary:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_salaryhistory_salary
+msgid "Amount (CNY)"
+msgstr "金额（万元）"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,salary_id:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_salaryhistory_salary_id
+msgid "Test"
+msgstr "Test"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Others"
+msgstr "其它"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,date:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_salaryhistory_date
+msgid "Date"
+msgstr "日"
+
+#. module: metro_hr
+#: field:hr.employee,emergency_contacter:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_emergency_contacter
+msgid "Emergency Contacter"
+msgstr "紧急联系人"
+
+#. module: metro_hr
 #: field:hr.employee,employment_start:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_employment_start
 msgid "Employment Started"
 msgstr "就业开始"
 
-#. module: hr
+#. module: metro_hr
+#: view:exhibit.calendar:0 model:ir.model,name:metro_hr.model_exhibit_calendar
+msgid "Exhibition Calendar"
+msgstr "展览日历"
+
+#. module: metro_hr
+#: field:exhibit.type,name:0
+#: model:ir.model.fields,field_description:metro_hr.field_exhibit_type_name
+msgid "Name"
+msgstr "名称"
+
+#. module: metro_hr
+#: model:ir.model,name:metro_hr.model_hr_employee_holidaycalendar
+msgid "Holiday Calendar Dates"
+msgstr "假期日历日期"
+
+#. module: metro_hr
+#: view:hr.employee:0 view:res.users:0
+msgid "Employees"
+msgstr "员工"
+
+#. module: metro_hr
+#: field:hr.employee,employment_finish:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_employment_finish
+msgid "Employment Finished"
+msgstr "合同结束"
+
+#. module: metro_hr
+#: view:hr.employee.holidaycalendar:0
+msgid "Holiday Calendar"
+msgstr "假期日历"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Employment History"
+msgstr "工作经历"
+
+#. module: metro_hr
+#: field:hr.employee,known_medical_cond:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_known_medical_cond
+msgid "Known Medical Conditions"
+msgstr "已知的医疗条件"
+
+#. module: metro_hr
+#: field:hr.employee,multi_images:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_multi_images
+msgid "Multi Images"
+msgstr "多图片"
+
+#. module: metro_hr
+#: view:hr.analytic.timesheet:0
+msgid ""
+"on_change_unit_amount(product_id, unit_amount, False, product_uom_id,"
+"journal_id,employee_id)"
+msgstr ""
+"on_change_unit_amount(product_id, unit_amount, False, product_uom_id,"
+"journal_id,employee_id)"
+
+#. module: metro_hr
+#: view:exhibit.calendar:0 view:hr.employee.holidaycalendar:0
+msgid "Calendar"
+msgstr "日历"
+
+#. module: metro_hr
+#: field:hr.employee,employment_resigned:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_employment_resigned
+msgid "Employment Resigned"
+msgstr "重签合同"
+
+#. module: metro_hr
+#: model:ir.model,name:metro_hr.model_res_users
+msgid "Users"
+msgstr "用户"
+
+#. module: metro_hr
+#: view:res.users:0
+msgid "Access Rights"
+msgstr "访问权限"
+
+#. module: metro_hr
+#: field:hr.employee.holidaycalendar,name:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_holidaycalendar_name
+msgid "Holiday Name"
+msgstr "假期名称"
+
+#. module: metro_hr
+#: model:ir.actions.act_window,name:metro_hr.exhibition_calendar_action
+#: model:ir.ui.menu,name:metro_hr.menu_exhibition_calendar_action
+msgid "Exhibitions"
+msgstr "展览"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Employment Dates"
+msgstr "就业日期"
+
+#. module: metro_hr
+#: field:hr.employee,recruit_source_id:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_recruit_source_id
+msgid "Recruitment Source"
+msgstr "入职渠道"
+
+#. module: metro_hr
+#: sql_constraint:hr.employee:0
+msgid "Employee Code must be unique!"
+msgstr "员工编码不能重复"
+
+#. module: metro_hr
+#: field:hr.department,sequence:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_department_sequence
+msgid "Sequence"
+msgstr "序号"
+
+#. module: metro_hr
+#: selection:hr.employee.holidaycalendar,holidaytype:0
+msgid "Chinese National Holiday"
+msgstr "中国法定假日"
+
+#. module: metro_hr
+#: model:ir.actions.act_window,name:metro_hr.metro_holiday_calendar_action
+#: model:ir.ui.menu,name:metro_hr.menu_metro_holiday_calendar_action
+#: model:ir.ui.menu,name:metro_hr.menu_metro_hr_holiday_calendar_action
+msgid "Factory Holidays"
+msgstr "工厂假期"
+
+#. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_res_users_img_emp_medium
+#: field:res.users,img_emp_medium:0
+msgid "Medium-sized image"
+msgstr "Medium-sized image"
+
+#. module: metro_hr
+#: field:exhibit.calendar,name:0
+#: model:ir.model.fields,field_description:metro_hr.field_exhibit_calendar_name
+msgid "Exhibition Name"
+msgstr "展览名称"
+
+#. module: metro_hr
+#: view:hr.employee.holidaycalendar:0
+msgid "Create a New Holiday"
+msgstr "创建一个假期"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Images"
+msgstr "图片附件"
+
+#. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_res_users_img_emp_small
+#: field:res.users,img_emp_small:0
+msgid "Small-sized image"
+msgstr "Small-sized image"
+
+#. module: metro_hr
 #: field:hr.employee,emp_code:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_emp_code
 msgid "Employee Code"
 msgstr "编号"
 
-#. module: hr
-#: field:hr.employee,emp_card_id:0
-msgid "Employee Card ID"
-msgstr "卡号"
+#. module: metro_hr
+#: model:ir.model,name:metro_hr.model_hr_analytic_timesheet
+msgid "Timesheet Line"
+msgstr "计工单明细"
+
+#. module: metro_hr
+#: field:exhibit.calendar,exhibit_type_id:0
+#: model:ir.model,name:metro_hr.model_exhibit_type
+#: model:ir.model.fields,field_description:metro_hr.field_exhibit_calendar_exhibit_type_id
+msgid "Exhibition Type"
+msgstr "展览类型"

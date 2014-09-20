@@ -83,7 +83,14 @@ class hr_employee(osv.osv):
 		'leave_date_to': fields.function(_get_leave_status, multi='leave_status', type='date', string='To Date'),
 		'emp_code': fields.char('Employee Code', size=16),
 		'emp_card_id': fields.char('Employee Card ID', size=16),
-        'multi_images': fields.text("Multi Images"),		
+        'multi_images': fields.text("Multi Images"),
+        'room_no': fields.char("Room#",size=8),
+        'emergency_contacter': fields.char("Emergency Contacter",size=32),
+        'emergency_phone': fields.char("Emergency Phone",size=32),
+        'known_medical_cond': fields.text("Known Medical Conditions"),
+        'known_allergies': fields.text("Known Allergies"),
+        'recruit_source_id': fields.many2one('hr.recruitment.source', 'Recruitment Source'),
+        'degree_id': fields.many2one('hr.recruitment.degree', 'Degree'),
 	}
 	_sql_constraints = [
 		('emp_code_uniq', 'unique(emp_code)', 'Employee Code must be unique!'),

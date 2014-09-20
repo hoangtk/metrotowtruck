@@ -1,0 +1,122 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* metro_hr
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-30 23:24+0000\n"
+"PO-Revision-Date: 2013-05-30 23:24+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Employment Dates"
+msgstr "就业日期"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,reason:0
+msgid "Reason for Change"
+msgstr "变更原因"
+
+#. module: metro_hr
+#: field:hr.employee,employment_finish:0
+msgid "Employment Finished"
+msgstr "Employment Finished"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Employment History"
+msgstr "工作经历"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,salary:0
+msgid "Amount (CNY)"
+msgstr "金额（万元）"
+
+#. module: metro_hr
+#: model:ir.model,name:metro_hr.model_hr_employee
+msgid "Employee"
+msgstr "员工"
+
+#. module: metro_hr
+#: view:hr.employee:0
+#: field:hr.employee,salaryhistory_ids:0
+msgid "Salary History"
+msgstr "工资历史"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,salary_id:0
+msgid "Test"
+msgstr "Test"
+
+#. module: metro_hr
+#: field:hr.employee.salaryhistory,date:0
+msgid "Date"
+msgstr "日"
+
+#. module: metro_hr
+#: model:ir.model,name:metro_hr.model_hr_employee_salaryhistory
+msgid "Employee Salary History"
+msgstr "职工工资历史"
+
+#. module: metro_hr
+#: field:hr.employee,employment_start:0
+msgid "Employment Started"
+msgstr "就业开始"
+
+#. module: metro_hr
+#: field:hr.employee,emp_code:0
+msgid "Employee Code"
+msgstr "编号"
+
+#. module: metro_hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "卡号"
+
+#. module: metro_hr
+#: field:hr.employee,emergency_contacter:0
+msgid "Emergency Contacter"
+msgstr "紧急联系人"
+
+#. module: metro_hr
+#: field:hr.employee,emergency_contacter:0
+msgid "Emergency Contacter"
+msgstr "紧急联系人"
+
+#. module: metro_hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "卡号"
+
+#. module: metro_hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "卡号"
+
+#. module: metro_hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "卡号"
+
+#. module: metro_hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "卡号"
+
+#. module: metro_hr
+#: field:hr.employee,emp_card_id:0
+msgid "Employee Card ID"
+msgstr "卡号"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Others"
+msgstr "其它"

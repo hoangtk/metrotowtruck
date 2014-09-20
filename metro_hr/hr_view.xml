@@ -44,7 +44,24 @@
 								<field name="emp_card_id"/>
 							</group>
 						</group>
-					</xpath>					
+					</xpath>		
+					<xpath expr="//group[@string='Birth']" position="after">
+	                    <group string="Others" colspan="4">
+		                    <group>
+		                        <field name="room_no"/>
+		                        <field name="recruit_source_id"/>
+		                        <field name="degree_id"/>
+		                    </group>
+		                    <group>
+		                        <field name="known_medical_cond"/>
+		                        <field name="known_allergies"/>
+		                    </group>
+	                    </group>
+					</xpath>
+                    <field name="work_location" position="after">
+	                    <field name="emergency_contacter"/>
+	                    <field name="emergency_phone"/>
+                    </field>
 				</data>
 			</field>
          </record>
