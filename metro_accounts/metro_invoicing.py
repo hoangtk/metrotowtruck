@@ -15,12 +15,6 @@ report_sxw.report_sxw(
     'metro_accounts/account_invoice_metro.rml',
     parser=account_invoice
 )
-    
-class account_voucher(osv.osv):
-    _inherit = "account.voucher"
-    _columns={
-              'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),              
-    }
-r=account_voucher()
+
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
