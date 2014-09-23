@@ -5,6 +5,7 @@ from openerp import netsvc
 import time
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.report.pyPdf import PdfFileWriter, PdfFileReader
+from openerp.addons.metro import utils
 class work_order_cnc(osv.osv):
     _name = "work.order.cnc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -30,7 +31,7 @@ class work_order_cnc(osv.osv):
         'sale_product_ids': fields.many2many('sale.product','cnc_id_rel','cnc_id','id_id',
                                              string="MFG IDs",readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'wo_cnc_lines': fields.one2many('work.order.cnc.line','order_id','CNC Work Order Lines',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
-        'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
+        'state': fields.selection([('draft','Draft'),('ready','Ready'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_progress','In Progress'),('done','Done'),('cancel','Cancelled')],
             'Status', track_visibility='onchange', required=True),
         'reject_message': fields.text('Rejection Message', track_visibility='onchange'),
         'create_uid': fields.many2one('res.users','Creator',readonly=True),
@@ -62,7 +63,18 @@ class work_order_cnc(osv.osv):
                 if line.state == 'done':
                     raise osv.except_osv(_('Invalid Action!'), _('Action was blocked, there are done work order lines!'))
         return True
-    
+
+    def action_ready(self, cr, uid, ids, context=None):
+        #set the ready state
+        self._set_state(cr, uid, ids, 'ready',context)
+        #send email to the user group that can confirm
+        email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_confirm', context=context)
+        if email_group_id:
+            for order in self.browse(cr, uid, ids, context=context):
+                email_content = 'CNC reminder: %s need your confirmation'%(order.name)
+                utils.email_send_group(cr, uid, order.create_uid.email, None,email_content,email_content, email_group_id, context)          
+        return True
+        
     def action_confirm(self, cr, uid, ids, context=None):
         #CNC MFG task required parameter
         cnc_task_required = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp.cnc.task.reuqired', '0', context=context)
@@ -82,6 +94,14 @@ class work_order_cnc(osv.osv):
                     raise osv.except_osv(_('Invalid Action!'), _('The cnc line must have both "CNC File" and "Drawing PDF" files uploaded!'))
         #set state to done
         self._set_state(cr, uid, ids, 'confirmed',context)
+        #send email to the user group that can approve
+        email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_approve', context=context)
+        if email_group_id:
+            for order in self.browse(cr, uid, ids, context=context):
+                email_content = 'CNC reminder: %s need your approval'%(order.name)
+                utils.email_send_group(cr, uid, order.create_uid.email, None,email_content,email_content, email_group_id, context)          
+        return True
+
         return True
         
     #TODO, for the feature connecting with the MRP
@@ -121,22 +141,39 @@ class work_order_cnc(osv.osv):
     def action_approve(self, cr, uid, ids, context=None):
         #set the cancel state
         self._set_state(cr, uid, ids, 'approved',context)
+        #send email to the user group that can CNC done
+        email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_cnc_mgr', context=context)
+        if email_group_id:
+            for order in self.browse(cr, uid, ids, context=context):
+                email_content = 'CNC reminder: %s was approved'%(order.name)
+                utils.email_send_group(cr, uid, order.create_uid.email, None,email_content,email_content, email_group_id, context)          
         return True
 
     def action_done(self, cr, uid, ids, context=None):
         #set the cancel state
         self._set_state(cr, uid, ids, 'done',context)
         return True
+
+    def action_in_progress(self, cr, uid, ids, context=None):
+        ids = self.search(cr, uid, [('id', 'in', ids),('state','=','approved')],context=context)
+        self.write(cr,uid,ids,{'state':'in_progress'},context=context)
+        return True    
     
     def action_reject_callback(self, cr, uid, ids, message, context=None):
         #set the draft state
         self._set_state(cr, uid, ids, 'rejected',context)
         self.write(cr,uid,ids,{'reject_message':message})
+        #send email to the user for the rejection message
+        email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
+        for order in self.browse(cr, uid, ids, context=context):
+            if order.create_uid.email:
+                email_content = 'CNC reminder: %s was rejected'%(order.name)
+                utils.email_send_group(cr, uid, email_from, order.create_uid.email,email_content,email_content, None, context) 
         return True
                     
     def action_reject(self, cr, uid, ids, context=None):     
         ctx = dict(context)
-        ctx.update({'confirm_title':'Confirm rejecttion message',
+        ctx.update({'confirm_title':'Confirm rejection message',
                     'src_model':'work.order.cnc',
                     "model_callback":'action_reject_callback',})
         return self.pool.get('confirm.message').open(cr, uid, ids, ctx)
@@ -267,7 +304,7 @@ class work_order_cnc_line(osv.osv):
         'percent_usage': fields.float('Usage Percent of Manufacture(%)', required=True),
         'date_finished': fields.date('Finished Date', readonly=True),
         'product_id': fields.many2one('product.product','Product', readonly=True),
-        'state': fields.selection([('draft','Draft'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
+        'state': fields.selection([('draft','Draft'),('ready','Ready'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
         'mr_id': fields.many2one('material.request','MR#', readonly=True),
         'is_whole_plate': fields.boolean('Whole Plate', readonly=True),
@@ -379,6 +416,7 @@ class work_order_cnc_line(osv.osv):
         #auto set the CNC order done once all lines are done
         order_ids = {}
         order_ids_done = []
+        order_ids_in_progress = []
         for line in self.read(cr,uid,ids,['order_id'],context=context):
             order_id = line['order_id'][0]
             if not order_ids.has_key(order_id):
@@ -392,7 +430,10 @@ class work_order_cnc_line(osv.osv):
                     break
             if order_done:
                 order_ids_done.append(order.id)
+            else:
+                order_ids_in_progress.append(order.id)
         self.pool.get('work.order.cnc').action_done(cr,uid,order_ids_done,context=context)
+        self.pool.get('work.order.cnc').action_in_progress(cr,uid,order_ids_in_progress,context=context)
         #generate material requisition
         self.make_material_requisition(cr, uid, ids, context)
         #decrease the quantity of whole plate

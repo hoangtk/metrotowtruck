@@ -39,5 +39,11 @@ class account_move_batch(osv.osv_memory):
         data =  self.browse(cr, uid, ids, context=context)[0]
         self.pool.get(active_model).button_validate(cr, uid, active_ids, context=context)
         return {'type': 'ir.actions.act_window_close'}    
+    def cancel_account_move(self, cr, uid, ids, context=None):
+        active_ids = context and context.get('active_ids', [])
+        active_model = context and context.get('active_model', [])
+        data =  self.browse(cr, uid, ids, context=context)[0]
+        self.pool.get(active_model).button_cancel(cr, uid, active_ids, context=context)
+        return {'type': 'ir.actions.act_window_close'}    
 account_move_batch()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

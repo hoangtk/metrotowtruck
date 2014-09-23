@@ -24,7 +24,10 @@ from openerp.addons.base_status.base_stage import base_stage
 from openerp.tools.translate import _
 from openerp.addons.project import project as project_super
 from openerp.addons.metro_purchase.purchase import deal_args
-
+import threading
+from openerp import pooler
+from openerp.addons.metro import utils
+    
 _PROJ_TYPES = [('simple','Simple'),('software','Software'),('engineer','Engineering'),('gtd','GTD'),('mfg','Manufacture')]
 import datetime
 
@@ -165,28 +168,21 @@ class project_task(base_stage, osv.osv):
                 resu.update({'project_id':result[1]})
         return resu
     
-    def email_send(self, cr, uid, ids, vals, context=None):
-        email_tmpl_obj = self.pool.get('email.template')
-        #send email to assignee
-        if 'user_id' in vals:
-            assignee = self.pool.get('res.users').browse(cr, uid, vals['user_id'], context=context)
-            #only send email when user have email setup
-            if assignee.email:
-                tmpl_ids = self.pool.get('email.template').search(cr, uid, [('name','=','project_task_assignee')])
-                if tmpl_ids:
-                    for id in ids:
-                        email_tmpl_obj.send_mail(cr, uid, tmpl_ids[0], id, force_send=True, context=context)
-        return True
-    
     def create(self, cr, uid, vals, context=None):
         new_id = super(project_task,self).create(cr, uid, vals ,context)
         if self.browse(cr,uid,new_id,context=context).project_type != 'mfg':
-            self.email_send(cr, uid, [new_id],vals,context)
+            if 'user_id' in vals:
+                email_vals = {'email_user_id':vals['user_id'],'email_template_name':'project_task_assignee'}
+                utils.email_send_template(cr, uid, [new_id], email_vals, context)
+#            self.email_send(cr, uid, [new_id],vals,context)
         return new_id
             
     def write(self, cr, uid, ids, vals, context=None):
         resu = super(project_task,self).write(cr, uid, ids, vals ,context)
-        self.email_send(cr, uid, ids,vals,context)
+        if 'user_id' in vals:
+            email_vals = {'email_user_id':vals['user_id'],'email_template_name':'project_task_assignee'}
+            utils.email_send_template(cr, uid, ids, email_vals, context)
+#        self.email_send(cr, uid, ids,vals,context)
         return resu     
     
     def fields_get(self, cr, uid, allfields=None, context=None, write_access=True):

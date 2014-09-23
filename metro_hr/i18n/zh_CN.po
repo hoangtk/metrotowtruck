@@ -194,7 +194,7 @@ msgstr "员工"
 #: field:hr.employee,employment_finish:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_employee_employment_finish
 msgid "Employment Finished"
-msgstr "合同结束"
+msgstr "离职日期"
 
 #. module: metro_hr
 #: view:hr.employee.holidaycalendar:0
@@ -236,7 +236,7 @@ msgstr "日历"
 #: field:hr.employee,employment_resigned:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_employee_employment_resigned
 msgid "Employment Resigned"
-msgstr "重签合同"
+msgstr "辞职申请"
 
 #. module: metro_hr
 #: model:ir.model,name:metro_hr.model_res_users
