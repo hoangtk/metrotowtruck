@@ -41,7 +41,7 @@ class mrp_config_settings(osv.osv_memory):
         #deal the cnc wo confirm/approve group id
         self.pool.get('ir.config_parameter').set_param(cr, uid, 'mrp_cnc_wo_group_confirm', conf.mrp_cnc_wo_group_confirm.id, context=context)
         self.pool.get('ir.config_parameter').set_param(cr, uid, 'mrp_cnc_wo_group_approve', conf.mrp_cnc_wo_group_approve.id, context=context)
-        self.pool.get('ir.config_parameter').set_param(cr, uid, 'mrp_cnc_wo_group_cnc_mgr', conf.mrp_cnc_wo_group_approve.id, context=context)
+        self.pool.get('ir.config_parameter').set_param(cr, uid, 'mrp_cnc_wo_group_cnc_mgr', conf.mrp_cnc_wo_group_cnc_mgr.id, context=context)
         return {}   
      
     def get_default_metro(self, cr,uid,fields,context):
@@ -52,8 +52,8 @@ class mrp_config_settings(osv.osv_memory):
         mrp_cnc_wo_group_cnc_mgr = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_cnc_mgr', context=context)
         
         res.update({'cnc_task_required':cnc_task_required=="1" and True or False,
-                    'mrp_cnc_wo_group_confirm':mrp_cnc_wo_group_confirm,
-                    'mrp_cnc_wo_group_approve':mrp_cnc_wo_group_approve,
-                    'mrp_cnc_wo_group_cnc_mgr':mrp_cnc_wo_group_cnc_mgr})
+                    'mrp_cnc_wo_group_confirm':mrp_cnc_wo_group_confirm and long(mrp_cnc_wo_group_confirm) or None,
+                    'mrp_cnc_wo_group_approve':mrp_cnc_wo_group_approve and long(mrp_cnc_wo_group_approve) or None,
+                    'mrp_cnc_wo_group_cnc_mgr':mrp_cnc_wo_group_cnc_mgr and long(mrp_cnc_wo_group_cnc_mgr) or None})
         return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
