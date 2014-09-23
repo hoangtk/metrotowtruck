@@ -48,9 +48,9 @@
 					<xpath expr="//group[@string='Birth']" position="after">
 	                    <group string="Others" colspan="4">
 		                    <group>
-		                        <field name="room_no"/>
 		                        <field name="recruit_source_id"/>
 		                        <field name="degree_id"/>
+		                        <field name="room_no"/>
 		                    </group>
 		                    <group>
 		                        <field name="known_medical_cond"/>
@@ -58,7 +58,7 @@
 		                    </group>
 	                    </group>
 					</xpath>
-                    <field name="work_location" position="after">
+                    <field name="mobile_phone" position="after">
 	                    <field name="emergency_contacter"/>
 	                    <field name="emergency_phone"/>
                     </field>

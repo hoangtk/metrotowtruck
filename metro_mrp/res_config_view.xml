@@ -15,6 +15,18 @@
 	                                <field name="cnc_task_required" class="oe_inline"/>
 	                                <label for="cnc_task_required"/>
 	                            </div>
+	                            <div>
+	                                <field name="mrp_cnc_wo_group_confirm" class="oe_inline"/>
+	                                <label for="mrp_cnc_wo_group_confirm"/>
+	                            </div>
+	                            <div>
+	                                <field name="mrp_cnc_wo_group_approve" class="oe_inline"/>
+	                                <label for="mrp_cnc_wo_group_approve"/>
+	                            </div>
+	                            <div>
+	                                <field name="mrp_cnc_wo_group_cnc_mgr" class="oe_inline"/>
+	                                <label for="mrp_cnc_wo_group_cnc_mgr"/>
+	                            </div>
 	                        </div>
 	                    </group>
              		</xpath>

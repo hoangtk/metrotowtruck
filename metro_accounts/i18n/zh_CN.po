@@ -183,3 +183,17 @@ msgstr "审查"
 #: view:account.move:0
 msgid "Cancel Entry"
 msgstr "取消登帐"
+
+#. module: account
+#: selection:account.account.type,report_type:0
+#: code:addons/account/account.py:188
+#, python-format
+msgid "Profit & Loss (Income account)"
+msgstr "损益表(收入科目)"
+
+#. module: account
+#: selection:account.account.type,report_type:0
+#: code:addons/account/account.py:191
+#, python-format
+msgid "Balance Sheet (Liability account)"
+msgstr "资产负债表(负债科目)"

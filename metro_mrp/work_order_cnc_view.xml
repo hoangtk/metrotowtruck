@@ -7,9 +7,11 @@
     	<field name="arch" type="xml">
     		<form string="CNC Work Order" version="7.0">
     			<header>
-    				<button name="action_confirm" string="Confirm" states="draft,rejected" class="oe_highlight" type="object" groups="metro_mrp.group_mrp_supervisor"/>
+    				<button name="action_ready" string="Ready" states="draft,rejected" class="oe_highlight" type="object"/>
+    				<button name="action_confirm" string="Confirm" states="ready" class="oe_highlight" type="object" groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_approve" string="Approve" states="confirmed" class="oe_highlight" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="action_reject" string="Reject" states="confirmed" type="object" groups="mrp.group_mrp_manager"/>
+    				<button name="action_draft" string="Set to Draft" states="ready" type="object"/>
     				<button name="action_draft" string="Set to Draft" states="confirmed,cancel" type="object" groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_draft" string="Set to Draft" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="action_done" string="Done" states="approved" type="object" groups="metro_mrp.group_mrp_cnc_manager"/>
@@ -17,7 +19,7 @@
     				<button name="action_cancel" string="Cancel" states="confirmed" type="object"  groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_cancel" string="Cancel" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="print_pdf" string="Print PDF" type="object"/>
-    				<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done"/>
+    				<field name="state" widget="statusbar" statusbar_visible="draft,ready,confirmed,approved,in_progress,done"/>
     			</header>
     			<!-- <sheet> -->
     				<group>
@@ -107,7 +109,7 @@
     	<field name="name">view_work_order_cnc_tree</field>
     	<field name="model">work.order.cnc</field>
     	<field name="arch" type="xml">
-            <tree fonts="bold:message_unread==True" colors="blue:state == 'confirmed';green:state == 'done';grey:state == 'cancel';" string="CNC Work Orders">
+            <tree fonts="bold:message_unread==True" colors="blue:state == 'confirmed';#FF9900:state == 'approved';green:state == 'done';grey:state == 'cancel';" string="CNC Work Orders">
                 <field name="message_unread" invisible="1"/>
 		    	<field name="id"/>
                 <field name="name"/>

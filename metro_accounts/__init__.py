@@ -7,3 +7,4 @@ import account_move
 import stock
 import account_analytic
 import account_voucher
+import res_partner
