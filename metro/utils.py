@@ -22,7 +22,7 @@
 import threading
 from openerp import pooler
 from openerp.tools import mail
-
+from openerp import SUPERUSER_ID
 def email_send_template(cr, uid, ids, email_vals, context=None):
     if 'email_template_name' in email_vals:
         threaded_email = threading.Thread(target=_email_send_template, args=(cr, uid, ids, email_vals, context))
@@ -65,6 +65,8 @@ def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_gro
         group_obj = pool.get("res.groups")
         if not isinstance(email_to_group_id, (int, long)):
             email_to_group_id = long(email_to_group_id)
+        #we can use SUPERUSER_ID to ignore the record rule for res_users and res_partner,  the email should send to all users in the group.
+#        group = group_obj.browse(new_cr,SUPERUSER_ID,email_to_group_id,context=context)
         group = group_obj.browse(new_cr,uid,email_to_group_id,context=context)
         emails = [user.email for user in group.users if user.email]
     if emails:

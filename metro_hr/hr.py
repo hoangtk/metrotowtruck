@@ -37,6 +37,13 @@ class hr_department(osv.osv):
 		#with the sequence field, then on the kanban view by department, user can change the sequence of departments.
         'sequence': fields.integer('Sequence'),
     }
+class hr_medical_type(osv.osv):
+    """ Known Medical Types """
+    _name = "hr.medical.type"
+    _description = "Known Medical Types"
+    _columns = {
+        'name': fields.char('Medical Name', size=64, required=True, translate=True),
+    }
     
 class hr_employee(osv.osv):
 	_inherit = "hr.employee"
@@ -84,10 +91,11 @@ class hr_employee(osv.osv):
 		'emp_code': fields.char('Employee Code', size=16),
 		'emp_card_id': fields.char('Employee Card ID', size=16),
         'multi_images': fields.text("Multi Images"),
-        'room_no': fields.char("Room#",size=8),
+        'room_no': fields.char("Room#",size=16),
         'emergency_contacter': fields.char("Emergency Contacter",size=32),
         'emergency_phone': fields.char("Emergency Phone",size=32),
         'known_medical_cond': fields.text("Known Medical Conditions"),
+        'known_medical_type': fields.many2many('hr.medical.type',string='Known Medical Types'),
         'known_allergies': fields.text("Known Allergies"),
         'recruit_source_id': fields.many2one('hr.recruitment.source', 'Recruitment Source'),
         'degree_id': fields.many2one('hr.recruitment.degree', 'Degree'),
