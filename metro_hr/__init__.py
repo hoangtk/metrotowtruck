@@ -21,3 +21,4 @@
 import hr
 import metro_calendar
 import hr_timesheet
+import hr_contract

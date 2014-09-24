@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#    Copyright (C) 2010 OpenERP s.a. (<http://openerp.com>).
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,35 +18,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'Metro HR',
-    'version': '1.0',
-    'category': 'Metro',
-    'description': """
-    
-        Metro HR Extension:  
-        
-        """,
-        
-        
-    'author': 'PureThrottle Inc.',
-    'maintainer': 'PureThrottle Inc.',
-    'website': 'http://www.purethrottle.com/',
-    'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image", "hr_recruitment", "hr_contract"],
-    'init_xml': [],
-    'update_xml': [
-        'security/ir.model.access.csv',
-        'hr_view.xml',
-        'hr_timesheet_view.xml',
-        'hr_contract_view.xml',
-        'metro_calendar_view.xml',
-        'hr_data.xml',
-    ],
-    'demo_xml': [],
-    'test': [],
-    'installable': True,
-    'auto_install': False,
-    'active': False,
-	'sequence': 150,
-}
+import time
+
+from openerp.osv import fields, osv
+class hr_contract(osv.osv):
+    _inherit = 'hr.contract'
+    def onchange_employee_id(self, cr, uid, ids, employee_id,context):
+        if not employee_id:
+            return {}
+        job_id = self.pool.get('hr.employee').read(cr, uid, employee_id, context=context)['job_id']
+        return {'value':{'job_id': job_id}}
+hr_contract()
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

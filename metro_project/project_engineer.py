@@ -113,9 +113,11 @@ class project_task(base_stage, osv.osv):
             ids = [ids]
         if context == None:
             context = {}
+        '''
         #the BOM is required when do project done
         for task in self.browse(cr, uid, ids, context=context):
             #Only the engineering project,  the bom_is is required
             if task.project_id.project_type == 'engineer' and not task.bom_id:
                 raise osv.except_osv(_('Error!'), _('Task "%s", BOM is required for done.'%(task.name,)))
+        '''
         return super(project_task,self).action_close(cr, uid, ids, context)
