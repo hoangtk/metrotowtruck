@@ -3,9 +3,47 @@ from osv import fields,osv
 from openerp.tools.translate import _
 from openerp import netsvc
 import time
+import datetime
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.report.pyPdf import PdfFileWriter, PdfFileReader
 from openerp.addons.metro import utils
+import zipfile
+import random
+import os
+
+def _get_file(self, cr, uid, ids, field_names, args, context=None):
+    result = dict.fromkeys(ids, {})
+    attachment_obj = self.pool.get('ir.attachment')
+    for obj in self.browse(cr, uid, ids):
+        for field_name in field_names:
+            result[obj.id][field_name] = None
+            file_ids = attachment_obj.search(
+                cr, uid, [('name', '=', field_name),
+                          ('res_id', '=', obj.id),
+                          ('res_model', '=', self._name)],context=context)
+            if file_ids:
+                result[obj.id][field_name] = attachment_obj.browse(cr, uid, file_ids[0]).datas
+    return result
+
+def _set_file(self, cr, uid, id, field_name, value, args, context=None):
+    attachment_obj = self.pool.get('ir.attachment')
+    file_ids = attachment_obj.search(
+        cr, uid, [('name', '=', field_name),
+                  ('res_id', '=', id),
+                  ('res_model', '=', self._name)])
+    file_id = None
+    if file_ids:
+        file_id = file_ids[0]
+        attachment_obj.write(cr, uid, file_id, {'datas': value})
+    else:
+        file_id = attachment_obj.create(
+            cr, uid, {'name':  field_name,
+                      'res_id': id,
+                      'type': 'binary',
+                      'res_model':self._name,
+                      'datas': value})    
+    return file_id
+    
 class work_order_cnc(osv.osv):
     _name = "work.order.cnc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -40,6 +78,9 @@ class work_order_cnc(osv.osv):
         'product_id': fields.related('wo_cnc_lines','product_id', type='many2one', relation='product.product', string='Product'),
         'can_change_ids' : fields.function(_get_done_info, type='boolean', string='Can Change IDs', multi="done_info"),
         'mfg_task_id': fields.many2one('project.task', string='Manufacture Task',domain=[('project_type','=','mfg'),('state','not in',('cancelled','done'))],readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'date_finished': fields.datetime('Finished Date', readonly=True),
+        'partlist_file_name': fields.char('Part List'),
+        'partlist_file': fields.function(_get_file, fnct_inv=_set_file, string="Part List File", type="binary", multi="_get_file",),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
@@ -63,16 +104,21 @@ class work_order_cnc(osv.osv):
                 if line.state == 'done':
                     raise osv.except_osv(_('Invalid Action!'), _('Action was blocked, there are done work order lines!'))
         return True
-
+    def _email_notify(self, cr, uid, ids, action_name, group_params, context=None):
+        for order in self.browse(cr, uid, ids, context=context):
+            for group_param in group_params:
+                email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, group_param, context=context)
+                if email_group_id:                    
+                    email_subject = 'CNC reminder: %s %s'%(order.name,action_name)
+                    mfg_id_names = ','.join([mfg_id.name for mfg_id in order.sale_product_ids])
+                    email_body = '%s %s, MFG IDs:%s'%(order.name,action_name,mfg_id_names)
+                    utils.email_send_group(cr, uid, order.create_uid.email, None,email_subject,email_body, email_group_id, context)        
+        
     def action_ready(self, cr, uid, ids, context=None):
         #set the ready state
         self._set_state(cr, uid, ids, 'ready',context)
         #send email to the user group that can confirm
-        email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_confirm', context=context)
-        if email_group_id:
-            for order in self.browse(cr, uid, ids, context=context):
-                email_content = 'CNC reminder: %s need your confirmation'%(order.name)
-                utils.email_send_group(cr, uid, order.create_uid.email, None,email_content,email_content, email_group_id, context)          
+        self._email_notify(cr, uid, ids, 'need your confirmation', ['mrp_cnc_wo_group_confirm'],context)     
         return True
         
     def action_confirm(self, cr, uid, ids, context=None):
@@ -95,11 +141,7 @@ class work_order_cnc(osv.osv):
         #set state to done
         self._set_state(cr, uid, ids, 'confirmed',context)
         #send email to the user group that can approve
-        email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_approve', context=context)
-        if email_group_id:
-            for order in self.browse(cr, uid, ids, context=context):
-                email_content = 'CNC reminder: %s need your approval'%(order.name)
-                utils.email_send_group(cr, uid, order.create_uid.email, None,email_content,email_content, email_group_id, context)          
+        self._email_notify(cr, uid, ids, 'need your approval', ['mrp_cnc_wo_group_approve'],context)           
         return True
 
         return True
@@ -142,16 +184,16 @@ class work_order_cnc(osv.osv):
         #set the cancel state
         self._set_state(cr, uid, ids, 'approved',context)
         #send email to the user group that can CNC done
-        email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, 'mrp_cnc_wo_group_cnc_mgr', context=context)
-        if email_group_id:
-            for order in self.browse(cr, uid, ids, context=context):
-                email_content = 'CNC reminder: %s was approved'%(order.name)
-                utils.email_send_group(cr, uid, order.create_uid.email, None,email_content,email_content, email_group_id, context)          
+        self._email_notify(cr, uid, ids, 'was approved', ['mrp_cnc_wo_group_cnc_mgr'],context) 
         return True
 
     def action_done(self, cr, uid, ids, context=None):
         #set the cancel state
         self._set_state(cr, uid, ids, 'done',context)
+        date_finished = context.get('date_finished') and context.get('date_finished') or datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        self.write(cr, uid, ids, {'date_finished':date_finished}, context=context)
+        #send email to the CNC Manager group to notify the CNC working is done
+        self._email_notify(cr, uid, ids, 'is finished', ['mrp_cnc_wo_group_confirm','mrp_cnc_wo_group_approve'],context)
         return True
 
     def action_in_progress(self, cr, uid, ids, context=None):
@@ -194,6 +236,7 @@ class work_order_cnc(osv.osv):
             'mfg_task_id': None,
             'sale_product_ids': None,
             'reject_message':None,
+            'date_finished':None,
         })
         return super(work_order_cnc, self).copy(cr, uid, id, default, context)    
     def task_id_check(self, cr, uid, task_id, mfg_ids, context=None):
@@ -231,68 +274,93 @@ class work_order_cnc(osv.osv):
                 raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
         return super(work_order_cnc, self).create(cr, uid, vals, context=context)
     
+    def _format_file_name(self, file_name):
+        file_reserved_char = ('/','\\','<','>','*','?')
+        new_file_name = file_name
+        for char in file_reserved_char:
+            new_file_name = new_file_name.replace(char, '-')
+        return new_file_name
+    
     def print_pdf(self, cr, uid, ids, context):
+        assert len(ids) == 1, 'This option should only be used for a single CNC work order at a time'
         attachment_obj = self.pool.get('ir.attachment')
         output = PdfFileWriter() 
         page_cnt = 0
-        for order in self.browse(cr, uid, ids, context=context):
+        order = self.browse(cr, uid, ids[0], context=context)
+        for line in order.wo_cnc_lines:
+            if line.drawing_file_name and line.drawing_file_name.lower().endswith('.pdf'):                    
+                file_ids = attachment_obj.search(
+                    cr, uid, [('name', '=', 'drawing_file'),
+                              ('res_id', '=', line.id),
+                              ('res_model', '=', 'work.order.cnc.line')])
+                if file_ids:
+                    attach_file = attachment_obj.file_get(cr, uid, file_ids[0],context=context)
+                    input = PdfFileReader(attach_file)
+                    for page in input.pages: 
+                        output.addPage(page)
+                        page_cnt += 1
+        if page_cnt > 0:
+            full_path_temp = attachment_obj.full_path(cr, uid, 'temp')
+            file_name = self._format_file_name(order.name)
+            full_file_name =  '%s/%s.pdf'%(full_path_temp, file_name,)
+            outputStream = file(full_file_name, "wb") 
+            output.write(outputStream) 
+            outputStream.close()
+            filedata = open(full_file_name,'rb').read().encode('base64')
+            os.remove(full_file_name)
+            return self.pool.get('file.down').download_data(cr, uid, "%s.pdf"%(file_name,), filedata, context)
+    
+        return False                
+    def zip_cnc_file(self, cr, uid, ids, context):
+        assert len(ids) == 1, 'This option should only be used for a single CNC work order at a time'
+        attachment_obj = self.pool.get('ir.attachment')      
+        try:
+            #prepare temp file path for the download files
+            full_path_temp = attachment_obj.full_path(cr, uid, 'temp')
+            full_path = '%s/%s/'%(full_path_temp, random.randint(1,12000))
+            dirname = os.path.dirname(full_path)
+            if not os.path.isdir(dirname):
+                os.makedirs(dirname)
+            
+            file_cnt = 0
+            order = self.browse(cr, uid, ids[0], context=context)
+            #zip file name
+            zip_name = self._format_file_name(order.name)
+            zip_file_name =  '%s/%s.zip'%(full_path_temp, zip_name,)
+            zip_cnc = zipfile.ZipFile(zip_file_name, 'w' ,zipfile.ZIP_DEFLATED) 
             for line in order.wo_cnc_lines:
-                if line.drawing_file_name and line.drawing_file_name.lower().endswith('.pdf'):                    
+                if line.cnc_file_name:                    
                     file_ids = attachment_obj.search(
-                        cr, uid, [('name', '=', 'drawing_file'),
+                        cr, uid, [('name', '=', 'cnc_file'),
                                   ('res_id', '=', line.id),
                                   ('res_model', '=', 'work.order.cnc.line')])
                     if file_ids:
                         attach_file = attachment_obj.file_get(cr, uid, file_ids[0],context=context)
-                        input = PdfFileReader(attach_file)
-                        for page in input.pages: 
-                            output.addPage(page)
-                            page_cnt += 1
-        if page_cnt > 0:
-            outputStream = file('c:/merged_pdf.pdf', "wb") 
-            output.write(outputStream) 
-            outputStream.close()
-            filedata = open('c:/merged_pdf.pdf','rb').read().encode('base64')
-            return self.pool.get('file.down').download_data(cr, uid, "merged_pdf.pdf", filedata, context)
-    
-        return False                
-                
+#                        full_path_file = attachment_obj.full_path(cr, uid, '%s/%s'%(full_path,line.cnc_file_name))
+                        full_path_file = '%s%s'%(full_path,line.cnc_file_name)
+                        open(full_path_file, "wb").write(attach_file.read())
+                        zip_cnc.write(full_path_file,line.cnc_file_name)
+                        file_cnt += 1
+            zip_cnc.close()
+            if file_cnt > 0:
+                #remove all the files zipped
+                for file in os.listdir(full_path): 
+                    targetFile = os.path.join(full_path,  file) 
+                    if os.path.isfile(targetFile): 
+                        os.remove(targetFile)
+                os.removedirs(full_path)
+                #get the zip file data and remove it
+                filedata = open(zip_file_name,'rb').read().encode('base64')
+                os.remove(zip_file_name)
+                #goto file download page
+                return self.pool.get('file.down').download_data(cr, uid, "%s.zip"%(zip_name), filedata, context)
+        except IOError, e:
+            raise osv.except_osv(_('Error'), "zip_txt writing %s, %s"%(full_path,e))
+        
+        return False                     
 class work_order_cnc_line(osv.osv):
     _name = "work.order.cnc.line"
     _description = "CNC Work Order Lines"
-
-    def _get_file(self, cr, uid, ids, field_names, args, context=None):
-        result = dict.fromkeys(ids, {})
-        attachment_obj = self.pool.get('ir.attachment')
-        for obj in self.browse(cr, uid, ids):
-            for field_name in field_names:
-                result[obj.id][field_name] = None
-                file_ids = attachment_obj.search(
-                    cr, uid, [('name', '=', field_name),
-                              ('res_id', '=', obj.id),
-                              ('res_model', '=', 'work.order.cnc.line')],context=context)
-                if file_ids:
-                    result[obj.id][field_name] = attachment_obj.browse(cr, uid, file_ids[0]).datas
-        return result
-
-    def _set_file(self, cr, uid, id, field_name, value, args, context=None):
-        attachment_obj = self.pool.get('ir.attachment')
-        file_ids = attachment_obj.search(
-            cr, uid, [('name', '=', field_name),
-                      ('res_id', '=', id),
-                      ('res_model', '=', 'work.order.cnc.line')])
-        file_id = None
-        if file_ids:
-            file_id = file_ids[0]
-            attachment_obj.write(cr, uid, file_id, {'datas': value})
-        else:
-            file_id = attachment_obj.create(
-                cr, uid, {'name':  field_name,
-                          'res_id': id,
-                          'type': 'binary',
-                          'res_model': 'work.order.cnc.line',
-                          'datas': value})    
-        return file_id
     
     _columns = {
         'order_id': fields.many2one('work.order.cnc','Ref'),
@@ -302,7 +370,7 @@ class work_order_cnc_line(osv.osv):
         'plate_height': fields.integer('Height(mm)', required=True),
         'percent_usage_theory': fields.float('Usage Percent in Theory(%)', required=True),
         'percent_usage': fields.float('Usage Percent of Manufacture(%)', required=True),
-        'date_finished': fields.date('Finished Date', readonly=True),
+        'date_finished': fields.datetime('Finished Date', readonly=True),
         'product_id': fields.many2one('product.product','Product', readonly=True),
         'state': fields.selection([('draft','Draft'),('ready','Ready'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('done','Done'),('cancel','Cancelled')], 'Status', required=True, readonly=True),
         'company_id': fields.related('order_id','company_id',type='many2one',relation='res.company',string='Company'),
@@ -432,13 +500,14 @@ class work_order_cnc_line(osv.osv):
                 order_ids_done.append(order.id)
             else:
                 order_ids_in_progress.append(order.id)
-        self.pool.get('work.order.cnc').action_done(cr,uid,order_ids_done,context=context)
-        self.pool.get('work.order.cnc').action_in_progress(cr,uid,order_ids_in_progress,context=context)
         #generate material requisition
         self.make_material_requisition(cr, uid, ids, context)
         #decrease the quantity of whole plate
         if context.get("is_whole_plate"):
             self.pool.get('plate.material').update_plate_whole_qty(cr, uid, context.get('product_id'), -1, context=context)
+        #set order status
+        self.pool.get('work.order.cnc').action_done(cr,uid,order_ids_done,context=context)
+        self.pool.get('work.order.cnc').action_in_progress(cr,uid,order_ids_in_progress,context=context)
         return True
     
     #get the material request price
@@ -623,8 +692,11 @@ class work_order_cnc_line(osv.osv):
             'date_finished': None,
             'product_id': None,
             'mr_id': None,
+            'is_whole_plate': None,
+            'wo_comp_ids': None,
             'cnc_file':line_data.cnc_file,
             'drawing_file':line_data.drawing_file,
             'doc_file':line_data.doc_file
         })
+                
         return super(work_order_cnc_line, self).copy_data(cr, uid, id, default, context)        

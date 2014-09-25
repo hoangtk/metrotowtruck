@@ -54,7 +54,6 @@
 		                    </group>
 		                    <group>
 		                    	<field name="known_medical_type" widget="many2many_tags"/>
-		                        <field name="known_medical_cond"/>
 		                        <field name="known_allergies"/>
 		                    </group>
 	                    </group>
