@@ -10,6 +10,7 @@ from openerp.addons.metro import utils
 import zipfile
 import random
 import os
+from openerp import SUPERUSER_ID
 
 def _get_file(self, cr, uid, ids, field_names, args, context=None):
     result = dict.fromkeys(ids, {})
@@ -26,6 +27,10 @@ def _get_file(self, cr, uid, ids, field_names, args, context=None):
     return result
 
 def _set_file(self, cr, uid, id, field_name, value, args, context=None):
+    if uid != SUPERUSER_ID:
+        create_uid = self.read(cr, uid, id, ['create_uid'])['create_uid'][0]
+        if uid != create_uid:
+            raise osv.except_osv(_('Invalid Action!'), _('Only the creator can change the upload file!'))
     attachment_obj = self.pool.get('ir.attachment')
     file_ids = attachment_obj.search(
         cr, uid, [('name', '=', field_name),
@@ -80,7 +85,7 @@ class work_order_cnc(osv.osv):
         'mfg_task_id': fields.many2one('project.task', string='Manufacture Task',domain=[('project_type','=','mfg'),('state','not in',('cancelled','done'))],readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'date_finished': fields.datetime('Finished Date', readonly=True),
         'partlist_file_name': fields.char('Part List'),
-        'partlist_file': fields.function(_get_file, fnct_inv=_set_file, string="Part List File", type="binary", multi="_get_file",),
+        'partlist_file': fields.function(_get_file, fnct_inv=_set_file, string="Part List File", type="binary", multi="_get_file",readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'work.order.cnc', context=c),
@@ -266,7 +271,7 @@ class work_order_cnc(osv.osv):
                 for wo in self.read(cr, uid, ids, context=context):
                     if not self.task_id_check(cr, uid, vals['mfg_task_id'], wo['sale_product_ids'], context):
                         raise osv.except_osv(_('Invalid Action!'), _('The manufacture task must match the MFG IDs you selected!'))
-        
+            
         return super(work_order_cnc, self).write(cr, uid, ids, vals, context=context)  
     def create(self, cr, uid, vals, context=None):
         #manufacture tasks must belongs to the CNC work order's MFG IDs's tasks
@@ -364,6 +369,8 @@ class work_order_cnc_line(osv.osv):
     
     _columns = {
         'order_id': fields.many2one('work.order.cnc','Ref'),
+        'create_uid': fields.many2one('res.users','Creator',readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True),   
         'file_name': fields.char('File Name', size=16, required=True),
         'plate_length': fields.integer('Length(mm)', required=True),
         'plate_width': fields.integer('Width(mm)', required=True),
