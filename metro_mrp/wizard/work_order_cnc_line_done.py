@@ -19,7 +19,7 @@
 #
 ##############################################################################
 
-import time
+import datetime
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
@@ -33,7 +33,7 @@ class work_order_cnc_line_done(osv.osv_memory):
         'file_name': fields.char('File Name', size=16, readonly=True),
         'size': fields.char('Size', size=32, readonly=True),
         'percent_usage': fields.float('Usage Percent(%)', readonly=True),
-        'date_finished': fields.date('Finished Date'),
+        'date_finished': fields.datetime('Finished Date'),
         'product_id': fields.many2one('product.product','Product', required=True),
         'is_whole_plate': fields.boolean('Whole Plate'),
         'product_inv': fields.float('Inventory',digits_compute=dp.get_precision('Product Unit of Measure'),),
@@ -46,7 +46,8 @@ class work_order_cnc_line_done(osv.osv_memory):
         required=True),
                 
     }
-    _defaults = {'date_finished': fields.date.context_today,}
+#    _defaults = {'date_finished': fields.date.context_today,}
+    _defaults = {'date_finished': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),}
     def default_get(self, cr, uid, fields, context=None):
         """
          To get default values for the object.

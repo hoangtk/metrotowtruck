@@ -19,6 +19,7 @@
     				<button name="action_cancel" string="Cancel" states="confirmed" type="object"  groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_cancel" string="Cancel" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="print_pdf" string="Print PDF" type="object"/>
+    				<button name="zip_cnc_file" string="CNC Zip File" type="object"/>
     				<field name="state" widget="statusbar" statusbar_visible="draft,ready,confirmed,approved,in_progress,done"/>
     			</header>
     			<!-- <sheet> -->
@@ -34,8 +35,10 @@
 		    				<!-- <field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/> -->
 		    				<field name="sale_product_ids" widget="many2many_tags" required="1" domain="[('state','in',('confirmed','engineer','manufacture'))]"/>
 		    				<field name="mfg_task_id" context="{'tree_view_ref':'metro_project.view_mfg_task_tree'}"/>
+	                        <field name="partlist_file" filename="partlist_file_name"/>
 		    				<field name="create_uid"/>
 		    				<field name="create_date"/>
+		    				<field name="date_finished"/>
 		    				<field name="id"/>
 		    				<field name="company_id" groups="base.group_multi_company" widget="selection"/>
     					</group>
@@ -118,6 +121,7 @@
                 <field name="create_date"/>
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="state"/>
+                <field name="date_finished"/>
             </tree>
       </field>
     </record>

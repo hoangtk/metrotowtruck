@@ -70,3 +70,7 @@ class ir_attachment(osv.osv):
         except IOError:
             _logger.error("_read_file reading %s",full_path)
         return r
+    
+    def full_path(self, cr, uid, fname):
+        location = self.pool.get('ir.config_parameter').get_param(cr, uid, 'ir_attachment.location')
+        return self._full_path(cr, uid, location, fname)
