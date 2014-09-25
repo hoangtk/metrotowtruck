@@ -47,7 +47,7 @@ class work_order_cnc_line_done(osv.osv_memory):
                 
     }
 #    _defaults = {'date_finished': fields.date.context_today,}
-    _defaults = {'date_finished': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),}
+    _defaults = {'date_finished': lambda *a: datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),}
     def default_get(self, cr, uid, fields, context=None):
         """
          To get default values for the object.
