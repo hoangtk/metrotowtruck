@@ -35,6 +35,7 @@
 		    				<!-- <field name="sale_product_ids" widget="many2many_tags" required="1" attrs="{'readonly':[('can_change_ids','=',False)]}"/> -->
 		    				<field name="sale_product_ids" widget="many2many_tags" required="1" domain="[('state','in',('confirmed','engineer','manufacture'))]"/>
 		    				<field name="mfg_task_id" context="{'tree_view_ref':'metro_project.view_mfg_task_tree'}"/>
+	                        <field name="partlist_file_name" invisible="1"/>
 	                        <field name="partlist_file" filename="partlist_file_name"/>
 		    				<field name="create_uid"/>
 		    				<field name="create_date"/>
