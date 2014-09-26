@@ -9,6 +9,11 @@
                 <field name="employee_id" position="attributes">
                 	<attribute name="on_change">onchange_employee_id(employee_id,context)</attribute>
                 </field>
+                <page name="information" position="after">
+	                    <page string="Images">
+	                        <field name="multi_images" widget="image_multi"/>
+	                    </page>
+                </page>
             </field>
         </record>
     </data>
