@@ -199,7 +199,7 @@ class work_order_cnc(osv.osv):
         date_finished = context.get('date_finished') and context.get('date_finished') or datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
         self.write(cr, uid, ids, {'date_finished':date_finished}, context=context)
         #send email to the CNC Manager group to notify the CNC working is done
-        self._email_notify(cr, uid, ids, 'is finished', ['mrp_cnc_wo_group_confirm','mrp_cnc_wo_group_approve'],context)
+        self._email_notify(cr, uid, ids, 'is finished', ['mrp_cnc_wo_group_confirm','mrp_cnc_wo_group_approve','mrp_cnc_wo_group_cnc_mgr'],context)
         return True
 
     def action_in_progress(self, cr, uid, ids, context=None):

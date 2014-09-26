@@ -23,6 +23,7 @@ import time
 from openerp.osv import fields, osv
 class hr_contract(osv.osv):
     _inherit = 'hr.contract'
+    _columns = {'multi_images': fields.text("Multi Images"),}
     def onchange_employee_id(self, cr, uid, ids, employee_id,context):
         if not employee_id:
             return {}
