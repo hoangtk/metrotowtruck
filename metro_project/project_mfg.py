@@ -89,7 +89,7 @@ class project_task(base_stage, osv.osv):
             for task_mfg_id in vals['mfg_ids'][0][2]:
                 if not task_mfg_id in wo_mfg_ids:
                     task_mfg_name = self.pool.get('sale.product').read(cr, uid, task_mfg_id, ['name'], context=context)['name']
-                    raise osv.except_osv(_('Invalid Action!'), _('The task MFG IDs:%s must match the manufacture order''s MFG IDs:%s')%(task_mfg_name,','.join(wo_mfg_names)))
+                    raise osv.except_osv(_('Invalid Action!'), _('The task MFG IDs:%s must match the work order''s MFG IDs:%s')%(task_mfg_name,','.join(wo_mfg_names)))
         return True
     
     def write(self, cr, uid, ids, vals, context=None):
