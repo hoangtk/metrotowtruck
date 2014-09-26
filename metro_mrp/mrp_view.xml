@@ -293,12 +293,9 @@
                     <xpath expr="//field[@name='move_lines2']//field[@name='state']" position='after'>
                     	<field name="mr_sale_prod_id" string='MFG ID'/>
                     </xpath>
-				<!-- remove the <form/> data of workcenter_lines -->
-                    <field name="workcenter_lines" position="attributes">
-                    	<attribute name="context">{'form_view_ref':'metro_operations.mrp_production_workcenter_form_view_inherit'}</attribute>
-                    </field> 
                     <!-- add the work order extended fields -->
                     <xpath expr="//field[@name='workcenter_lines']/form//field[@name='hour']" position="after">
+		        		<field name="mfg_ids" widget="many2many_tags"/>                    
 		        		<field name="bom_id"/>
 		        		<field name="routing_id"/>
 		        		<field name="routing_operation_id"/>
@@ -343,6 +340,9 @@
             <field name="inherit_id" ref="mrp_operations.mrp_production_workcenter_form_view_inherit"/>
             <field name="arch" type="xml">
             	<field name="name" position="replace"/>
+            	<field name="state" position="replace">
+            		<field name="state" widget="statusbar"/>
+            	</field>
             	<xpath expr="//group" position="before">	
             		<!-- make the 'Reference' and 'Name' as the title -->    	
                     <div class="oe_title">
@@ -357,7 +357,10 @@
                 		<button name="wo_docs" string="Documents" type="object"/>
                     </div>
             	</xpath>
-	            	            
+	           	<!-- add the onchange to set the mfg_ids automatically -->
+	           	<field name="production_id" position="attributes">
+	           		<attribute name="on_change">onchange_mo(production_id,context)</attribute>
+	           	</field>
             	<!--  add the BOM/Routing/Operation info to manufacture order's work center line -->
 	        	<field name="production_state" position="after">
 	        		<field name="priority"/>
