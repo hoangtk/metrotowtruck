@@ -184,7 +184,14 @@ class project_task(base_stage, osv.osv):
             utils.email_send_template(cr, uid, ids, email_vals, context)
 #        self.email_send(cr, uid, ids,vals,context)
         return resu     
-    
+    def unlink(self, cr, uid, ids, context=None):
+        if context == None:
+            context = {}
+        for task_state in self.read(cr, uid, ids, ['name','state']):
+            if task_state['state'] not in ('cancelled','draft'):
+                raise osv.except_osv(_('Error!'), _('Task "%s" can not be delete, only task with Draft&Cancel states can be delete.'%(task_state['name'],)))
+        res = super(project_task, self).unlink(cr, uid, ids, context)
+        return res    
     def fields_get(self, cr, uid, allfields=None, context=None, write_access=True):
         resu = super(project_task,self).fields_get(cr, uid, allfields,context,write_access)
         #set  the 'project_id' domain dynamically by the default_project_type

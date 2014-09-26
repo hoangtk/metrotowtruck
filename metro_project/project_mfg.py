@@ -93,6 +93,8 @@ class project_task(base_stage, osv.osv):
         return True
     
     def write(self, cr, uid, ids, vals, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
         self._check_before_save(cr, uid, ids, vals, context=context)
         return super(project_task,self).write(cr, uid, ids, vals, context=context)
         

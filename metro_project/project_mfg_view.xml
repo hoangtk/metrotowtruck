@@ -195,7 +195,7 @@
             <field name="search_view_id" ref="project.view_task_search_form"/>
             <field name="domain">[('project_type','=','mfg')]</field>
             <field name="context">{'default_project_type':'mfg'}</field>
-            <field name="auto_search" eval="False"/>
+            <field name="auto_search" eval="True"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a new task.
