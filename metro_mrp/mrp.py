@@ -321,7 +321,7 @@ class mrp_bom(osv.osv):
                                    'dept_mgr_id':wc_task.dept_id.manager_id.id,
                                    'emp_ids':emp_ids,
                                    'name':wc_task.name,
-                                   'planned_hours':wc_task.planned_hours}
+                                   'planned_hours':wc_task.planned_hours,}
                         wc_tasks.append((0,0,wc_task))
                     result2.append({
                         'bom_id': bom.id,
@@ -802,8 +802,12 @@ def mrp_prod_action_compute(self, cr, uid, ids, properties=None, context=None):
         for line in results2:
             line['production_id'] = production.id
             line['priority'] = production.priority
+            mfg_ids = [(4,mfg_id.id) for mfg_id in production.mfg_ids]
+            line['mfg_ids'] = mfg_ids
             for wc_task in line['task_ids']:
-                wc_task[2].update({'priority':production.priority, 'user_id':production.task_mgr_id.id})
+                wc_task[2].update({'priority':production.priority, 
+                                   'user_id':production.task_mgr_id.id,
+                                   'mfg_ids':mfg_ids})
             wo_new_id = workcenter_line_obj.create(cr, uid, line)
             wo_ids.append(wo_new_id)
         #add by johnw@07/1102014, update the wo_pre_ids and wo_next_ids
@@ -874,6 +878,7 @@ class mrp_production_workcenter_line(osv.osv):
             if wo.wo_pre_ids:
                 res[wo.id] = True
         return res    
+            
     _columns = {
         'code': fields.char('Reference', size=16, required=True, readonly=True),
         'bom_id': fields.many2one('mrp.bom', string='BOM', readonly=True),
@@ -892,7 +897,8 @@ class mrp_production_workcenter_line(osv.osv):
                                        "* When order is completely processed that time it is set in 'Finished' status."),
         #the work order related components from bom, can generated from mrp_bom_workcenter_operation when executing action_compute()
         'comp_lines': fields.one2many('mrp.wo.comp', 'wo_id', string='Components'),
-        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
+#        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
+        'mfg_ids': fields.many2many(obj='sale.product',rel='mrp_wo_id_rel',id1='wo_id',id2='mfg_id',string='MFG IDs', readonly=False),
         'priority': fields.selection([('4','Very Low'), ('3','Low'), ('2','Medium'), ('1','Important'), ('0','Very important')], 'Priority', select=True),
     }
     _defaults = {'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'mrp.production.workcenter.line') or '/',
@@ -963,7 +969,50 @@ class mrp_production_workcenter_line(osv.osv):
                         res = False
                         break
         return res
-                
+
+    def onchange_mo(self, cr, uid, ids, production_id, context=None):
+        resu = {}
+        if production_id:
+            wo = self.pool.get('mrp.production').read(cr, uid, production_id, ['mfg_ids'],context=context)
+            value={'mfg_ids':wo['mfg_ids']}
+            resu['value'] = value
+        return resu
+    def _check_before_save(self, cr, uid, ids, vals, context=None):
+        assert ids == None or len(ids) == 1, 'This option should only be used for a single work order update at a time'
+        '''
+        from GUI: [[6, False, [418, 416]]]
+        from code to create: [4, [418, 416]]
+        Only check from GUI
+        '''
+        if 'mfg_ids' in vals and len(vals['mfg_ids']) == 1:
+            mo = None
+            #get the workorder data
+            if not 'production_id' in vals:
+                task = self.browse(cr, uid, ids[0], context=context)
+                mo = task.production_id
+            else:
+                mo = self.pool.get('mrp.production').browse(cr,uid,vals['production_id'],context=context)
+            #get the manufacture order's MFG ID's ID&Name list
+            mo_mfg_ids = []
+            mo_mfg_names = []
+            for mfg_id in mo.mfg_ids:
+                mo_mfg_ids.append(mfg_id.id)
+                mo_mfg_names.append(mfg_id.name)
+            #loop to check make sure the MFG IDs of work order belongs to manufacture order's MFG IDs
+            for wo_mfg_id in vals['mfg_ids'][0][2]:
+                if not wo_mfg_id in mo_mfg_ids:
+                    wo_mfg_name = self.pool.get('sale.product').read(cr, uid, wo_mfg_id, ['name'], context=context)['name']
+                    raise osv.except_osv(_('Invalid Action!'), _('The task MFG IDs:%s must match the manufacture order''s MFG IDs:%s')%(wo_mfg_name,','.join(mo_mfg_names)))
+        return True
+    
+    def write(self, cr, uid, ids, vals, context=None, update=True):
+        self._check_before_save(cr, uid, ids, vals, context=context)
+        return super(mrp_production_workcenter_line,self).write(cr, uid, ids, vals, context=context, update=True)
+        
+    def create(self, cr, uid, vals, context=None):
+        self._check_before_save(cr, uid, None, vals, context=context)
+        return super(mrp_production_workcenter_line,self).create(cr, uid, vals, context=context)
+                    
 class mrp_production_product_line(osv.osv):
     _inherit = 'mrp.production.product.line'
     _columns = {

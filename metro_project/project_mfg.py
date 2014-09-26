@@ -32,7 +32,8 @@ class project_task(base_stage, osv.osv):
         'workorder_id': fields.many2one('mrp.production.workcenter.line', string='Work Order'),
         'workcenter_id': fields.related('workorder_id','workcenter_id', type='many2one', relation="mrp.workcenter", string='Work Center', readonly=True),
         'production_id': fields.related('workorder_id','production_id', type='many2one', relation="mrp.production", string='Manufacture Order', readonly=True),
-        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_prod_id_rel',id1='mrp_prod_id',id2='mfg_id',string='MFG IDs', readonly=True),
+#        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_task_id_rel',id1='task_id',id2='mfg_id',string='MFG IDs', readonly=False,store=True),
+        'mfg_ids': fields.many2many(obj='sale.product',rel='mrp_task_id_rel',id1='task_id',id2='mfg_id',string='MFG IDs', readonly=False),
         'product':fields.related('production_id','product_id',type='many2one',relation='product.product',string='Product', readonly=True),
         'dept_id':fields.many2one('hr.department',string='Team',),
         'dept_mgr_id':fields.many2one('hr.employee',string='Team Leader'),
@@ -57,10 +58,48 @@ class project_task(base_stage, osv.osv):
     def on_change_wo(self,cr,uid,ids,wo_id,context=None):
         resu = {}
         if wo_id:
-            wo = self.pool.get('mrp.production.workcenter.line').read(cr, uid, wo_id, ['priority'],context=context)
-            value={'priority':wo['priority']}
+            wo = self.pool.get('mrp.production.workcenter.line').read(cr, uid, wo_id, ['priority','mfg_ids'],context=context)
+            value={'priority':wo['priority'],'mfg_ids':wo['mfg_ids']}
             resu['value'] = value
+#            resu['domain'] = {'mfg_ids': [('id','in',wo['mfg_ids'])]}
         return resu
+    
+    def _check_before_save(self, cr, uid, ids, vals, context=None):
+        assert ids == None or len(ids) == 1, 'This option should only be used for a single task update at a time'
+        '''
+        from GUI: [[6, False, [418, 416]]]
+        from code to create: [4, [418, 416]]
+        Only check from GUI
+        '''
+        if 'mfg_ids' in vals and len(vals['mfg_ids']) == 1:     
+            wo = None
+            #get the workorder data
+            if not 'workorder_id' in vals:
+                task = self.browse(cr, uid, ids[0], context=context)
+                wo = task.workorder_id
+            else:
+                wo = self.pool.get('mrp.production.workcenter.line').browse(cr,uid,vals['workorder_id'],context=context)
+            #get the workorder's MFG ID's ID&Name list
+            wo_mfg_ids = []
+            wo_mfg_names = []
+            for mfg_id in wo.mfg_ids:
+                wo_mfg_ids.append(mfg_id.id)
+                wo_mfg_names.append(mfg_id.name)
+            #loop to check make sure the MFG IDs of task belongs to work order's MFG IDs
+            for task_mfg_id in vals['mfg_ids'][0][2]:
+                if not task_mfg_id in wo_mfg_ids:
+                    task_mfg_name = self.pool.get('sale.product').read(cr, uid, task_mfg_id, ['name'], context=context)['name']
+                    raise osv.except_osv(_('Invalid Action!'), _('The task MFG IDs:%s must match the work order''s MFG IDs:%s')%(task_mfg_name,','.join(wo_mfg_names)))
+        return True
+    
+    def write(self, cr, uid, ids, vals, context=None):
+        self._check_before_save(cr, uid, ids, vals, context=context)
+        return super(project_task,self).write(cr, uid, ids, vals, context=context)
+        
+    def create(self, cr, uid, vals, context=None):
+        self._check_before_save(cr, uid, None, vals, context=context)
+        return super(project_task,self).create(cr, uid, vals, context=context)
+        
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         for arg in args:
             #add the multi part# query

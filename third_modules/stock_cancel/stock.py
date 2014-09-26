@@ -106,6 +106,10 @@ class stock_picking(osv.osv):
 #        for (id,name) in self.name_get(cr, uid, ids):
 #            message = _("The stock picking '%s' has been set in draft state.") %(name,)
 #            self.log(cr, uid, id, message)
+            #johnw,  09/26/2014, set po's shipped status to false
+            if picking.purchase_id and picking.purchase_id.shipped:
+                self.pool.get('purchase.order').write(cr, uid, [picking.purchase_id.id], {'shipped':False}, context=context)
+                
         return True
 
 class stock_picking_out(osv.osv):
