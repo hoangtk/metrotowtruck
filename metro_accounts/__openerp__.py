@@ -20,7 +20,9 @@
        "invoice_payment_view.xml",
        "account_move_view.xml",
        "wizard/account_move_batch.xml",
-       "account_analytic_view.xml"
+       "wizard/account_rptcn_view.xml",
+       "account_analytic_view.xml",
+       "metro_account_view.xml"
         ],
     'demo': [],
     'test': [],

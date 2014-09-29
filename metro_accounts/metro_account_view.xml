@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_account_form_ext">
+            <field name="name">view_account_form_ext</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_form"/>
+            <field name="arch" type="xml">
+            	<field name="balance" position="after">
+            		<field name="bal_direct"/>
+            	</field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_account_list_ext">
+            <field name="name">view_account_list_ext</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_list"/>
+            <field name="arch" type="xml">
+            	<field name="balance" position="after">
+            		<field name="bal_direct"/>
+            	</field>
+            </field>
+        </record>   
+    </data>
+</openerp>
