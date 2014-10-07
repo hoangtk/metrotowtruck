@@ -70,7 +70,27 @@ class purchase_order(osv.osv):
             else:
                 res[purchase.id] = 0.0
         return res    
-        
+
+    def _change_log_line(self, cr, uid, ids, field_names=None, arg=False, context=None):
+        """ Finds the line change log
+        @return: Dictionary of values
+        """
+        if not field_names:
+            field_names = []
+        if context is None:
+            context = {}
+        res = {}
+        for id in ids:
+            res[id] = {}.fromkeys(field_names)
+
+        for purchase in self.browse(cr, uid, ids, context=context):
+            #check the invoice paid  
+            change_log_ids = []          
+            for line in purchase.order_line:
+                change_log_ids.extend([change_log.id for change_log in line.change_log])
+            res[purchase.id] = change_log_ids
+        return res
+            
     _columns = {
         'warehouse_id': fields.many2one('stock.warehouse', 'Destination Warehouse',states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),            
         'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
@@ -85,7 +105,9 @@ class purchase_order(osv.osv):
         'has_freight': fields.boolean('Has Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'amount_freight': fields.float('Freight', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),
-        'comments': fields.text('Comments'),        
+        'comments': fields.text('Comments'),       
+#        'change_log_line': fields.function(_change_log_line, type='one2many', relation='change.log.po.line', string='Line Changing'),
+        'change_log_line': fields.one2many('change.log.po.line','po_id','Line Changing Log', readonly=True),  
     }
     _defaults = {
         'is_sent_supplier': False,
@@ -704,7 +726,7 @@ class purchase_order_line(osv.osv):
         'create_uid':  fields.many2one('res.users', 'Creator', select=True, readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'image_medium': fields.related('product_id','image_medium',type='binary',String="Medium-sized image"),
-        'change_log': fields.one2many('change.log.po.line','res_id','Quantity Changing'),
+        'change_log': fields.one2many('change.log.po.line','po_line_id','Changing Log'),
         'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
         'has_freight': fields.related('order_id','has_freight',string='Has Freight', type="boolean", readonly=True),
         'amount_freight': fields.related('order_id','amount_freight',string='Freight', type='float', readonly=True),
@@ -824,15 +846,22 @@ class purchase_order_line(osv.osv):
                 raise osv.except_osv(_('Error!'),
                                      _('The price of %s can not be change since there are related existing paid invoices.')%(po_line.product_id.name))     
         
-        value_old = po_line.product_qty
         resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)
-        #only when orders confirmed, then record the quantity changing log
-        if po_line.state != 'draft':
-            field_name = 'product_qty';
-            if vals.has_key(field_name):
-                log_obj = self.pool.get('change.log.po.line')
-                log_vals = {'res_id':id,'filed_name':field_name,'value_old':value_old,'value_new':vals[field_name]}
-                log_obj.create(cr,uid,log_vals,context=context)
+        #only when orders confirmed, then record the quantity&price changing log
+        if po_line.order_id.state != 'draft':
+            log_obj = self.pool.get('change.log.po.line')
+            field_names = ['product_qty','price_unit','product_id'];
+            for field_name in field_names:
+                if vals.has_key(field_name):
+                    value_old = getattr(po_line,field_name)
+                    value_new = vals[field_name]
+                    if field_name == 'product_id':
+                        prod_obj = self.pool.get('product.product')
+                        value_old = prod_obj.name_get(cr, uid, [value_old.id], context=context)[0][1]
+                        value_new = prod_obj.name_get(cr, uid, [vals[field_name]], context=context)[0][1]
+                    log_vals = {'po_id':po_line.order_id.id,'po_line_id':po_line.id,'product_id':po_line.product_id.id,
+                                'field_name':field_name,'value_old':value_old,'value_new':value_new}
+                    log_obj.create(cr,uid,log_vals,context=context)
         #update product supplier info
         self._update_prod_supplier(cr, uid, ids, vals, context)
         #if price_unit changed then update it to product_product.standard_price
@@ -858,7 +887,16 @@ class purchase_order_line(osv.osv):
         if vals.has_key('price_unit'):
             prod = self.pool.get('product.product').browse(cr, user, vals['product_id'], context=context)
             standard_price = self.pool.get('product.uom')._compute_price(cr, user, vals["product_uom"], vals["price_unit"],prod.uom_id.id)            
-            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)        
+            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)
+            
+        #only when orders confirmed, then record the po lines adding
+        uid = user
+        po_line = self.browse(cr, uid, resu, context=context)
+        if po_line.order_id.state != 'draft':
+            log_obj = self.pool.get('change.log.po.line')
+            log_vals = {'po_id':po_line.order_id.id,'po_line_id':po_line.id,'product_id':po_line.product_id.id,
+                                'field_name':'Add Product','value_old':'','value_new':'price:%s, quantity:%s'%(po_line.product_qty, po_line.price_unit)}
+            log_obj.create(cr,uid,log_vals,context=context)                    
         return resu  
     def unlink(self, cr, uid, ids, context=None):
         #only the draft,canceled can be deleted
@@ -868,9 +906,19 @@ class purchase_order_line(osv.osv):
                 raise osv.except_osv(_('Error'), _('Only the lines with draft, canceled, rejected, changing, changing rejected can be deleted!\n%s'%line.product_id.name))
             if (line.move_ids and line.move_ids) or (line.invoice_lines and line.invoice_lines):
                 raise osv.except_osv(_('Error'), _('Can not delete the lines with picking or invoice lines!\n%s'%line.product_id.name))
-            
+            #only when orders confirmed, then record the po lines deleting
+            if line.order_id.state != 'draft':
+                log_obj = self.pool.get('change.log.po.line')
+                log_vals = {'po_id':line.order_id.id,'po_line_id':line.id,'product_id':line.product_id.id,
+                                'field_name':'Delete Product','value_old':'price:%s, quantity:%s'%(line.product_qty, line.price_unit),'value_new':''}
+                log_obj.create(cr,uid,log_vals,context=context)
         return super(purchase_order_line,self).unlink(cr,uid,ids,context=context)
-        
+    def copy_data(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({'change_log':None})
+        return super(purchase_order_line, self).copy_data(cr, uid, id, default, context)
+            
     def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
             partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
             name=False, price_unit=False, context=None):

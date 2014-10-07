@@ -11,7 +11,7 @@
     'website': 'PY Solutions',
     'images': [],
     'depends': [
-        'account','purchase','account_voucher','account_analytic_plans'
+        'metro','account','purchase','account_voucher','account_analytic_plans'
     ],
     'data':[
        "account_invoice_metro.xml",
@@ -20,7 +20,12 @@
        "invoice_payment_view.xml",
        "account_move_view.xml",
        "wizard/account_move_batch.xml",
-       "wizard/account_rptcn_view.xml",
+       
+       "wizard/rpt_account_cn_gl_view.xml",
+       "wizard/rpt_account_cn_detail_view.xml",
+       "wizard/rpt_account_cn_menu.xml",
+       "account_report.xml",
+       
        "account_analytic_view.xml",
        "metro_account_view.xml"
         ],

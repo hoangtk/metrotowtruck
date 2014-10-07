@@ -11,3 +11,4 @@ import ir_attachment
 import ir_cron
 import workflow
 import wizard
+import rpt_base

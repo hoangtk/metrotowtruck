@@ -26,42 +26,13 @@ from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
-class account_rptcn_line(osv.osv_memory):
-    _name = "account.rptcn.line"
-    _description = "China Account Report Lines"
-    _order = 'seq'
+class rpt_account_cn(osv.osv_memory):
+    _name = "rpt.account.cn"
+    _inherit = "rpt.base"
+    _description = "China Account Report"
     _columns = {
-        'rpt_id': fields.many2one('account.rptcn', ),
-        'seq': fields.integer('Seq', ),
-        #report objects code/name, object can be: account, partner, product, journal...
-        'code': fields.char('Code', size=64, ),
-        'name': fields.char('Name', size=256, ),
-        
-        #for GL
-        'period_id': fields.many2one('account.period', 'Period',),
-        
-        #for detail
-        'aml_id': fields.many2one('account.move.line', 'Move Line', ),
-        'date': fields.date('Move Date', ),
-        'am_name': fields.char('Move Name', size=64, ),
-        
-        #for both Gl and detail, move line name or static:期初,本期合计,本年合计
-        'notes': fields.char('Notes', size=64, ),
-        
-        #for all
-        'debit': fields.float('Debit', digits_compute=dp.get_precision('Account')),
-        'credit': fields.float('Credit', digits_compute=dp.get_precision('Account')),
-        #debit/credit direction:Debit(借)/Credit(贷)
-        'bal_direct': fields.char('Balance Direction', size=16, ),
-        'balance': fields.float('Balance', digits_compute=dp.get_precision('Account')),
-        }
-
-account_rptcn_line()
-
-class account_rptcn(osv.osv_memory):
-    _name = "account.rptcn"
-    _description = "Account Report China"
-    _columns = {
+        #report data lines
+        'rpt_lines': fields.one2many('rpt.account.cn.line', 'rpt_id', string='Report Line'),
 #        'filter': fields.selection([('filter_date', 'Date'), ('filter_period', 'Periods')], "Filter by", required=True),
         'filter': fields.selection([('filter_period', 'Periods')], "Filter by", required=True),        
         'period_from': fields.many2one('account.period', 'Start Period'),
@@ -72,18 +43,10 @@ class account_rptcn(osv.osv_memory):
                                          ('all', 'All Entries'),
                                         ], 'Target Moves', required=True),
         'account_ids': fields.many2many('account.account', string='Accounts', required=True),
-        'company_id': fields.many2one('res.company','Company',required=True,),
-        #report data lines
-        'rpt_lines': fields.one2many('account.rptcn.line', 'rpt_id', string='Report Line'),
-        #report type
-        'rpt_type': fields.selection([('account_gl', 'Account GL'),
-                                    ('account_detail', 'Account Detail'),
-                                    ('partner_gl', 'Partner GL'),
-                                    ('partner_detail', 'Partner Detail'),
-                                    ('product_gl', 'Product General Ledger'),
-                                    ('product_detail', 'Product Detail'),], "Report Type", required=True),        
-        #show/hide search fields on GUI
-        'show_search': fields.boolean('Show Searching', ),
+        #report level       
+        'level': fields.selection([('general', 'General'),('detail', 'Detail'),], "Report Level", required=True),     
+        #Show counterpart account flag for detail report level   
+        'show_counter': fields.boolean("Show counterpart", required=False),
         }
     
     def _get_accounts_default(self, cr, uid, context=None):
@@ -91,12 +54,11 @@ class account_rptcn(osv.osv_memory):
         return self.pool.get('account.account').search(cr, uid ,[('company_id','=',company_id),'|',('type','=','liquidity'),('type','=','payable')])
         
     _defaults = {
+        'type': 'account_cn',     
         'filter': 'filter_period',        
         'target_move': 'posted',
-        'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.rptcn', context=c),
         'account_ids': _get_accounts_default,
-        'rpt_type': 'account_gl',
-        'show_search': True,        
+        'level': 'general',   
     }
     def _check_periods(self, cr, uid, ids, context=None):
         for wiz in self.browse(cr, uid, ids, context=context):
@@ -163,13 +125,8 @@ class account_rptcn(osv.osv_memory):
         if debit < credit: bal_direct = 'credit'
         balance = account.bal_direct == 'credit' and (credit-debit) or (debit-credit) 
         return balance, bal_direct          
-    
-    def run_report(self, cr, uid, ids, context=None):
-        rpt = self.browse(cr, uid, ids, context=context)[0]
-        rpt_method = getattr(self, 'run_%s'%(rpt.rpt_type,))
-        return rpt_method(cr, uid, ids, context)
         
-    def run_account_gl(self, cr, uid, ids, context=None):
+    def run_account_cn(self, cr, uid, ids, context=None):
         if context is None: context = {}         
         rpt = self.browse(cr, uid, ids, context=context)[0]
         account_obj = self.pool.get('account.account')
@@ -191,8 +148,8 @@ class account_rptcn(osv.osv_memory):
         aml_common_query = 'aml.company_id=%s'%(company_id,)
         seq = 1
         rpt_lns = []
-        balance_sum = 0.0
         for account in rpt.account_ids:
+            balance_sum = 0.0
             search_account_ids = tuple(account_obj._get_children_and_consol(cr, uid, [account.id], context=context))
             #1.the initial balance line
             cr.execute('SELECT COALESCE(SUM(aml.debit),0) as debit, COALESCE(SUM(aml.credit), 0) as credit \
@@ -238,6 +195,42 @@ class account_rptcn(osv.osv_memory):
                         year_initial[period.fiscalyear_id.code] = {'debit':row[0],'credit':row[1]}   
                     else:
                         year_initial[period.fiscalyear_id.code] = {'debit':0.0,'credit':0.0}
+
+                #detail lines
+                if rpt.level == 'detail':
+                    cr.execute('SELECT aml.debit, aml.credit,aml.date as move_date, am.name as move_name, aml.name as move_line_name, \
+                            aml.id,aml.move_id \
+                            FROM account_move_line aml \
+                            JOIN account_move am ON (am.id = aml.move_id) \
+                            WHERE (aml.account_id IN %s) \
+                            AND (am.state IN %s) \
+                            AND (am.period_id = %s) \
+                            AND '+ aml_common_query +' \
+                            ORDER by aml.date, aml.move_id'
+                            ,(search_account_ids, tuple(move_state), period.id))
+                    rows = cr.dictfetchall()
+                    balance_detail = balance_sum
+                    for row in rows:
+                        #move detail line
+                        debit = row['debit']
+                        credit = row['credit']            
+                        balance, direction = self._get_account_balance(account, debit, credit)
+                        balance_detail += balance
+                        rpt_ln = {'seq':seq,
+                                    'code':'', 
+                                    'name':'',
+                                    'period_id':period.id,
+                                    'date':row['move_date'], # for detail
+                                    'am_name':row['move_name'], # for detail
+                                    'notes':row['move_line_name'],
+                                    'debit':debit,
+                                    'credit':credit,
+                                    'bal_direct':labels['bal_direct_%s'%(direction,)],
+                                    'balance':balance_detail}
+                        if rpt.show_counter:
+                            rpt_ln['counter_account'] = ''
+                        rpt_lns.append(rpt_ln)    
+                        seq += 1
                 
                 #the period credit/debit
                 cr.execute('SELECT COALESCE(SUM(aml.debit),0) as debit, COALESCE(SUM(aml.credit), 0) as credit \
@@ -270,7 +263,7 @@ class account_rptcn(osv.osv_memory):
                 debit_year = debit + year_initial[period.fiscalyear_id.code]['debit']
                 credit_year = credit + year_initial[period.fiscalyear_id.code]['credit']
                 balance_year, direction_year = self._get_account_balance(account, debit_year, credit_year)
-                balance_year = balance_sum + year_initial[period.fiscalyear_id.code]['credit']
+                balance_year = balance_sum
                 rpt_ln = {'seq':seq,
                             'code':'', 
                             'name':'',
@@ -281,22 +274,57 @@ class account_rptcn(osv.osv_memory):
                             'bal_direct':labels['bal_direct_%s'%(direction_year,)],
                             'balance':balance_year,}
                 rpt_lns.append(rpt_ln)     
-                seq += 1      
-        rpt_line_obj = self.pool.get('account.rptcn.line')
-        #remove the old lines
-        unlink_ids = rpt_line_obj.search(cr, uid, [('rpt_id','=',rpt.id)], context=context)
-        rpt_line_obj.unlink(cr ,uid, unlink_ids, context=context)
-        #create new lines
-        for rpt_line in rpt_lns:
-            rpt_line['rpt_id'] = rpt.id
-            rpt_line_obj.create(cr ,uid, rpt_line, context=context)
-        self.write(cr, uid, rpt.id, {'show_search':False},context=context)
-        
+                seq += 1              
+        return self.pool.get('rpt.account.cn.line'), rpt_lns    
 #        upt_lines = [(0,0,rpt_ln) for rpt_ln in rpt_lns]
 #        self.write(cr, uid, rpt.id, {'rpt_lines':upt_lines,'show_search':False},context=context)
-        
         return True
     
-account_rptcn()
+#    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+#        resu = super(rpt_account_cn, self).fields_view_get(cr, user, view_id, view_type, context, toolbar, submenu)
+#        return resu
+    
+    def _pdf_data(self, cr, uid, ids, form_data, context=None):
+        rpt_name = 'rpt.account.cn.gl'
+        if form_data['level'] == 'detail':
+            rpt_name = 'rpt.account.cn.detail'
+        return {'xmlrpt_name': rpt_name}
+    
+rpt_account_cn()
 
+class rpt_account_cn_line(osv.osv_memory):
+    _name = "rpt.account.cn.line"
+    _inherit = "rpt.base.line"
+    _description = "China Account Report Lines"
+    _columns = {
+        'rpt_id': fields.many2one('rpt.account.cn', 'Report'),
+        #for GL
+        'period_id': fields.many2one('account.period', 'Period',),
+        
+        #for detail
+        'aml_id': fields.many2one('account.move.line', 'Move Line', ),
+        'date': fields.date('Move Date', ),
+        'am_name': fields.char('Move Name', size=64, ),
+        'counter_account': fields.char('Counter Account', size=64, ),
+        
+        #for both Gl and detail, move line name or static:期初,本期合计,本年合计
+        'notes': fields.char('Notes', size=64, ),
+        
+        #for all
+        'debit': fields.float('Debit', digits_compute=dp.get_precision('Account')),
+        'credit': fields.float('Credit', digits_compute=dp.get_precision('Account')),
+        #debit/credit direction:Debit(借)/Credit(贷)
+        'bal_direct': fields.char('Balance Direction', size=16, ),
+        'balance': fields.float('Balance', digits_compute=dp.get_precision('Account')),
+        #report level       
+        'level': fields.related('rpt_id','level',type='selection',selection=[('general', 'General'),('detail', 'Detail'),], string="Report Level"),     
+        #Show counterpart account flag for detail report level   
+        'show_counter': fields.related('rpt_id','show_counter',type='boolean', string="Show counterpart", required=False),
+        }
+
+rpt_account_cn_line()
+
+from openerp.report import report_sxw
+report_sxw.report_sxw('report.rpt.account.cn.gl', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_gl.rml', parser=report_sxw.rml_parse, header='internal landscape')
+report_sxw.report_sxw('report.rpt.account.cn.detail', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_detail.rml', parser=report_sxw.rml_parse, header='internal landscape')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

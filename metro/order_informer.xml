@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
-    <data noupdate="1">
+    <data>
 <!-- purchase order email template -->
         <record id="OI_po_wait_approval" model="email.template">
             <field name="name">OI_po_wait_approval</field>
@@ -190,7 +190,30 @@ Contact: <a href="mailto:ncoad@metrospv.com">Nicholas Coad</a> &nbsp;&nbsp;<a hr
     <td align="right"><strong>Creator Date:</strong></td>
     <td>${object.create_date}</td>
   </tr>
-</table>            
+</table>        
+<h2>Change Log </h2>
+<table border="1" cellpadding="0" cellspacing="0" bordercolor="#000000">
+  <tr bgcolor="#666666">
+    <td style="color: #FFFFFF">PO Line</td>
+    <td style="color: #FFFFFF">Product</td>
+    <td style="color: #FFFFFF">Field Name</td>
+    <td style="color: #FFFFFF">Old Value</td>
+    <td style="color: #FFFFFF">New Value</td>
+    <td style="color: #FFFFFF">User</td>
+    <td style="color: #FFFFFF">Time</td>
+  </tr>
+% for log in object.change_log_line:
+  <tr>
+    <td>${log.po_line_id.name}</td>
+    <td>[${log.product_id.default_code}]${log.product_id.name}-${log.product_id.cn_name}</td>
+    <td>${log.field_name}</td>
+    <td>${log.value_old}</td>
+    <td>${log.value_new}</td>
+    <td>${log.create_uid.name}</td>
+    <td>${log.create_date}</td>
+  </tr>
+% endfor
+</table>    
 ]]>
 			</field>
         </record>

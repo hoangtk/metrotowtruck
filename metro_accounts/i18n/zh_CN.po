@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-29 09:57+0000\n"
-"PO-Revision-Date: 2014-09-29 18:05+0800\n"
+"POT-Creation-Date: 2014-10-07 06:24+0000\n"
+"PO-Revision-Date: 2014-10-07 14:41+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,44 +17,163 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 
 #. module: metro_accounts
-#: field:account.voucher,receipt_number:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_voucher_receipt_number
-msgid "Receipt Number"
-msgstr "发票号"
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_save_pdf
+#: field:rpt.account.cn,save_pdf:0
+msgid "Can Save PDF"
+msgstr "可保存PDF"
 
 #. module: metro_accounts
-#: field:account.rptcn,rpt_lines:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_rpt_lines
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_show_counter
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_show_counter
+#: field:rpt.account.cn,show_counter:0
+#: field:rpt.account.cn.line,show_counter:0
+msgid "Show counterpart"
+msgstr "显示对方科目"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_analytic_plan
+msgid "Analytic Plan"
+msgstr "辅助核算方案"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0
+msgid "明细账"
+msgstr "明细账"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Are you sure to cancel the selected acccount entries?"
+msgstr "你确认取消选择的凭证吗?"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_company_id
+#: field:rpt.account.cn,company_id:0
+msgid "Company"
+msgstr "公司"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_rpt_lines
+#: field:rpt.account.cn,rpt_lines:0
 msgid "Report Line"
 msgstr "报表行"
 
 #. module: metro_accounts
-#: view:account.move:0 view:account.move.batch:0
-#: model:ir.actions.act_window,name:metro_accounts.action_view_account_move_review
-msgid "Review"
-msgstr "审查"
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_counter_account
+#: field:rpt.account.cn.line,counter_account:0
+msgid "Counter Account"
+msgstr "对方科目"
 
 #. module: metro_accounts
-#: selection:account.account,bal_direct:0 field:account.rptcn.line,debit:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_debit
-msgid "Debit"
+#: model:ir.model,name:metro_accounts.model_account_account
+msgid "Account"
+msgstr "科目"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_notes
+#: field:rpt.account.cn.line,notes:0
+msgid "Notes"
+msgstr "备注"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "借方"
 msgstr "借方"
 
 #. module: metro_accounts
-#: view:account.rptcn:0
-msgid "Dates"
-msgstr "日期"
+#: view:account.move.batch:0
+msgid "Note: Only unposted entries can be post!"
+msgstr "注意: 只有未记账的凭证可以过账!"
 
 #. module: metro_accounts
-#: field:account.rptcn.line,aml_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_aml_id
+#: model:ir.model,name:metro_accounts.model_account_rptcn
+msgid "Account Report China"
+msgstr "中国财务报表"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "代码"
+msgstr "代码"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "贷方"
+msgstr "贷方"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Post account entries by batch"
+msgstr "凭证批量过账"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_am_name
+#: field:rpt.account.cn.line,am_name:0
+msgid "Move Name"
+msgstr "凭证名称"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Payment"
+msgstr "付款"
+
+#. module: metro_accounts
+#: help:account.voucher,receipt_number:0
+msgid "The reference of this invoice as provided by the partner."
+msgstr "The reference of this invoice as provided by the partner."
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Note: Only posted entries can be review!"
+msgstr "注意: 只有已登帐的凭证可以审查!"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_account_ids
+#: field:rpt.account.cn,account_ids:0
+msgid "Accounts"
+msgstr "科目"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_res_partner
+msgid "Partner"
+msgstr "业务伙伴"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_filter
+#: field:rpt.account.cn,filter:0
+msgid "Filter by"
+msgstr "查询条件"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.gl:0
+msgid "总分类账"
+msgstr "总分类账"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0
+msgid "凭证号"
+msgstr "凭证号"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "摘要"
+msgstr "摘要"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_aml_id
+#: field:rpt.account.cn.line,aml_id:0
 msgid "Move Line"
 msgstr "凭证行"
 
 #. module: metro_accounts
-#: view:account.invoice:0
-msgid "Purchase Advance Payments"
-msgstr "采购预付款"
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_period_id
+#: field:rpt.account.cn.line,period_id:0
+msgid "Period"
+msgstr "期间"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_type
+#: field:rpt.account.cn,type:0
+msgid "Report Type"
+msgstr "报表类型"
 
 #. module: metro_accounts
 #: field:account.invoice,auto_reconcile_purchase_pay:0
@@ -63,20 +182,11 @@ msgid "Auto Reconcile Purchase Payment"
 msgstr "自动核销预付款"
 
 #. module: metro_accounts
-#: field:account.rptcn.line,seq:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_seq
-msgid "Seq"
-msgstr "序列号"
-
-#. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_analytic_plan
-msgid "Analytic Plan"
-msgstr "辅助核算方案"
-
-#. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_stock_picking
-msgid "Picking List"
-msgstr "分拣单"
+#: selection:account.account,bal_direct:0
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_debit
+#: field:rpt.account.cn.line,debit:0
+msgid "Debit"
+msgstr "借方"
 
 #. module: metro_accounts
 #: view:account.move.batch:0
@@ -84,76 +194,158 @@ msgid "Cancel account entries by batch"
 msgstr "批量取消凭证"
 
 #. module: metro_accounts
-#: field:account.rptcn.line,am_name:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_am_name
-msgid "Move Name"
-msgstr "凭证名称"
-
-#. module: metro_accounts
 #: view:account.move:0
 msgid "{'invisible':[('state','=','draft')]}"
 msgstr "{'invisible':[('state','=','draft')]}"
 
 #. module: metro_accounts
-#: help:account.voucher,receipt_number:0
-msgid "The reference of this invoice as provided by the partner."
-msgstr "The reference of this invoice as provided by the partner."
+#: model:ir.model,name:metro_accounts.model_rpt_account_cn
+msgid "China Account Report"
+msgstr "中国会计报表"
+
+#. module: metro_accounts
+#: view:rpt.account.cn:0
+msgid "Accounting General Ledger"
+msgstr "总分类账"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "名称"
+msgstr "名称"
 
 #. module: metro_accounts
 #: view:account.invoice:0
-msgid "Payment Method"
-msgstr "付款方式"
+msgid "Reconcile Advance Payments"
+msgstr "核销预付款"
+
+#. module: metro_accounts
+#: model:ir.actions.act_window,name:metro_accounts.rpt_account_cn_detail_action
+#: model:ir.ui.menu,name:metro_accounts.rpt_account_cn_detail_menu
+msgid "Account Entry Detail"
+msgstr "明细账"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_rpt_id
+#: view:rpt.account.cn:0 field:rpt.account.cn.line,rpt_id:0
+msgid "Report"
+msgstr "报表"
+
+#. module: metro_accounts
+#: view:rpt.account.cn:0 selection:rpt.account.cn,filter:0
+msgid "Periods"
+msgstr "期间"
+
+#. module: metro_accounts
+#: view:rpt.account.cn:0
+msgid "Dates"
+msgstr "日期"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0
+msgid "日期"
+msgstr "日期"
+
+#. module: metro_accounts
+#: model:ir.actions.report.xml,name:metro_accounts.report_rpt_account_cn_detail
+msgid "Accounting Entry Detail"
+msgstr "明细账"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_period_to
+#: field:rpt.account.cn,period_to:0
+msgid "End Period"
+msgstr "截止期间"
+
+#. module: metro_accounts
+#: view:account.invoice:0
+msgid "Paid Amount"
+msgstr "金额"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Are you sure to post the selected acccount entries?"
+msgstr "确认过账选择的凭证吗?"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_title
+#: field:rpt.account.cn,title:0
+msgid "Report Title"
+msgstr "报表标题"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_rptcn_line
+#: model:ir.model,name:metro_accounts.model_rpt_account_cn_line
+msgid "China Account Report Lines"
+msgstr "中国财务报表明细"
+
+#. module: metro_accounts
+#: view:account.move.line:0 field:account.move.line,to_check:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_move_line_to_check
+msgid "To Review"
+msgstr "审查"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "余额"
+msgstr "余额"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_move_line
+msgid "Journal Items"
+msgstr "会计凭证明细"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_date_from
+#: field:rpt.account.cn,date_from:0
+msgid "Start Date"
+msgstr "开始日期"
+
+#. module: metro_accounts
+#: field:account.account,bal_direct:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_account_bal_direct
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_bal_direct
+#: field:rpt.account.cn.line,bal_direct:0
+msgid "Balance Direction"
+msgstr "余额方向"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "or"
+msgstr "or"
+
+#. module: metro_accounts
+#: selection:rpt.account.cn,target_move:0
+msgid "All Entries"
+msgstr "所有"
+
+#. module: metro_accounts
+#: field:account.voucher,receipt_number:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_voucher_receipt_number
+msgid "Receipt Number"
+msgstr "发票号"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_level
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_level
+#: field:rpt.account.cn,level:0 field:rpt.account.cn.line,level:0
+msgid "Report Level"
+msgstr "报表级别"
+
+#. module: metro_accounts
+#: view:account.move:0 view:account.move.batch:0
+#: model:ir.actions.act_window,name:metro_accounts.action_view_account_move_review
+msgid "Review"
+msgstr "审查"
+
+#. module: metro_accounts
+#: selection:rpt.account.cn,level:0 selection:rpt.account.cn.line,level:0
+msgid "Detail"
+msgstr "明细"
 
 #. module: metro_accounts
 #: model:ir.model,name:metro_accounts.model_account_analytic_line
 msgid "Analytic Line"
 msgstr "辅助核算明细"
-
-#. module: metro_accounts
-#: field:account.move,line_partner_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_move_line_partner_id_5360
-msgid "Move Partner"
-msgstr "凭证合作伙伴"
-
-#. module: metro_accounts
-#: field:account.analytic.plan,instance_ids:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_analytic_plan_instance_ids
-msgid "Instances"
-msgstr "Instances"
-
-#. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_move_batch
-msgid "Batch action on the account move"
-msgstr "凭证明细批量操作"
-
-#. module: metro_accounts
-#: field:account.rptcn.line,rpt_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_rpt_id
-msgid "unknown"
-msgstr "unknown"
-
-#. module: metro_accounts
-#: field:account.rptcn,company_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_company_id
-msgid "Company"
-msgstr "公司"
-
-#. module: metro_accounts
-#: view:account.move.batch:0
-msgid "Are you sure to cancel the selected acccount entries?"
-msgstr "你确认取消选择的凭证吗?"
-
-#. module: metro_accounts
-#: field:account.rptcn.line,date:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_date
-msgid "Move Date"
-msgstr "凭证日期"
-
-#. module: metro_accounts
-#: field:account.rptcn,period_from:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_period_from
-msgid "Start Period"
-msgstr "开始期间"
 
 #. module: metro_accounts
 #: view:account.invoice:0
@@ -168,57 +360,24 @@ msgstr "过账"
 
 #. module: metro_accounts
 #: view:account.move.batch:0
-msgid "Post account entries by batch"
-msgstr "凭证批量过账"
-
-#. module: metro_accounts
-#: view:account.invoice:0
-msgid "Payment"
-msgstr "付款"
-
-#. module: metro_accounts
-#: view:account.rptcn:0
-msgid "Report Options"
-msgstr "报表选项"
-
-#. module: metro_accounts
-#: view:account.move.batch:0
 msgid "Are you sure to review the selected acccount entries?"
 msgstr "确认审查选择的凭证吗?"
 
 #. module: metro_accounts
-#: field:account.rptcn,date_to:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_date_to
-msgid "End Date"
-msgstr "截止日期"
+#: view:rpt.account.cn:0
+msgid "Search"
+msgstr "搜索"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_account
-msgid "Account"
-msgstr "科目"
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "期间"
+msgstr "期间"
 
 #. module: metro_accounts
-#: field:account.rptcn,show_search:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_show_search
-msgid "Show Searching"
-msgstr "显示查询"
-
-#. module: metro_accounts
-#: field:account.rptcn.line,name:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_name
-msgid "Name"
-msgstr "名称"
-
-#. module: metro_accounts
-#: selection:account.rptcn,target_move:0
-msgid "All Posted Entries"
-msgstr "已过账"
-
-#. module: metro_accounts
-#: field:account.rptcn.line,notes:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_notes
-msgid "Notes"
-msgstr "备注"
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_date
+#: field:rpt.account.cn.line,date:0
+msgid "Move Date"
+msgstr "凭证日期"
 
 #. module: metro_accounts
 #: view:account.move.batch:0
@@ -226,54 +385,22 @@ msgid "Review account entries by batch"
 msgstr "凭证批量审查"
 
 #. module: metro_accounts
-#: field:account.rptcn,period_to:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_period_to
-msgid "End Period"
-msgstr "截止期间"
-
-#. module: metro_accounts
-#: selection:account.account,bal_direct:0 field:account.rptcn.line,credit:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_credit
+#: selection:account.account,bal_direct:0
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_credit
+#: field:rpt.account.cn.line,credit:0
 msgid "Credit"
 msgstr "贷方"
 
 #. module: metro_accounts
-#: view:account.move.batch:0
-msgid "Note: Only unposted entries can be post!"
-msgstr "注意: 只有未记账的凭证可以过账!"
+#: view:rpt.account.cn:0
+msgid "PDF"
+msgstr "PDF"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_res_partner
-msgid "Partner"
-msgstr "业务伙伴"
-
-#. module: metro_accounts
-#: model:ir.actions.act_window,name:metro_accounts.action_account_rptcn
-#: model:ir.model,name:metro_accounts.model_account_rptcn
-#: model:ir.ui.menu,name:metro_accounts.menu_account_rptcn
-msgid "Account Report China"
-msgstr "中国财务报表"
-
-#. module: metro_accounts
-#: field:account.rptcn.line,balance:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_balance
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_balance
+#: field:rpt.account.cn.line,balance:0
 msgid "Balance"
 msgstr "余额"
-
-#. module: metro_accounts
-#: view:account.rptcn:0
-msgid "Search"
-msgstr "搜索"
-
-#. module: metro_accounts
-#: constraint:account.rptcn:0
-msgid "The chosen periods have to belong to the same company."
-msgstr "选择的期间必须属于同一个公司"
-
-#. module: metro_accounts
-#: view:account.move.batch:0
-msgid "Are you sure to post the selected acccount entries?"
-msgstr "确认过账选择的凭证吗?"
 
 #. module: metro_accounts
 #: view:account.invoice:0
@@ -281,36 +408,23 @@ msgid "Sale Advance Payments"
 msgstr "销售预付款"
 
 #. module: metro_accounts
-#: field:account.rptcn.line,code:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_code
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_code
+#: field:rpt.account.cn.line,code:0
 msgid "Code"
 msgstr "代码"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_move
-msgid "Account Entry"
-msgstr "凭证"
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_seq
+#: field:rpt.account.cn.line,seq:0
+msgid "Seq"
+msgstr "序列号"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_rptcn_line
-msgid "China Account Report Lines"
-msgstr "中国财务报表明细"
-
-#. module: metro_accounts
-#: view:account.rptcn:0 selection:account.rptcn,filter:0
-msgid "Periods"
-msgstr "期间"
-
-#. module: metro_accounts
-#: view:account.move.line:0 field:account.move.line,to_check:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_move_line_to_check
-msgid "To Review"
-msgstr "审查"
-
-#. module: metro_accounts
-#: view:account.invoice:0
-msgid "Reconcile Advance Payments"
-msgstr "核销预付款"
+#: model:ir.actions.act_window,name:metro_accounts.rpt_account_cn_gl_action
+#: model:ir.actions.report.xml,name:metro_accounts.report_rpt_account_cn_gl
+#: model:ir.ui.menu,name:metro_accounts.rpt_account_cn_gl_menu
+msgid "Accounting Entry GL"
+msgstr "总分类账"
 
 #. module: metro_accounts
 #: model:ir.model,name:metro_accounts.model_account_voucher
@@ -318,16 +432,14 @@ msgid "Accounting Voucher"
 msgstr "手工凭证"
 
 #. module: metro_accounts
-#: field:account.rptcn.line,period_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_period_id
-msgid "Period"
-msgstr "期间"
+#: view:account.invoice:0
+msgid "Purchase Advance Payments"
+msgstr "采购预付款"
 
 #. module: metro_accounts
-#: field:account.rptcn,target_move:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_target_move
-msgid "Target Moves"
-msgstr "凭证过账"
+#: selection:rpt.account.cn,level:0 selection:rpt.account.cn.line,level:0
+msgid "General"
+msgstr "General"
 
 #. module: metro_accounts
 #: view:account.move.batch:0
@@ -335,25 +447,9 @@ msgid "Note: Only posted entries will be cancel!"
 msgstr "注意:只有过账的凭证可以取消"
 
 #. module: metro_accounts
-#: selection:account.rptcn,target_move:0
-msgid "All Entries"
-msgstr "所有"
-
-#. module: metro_accounts
-#: view:account.move.batch:0
-msgid "Note: Only posted entries can be review!"
-msgstr "注意: 只有已登帐的凭证可以审查!"
-
-#. module: metro_accounts
-#: field:account.rptcn,account_ids:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_account_ids
-msgid "Accounts"
-msgstr "科目"
-
-#. module: metro_accounts
-#: help:account.invoice,auto_reconcile_purchase_pay:0
-msgid "Auto reconcile the purchase order payments when valid the invoice"
-msgstr "当验证发票时自动核销采购预付款"
+#: constraint:rpt.account.cn:0
+msgid "The chosen periods have to belong to the same company."
+msgstr "选择的期间必须属于同一个公司"
 
 #. module: metro_accounts
 #: model:ir.model,name:metro_accounts.model_account_invoice
@@ -373,44 +469,114 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: metro_accounts
-#: view:account.invoice:0
-msgid "Paid Amount"
-msgstr "金额"
-
-#. module: metro_accounts
-#: field:account.rptcn,date_from:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_date_from
-msgid "Start Date"
-msgstr "开始日期"
-
-#. module: metro_accounts
 #: field:account.invoice,purchase_ids:0
 #: model:ir.model.fields,field_description:metro_accounts.field_account_invoice_purchase_ids
 msgid "Purchase Orders"
 msgstr "采购订单"
 
 #. module: metro_accounts
-#: field:account.rptcn,filter:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_filter
-msgid "Filter by"
-msgstr "查询条件"
+#: model:ir.model,name:metro_accounts.model_stock_picking
+msgid "Picking List"
+msgstr "分拣单"
 
 #. module: metro_accounts
-#: view:account.move.batch:0
-msgid "or"
-msgstr "or"
+#: view:account.invoice:0
+msgid "Payment Method"
+msgstr "付款方式"
 
 #. module: metro_accounts
-#: field:account.account,bal_direct:0 field:account.rptcn.line,bal_direct:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_account_bal_direct
-#: model:ir.model.fields,field_description:metro_accounts.field_account_rptcn_line_bal_direct
-msgid "Balance Direction"
-msgstr "余额方向"
+#: field:account.move,line_partner_id:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_move_line_partner_id_5360
+msgid "Move Partner"
+msgstr "凭证合作伙伴"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_move_line
-msgid "Journal Items"
-msgstr "会计凭证明细"
+#: model:ir.model,name:metro_accounts.model_account_move_batch
+msgid "Batch action on the account move"
+msgstr "凭证明细批量操作"
+
+#. module: metro_accounts
+#: selection:rpt.account.cn,target_move:0
+msgid "All Posted Entries"
+msgstr "已登帐"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_target_move
+#: field:rpt.account.cn,target_move:0
+msgid "Target Moves"
+msgstr "凭证过账"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_date_to
+#: field:rpt.account.cn,date_to:0
+msgid "End Date"
+msgstr "截止日期"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_period_from
+#: field:rpt.account.cn,period_from:0
+msgid "Start Period"
+msgstr "开始期间"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_name
+#: field:rpt.account.cn,name:0
+msgid "Report Name"
+msgstr "报表名称"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_name
+#: field:rpt.account.cn.line,name:0
+msgid "Name"
+msgstr "名称"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_show_result
+#: field:rpt.account.cn,show_result:0
+msgid "Show Result"
+msgstr "显示结果"
+
+#. module: metro_accounts
+#: view:rpt.account.cn:0
+msgid "Accounting Detail"
+msgstr "明细账"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "会计期间:"
+msgstr "会计期间:"
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.cn.gl:0
+msgid "–"
+msgstr "–"
+
+#. module: metro_accounts
+#: model:ir.model,name:metro_accounts.model_account_move
+msgid "Account Entry"
+msgstr "凭证"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_show_search
+#: field:rpt.account.cn,show_search:0
+msgid "Show Searching"
+msgstr "显示查询"
+
+#. module: metro_accounts
+#: model:ir.ui.menu,name:metro_accounts.menu_rpt_account_cn
+msgid "Account CN"
+msgstr "中国财务"
+
+#. module: metro_accounts
+#: field:account.analytic.plan,instance_ids:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_analytic_plan_instance_ids
+msgid "Instances"
+msgstr "Instances"
+
+#. module: metro_accounts
+#: help:account.invoice,auto_reconcile_purchase_pay:0
+msgid "Auto reconcile the purchase order payments when valid the invoice"
+msgstr "当验证发票时自动核销采购预付款"
 
 ########################manual########################
 #. module: account
@@ -440,31 +606,31 @@ msgid "Initial balance"
 msgstr "期初余额"
 
 #. module: metro_account
-#: code:addons/account/account_rptcn.py:0
+#: code:addons/metro_accounts/wizard/rpt_account_cn.py:0
 #, python-format
 msgid "Period total"
 msgstr "本期合计"
 
 #. module: metro_account
-#: code:addons/account/account_rptcn.py:0
+#: code:addons/metro_accounts/wizard/rpt_account_cn.py:0
 #, python-format
 msgid "Year total"
 msgstr "本年累计"
                             
 #. module: metro_account
-#: code:addons/account/account_rptcn.py:0
+#: code:addons/metro_accounts/wizard/rpt_account_cn.py:0
 #, python-format
 msgid "Debit"
 msgstr "借"
 
 #. module: metro_account
-#: code:addons/account/account_rptcn.py:0
+#: code:addons/metro_accounts/wizard/rpt_account_cn.py:0
 #, python-format
 msgid "Credit"
 msgstr "贷"
 
 #. module: metro_account
-#: code:addons/account/account_rptcn.py:0
+#: code:addons/metro_accounts/wizard/rpt_account_cn.py:0
 #, python-format
 msgid "Balanced"
 msgstr "平"
