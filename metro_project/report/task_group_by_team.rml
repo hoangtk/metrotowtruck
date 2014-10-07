@@ -78,12 +78,9 @@
       <lineStyle kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
       <lineStyle kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
       <lineStyle kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
       <lineStyle kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
-      <lineStyle kind="LINEBEFORE" colorName="#000000" start="6,0" stop="6,-1"/>
-      <lineStyle kind="LINEAFTER" colorName="#000000" start="6,0" stop="6,-1"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="6,0" stop="6,0"/>
-      <lineStyle kind="LINEBELOW" colorName="#000000" start="6,-1" stop="6,-1"/>
       <blockTopPadding length="1"/>
       <blockBottomPadding length="1"/>
       <blockLeftPadding length="1"/>
@@ -98,8 +95,9 @@
     <paraStyle name="P4" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P5" fontName="Helvetica" fontSize="12.0" leading="15" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="P6" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="P7" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P8" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P7" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="15.0" leading="19" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -137,6 +135,59 @@
     <images/>
   </stylesheet>
   <story>
+  <pto>
+  <pto_header>
+    <blockTable colWidths="38.0,129.0,56.0,63.0,62.0,119.0,64.0" repeatRows="1" style="table_list">
+      <tr>
+        <td>
+          <para style="P5">MFG ID</para>
+        </td>
+        <td>
+          <para style="P5">Name</para>
+        </td>
+        <td>
+          <para style="P5">Planned Hours</para>
+        </td>
+        <td>
+          <para style="P5">Start</para>
+        </td>
+        <td>
+          <para style="P5">Deadline</para>
+        </td>
+        <td>
+          <para style="P5">Problems arise in the manufacture</para>
+        </td>
+        <td>
+          <para style="P5">End</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P5">
+            <font color="white"> </font>
+          </para>
+        </td>
+        <td>
+          <para style="P5">名称</para>
+        </td>
+        <td>
+          <para style="P5">计划时数</para>
+        </td>
+        <td>
+          <para style="P5">开始日期</para>
+        </td>
+        <td>
+          <para style="P5">最后期限</para>
+        </td>
+        <td>
+          <para style="P5">生产中出现的问题</para>
+        </td>
+        <td>
+          <para style="P5">完成日期</para>
+        </td>
+      </tr>
+    </blockTable>  
+  </pto_header>
     <para style="P1">[[ repeatIn(objects,'group') ]]</para>
     <para style="P2">Daily Task/日工作任务 [[formatLang(group.task_day,date='True')]]</para>
     <para style="P3">
@@ -202,41 +253,35 @@
     </blockTable>
     <section>
       <para style="P6">[[ repeatIn(group.task_ids,'task') ]]</para>
-      <blockTable colWidths="38.0,129.0,56.0,63.0,62.0,120.0,63.0" repeatRows="1" style="Table1">
+      <blockTable colWidths="167.0,56.0,63.0,62.0,119.0,64.0" repeatRows="1" style="Table1">
         <tr>
           <td>
             <para style="P7">[[get_mfg_ids(task.mfg_ids)]]</para>
-          </td>
-          <td>
-            <para style="P7">[[task.product.name]],[[task.workorder_id.name]],</para>
+            <para style="P7">[[task.product.name]]</para>
+            <para style="P7">[[task.workorder_id.name]],[[task.workorder_id.bom_id.product_id.cn_name]]</para>
             <para style="P7">[[task.id]]-[[task.name]]</para>
           </td>
           <td>
-            <para style="P7">[[task.planned_hours]]</para>
+            <para style="P8">[[task.planned_hours]]</para>
           </td>
           <td>
-            <para style="P7">[[formatLang(task.date_start,date='True')]]</para>
+            <para style="P8">[[formatLang(task.date_start,date='True')]]</para>
           </td>
           <td>
-            <para style="P7">[[formatLang(task.date_deadline,date='True')]]</para>
+            <para style="P8">[[formatLang(task.date_deadline,date='True')]]</para>
           </td>
           <td>
-            <para style="P7">
+            <para style="P8">
               <font color="white"> </font>
             </para>
           </td>
           <td>
-            <para style="P7">[[formatLang(task.date_end,date='True')]]</para>
+            <para style="P8">[[formatLang(task.date_end,date='True')]]</para>
           </td>
         </tr>
       </blockTable>
     </section>
-    <para style="P4">
-      <font color="white"> </font>
-    </para>
-    <para style="P4">
-      <font color="white"> </font>
-    </para>
+  </pto>
   </story>
 </document>
 

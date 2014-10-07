@@ -39,7 +39,7 @@ class project_task_print(report_sxw.rml_parse):
         return ', '.join(emp_names)  
     def get_mfg_ids(self,mfg_ids):
         mfg_ids_name = [mfg_id.name for mfg_id in mfg_ids]
-        return ', '.join(mfg_ids_name)                 
+        return ','.join(mfg_ids_name)                 
     #get the selection display value by the selection key(field_value)
     def _get_sellection_name(self,model_name,field_name,field_value):
         field_sel = self.pool.get(model_name)._columns[field_name].selection

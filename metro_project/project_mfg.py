@@ -71,7 +71,7 @@ class project_task(base_stage, osv.osv):
         from code to create: [4, [418, 416]]
         Only check from GUI
         '''
-        if 'mfg_ids' in vals and len(vals['mfg_ids']) == 1:     
+        if 'mfg_ids' in vals and vals['mfg_ids'][0][2] == 1:     
             wo = None
             #get the workorder data
             if not 'workorder_id' in vals:
