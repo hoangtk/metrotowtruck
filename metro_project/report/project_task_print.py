@@ -39,7 +39,7 @@ class project_task_print(report_sxw.rml_parse):
         return ', '.join(emp_names)  
     def get_mfg_ids(self,mfg_ids):
         mfg_ids_name = [mfg_id.name for mfg_id in mfg_ids]
-        return ', '.join(mfg_ids_name)                 
+        return ','.join(mfg_ids_name)                 
     #get the selection display value by the selection key(field_value)
     def _get_sellection_name(self,model_name,field_name,field_value):
         field_sel = self.pool.get(model_name)._columns[field_name].selection
@@ -52,14 +52,14 @@ class project_task_print(report_sxw.rml_parse):
         trans_name = model_name + ',' + field_name
         trans_result = trans_obj._get_source(self.cr, self.uid, trans_name, 'selection', self.localcontext.get('lang'), trans_src)
         return trans_result   
-report_sxw.report_sxw('report.project.task.print','project.task','addons/metro_project/report/project_task_print.rml',parser=project_task_print)
-report_sxw.report_sxw('report.project.task.list','project.task','addons/metro_project/report/project_task_list.rml',parser=project_task_print)
-report_sxw.report_sxw('report.project.task.sheet','project.task','addons/metro_project/report/project_task_sheet.rml',parser=project_task_print)
+report_sxw.report_sxw('report.project.task.print','project.task','addons/metro_project/report/project_task_print.rml',parser=project_task_print, header='internal')
+report_sxw.report_sxw('report.project.task.list','project.task','addons/metro_project/report/project_task_list.rml',parser=project_task_print, header='internal')
+report_sxw.report_sxw('report.project.task.sheet','project.task','addons/metro_project/report/project_task_sheet.rml',parser=project_task_print, header='internal')
 #tasks by group
-report_sxw.report_sxw('report.task.group.by_assignee','task.group','addons/metro_project/report/task_group_by_assignee.rml',parser=project_task_print)
-report_sxw.report_sxw('report.task.group.by_employee','task.group','addons/metro_project/report/task_group_by_employee.rml',parser=project_task_print)
-report_sxw.report_sxw('report.task.group.by_team','task.group','addons/metro_project/report/task_group_by_team.rml',parser=project_task_print)
+report_sxw.report_sxw('report.task.group.by_assignee','task.group','addons/metro_project/report/task_group_by_assignee.rml',parser=project_task_print, header='internal')
+report_sxw.report_sxw('report.task.group.by_employee','task.group','addons/metro_project/report/task_group_by_employee.rml',parser=project_task_print, header='internal')
+report_sxw.report_sxw('report.task.group.by_team','task.group','addons/metro_project/report/task_group_by_team.rml',parser=project_task_print, header='internal')
 #daily task
-report_sxw.report_sxw('report.task.daily.mfg','task.group','addons/metro_project/report/task_daily_mfg.rml',parser=project_task_print)
+#report_sxw.report_sxw('report.task.daily.mfg','task.group','addons/metro_project/report/task_daily_mfg.rml',parser=project_task_print, header='internal')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

@@ -6,6 +6,7 @@
             <field name="model">change.log.po.line</field>
             <field name="arch" type="xml">
 				<tree string="Change Log of PO Lines">
+                  <field name="field_name"/>
                   <field name="value_old"/>
                   <field name="value_new"/>
                   <field name="create_uid"/>

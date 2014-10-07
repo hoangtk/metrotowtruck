@@ -27,12 +27,14 @@ from openerp.osv import fields,osv
 class change_log_po_line(osv.osv):  
     _name = "change.log.po.line"
     _columns = {
-        'res_id': fields.many2one('purchase.order.line','PO Line'),
+        'po_line_id': fields.many2one('purchase.order.line','PO Line'),
+        'po_id': fields.many2one('purchase.order','PO'),
+        'product_id': fields.many2one('product.product','Product'),
         'field_name':  fields.char('Field Name', size=30, readonly=True),
         'value_old': fields.char('Old Value', readonly=True),
         'value_new': fields.char('New Value', readonly=True),
         'create_uid': fields.many2one('res.users', 'User', readonly=True),
         'create_date':  fields.datetime('Time', readonly=True),
     }
-
+    _order = 'create_date desc'
 change_log_po_line()    

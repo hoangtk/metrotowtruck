@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <report auto="False" id="report_rpt_account_cn_gl" model="rpt.account.cn" header="True"
+                name="rpt.account.cn.gl" rml="metro_accounts/report/rpt_account_cn_gl.rml"
+                usage="default" string="Accounting Entry GL"/>     
+        <report auto="False" id="report_rpt_account_cn_detail" model="rpt.account.cn" header="True"
+                name="rpt.account.cn.detail" rml="metro_accounts/report/rpt_account_cn_detail.rml"
+                usage="default" string="Accounting Entry Detail"/>                    
+    </data>
+</openerp>

@@ -135,59 +135,6 @@
     <images/>
   </stylesheet>
   <story>
-  <pto>
-  <pto_header>
-    <blockTable colWidths="38.0,129.0,56.0,63.0,62.0,119.0,64.0" repeatRows="1" style="table_list">
-      <tr>
-        <td>
-          <para style="P5">MFG ID</para>
-        </td>
-        <td>
-          <para style="P5">Name</para>
-        </td>
-        <td>
-          <para style="P5">Planned Hours</para>
-        </td>
-        <td>
-          <para style="P5">Start</para>
-        </td>
-        <td>
-          <para style="P5">Deadline</para>
-        </td>
-        <td>
-          <para style="P5">Problems arise in the manufacture</para>
-        </td>
-        <td>
-          <para style="P5">End</para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para style="P5">
-            <font color="white"> </font>
-          </para>
-        </td>
-        <td>
-          <para style="P5">名称</para>
-        </td>
-        <td>
-          <para style="P5">计划时数</para>
-        </td>
-        <td>
-          <para style="P5">开始日期</para>
-        </td>
-        <td>
-          <para style="P5">最后期限</para>
-        </td>
-        <td>
-          <para style="P5">生产中出现的问题</para>
-        </td>
-        <td>
-          <para style="P5">完成日期</para>
-        </td>
-      </tr>
-    </blockTable>  
-  </pto_header>
     <para style="P1">[[ repeatIn(objects,'group') ]]</para>
     <para style="P2">Daily Task/日工作任务 [[formatLang(group.task_day,date='True')]]</para>
     <para style="P3">
@@ -253,7 +200,7 @@
     </blockTable>
     <section>
       <para style="P6">[[ repeatIn(group.task_ids,'task') ]]</para>
-      <blockTable colWidths="167.0,56.0,63.0,62.0,119.0,64.0" repeatRows="1" style="Table1">
+      <blockTable colWidths="167.0,56.0,63.0,62.0,120.0,63.0" repeatRows="1" style="Table1">
         <tr>
           <td>
             <para style="P7">[[get_mfg_ids(task.mfg_ids)]]</para>
@@ -280,8 +227,16 @@
           </td>
         </tr>
       </blockTable>
+      <para style="P9">
+        <font color="white"> </font>
+      </para>
     </section>
-  </pto>
+    <para style="P4">
+      <font color="white"> </font>
+    </para>
+    <para style="P4">
+      <font color="white"> </font>
+    </para>
   </story>
 </document>
 

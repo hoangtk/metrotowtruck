@@ -17,11 +17,6 @@ msgstr ""
 "X-Generator: Poedit 1.5.7\n"
 
 #. module: metro_project
-#: report:task.group.by_team:0
-msgid "最后期限"
-msgstr "最后期限"
-
-#. module: metro_project
 #: model:ir.actions.report.xml,name:metro_project.report_task_group_by_assignee
 msgid "Tasks by Assignee"
 msgstr "按分配者的任务列表"
@@ -42,16 +37,6 @@ msgstr "Metro Production"
 #: selection:project.task.type,project_type:0 selection:task.print,task_type:0
 msgid "Manufacture"
 msgstr "生产"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "Team leader sign/组长签名:"
-msgstr "Team leader sign/组长签名:"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "Problems arise in the manufacture"
-msgstr "Problems arise in the manufacture"
 
 #. module: metro_project
 #: report:project.task.print:0 report:project.task.sheet:0
@@ -177,11 +162,6 @@ msgstr ""
 "            "
 
 #. module: metro_project
-#: report:task.group.by_team:0
-msgid "开始日期"
-msgstr "开始日期"
-
-#. module: metro_project
 #: view:project.task:0
 msgid "False"
 msgstr "False"
@@ -256,21 +236,6 @@ msgid "Timeframe:"
 msgstr "时间表:"
 
 #. module: metro_project
-#: view:project.task:0 report:task.group.by_team:0
-msgid "Planned Hours"
-msgstr "计划时数"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "End"
-msgstr "结束"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "MFG ID"
-msgstr "生产ID"
-
-#. module: metro_project
 #: view:project.task:0
 msgid "Today's Tasks"
 msgstr "今天的任务"
@@ -321,16 +286,6 @@ msgstr "打印"
 #: view:project.task:0
 msgid "{'task_employee_ids':emp_ids,'workorder_id':workorder_id}"
 msgstr "{'task_employee_ids':emp_ids,'workorder_id':workorder_id}"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "名称"
-msgstr "名称"
-
-#. module: metro_project
-#: report:project.task.list:0 report:task.group.by_team:0
-msgid "Deadline"
-msgstr "最后期限"
 
 #. module: metro_project
 #: selection:project.issue,database:0 selection:project.issue,database_test:0
@@ -499,16 +454,6 @@ msgid "Project Task Work"
 msgstr "任务进度"
 
 #. module: metro_project
-#: report:task.group.by_team:0
-msgid "Daily Task/日工作任务"
-msgstr "Daily Task/日工作任务"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "Start"
-msgstr "开始"
-
-#. module: metro_project
 #: selection:project.issue,type:0
 msgid "Feature Request"
 msgstr "特性请求"
@@ -530,11 +475,6 @@ msgstr "测试数据库"
 #: model:ir.actions.act_window,name:metro_project.tasks_opening_simple_action
 msgid "Simple Tasks"
 msgstr "普通任务"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "完成日期"
-msgstr "完成日期"
 
 #. module: metro_project
 #: model:ir.actions.report.xml,name:metro_project.report_task_group_by_employee
@@ -594,11 +534,6 @@ msgstr "用户"
 #: model:ir.ui.menu,name:metro_project.menu_action_view_task_engineer
 msgid "Engineer Tasks"
 msgstr "工程任务"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "生产中出现的问题"
-msgstr "生产中出现的问题"
 
 #. module: metro_project
 #: selection:project.project,project_type:0
@@ -661,11 +596,6 @@ msgstr "float_time"
 #: view:task.print:0
 msgid "Task printing by group"
 msgstr "分组任务打印"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "计划时数"
-msgstr "计划时数"
 
 #. module: metro_project
 #: model:ir.actions.act_window,name:metro_project.open_view_project_engineer
@@ -790,11 +720,6 @@ msgid "Work Hours"
 msgstr "工作小时数"
 
 #. module: metro_project
-#: report:task.group.by_team:0
-msgid "Approved production manager/生产经理许可:"
-msgstr "Approved production manager/生产经理许可:"
-
-#. module: metro_project
 #: model:ir.model.fields,field_description:metro_project.field_project_project_product_id
 #: model:ir.model.fields,field_description:metro_project.field_project_task_product
 #: model:ir.model.fields,field_description:metro_project.field_project_task_product_id
@@ -802,11 +727,6 @@ msgstr "Approved production manager/生产经理许可:"
 #: field:project.task,product_id:0
 msgid "Product"
 msgstr "产品"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "Members/组员:"
-msgstr "Members/组员:"
 
 #. module: metro_project
 #: model:ir.model,name:metro_project.model_task_group_test
@@ -822,11 +742,6 @@ msgstr "按部门的任务列表"
 #: view:project.task:0
 msgid "End Date"
 msgstr "结束日期"
-
-#. module: metro_project
-#: report:project.task.list:0 report:task.group.by_team:0
-msgid "Name"
-msgstr "名称"
 
 #. module: metro_project
 #: model:ir.model.fields,field_description:metro_project.field_project_task_emp_ids
@@ -885,11 +800,6 @@ msgstr "开始日期:"
 #: selection:project.task.type,project_type:0 selection:task.print,task_type:0
 msgid "All"
 msgstr "所有"
-
-#. module: metro_project
-#: report:task.group.by_team:0
-msgid "Leader/组长:"
-msgstr "Leader/组长:"
 
 #. module: metro_project
 #: view:board.board:0
