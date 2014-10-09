@@ -67,7 +67,8 @@ class stock_picking(osv.osv):
         #only do the merging when there more than one stocking moves to this picking
         if not pick.account_move_ids or len(pick.account_move_ids) <= 1:
             move_ids = [move.id for move in pick.account_move_ids]
-            self.pool.get('account.move').post(cr, uid, move_ids, context=context)
+            if move_ids:
+                self.pool.get('account.move').post(cr, uid, move_ids, context=context)
             return        
         # pick one product to get the account configuration
         product_id = pick.move_lines[0].product_id.id
