@@ -421,7 +421,7 @@ class stock_picking(osv.osv):
                     #remove the auto validate, need the accoutant to validate manually.
                     wf_service = netsvc.LocalService("workflow")
                     for invoice_id in invoice_ids:
-                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)\
+                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)
                     '''   
 
         super(stock_picking,self).action_done(cr,uid,ids,context)

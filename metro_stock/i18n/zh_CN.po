@@ -1384,3 +1384,13 @@ msgstr "确认重置此出入库单吗?"
 #: view:material.request:0
 msgid "Reopen"
 msgstr "重置"
+
+#. module: account
+#: view:account.invoice:0
+msgid "Create Invoice/Refund"
+msgstr "创建凭据"
+
+#. module: account
+#: view:account.invoice:0
+msgid "Validate"
+msgstr "确认"

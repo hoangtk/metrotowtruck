@@ -28,8 +28,8 @@ from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
   
 class stock_picking(osv.osv):
     _inherit = "stock.picking"
-    def action_move(self, cr, uid, ids, context=None):
-        resu = super(stock_picking,self).action_move(cr, uid, ids, context=context)
+    def action_done(self, cr, uid, ids, context=None):
+        resu = super(stock_picking,self).action_done(cr, uid, ids, context=context)
         for picking_id in ids:
             self.merge_pick_moves(cr, uid, picking_id, context)
         return resu
@@ -66,6 +66,8 @@ class stock_picking(osv.osv):
         pick = self.browse(cr, uid, picking_id,context=context)
         #only do the merging when there more than one stocking moves to this picking
         if not pick.account_move_ids or len(pick.account_move_ids) <= 1:
+            move_ids = [move.id for move in pick.account_move_ids]
+            self.pool.get('account.move').post(cr, uid, move_ids, context=context)
             return        
         # pick one product to get the account configuration
         product_id = pick.move_lines[0].product_id.id
@@ -82,7 +84,7 @@ class stock_picking(osv.osv):
         unlink_move_ids = []
         for move in pick.account_move_ids:
             #only the draft's stock move can be merge
-            if move.state != 'draft' and move.journal_id.id != accounts['stock_journal']:
+            if move.state != 'draft' or move.journal_id.id != accounts['stock_journal']:
                 continue
             #get the account move values
             move_key = '%s-%s-%s-%s'%(move.ref,move.period_id.id,move.journal_id.id,move.company_id.id)
@@ -156,6 +158,9 @@ class stock_picking(osv.osv):
                     move_vals.get('line_id').append((0, 0, new_move_line))
             if len(move_vals.get('line_id')) > 0:
                 unlink_move_ids.append(move.id)
+        #if move count did not change then return directly
+        if len(new_moves) == len(unlink_move_ids):
+            return
         move_obj = self.pool.get('account.move')
         #create the new moves
         new_move_ids = []
@@ -172,8 +177,10 @@ class stock_picking(osv.osv):
             new_move_id = move_obj.create(cr, uid, new_move_vals, context=context)
             new_move_ids.append(new_move_id)
         #deleted the merged moves
-        move_obj.unlink(cr, uid, unlink_move_ids, context=context)
+        if unlink_move_ids:
+            move_obj.unlink(cr, uid, unlink_move_ids, context=context)
         #post new move
-        move_obj.post(cr, uid, new_move_ids, context=context)
+        if new_move_ids:
+            move_obj.post(cr, uid, new_move_ids, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
