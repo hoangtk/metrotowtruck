@@ -93,7 +93,8 @@ class stock_picking(osv.osv):
                              'period_id':move.period_id.id,
                              'journal_id':move.journal_id.id,
                              'company_id':move.company_id.id,
-                             'line_id':[],}
+                             'line_id':[],
+                             'valuation_line_id':[],}
                 new_moves.update({move_key:move_vals})
             else:
                 move_vals = new_moves.get(move_key)
@@ -101,6 +102,7 @@ class stock_picking(osv.osv):
                 
             for move_line in move.line_id:
                 if move_line.account_id.id == accounts['property_stock_valuation_account_id']:
+                    '''
                     #merge the stock valuation values to one line
                     stock_valuation_line = {}
                     if 'stock_valuation_line' not in move_vals:
@@ -118,6 +120,23 @@ class stock_picking(osv.osv):
                         stock_valuation_line = move_vals.get('stock_valuation_line')
                     stock_valuation_line['credit'] += move_line.credit
                     stock_valuation_line['debit'] += move_line.debit
+                    '''
+                    #add valuation move lines
+                    new_move_line = {
+                        'name': move_line.name,
+                        'product_id': move_line.product_id.id,
+                        'quantity': move_line.quantity,
+                        'product_uom_id': move_line.product_uom_id.id, 
+                        'ref': move_line.ref,
+                        'date': time.strftime('%Y-%m-%d'),
+                        'partner_id': move_line.partner_id.id,
+                        'credit': move_line.credit,
+                        'debit': move_line.debit,
+                        'account_id': move_line.account_id.id,
+                        'analytic_account_id': move_line.analytic_account_id.id,
+                        }
+                    
+                    move_vals.get('valuation_line_id').append((0, 0, new_move_line))                    
                 else:
                     #add other move lines for the stock in/out account
                     new_move_line = {
@@ -139,12 +158,22 @@ class stock_picking(osv.osv):
                 unlink_move_ids.append(move.id)
         move_obj = self.pool.get('account.move')
         #create the new moves
+        new_move_ids = []
         for new_move_vals in new_moves.values():
             if len(move_vals.get('line_id')) <= 0:
                 continue
-            new_move_vals.get('line_id').append((0,0,new_move_vals['stock_valuation_line']))
-            move_obj.create(cr, uid, new_move_vals, context=context)
+            #new_move_vals.get('line_id').append((0,0,new_move_vals['stock_valuation_line']))
+            line_ids = []
+            if pick.type in (u'out',u'mr'):
+                line_ids =  new_move_vals['valuation_line_id'] + new_move_vals.get('line_id') 
+            else:
+                line_ids =  new_move_vals.get('line_id') + new_move_vals['valuation_line_id']
+            new_move_vals['line_id'] = line_ids
+            new_move_id = move_obj.create(cr, uid, new_move_vals, context=context)
+            new_move_ids.append(new_move_id)
         #deleted the merged moves
         move_obj.unlink(cr, uid, unlink_move_ids, context=context)
+        #post new move
+        move_obj.post(cr, uid, new_move_ids, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
