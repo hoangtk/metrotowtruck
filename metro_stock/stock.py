@@ -401,6 +401,13 @@ class stock_picking(osv.osv):
                         
                 #if this is related to a PO and need to create invoices after picking, then auto generate the invoie and valid the invoice.
                 if pick.type=='in' and pick.invoice_state == '2binvoiced':
+                    '''
+                    remove the auto invoice generating, by johnw, 10/09/2014, for the price chaning, 
+                    need user to adjust price on stock_move, 
+                    otherwise user change the price on invoice, 
+                    then the move price will be wrong, then the FIFO price will be wrong
+                    '''
+                    '''
                     inv_create_obj = self.pool.get("stock.invoice.onshipping")
                     if not context:
                         context = {}
@@ -410,10 +417,11 @@ class stock_picking(osv.osv):
                     pick_inv_ids = inv_create_obj.create_invoice(cr,uid,[inv_create_id],context)
                     invoice_ids = pick_inv_ids.values()
                     '''
-                    remove the auto validate, need the accoutant to validate manually.
+                    '''
+                    #remove the auto validate, need the accoutant to validate manually.
                     wf_service = netsvc.LocalService("workflow")
                     for invoice_id in invoice_ids:
-                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)\
+                        wf_service.trg_validate(uid, 'account.invoice', invoice_id, 'invoice_open', cr)
                     '''   
 
         super(stock_picking,self).action_done(cr,uid,ids,context)
@@ -450,6 +458,14 @@ class stock_picking(osv.osv):
         self.write(cr, uid, done_pick_ids, vals, context=context)
         return res
 
+    def _prepare_invoice_line(self, cr, uid, group, picking, move_line, invoice_id, invoice_vals, context=None):
+        invoice_line_vals = super(stock_picking, self)._prepare_invoice_line(cr, uid, group, picking, move_line, invoice_id, invoice_vals, context=context)
+        if invoice_vals['type'] in ('in_invoice', 'in_refund'):
+            #check the 'property_stock_valuation_account_id' for the incoming stock, if it is true, then replace the invoice line account_id
+            use_valuation_account = move_line.product_id.categ_id.prop_use_value_act_as_invoice
+            if use_valuation_account:
+                invoice_line_vals['account_id'] = move_line.product_id.categ_id.property_stock_valuation_account_id.id
+        return invoice_line_vals
     
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   
@@ -555,6 +571,20 @@ class stock_warehouse_orderpoint(osv.osv):
             if prod:
                 vals.update({'product_uom':prod.uom_id.id})
         return super(stock_warehouse_orderpoint,self).create(cr, uid, vals, context)
+
+class product_category(osv.osv):
+    _inherit = 'product.category'
+    _columns = {
+        #use valuation account as invoice account
+        #使用存货科目作为生成凭据明细的会计科目,也就是凭据确认时应付账款的对方科目
+        'prop_use_value_act_as_invoice': fields.property(None,
+            type='boolean',
+            string="Use valuation as invoice",
+            view_load=True,
+            help="Use Stock Valuation Account as the invoice counterpart account to the payable."),
+    }
+
+product_category()
       
 def deal_args(obj,args):  
     new_args = []

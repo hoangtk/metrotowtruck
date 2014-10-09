@@ -329,8 +329,10 @@ class stock_move(osv.osv):
         ctx = context.copy()
         ctx['force_company'] = move.company_id.id
         valuation = self.pool.get("product.product").browse(cr, uid, move.product_id.id, context=ctx).valuation
-        move_obj = self.pool.get('account.move')
-        if valuation == 'real_time':
+        move_obj = self.pool.get('account.move')        
+        #check the 'property_stock_valuation_account_id' for the incoming stock, if it is true, then replace the invoice line account_id
+        use_valuation_account = move.type == 'in' and move.product_id.categ_id.prop_use_value_act_as_invoice                        
+        if not use_valuation_account and valuation == 'real_time':
             if context is None:
                 context = {}
             company_ctx = dict(context,force_company=move.company_id.id)
@@ -814,7 +816,7 @@ class stock_move(osv.osv):
                     wf_service.trg_validate(uid, 'stock.picking', move.picking_id.id, 'button_done', cr)
 
         return [move.id for move in complete]
-
+stock_move()
 class stock_inventory(osv.osv):
     _inherit = "stock.inventory"
 

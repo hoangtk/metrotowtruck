@@ -376,17 +376,25 @@ class purchase_order(osv.osv):
         property_obj = self.pool.get('ir.property')
         acc = None
         if po_line.product_id:
-            acc = property_obj.get(cr, uid, 'property_account_expense', 'product.template', 
-                              res_id = 'product.template,%d'%po_line.product_id.id, context = {'force_company':order.company_id.id})
-            if not acc:
-                acc = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category', 
-                                  res_id = 'product.category,%d'%po_line.product_id.categ_id.id, context = {'force_company':order.company_id.id})
+            acc = po_line.product_id.property_account_expense or  po_line.product_id.categ_id.property_account_expense_categ
+#        if po_line.product_id:
+#            acc = property_obj.get(cr, uid, 'property_account_expense', 'product.template', 
+#                              res_id = 'product.template,%d'%po_line.product_id.id, context = {'force_company':order.company_id.id})
+#            if not acc:
+#                acc = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category', 
+#                                  res_id = 'product.category,%d'%po_line.product_id.categ_id.id, context = {'force_company':order.company_id.id})
         if not acc:
             acc = property_obj.get(cr, uid, 'property_account_expense', 'product.template', 
                               context = {'force_company':order.company_id.id})                                
         if not acc:
             acc = property_obj.get(cr, uid, 'property_account_expense_categ', 'product.category', 
                                    context = {'force_company':order.company_id.id})
+            
+        #check the 'property_stock_valuation_account_id', if it is true, then replace the invoice line account_id, by johnw, 10/08/2014
+        use_valuation_account = po_line.product_id.type == 'product' and po_line.product_id.categ_id.prop_use_value_act_as_invoice
+        if use_valuation_account:
+            acc = po_line.product_id.categ_id.property_stock_valuation_account_id
+        
         if not acc:
                 raise osv.except_osv(_('Error!'),
                         _('Define purchase journal for this company: "%s" (id:%d).') % (order.company_id.name, order.company_id.id))

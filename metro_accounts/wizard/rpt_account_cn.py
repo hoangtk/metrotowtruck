@@ -57,7 +57,7 @@ class rpt_account_cn(osv.osv_memory):
         'type': 'account_cn',     
         'filter': 'filter_period',        
         'target_move': 'posted',
-        'account_ids': _get_accounts_default,
+#        'account_ids': _get_accounts_default,
         'level': 'general',   
     }
     def _check_periods(self, cr, uid, ids, context=None):

@@ -82,7 +82,7 @@
         </record>   
         
         <record id="rpt_account_cn_gl_action" model="ir.actions.act_window">
-            <field name="name">Accounting Entry GL</field>
+            <field name="name">Account Entry GL</field>
             <field name="res_model">rpt.account.cn</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>

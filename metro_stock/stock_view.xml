@@ -190,7 +190,7 @@
                     <field name="product_uom" readonly="1" string="Unit of Measure" groups="product.group_uom"/>
                     <field name="product_uos_qty"  invisible="1"/>
                     <field name="product_uos"  invisible="1"/>     
-					<field name="price_unit"/> 
+					<field name="price_unit" groups="account.group_account_invoice"/> 
 					<field name="price_subtotal"/>
 					<field name="price_currency_id" invisible="1"/>	                                       
 		            <field name="mr_emp_id"/>
@@ -230,7 +230,7 @@
 	                        </div>
 	                        <field name="product_uos_qty" invisible="1" on_change="onchange_uos_quantity(product_id, product_uos_qty, product_uos, product_uom)" class="oe_inline"/>
 	                        <field name="product_uos" invisible="1" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)" class="oe_inline"/>
-							<field name="price_unit"/>
+							<field name="price_unit" groups="account.group_account_invoice"/>
 							<field name="price_currency_id" invisible="1"/>
 							<field name="mr_emp_id"/>
 							<field name="mr_sale_prod_id"/>                       
@@ -259,7 +259,7 @@
                     <field name="product_id" on_change="onchange_product_id(product_id,location_id,location_dest_id, False)"/>
                     <field name="product_qty" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)"/>
                     <field name="product_uom" string="Unit of Measure" groups="product.group_uom"/>
-					<field name="price_unit"/> 
+					<field name="price_unit" groups="account.group_account_invoice"/> 
 					<field name="price_subtotal"/>
 					<field name="price_currency_id" invisible="1"/>	 
                     <field name="mr_emp_id"/>
@@ -294,7 +294,7 @@
 	                        </div>
 	                        <field name="product_uos_qty" invisible="1" on_change="onchange_uos_quantity(product_id, product_uos_qty, product_uos, product_uom)" class="oe_inline"/>
 	                        <field name="product_uos" invisible="1" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)" class="oe_inline"/>
-							<field name="price_unit"/>
+							<field name="price_unit" groups="account.group_account_invoice"/>
 							<field name="price_currency_id" invisible="1"/>	                        
 							<field name="mr_emp_id"/>
 							<field name="mr_sale_prod_id"/>                       
@@ -610,7 +610,14 @@
  					<page string="Account Moves" groups="account.group_account_user">
  						<field name='account_move_ids' attrs="{'readonly': [('state','!=','done')]}"/>
  					</page>
- 				</notebook>                                    	
+ 				</notebook>       
+ 				<!-- change price and create invoice wizard
+ 				 
+ 				-->
+                <xpath expr="//button[@string='Create Invoice/Refund']" position="attributes">
+                	<attribute name="name">%(action_stock_invoice_onshipping_single)d</attribute>
+                	<attribute name="groups">account.group_account_user</attribute>
+                </xpath> 				                             	
         	</field>        
 		</record>	
 <!-- adjust the stock out -->		
@@ -641,6 +648,7 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            		<field name="price_unit" groups="account.group_account_invoice"/>
             	</field>
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
@@ -665,6 +673,7 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            		<field name="price_unit" groups="account.group_account_invoice"/>
             	</field>
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
@@ -692,6 +701,7 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            		<field name="price_unit" groups="account.group_account_invoice"/>
             	</field>
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
@@ -716,6 +726,7 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            		<field name="price_unit" groups="account.group_account_invoice"/>
             	</field>
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
@@ -734,6 +745,7 @@
             	</field>
             	<field name="product_qty" position="after">
             		<field name="return_qty"/>
+            		<field name="price_unit" groups="account.group_account_invoice"/>
             	</field>
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
@@ -762,5 +774,16 @@
             	</field>
             </field>
         </record> 
+        
+        <record id="view_category_property_form_ext" model="ir.ui.view">
+            <field name="name">view_category_property_form_ext</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="stock.view_category_property_form"/>
+            <field name="arch" type="xml">
+            	<field name="property_stock_valuation_account_id" position="after">
+            		<field name="prop_use_value_act_as_invoice"/>
+            	</field>
+            </field>
+        </record>        
     </data>
 </openerp>

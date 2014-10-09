@@ -423,7 +423,7 @@ msgstr "序列号"
 #: model:ir.actions.act_window,name:metro_accounts.rpt_account_cn_gl_action
 #: model:ir.actions.report.xml,name:metro_accounts.report_rpt_account_cn_gl
 #: model:ir.ui.menu,name:metro_accounts.rpt_account_cn_gl_menu
-msgid "Accounting Entry GL"
+msgid "Account Entry GL"
 msgstr "总分类账"
 
 #. module: metro_accounts

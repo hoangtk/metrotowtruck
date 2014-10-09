@@ -437,7 +437,7 @@
         </record>	
  	    <menuitem
 	        id="menu_product_inventory_warning"
-	        sequence="2"
+	        sequence="12"
 	        parent="purchase.menu_procurement_management"
 	        action="action_product_inventory_warning"/>  
 	</data>		    
