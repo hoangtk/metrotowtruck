@@ -981,10 +981,10 @@ class mrp_production_workcenter_line(osv.osv):
         assert ids == None or len(ids) == 1, 'This option should only be used for a single work order update at a time'
         '''
         from GUI: [[6, False, [418, 416]]]
-        from code to create: [4, [418, 416]]
-        Only check from GUI
+        from code to create: [(4, 418)(4, 416)]
+        Only check from GUI: len(vals['mfg_ids']) == 1 and 
         '''
-        if 'mfg_ids' in vals and len(vals['mfg_ids']) == 1:
+        if 'mfg_ids' in vals and len(vals['mfg_ids']) == 1 and len(vals['mfg_ids'][0]) == 3:
             mo = None
             #get the workorder data
             if not 'production_id' in vals:

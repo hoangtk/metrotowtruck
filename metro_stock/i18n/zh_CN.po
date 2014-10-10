@@ -1636,8 +1636,8 @@ msgstr "确认重置此出入库单吗?"
 msgid "Reopen"
 msgstr "重置"
 
-#. module: account
-#: view:account.invoice:0
+#. module: stock
+#: view:stock.picking:0
 msgid "Create Invoice/Refund"
 msgstr "创建凭据"
 

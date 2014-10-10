@@ -9,7 +9,7 @@
 			<field name="arch" type="xml">
 				<data>
 					<notebook position="inside">
-	                    <page string="Images">
+	                    <page string="Images" groups="base.group_hr_user">
 	                        <field name="multi_images" widget="image_multi"/>
 	                    </page>
 						<page string="Employment History" groups="base.group_hr_user">
