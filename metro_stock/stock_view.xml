@@ -634,7 +634,11 @@
  					<page string="Account Moves" groups="account.group_account_user">
  						<field name='account_move_ids' attrs="{'readonly': [('state','!=','done')]}"/>
  					</page>
- 				</notebook>                                   	
+ 				</notebook>           
+                <xpath expr="//button[@string='Create Invoice/Refund']" position="attributes">
+                	<attribute name="name">%(action_stock_invoice_onshipping_single)d</attribute>
+                	<attribute name="groups">account.group_account_user</attribute>
+                </xpath> 				                        	
         	</field>        
 		</record>		
 <!-- add the supplier product name -->		
