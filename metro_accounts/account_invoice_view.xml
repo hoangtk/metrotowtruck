@@ -16,13 +16,33 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
+            	<!-- remove the  "supplier_invoice_number, reference_type, reference" fields-->
             	<field name="supplier_invoice_number" position="replace">
             	</field>
             	<xpath expr="//sheet[@string='Supplier Invoice']/group/group[1]/div" position="replace">
             	</xpath>
             	<xpath expr="//label[@for='reference_type']" position="replace">
             	</xpath>
+            	<!-- move 'move_id' after the 'origin' -->
+            	<field name="move_id" position="replace">
+            	</field>
+            	<field name="origin" position="after">
+            		<field name="move_id" groups="account.group_account_user"/>
+            	</field>
             </field>
-        </record>       
+        </record>  
+        <record id="invoice_customer_form_ext" model="ir.ui.view">
+            <field name="name">invoice_customer_form_ext</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+            	<!-- move 'move_id' after the 'origin' -->
+            	<field name="move_id" position="replace">
+            	</field>
+            	<field name="fiscal_position" position="after">
+            		<field name="move_id" groups="account.group_account_user"/>
+            	</field>
+            </field>
+        </record>     
     </data>
 </openerp>
