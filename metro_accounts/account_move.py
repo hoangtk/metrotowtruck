@@ -32,5 +32,11 @@ class account_move_line(osv.osv):
     _inherit = "account.move.line"
     _columns = {
         'to_check': fields.related('move_id','to_check',type='boolean',string='To Review'),
+        'date_biz': fields.date('Biz Date', select=True, help="the business date for this entry, default is the account entry date, used when accountant input one account entry for many items at the end of the month."),
     }
+    def default_get(self, cr, uid, field_names, context=None):
+        res = super(account_move_line, self).default_get(cr, uid, field_names, context=context)
+        date_biz = context.get('move_date',False) or fields.date.context_today(self,cr,uid)
+        res['date_biz'] = date_biz
+        return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
