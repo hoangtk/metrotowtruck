@@ -28,6 +28,7 @@ from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp.addons.purchase import purchase
 from collections import Iterable
+from openerp.tools.translate import _
 
 class purchase_order(osv.osv):  
     _inherit = "purchase.order"
@@ -118,7 +119,7 @@ class purchase_order(osv.osv):
         'amount_paid': fields.function(_pay_info, multi='pay_info', string='Amount Paid', type='float', readonly=True,digits_compute=dp.get_precision('Account')),        
         'residual': fields.function(_pay_info, multi='pay_info', string='Balance', type='float', readonly=True,digits_compute=dp.get_precision('Account')),
         'paid_done': fields.function(_pay_info, multi='pay_info', string='Paid Done', type='boolean', readonly=True),        
-        'payment_exists': fields.function(_pay_info, multi='pay_info', string='Has payments', type='boolean', readonly=True,help="It indicates that sales order has at least one payment."),
+        'payment_exists': fields.function(_pay_info, multi='pay_info', string='Has payments', type='boolean', readonly=True,help="It indicates that purchase order has at least one payment."),
         'inv_pay_ids': fields.function(_inv_pay_ids,relation='account.move.line', type='many2many', string='Invoice Payments'),
     }
 
@@ -154,12 +155,13 @@ class purchase_order(osv.osv):
         period = period_obj.browse(cr, uid, period_id, context=context)
         move_name =  self._get_payment_move_name(cr, uid, journal,
                                                 period, context=context)
+        description = '%s : %s'%(_('Supplier Advance Payment'),description)
         move_vals = self._prepare_payment_move(cr, uid, move_name, order,
                                                journal, period, date, description,
                                                context=context)
         move_lines = self._prepare_payment_move_line(cr, uid, move_name, order,
                                                      journal, period, amount,
-                                                     date, context=context)
+                                                     date, description, context=context)
 
         move_vals['line_id'] = [(0, 0, line) for line in move_lines]
         move_obj.create(cr, uid, move_vals, context=context)
@@ -198,7 +200,7 @@ class purchase_order(osv.osv):
                 }
 
     def _prepare_payment_move_line(self, cr, uid, move_name, order, journal,
-                                   period, amount, date, context=None):
+                                   period, amount, date, description, context=None):
         """ """
         partner_obj = self.pool.get('res.partner')
         currency_obj = self.pool.get('res.currency')
@@ -219,7 +221,7 @@ class purchase_order(osv.osv):
 
         # payment line (bank / cash)
         credit_line = {
-            'name': move_name,
+            'name': description,
             'debit': 0.0,
             'credit': amount,
             'account_id': journal.default_credit_account_id.id,
@@ -233,7 +235,7 @@ class purchase_order(osv.osv):
 
         # payment line (payable)
         debit_line = {
-            'name': move_name,
+            'name': description,
             'debit': amount,
             'credit': 0.0,
             'account_id': partner.property_account_prepayable.id,

@@ -80,8 +80,11 @@ class account_invoice(osv.osv):
             inv_reconciled = False
             if not inv.move_id:
                 continue
+            #invoice move lines can do reconcile
             inv_move_line_ids = []
+            #advance pay move lines with 'payable/receivable' can do reconcile
             rec_ids = []
+            #advance pay move lines with 'pre payable/receivable acccount' can do reconcile
             prepay_rec_ids = []
             account_type = (inv.journal_id.type == 'sale' and 'receivable') or 'payable'
             #add the invoice 'receivable' move line
@@ -140,13 +143,20 @@ class account_invoice(osv.osv):
         date = fields.datetime.now()
         period_id = period_obj.find(cr, uid, dt=date, context=context)[0]
         period = period_obj.browse(cr, uid, period_id, context=context)
-        move_name = inv.name + ' Advance Payments Auto Reconciliation'
+        move_name = self._get_payment_move_name(cr, uid, journal, period, context=None)
+        move_description = ""
+        if journal.type == 'sale':
+            move_description = 'Customer invoice payments reconciliation between "%s" and "%s"'%('Account Receivable (Prepayment)', 'Account Receivable')
+        else:
+            move_description = 'Supplier invoice payments reconciliation between "%s" and "%s"'%('Account Payable (Prepayment)', 'Account Payable')
+        move_line_name = 'Advance Payments Reconciliation'
         move_vals = {'name': move_name,
                 'journal_id': journal.id,
                 'date': date,
                 'ref': inv.name,
                 'period_id': period.id,
-                }         
+                'narration':move_description,
+                }
         move_id = move_obj.create(cr, uid, move_vals, context=context)        
         #########get the move lines##########
         inv_debit_prefix = 0
@@ -188,7 +198,7 @@ class account_invoice(osv.osv):
                                                                     amount_pay,
                                                                     context=context))
                 move_line_vals = \
-                    {'name': move_name,
+                    {'name': move_line_name,
                     'debit': pay_debit_prefix*amount_pay,
                     'credit': pay_credit_prefix*amount_pay,
                     'account_id': pay_mv_ln.account_id.id,
@@ -227,7 +237,7 @@ class account_invoice(osv.osv):
                                                                     amount_inv,
                                                                     context=context))
                 move_line_vals = \
-                    {'name': move_name,
+                    {'name': move_line_name,
                     'debit': inv_debit_prefix*amount_inv,
                     'credit': inv_credit_prefix*amount_inv,
                     'account_id': inv_mv_ln.account_id.id,

@@ -155,14 +155,14 @@ class sale_order(orm.Model):
         period_obj = self.pool.get('account.period')
         period_id = period_obj.find(cr, uid, dt=date, context=context)[0]
         period = period_obj.browse(cr, uid, period_id, context=context)
-        move_name = description or self._get_payment_move_name(cr, uid, journal,
+        move_name =  self._get_payment_move_name(cr, uid, journal,
                                                 period, context=context)
+        description = '%s : %s'%(_('Customer Advance Payment'),description)
         move_vals = self._prepare_payment_move(cr, uid, move_name, sale,
-                                               journal, period, date,
-                                               context=context)
+                                               journal, period, date, description,context=context)
         move_lines = self._prepare_payment_move_line(cr, uid, move_name, sale,
                                                      journal, period, amount,
-                                                     date, context=context)
+                                                     date, description, context=context)
 
         move_vals['line_id'] = [(0, 0, line) for line in move_lines]
         move_obj.create(cr, uid, move_vals, context=context)
@@ -189,17 +189,17 @@ class sale_order(orm.Model):
         name = seq_obj.next_by_id(cr, uid, sequence.id, context=ctx)
         return name
 
-    def _prepare_payment_move(self, cr, uid, move_name, sale, journal,
-                              period, date, context=None):
+    def _prepare_payment_move(self, cr, uid, move_name, sale, 
+                              journal,period, date, description, context=None):
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': date,
                 'ref': sale.name,
                 'period_id': period.id,
+                'narration':description,
                 }
-
     def _prepare_payment_move_line(self, cr, uid, move_name, sale, journal,
-                                   period, amount, date, context=None):
+                                   period, amount, date, description, context=None):
         """ """
         partner_obj = self.pool.get('res.partner')
         currency_obj = self.pool.get('res.currency')
@@ -220,7 +220,7 @@ class sale_order(orm.Model):
 
         # payment line (bank / cash)
         debit_line = {
-            'name': move_name,
+            'name': description,
             'debit': amount,
             'credit': 0.0,
             'account_id': journal.default_credit_account_id.id,
@@ -234,7 +234,7 @@ class sale_order(orm.Model):
 
         # payment line (receivable)
         credit_line = {
-            'name': move_name,
+            'name': description,
             'debit': 0.0,
             'credit': amount,
             'account_id': partner.property_account_receivable.id,
