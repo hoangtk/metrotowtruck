@@ -66,9 +66,12 @@ class stock_picking(osv.osv):
         pick = self.browse(cr, uid, picking_id,context=context)
         #only do the merging when there more than one stocking moves to this picking
         if not pick.account_move_ids or len(pick.account_move_ids) <= 1:
+            '''
+            #remove the auto post, johnw, 10/11/2014
             move_ids = [move.id for move in pick.account_move_ids]
             if move_ids:
                 self.pool.get('account.move').post(cr, uid, move_ids, context=context)
+            '''
             return        
         # pick one product to get the account configuration
         product_id = pick.move_lines[0].product_id.id
@@ -180,8 +183,11 @@ class stock_picking(osv.osv):
         #deleted the merged moves
         if unlink_move_ids:
             move_obj.unlink(cr, uid, unlink_move_ids, context=context)
+        '''    
+        #remove the auto post, johnw, 10/11/2014
         #post new move
         if new_move_ids:
             move_obj.post(cr, uid, new_move_ids, context=context)
+        '''
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

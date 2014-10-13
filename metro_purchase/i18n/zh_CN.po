@@ -1575,3 +1575,8 @@ msgstr "已收"
 #: field:purchase.order.line,return_qty:0
 msgid "Returned Quantity"
 msgstr "退货"
+
+#. module: metro_purchase
+#: code:addons/metro_purchase/purchase_payment.py:198
+msgid "Supplier Advance Payment"
+msgstr "供应商预付款"

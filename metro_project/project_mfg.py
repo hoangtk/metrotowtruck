@@ -70,8 +70,13 @@ class project_task(base_stage, osv.osv):
         from GUI: [[6, False, [418, 416]]]
         from code to create: [4, [418, 416]]
         Only check from GUI
-        '''
-        if 'mfg_ids' in vals and len(vals['mfg_ids']) == 1 and len(vals['mfg_ids'][0]) == 3:    
+        ''' 
+        project_type = ''
+        if ids == None:
+            project_type = vals['project_type']
+        else:
+            project_type = self.read(cr, uid, ids[0], ['project_type'],context=context)['project_type']
+        if project_type == 'mfg' and 'mfg_ids' in vals and len(vals['mfg_ids']) == 1 and len(vals['mfg_ids'][0]) == 3:    
             wo = None
             #get the workorder data
             if not 'workorder_id' in vals:

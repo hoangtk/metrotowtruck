@@ -46,7 +46,9 @@
             <field name="arch" type="xml">
             	<filter name='posted' position="after">
                     <separator/> 
-                    <filter name="checked" icon="terp-camera_test" string="To Review" domain="[('to_check','=',True)]"/>                                     
+                    <filter name="checked" icon="terp-camera_test" string="To Review" domain="[('to_check','=',True)]"/>
+                    <field name="reconcile_id"/>
+                    <field name="reconcile_partial_id"/>    
             	</filter>
             </field>
         </record>     

@@ -62,8 +62,8 @@ class sale_order(osv.osv):
 
     #from the sale_payment_method.sale.py, add the sale_id
     def _prepare_payment_move(self, cr, uid, move_name, sale, journal,
-                              period, date, context=None):
-        resu = super(sale_order,self)._prepare_payment_move(cr,uid,move_name,sale,journal,period,date,context)
+                              period, date, description, context=None):
+        resu = super(sale_order,self)._prepare_payment_move(cr,uid,move_name,sale,journal,period,date,description,context)
         resu.update({'sale_ids':[(4, sale.id)]})
         return resu
     
