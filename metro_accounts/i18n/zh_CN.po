@@ -578,6 +578,11 @@ msgstr "Instances"
 msgid "Auto reconcile the purchase order payments when valid the invoice"
 msgstr "当验证发票时自动核销采购预付款"
 
+#. module: metro_accounts
+#: field:account.move.line,date_biz:0
+msgid "Biz Date"
+msgstr "业务日期"
+
 ########################manual########################
 #. module: account
 #: view:account.move:0
