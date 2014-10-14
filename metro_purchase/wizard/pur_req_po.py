@@ -164,8 +164,6 @@ class pur_req_po(osv.osv_memory):
         if req:             
             uom_obj = self.pool.get('product.uom')
             for line in req.line_ids:
-                if partner_id == None:
-                    partner_id = line.product_id.seller_id.id
                 if not line.generated_po:
                     uom_po_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom_id, line.product_qty_remain, line.product_id.uom_po_id, context=context)
                     uom_po_factor = line.product_id.uom_po_factor/line.product_uom_id.factor_display
@@ -185,7 +183,9 @@ class pur_req_po(osv.osv_memory):
                                       'date_required': line.date_required,
                                       'req_line_id':line.id, 
                                       'req_reason':line.req_reason,
-                                    })         
+                                    })
+                    if partner_id == None:
+                        partner_id = line.product_id.seller_id.id    									
                     
             res.update({'line_ids': line_data,'partner_id':partner_id})
         return res
