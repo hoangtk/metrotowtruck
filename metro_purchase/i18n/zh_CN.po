@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-07 06:54+0000\n"
-"PO-Revision-Date: 2014-10-07 14:58+0800\n"
+"POT-Creation-Date: 2014-10-14 07:23+0000\n"
+"PO-Revision-Date: 2014-10-14 15:26+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -307,7 +307,7 @@ msgstr "Wizard to generate a payment from the purchase order"
 #. module: metro_purchase
 #: report:purchase.order.metro:0
 msgid "No."
-msgstr "No."
+msgstr "否"
 
 #. module: metro_purchase
 #: view:purchase.order:0
@@ -356,9 +356,10 @@ msgid "Rejection reason"
 msgstr "拒绝原因"
 
 #. module: metro_purchase
-#: view:pur.req.po:0
-msgid "Create&View PO"
-msgstr "创建并查看采购单"
+#: model:ir.model.fields,field_description:metro_purchase.field_purchase_order_inv_pay_ids
+#: view:purchase.order:0 field:purchase.order,inv_pay_ids:0
+msgid "Invoice Payments"
+msgstr "凭据付款"
 
 #. module: metro_purchase
 #: view:pur.req.line:0
@@ -375,6 +376,12 @@ msgstr ""
 "{'supplier_prod_id':supplier_prod_id,'supplier_prod_name':"
 "supplier_prod_name,'supplier_prod_code':supplier_prod_code,'supplier_delay':"
 "supplier_delay}"
+
+#. module: metro_purchase
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_uom_po_qty_remain
+#: field:pur.req.po.line,uom_po_qty_remain:0
+msgid "PO Quantity Remain"
+msgstr "未采购"
 
 #. module: metro_purchase
 #: view:purchase.order:0
@@ -514,11 +521,6 @@ msgid "Cancel With Exception"
 msgstr "异常取消"
 
 #. module: metro_purchase
-#: help:purchase.order,payment_exists:0
-msgid "It indicates that sales order has at least one payment."
-msgstr "It indicates that sales order has at least one payment."
-
-#. module: metro_purchase
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_req_line_date_required
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_date_required
 #: report:pur.req:0 field:pur.req.line,date_required:0
@@ -548,6 +550,11 @@ msgstr "采购单创建发票"
 #: report:pur.req:0
 msgid "Purchase Reason"
 msgstr "采购原因"
+
+#. module: metro_purchase
+#: view:pur.history:0 view:purchase.order.line:0
+msgid "Purchasing History"
+msgstr "采购历史"
 
 #. module: metro_purchase
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_history_line_product_qty
@@ -729,6 +736,12 @@ msgid "Comments..."
 msgstr "备注..."
 
 #. module: metro_purchase
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_uom_po_id
+#: field:pur.req.po.line,uom_po_id:0
+msgid "PO Unit of Measure"
+msgstr "采购单位"
+
+#. module: metro_purchase
 #: view:purchase.order:0
 msgid "Approved purchase orders"
 msgstr "已核准的采购单"
@@ -780,6 +793,12 @@ msgid "Purchase Orders"
 msgstr "采购订单"
 
 #. module: metro_purchase
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_line_inv_uom_id
+#: field:pur.req.line,inv_uom_id:0
+msgid "Inventory UOM"
+msgstr "库存单位"
+
+#. module: metro_purchase
 #: view:purchase.order.line:0
 msgid "Purchase order lines been rejected"
 msgstr "被拒绝的采购产品明细"
@@ -826,10 +845,9 @@ msgstr "产品"
 #. module: metro_purchase
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_history_line_product_uom
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_invoice_line_product_uom_id
-#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_line_product_uom_id
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_product_uom_id
 #: field:pur.history.line,product_uom:0
-#: field:pur.invoice.line,product_uom_id:0 field:pur.req.line,product_uom_id:0
+#: field:pur.invoice.line,product_uom_id:0
 #: field:pur.req.po.line,product_uom_id:0
 msgid "Product Unit of Measure"
 msgstr "单位"
@@ -975,6 +993,11 @@ msgid "Generate PO"
 msgstr "生成采购单"
 
 #. module: metro_purchase
+#: view:purchase.order.line:0
+msgid "{'readonly':[('can_change_product','=',False)]}"
+msgstr "{'readonly':[('can_change_product','=',False)]}"
+
+#. module: metro_purchase
 #: help:purchase.order.line,sequence:0
 msgid "Gives the sequence order when displaying a list of sales order lines."
 msgstr "Gives the sequence order when displaying a list of sales order lines."
@@ -1045,6 +1068,12 @@ msgstr "历史"
 #: selection:pur.history.line,state:0
 msgid "Changing Rejected"
 msgstr "变更被拒绝"
+
+#. module: metro_purchase
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_uom_po_factor
+#: field:pur.req.po.line,uom_po_factor:0
+msgid "UOM Ratio"
+msgstr "单位比率"
 
 #. module: metro_purchase
 #: view:purchase.order:0
@@ -1219,9 +1248,10 @@ msgid "Purchase Order Lines"
 msgstr "采购单行"
 
 #. module: metro_purchase
-#: view:pur.history:0 view:purchase.order.line:0
-msgid "Purchasing History"
-msgstr "采购历史"
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_uom_po_price
+#: field:pur.req.po.line,uom_po_price:0
+msgid "PO Unit Price"
+msgstr "采购单价"
 
 #. module: metro_purchase
 #: selection:pur.req,state:0 selection:pur.req.line,order_state:0
@@ -1286,6 +1316,11 @@ msgid "Product quantity exceeds the remaining quantity"
 msgstr "产品数量超过了剩余数量!"
 
 #. module: metro_purchase
+#: help:purchase.order,payment_exists:0
+msgid "It indicates that purchase order has at least one payment."
+msgstr "It indicates that purchase order has at least one payment."
+
+#. module: metro_purchase
 #: view:purchase.order.line:0
 msgid "{'readonly':[('can_change_price','=',False)]}"
 msgstr "{'readonly':[('can_change_price','=',False)]}"
@@ -1326,9 +1361,10 @@ msgid "Purchase orders waitting approval"
 msgstr "等待审批的采购单"
 
 #. module: metro_purchase
-#: view:purchase.order.line:0
-msgid "{'readonly':[('can_change_product','=',False)]}"
-msgstr "{'readonly':[('can_change_product','=',False)]}"
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_line_product_uom_id
+#: field:pur.req.line,product_uom_id:0
+msgid "Product UOM"
+msgstr "单位"
 
 #. module: metro_purchase
 #: constraint:pay.po:0
@@ -1349,10 +1385,9 @@ msgid "Purchase Requisitions"
 msgstr "采购申请"
 
 #. module: metro_purchase
-#: model:ir.model.fields,field_description:metro_purchase.field_purchase_order_inv_pay_ids
-#: view:purchase.order:0 field:purchase.order,inv_pay_ids:0
-msgid "Invoice Payments"
-msgstr "凭据付款"
+#: view:pur.req.po:0
+msgid "Create&View PO"
+msgstr "创建并查看采购单"
 
 #. module: metro_purchase
 #: view:purchase.order:0
@@ -1439,7 +1474,8 @@ msgstr "付款"
 
 #. module: metro_purchase
 #: model:ir.model.fields,field_description:metro_purchase.field_pur_req_line_po_info
-#: field:pur.req.line,po_info:0
+#: model:ir.model.fields,field_description:metro_purchase.field_pur_req_po_line_uom_po_qty
+#: field:pur.req.line,po_info:0 field:pur.req.po.line,uom_po_qty:0
 msgid "PO Quantity"
 msgstr "采购数量"
 
@@ -1575,8 +1611,3 @@ msgstr "已收"
 #: field:purchase.order.line,return_qty:0
 msgid "Returned Quantity"
 msgstr "退货"
-
-#. module: metro_purchase
-#: code:addons/metro_purchase/purchase_payment.py:198
-msgid "Supplier Advance Payment"
-msgstr "供应商预付款"

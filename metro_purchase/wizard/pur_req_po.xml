@@ -16,25 +16,34 @@
             <field name="arch" type="xml">
                 <form string="Requisition lines" version="7.0">
                     <separator string="Select supplier and the prodcuts that you want to generate PO."/>
-                    <group>
-                        <field name="partner_id" on_change="onchange_partner(partner_id,line_ids,context)"/>
-                        <field name="line_ids">
-                            <tree string="Products" editable="bottom">
-		                        <field name="product_id"/>
-		                        <field name="product_qty_remain" invisible="1"/>
-		                        <field name="product_qty"/>
-		                        <field name="product_uom_id"/>
-		                        <field name="price_unit"/>
-		                        <field name="date_required" on_change = "onchange_lead('date_required',date_required,context)"/>
-		                        <field name="req_reason"/>
-		                        <field name="inv_qty"/>
-		                        <field name="supplier_prod_id" invisible="1"/>
-		                        <field name="supplier_prod_name"/>
-		                        <field name="supplier_prod_code"/>
-		                        <field name="supplier_delay" on_change = "onchange_lead('supplier_delay',supplier_delay,context)"/>
-                            </tree>
-                        </field>          
-                    </group>
+                    <label for="partner_id"/>
+                    <field name="partner_id" on_change="onchange_partner(partner_id,line_ids,context)"/>
+                    <label for="line_ids"/>
+                    <field name="line_ids">
+                        <tree string="Products" editable="bottom">
+                      <field name="product_id" readonly="1"/>
+                      
+                      <field name="product_qty_remain" invisible="1"/>
+                      <field name="product_qty" invisible="1"/>
+                      <field name="product_uom_id" invisible="1"/>
+                      <field name="price_unit" invisible="1"/>
+                      
+                      <field name="uom_po_qty_remain" invisible="1"/>
+                      <field name="uom_po_qty"/>
+                      <field name="uom_po_id" readonly="1"/>
+                      <field name="uom_po_price"/>
+                      <field name="uom_po_factor" readonly="1"/>
+                                  
+                      <field name="date_required" on_change = "onchange_lead('date_required',date_required,context)"/>
+                      <field name="req_reason"/>
+                      <field name="inv_qty" readonly="1"/>
+                      <field name="product_uom_id" readonly="1"/>
+                      <field name="supplier_prod_id" invisible="1"/>
+                      <field name="supplier_prod_name"/>
+                      <field name="supplier_prod_code"/>
+                      <field name="supplier_delay" on_change = "onchange_lead('supplier_delay',supplier_delay,context)"/>
+                        </tree>
+                    </field>   
                     <footer>
                         <button name="create_po" string="Create PO" type="object" class="oe_highlight"/>
                         <button name="create_view_po" string="Create&amp;View PO" type="object" class="oe_highlight"/>
