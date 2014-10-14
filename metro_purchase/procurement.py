@@ -22,6 +22,7 @@ from dateutil.relativedelta import relativedelta
 from openerp.osv import fields, osv
 from openerp import netsvc
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import float_compare
 
 import logging
    
@@ -127,6 +128,9 @@ class cron_job(osv.osv_memory):
         wf_service = netsvc.LocalService("workflow")
         
         pur_req_ids = pur_req_obj.search(cr, uid, [('state','=','in_purchase')], context=context)
+        uom_obj = self.pool.get('product.uom')
+        if context is None:
+            context = {}
         for pur_req in pur_req_obj.browse(cr, uid, pur_req_ids, context=context):
             pur_req_received = True
             for pur_req_line in pur_req.line_ids:
@@ -137,12 +141,18 @@ class cron_job(osv.osv_memory):
                 rec_qty = 0
                 #check the pur_req's po line receiving status
                 for po_line in pur_req_line.po_lines_ids:
-                    if po_line.state == 'approved':
+                    if po_line.state in ('approved','done','done_except'):
                         if po_line.receive_qty != po_line.product_qty:
                             break
-                        else:
-                            rec_qty += po_line.product_qty                        
-                pur_req_line_received = pur_req_line.product_qty == rec_qty
+                        else: 
+                            ctx_uom = context.copy()
+                            ctx_uom['raise-exception'] = False
+                            #convert the po quantity the req quantity
+                            uom_po_qty = uom_obj._compute_qty_obj(cr, uid, po_line.product_uom, po_line.product_qty, \
+                                                              pur_req_line.product_uom_id, context=ctx_uom)
+                            rec_qty += uom_po_qty 
+                req_finished = float_compare(pur_req_line.product_qty, rec_qty, precision_rounding=1)                                
+                pur_req_line_received = (req_finished <= 0)
                 #if all po lines are received then trigger the related procurement order to go 'ready' state
                 if pur_req_line_received:
                     pro_ids = procurement_order_obj.search(cr, uid, [('pur_req_line_id','=',pur_req_line.id)],context=context)

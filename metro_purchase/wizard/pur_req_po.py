@@ -46,12 +46,20 @@ class pur_req_po_line(osv.osv_memory):
         'supplier_prod_id': fields.integer(string='Supplier Product ID', required=False),
         'supplier_prod_name': fields.char(string='Supplier Product Name', required=True),
         'supplier_prod_code': fields.char(string='Supplier Product Code', required=False),
-        'supplier_delay' : fields.integer(string='Supplier Lead Time', required=False),        
+        'supplier_delay' : fields.integer(string='Supplier Lead Time', required=False),
+        
+        'uom_po_qty': fields.float('PO Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
+        'uom_po_qty_remain': fields.float('PO Quantity Remain', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
+        'uom_po_price': fields.float('PO Unit Price', digits_compute=dp.get_precision('Product Price')),
+        'uom_po_id': fields.many2one('product.uom', 'PO Unit of Measure', required=True, ),
+        'uom_po_factor': fields.float('UOM Ratio',digits=(12,4),) 
     }
     def _check_product_qty(self, cursor, user, ids, context=None):
         for line in self.browse(cursor, user, ids, context=context):
-            if line.product_qty > line.product_qty_remain:
-                raise osv.except_osv(_('Warning!'), _("Product '%s' max po quantity is %s, you can not purchae %s"%(line.product_id.default_code + '-' + line.product_id.name, line.product_qty_remain, line.product_qty)))
+#            if line.product_qty > line.product_qty_remain:
+#                raise osv.except_osv(_('Warning!'), _("Product '%s' max po quantity is %s, you can not purchae %s"%(line.product_id.default_code + '-' + line.product_id.name, line.product_qty_remain, line.product_qty)))
+            if line.uom_po_qty > line.uom_po_qty_remain:
+                raise osv.except_osv(_('Warning!'), _("Product '%s' max po quantity is %s, you can not purchae %s"%(line.product_id.default_code + '-' + line.product_id.name, line.uom_po_qty_remain, line.uom_po_qty)))
         return True    
     _constraints = [(_check_product_qty,'Product quantity exceeds the remaining quantity',['product_qty'])]
         
@@ -152,13 +160,34 @@ class pur_req_po(osv.osv_memory):
         record_id = context and context.get('active_id', False) or False
         req_obj = self.pool.get('pur.req')
         req = req_obj.browse(cr, uid, record_id, context=context)
+        partner_id = None
         if req:             
+            uom_obj = self.pool.get('product.uom')
             for line in req.line_ids:
+                if partner_id == None:
+                    partner_id = line.product_id.seller_id.id
                 if not line.generated_po:
-                    line_data.append({'product_id': line.product_id.id, 'product_qty': line.product_qty_remain, 'price_unit':line.product_id.standard_price, 
-                                    'product_uom_id':line.product_uom_id.id, 'date_required': line.date_required,'inv_qty':line.inv_qty,
-                                    'req_line_id':line.id, 'req_reason':line.req_reason, 'product_qty_remain': line.product_qty_remain})
-            res.update({'line_ids': line_data})
+                    uom_po_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom_id, line.product_qty_remain, line.product_id.uom_po_id, context=context)
+                    uom_po_factor = line.product_id.uom_po_factor/line.product_uom_id.factor_display
+                    line_data.append({'product_id': line.product_id.id, 
+                                      'product_qty_remain': line.product_qty_remain,
+                                      'product_qty': line.product_qty_remain, 
+                                      'product_uom_id':line.product_uom_id.id, 
+                                      'price_unit':line.product_id.standard_price,
+                                      
+                                      'uom_po_qty_remain': uom_po_qty,
+                                      'uom_po_qty': uom_po_qty,
+                                      'uom_po_id':line.product_id.uom_po_id.id, 
+                                      'uom_po_price':line.product_id.uom_po_price, 
+                                      'uom_po_factor':uom_po_factor,
+                                      
+                                      'inv_qty':line.product_id.qty_available,
+                                      'date_required': line.date_required,
+                                      'req_line_id':line.id, 
+                                      'req_reason':line.req_reason,
+                                    })         
+                    
+            res.update({'line_ids': line_data,'partner_id':partner_id})
         return res
 
     def view_init(self, cr, uid, fields_list, context=None):
@@ -195,8 +224,8 @@ class pur_req_po(osv.osv_memory):
                    'warehouse_id':req.warehouse_id.id, 'notes':req.remark, 'company_id':req.company_id.id,'lines':[]}
         po_lines = []
         for line in data.line_ids:
-            po_line = {'product_id':line.product_id.id, 'product_qty':line.product_qty, 'product_uom':line.product_uom_id.id,
-                       'req_line_id':line.req_line_id.id,'date_planned':line.date_required,'price_unit':float('%.2f' %line.price_unit),
+            po_line = {'product_id':line.product_id.id, 'product_qty':line.uom_po_qty, 'product_uom':line.uom_po_id.id,
+                       'req_line_id':line.req_line_id.id,'date_planned':line.date_required,'price_unit':line.uom_po_price,
                        'name':(line.req_reason or ''),
                        'supplier_prod_id':line.supplier_prod_id, 'supplier_prod_name':line.supplier_prod_name, 
                        'supplier_prod_code':line.supplier_prod_code,'supplier_delay':line.supplier_delay,}

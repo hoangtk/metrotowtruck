@@ -27,6 +27,7 @@ from openerp import netsvc
 from openerp.osv import fields,osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+from openerp.tools import float_compare
 
 class pur_req(osv.osv):
     _name = "pur.req"
@@ -189,22 +190,35 @@ class pur_req_line(osv.osv):
             generated_po = False
             req_qty = req_line.product_qty
             po_qty = 0
+            product_qty_remain = req_line.product_qty
             po_qty_str = ''
             if req_line.po_lines_ids:
+                uom_obj = self.pool.get('product.uom')
                 for po_line in req_line.po_lines_ids:
                     if po_line.state != 'cancel':
-                        po_qty += po_line.product_qty
-                        po_qty_str += ((po_qty_str or '') and '; ') + '%s@%s'%(po_line.product_qty, po_line.order_id.name)
-                generated_po = po_qty == req_qty
+                        ctx_uom = context.copy()
+                        ctx_uom['raise-exception'] = False
+                        uom_po_qty = uom_obj._compute_qty_obj(cr, uid, po_line.product_uom, po_line.product_qty, \
+                                                              req_line.product_uom_id, context=ctx_uom)
+                        po_qty += uom_po_qty
+                        po_qty_str += ((po_qty_str or '') and '; ') + '%s(%s)@%s'%(po_line.product_qty, uom_po_qty, po_line.order_id.name)
+#                po_finished = float_compare(po_qty, req_qty, precision_rounding=req_line.product_uom_id.rounding)
+                po_finished = float_compare(req_qty, po_qty, precision_rounding=1)
+                generated_po = (po_finished <= 0)
+                if generated_po:
+                    product_qty_remain =  0
+                else:
+                    product_qty_remain = req_qty - po_qty
             res[req_line.id]['generated_po'] = generated_po 
-            res[req_line.id]['product_qty_remain'] = req_qty - po_qty
+            res[req_line.id]['product_qty_remain'] = product_qty_remain
             res[req_line.id]['po_info'] = po_qty_str
         return res    
     _columns = {
         'req_id' : fields.many2one('pur.req','Purchase Requisition', ondelete='cascade'),
         'product_id': fields.many2one('product.product', 'Product' ,required=True),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
-        'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
+        'product_uom_id': fields.many2one('product.uom', 'Product UOM',required=True),
+        'inv_uom_id': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Inventory UOM',readonly=True),
         'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
         'req_emp_id': fields.many2one('hr.employee','Employee'),
@@ -237,7 +251,7 @@ class pur_req_line(osv.osv):
             prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
             value = {'product_qty':1.0,'inv_qty':prod.qty_available}
             uom = prod.uom_po_id or prod.uom_id
-            value.update({'product_uom_id': uom.id})
+            value.update({'product_uom_id': uom.id,'inv_uom_id':prod.uom_id.id})
             # - set a domain on product_uom
             domain = {'product_uom_id': [('category_id','=',uom.category_id.id)]}
         res['domain'] = domain
@@ -264,6 +278,9 @@ class pur_req_line(osv.osv):
                 res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
             uom_id = prod_uom.id
 
+        # - set a domain on product_uom
+        domain = {'product_uom_id': [('category_id','=',prod_uom.category_id.id)]}
+        res['domain'] = domain
         res['value'] = {'product_uom_id': uom_id}
         return res
     def _check_product_uom_group(self, cr, uid, context=None):
