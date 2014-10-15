@@ -102,6 +102,11 @@
 					<filter string="Team" name="group_dept_id" icon="terp-folder-violet" domain="[]" context="{'group_by':'dept_id'}"/>
 					<filter string="Work Order" name="group_workorder_id" icon="terp-folder-violet" domain="[]" context="{'group_by':'workorder_id'}"/>
 				</filter>
+				<filter string="Pending" position="after">
+                    <filter name="done" string="Done" domain="[('state','=','done')]" help="Done Tasks" icon="terp-camera_test"/>
+                    <filter name="cancel" string="Cancel" domain="[('state','=','cancelled')]" help="Done Tasks" icon="terp-camera_test"/>
+					<filter name='not_done_cancelled' string="NotDoneCancel" domain="[('state','not in',('cancelled','done'))]" help="Tasks except done and cancelled" icon="terp-gtk-media-pause"/>
+				</filter>
 	        </field>
 	    </record> 
 <!-- MFG Task Kanban View -->
@@ -194,7 +199,7 @@
             <field name="view_mode">kanban,tree,form,calendar,gantt,graph</field>
             <field name="search_view_id" ref="project.view_task_search_form"/>
             <field name="domain">[('project_type','=','mfg')]</field>
-            <field name="context">{'default_project_type':'mfg'}</field>
+            <field name="context">{'default_project_type':'mfg','search_default_not_done_cancelled': 1}</field>
             <field name="auto_search" eval="True"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
@@ -253,8 +258,5 @@
 	            </data>
 	        </field>
 	    </record>         
-         
-
-		        		         
     </data>
 </openerp>
