@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-09 10:53+0000\n"
-"PO-Revision-Date: 2014-10-09 19:01+0800\n"
+"POT-Creation-Date: 2014-10-15 06:43+0000\n"
+"PO-Revision-Date: 2014-10-15 14:44+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -455,6 +455,11 @@ msgid "Create"
 msgstr "创建"
 
 #. module: metro_stock
+#: view:material.request:0 view:stock.picking:0
+msgid "Check Availability"
+msgstr "检查可用"
+
+#. module: metro_stock
 #: model:ir.model,name:metro_stock.model_stock_warehouse_orderpoint
 msgid "Minimum Inventory Rule"
 msgstr "最小库存规则"
@@ -851,7 +856,7 @@ msgid "oe_form_sheet_width_wider"
 msgstr "oe_form_sheet_width_wider"
 
 #. module: metro_stock
-#: view:stock.picking.in:0
+#: view:stock.picking.in:0 view:stock.picking.out:0
 msgid "857"
 msgstr "857"
 
@@ -1028,7 +1033,7 @@ msgstr "退货数量"
 #. module: metro_stock
 #: view:stock.inventory.line:0
 msgid "Inventory Reference"
-msgstr "Inventory Reference"
+msgstr "盘点单"
 
 #. module: metro_stock
 #: selection:material.request,move_type:0
@@ -1241,6 +1246,11 @@ msgid "Invoice View XMLID"
 msgstr "Invoice View XMLID"
 
 #. module: metro_stock
+#: view:material.request:0
+msgid "Deliver"
+msgstr "领料"
+
+#. module: metro_stock
 #: model:ir.model.fields,field_description:metro_stock.field_stock_move_product_uos_4394
 #: field:material.request.line,product_uos:0
 msgid "Product UOS"
@@ -1412,7 +1422,7 @@ msgid "Material Return"
 msgstr "退料单"
 
 #. module: metro_stock
-#: view:stock.picking.in:0
+#: view:stock.picking.in:0 view:stock.picking.out:0
 msgid "account.group_account_user"
 msgstr "account.group_account_user"
 

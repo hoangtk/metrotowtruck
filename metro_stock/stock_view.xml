@@ -69,6 +69,18 @@
                 </xpath>
                 <xpath expr="//button[@string='Reverse Transfer']" position="replace">
                 </xpath>   
+                <!-- Remove the 'Confirm and Transfter' button for the forcing assign under 'draft' state, and replace with the checking available button -->
+                <xpath expr="//button[@name='draft_validate']" position="replace">
+                    <button name="action_assign" states="confirmed" string="Check Availability" type="object" class="oe_highlight"/>
+                </xpath>
+                <!-- Remove the 'Force Assign' button when there are not available inventory under 'confirmed' state -->
+                <xpath expr="//button[@name='force_assign']" position="replace">
+                </xpath>
+                <!-- Rename the transfer button title -->                
+                <xpath expr="/form/header//button[@name='action_process']" position="replace">
+                    <button name="action_process" states="assigned" string="Deliver" type="object" class="oe_highlight"/>
+                </xpath>
+                                
  				<notebook position="inside">
  					<page string="Account Moves" groups="account.group_account_user">
  						<field name='account_move_ids' attrs="{'readonly': [('state','!=','done')]}"/>
@@ -572,6 +584,13 @@
 	            <xpath expr="/form/header" position="attributes">
                 	<attribute name="groups">stock.group_stock_user</attribute>
                 </xpath>
+                <!-- Remove the 'Confirm and Transfter' button for the forcing assign under 'draft' state, and replace with the checking available button -->
+                <xpath expr="//button[@name='draft_validate']" position="replace">
+                    <button name="action_assign" states="confirmed" string="Check Availability" type="object" class="oe_highlight"/>
+                </xpath>
+                <!-- Remove the 'Force Assign' button when there are not available inventory under 'confirmed' state -->
+                <xpath expr="//button[@name='force_assign']" position="replace">
+                </xpath>                    
         	</field>        
 		</record>
 <!-- adjust  the stock in -->	
@@ -638,7 +657,13 @@
                 <xpath expr="//button[@string='Create Invoice/Refund']" position="attributes">
                 	<attribute name="name">%(action_stock_invoice_onshipping_single)d</attribute>
                 	<attribute name="groups">account.group_account_user</attribute>
-                </xpath> 				                        	
+                </xpath> 	
+                <!-- Remove the 'Confirm and Transfter' button for the forcing assign under 'draft' state -->
+                <xpath expr="//button[@name='draft_validate']" position="replace">
+                </xpath>
+                <!-- Remove the 'Force Assign' button when there are not available inventory under 'confirmed' state -->
+                <xpath expr="//button[@name='force_assign']" position="replace">
+                </xpath>                			                        	
         	</field>        
 		</record>		
 <!-- add the supplier product name -->		

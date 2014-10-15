@@ -24,6 +24,7 @@ import time
 
 from openerp.osv import osv,fields
 from openerp.tools.translate import _
+from openerp import netsvc
 
 class stock_return_picking(osv.osv_memory):
     _inherit = 'stock.return.picking'
@@ -39,6 +40,21 @@ class stock_return_picking(osv.osv_memory):
         pick = pick_obj.browse(cr,uid,pick_id,context=context)
         note = pick.note and pick.note != '' and (pick.note + ';' + data["reason"]) or data["reason"]
         pick_obj.write(cr, uid, [pick_id], {'note':note})
+        '''
+        since the parent class did the pick_obj.force_assign(cr, uid, [new_picking], context)
+        So need trigger the workflow to run below transition, if no available quantity then picking will go the 'confirmed' state
+        <record id="trans_confirmed_assigned_back" model="workflow.transition">
+            <field name="act_from" ref="act_assigned"/>
+            <field name="act_to" ref="act_confirmed"/>
+            <field name="condition">not test_assigned()</field>
+        </record>        
+        '''
+        #update state to 'assigned' then the test_assigned() method will return false
+        move_ids = [move.id for move in pick.move_lines if move.state=='assigned']
+        self.pool.get('stock.move').write(cr, uid, move_ids, {'state':'draft'},context=context)
+        pick_obj.write(cr, uid, [pick_id], {'state':'draft'})
+        wf_service = netsvc.LocalService("workflow")
+        wf_service.trg_write(uid, 'stock.picking', pick_id, cr)
         return resu
     def get_return_history(self, cr, uid, pick_id, context=None):
         """ 

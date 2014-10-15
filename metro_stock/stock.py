@@ -282,7 +282,6 @@ class stock_move(osv.osv):
         ),                
         'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
         'product_uom_base_qty': fields.function(_get_rec_info, type='float', string='Base Quantity', multi="rec_info", digits_compute=dp.get_precision('Product Unit of Measure'),readonly=True),
-        
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -441,10 +440,10 @@ class stock_picking(osv.osv):
             pickings = self.browse(cr, uid, ids, context=context)
             todo = []
             for picking in pickings:
-                if picking.type in('mr','mrr'):
-                    for r in picking.move_lines:
-                        if r.state == 'confirmed':
-                            todo.append(r.id)
+#                if picking.type in('mr','mrr'):
+                for r in picking.move_lines:
+                    if r.state == 'confirmed':
+                        todo.append(r.id)
             if len(todo):
                 self.pool.get('stock.move').check_assign(cr, uid, todo, context=context)
         return resu       
