@@ -1052,3 +1052,9 @@ msgstr "加工结束后，操作者在系统中完成工单以报工"
 #: model:process.transition,name:mrp_operations.process_transition_workstartoperation0
 msgid "Details of the work order"
 msgstr "工单明细"
+
+#. module: metro_mrp
+#: code:addons/metro_mrp/work_order_cnc.py:576
+#, python-format
+msgid "%s inventory is not enough, please check onhand quantity and ready to delivery stock move for it."
+msgstr "%s 库存不够，请检查在手数量和准备出库的数量."

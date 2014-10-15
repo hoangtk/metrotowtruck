@@ -554,6 +554,8 @@ class work_order_cnc_line(osv.osv):
         user = self.pool.get('res.users').browse(cr,uid,uid,context=context)
         if user.employee_ids:
             mr_emp_id = user.employee_ids[0].id
+        
+        loc_from_id, loc_to_id = mr_line_obj.default_mr_loc(cr, uid, context=context)
         for ln in cnc_lines:
             ln_volume = (ln.plate_length * ln.plate_width * ln.plate_height * ln.percent_usage/100)
             #the name will be like 'Manganese Plate(T20*2200*11750mm)'
@@ -568,6 +570,11 @@ class work_order_cnc_line(osv.osv):
             prod_volume = eval(prod_name[start_idx+2:end_idx])
 
             ln_quantity = ln_volume/prod_volume
+            #check the available inventory
+            qty_avail = self.pool.get('stock.location')._product_reserve(cr, uid, [loc_from_id], ln.product_id.id, ln_quantity, {'uom': ln.product_id.uom_id.id}, lock=True)
+            if not qty_avail:
+                raise osv.except_osv(_('Error!'), _('%s inventory is not enough, please check onhand quantity and ready to delivery stock move for it.')%(ln.product_id.name,))
+
             price = self._get_mr_prod_price(cr, uid, ln.product_id)
             #loop ids to generate mr line
             if ln.order_id.sale_product_ids:
@@ -599,24 +606,26 @@ class work_order_cnc_line(osv.osv):
                     mr_line_ids.append(mr_line_id)
                 
             self.pool.get('work.order.cnc.line').write(cr,uid,ln.id,{'mr_id':mr_id},context=context)
-        
-        mr_line_obj.action_confirm(cr, uid, mr_line_ids)
-        mr_line_obj.force_assign(cr, uid, mr_line_ids)
-        wf_service = netsvc.LocalService("workflow")
-        wf_service.trg_validate(uid, 'stock.picking', mr_id, 'button_confirm', cr)
+        #confirm and assign if inventory is available
+        mr_obj.draft_force_assign(cr, uid, [mr_id], {'context':context})
+#        mr_line_obj.action_confirm(cr, uid, mr_line_ids)
+#        mr_line_obj.force_assign(cr, uid, mr_line_ids)
+#        wf_service = netsvc.LocalService("workflow")
+#        wf_service.trg_validate(uid, 'stock.picking', mr_id, 'button_confirm', cr)
         
         #do auto receiving
-        partial_data = {
-            'delivery_date' : time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        }
-        for mr_line in mr_line_obj.browse(cr, uid, mr_line_ids, context=context):
-            partial_data['move%s' % (mr_line.id)] = {
-                'product_id': mr_line.product_id.id,
-                'product_qty': mr_line.product_qty,
-                'product_uom': mr_line.product_uom.id,
-                'prodlot_id': mr_line.prodlot_id.id,
+        if mr_obj.read(cr,uid,mr_id,['state'],context=context)['state'] == 'assigned':
+            partial_data = {
+                'delivery_date' : time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
             }
-        self.pool.get('stock.picking').do_partial(cr, uid, [mr_id], partial_data, context=context)
+            for mr_line in mr_line_obj.browse(cr, uid, mr_line_ids, context=context):
+                partial_data['move%s' % (mr_line.id)] = {
+                    'product_id': mr_line.product_id.id,
+                    'product_qty': mr_line.product_qty,
+                    'product_uom': mr_line.product_uom.id,
+                    'prodlot_id': mr_line.prodlot_id.id,
+                }
+            self.pool.get('stock.picking').do_partial(cr, uid, [mr_id], partial_data, context=context)
     #TODO, for the feature connecting with the MRP
     '''
     def make_material_requisition(self, cr, uid, cnc_line_ids, context = None):

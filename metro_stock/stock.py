@@ -126,8 +126,9 @@ class material_request_line(osv.osv):
         'prod_categ_id': fields.related('product_id','categ_id',string='Product Category Type',type='many2one',relation="product.category",select=True),
     }
     _order = 'id'
-    def default_get(self, cr, uid, fields_list, context=None):
-        resu = super(material_request_line,self).default_get(cr, uid, fields_list, context)
+    def default_mr_loc(self, cr, uid, context=None):
+        if context is None:
+            context = {}
         #material_request.type: mr or mrr
         req_type = context.get('req_type')
         if not req_type:
@@ -142,7 +143,7 @@ class material_request_line(osv.osv):
                     'where a.id = %s', (uid,))
         loc_src = cr.fetchone()
         if loc_src:
-           loc_stock_id = loc_src[0]           
+            loc_stock_id = loc_src[0]           
         #get the default production location
         loc_obj = self.pool.get('stock.location')
         prod_loc_ids = loc_obj.search(cr,uid,[('usage','=','production')],context=context)
@@ -150,18 +151,26 @@ class material_request_line(osv.osv):
             prod_loc = loc_obj.browse(cr,uid,prod_loc_ids[0],context=context)
             loc_prod_id = prod_loc.id
         #set the locations by the request type
+        loc_from_id = 0
+        loc_to_id = 0
         if req_type == 'mr':
-           if loc_stock_id:
-               resu.update({'location_id':loc_stock_id})
-           if loc_prod_id:
-               resu.update({'location_dest_id':loc_prod_id})
+            if loc_stock_id:
+                loc_from_id = loc_stock_id
+            if loc_prod_id:
+                loc_to_id = loc_prod_id
         if req_type == 'mrr':
-           if loc_prod_id:
-               resu.update({'location_id':loc_prod_id})
-           if loc_stock_id:
-               resu.update({'location_dest_id':loc_stock_id})                  
-           
+            if loc_prod_id:
+                loc_from_id = loc_prod_id
+            if loc_stock_id:
+                loc_to_id = loc_stock_id
+        return loc_from_id, loc_to_id
+                       
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(material_request_line,self).default_get(cr, uid, fields_list, context)
+        loc_from_id, loc_to_id = self.default_mr_loc(cr, uid, context=context)
+        resu.update({'location_id':loc_from_id, 'location_dest_id':loc_to_id})
         return resu
+    
     def onchange_product_id(self, cr, uid, ids, prod_id=False, loc_id=False,
                             loc_dest_id=False, ):
         """ On change of product id, if finds UoM, UoS, quantity and UoS quantity.
@@ -282,7 +291,6 @@ class stock_move(osv.osv):
         ),                
         'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
         'product_uom_base_qty': fields.function(_get_rec_info, type='float', string='Base Quantity', multi="rec_info", digits_compute=dp.get_precision('Product Unit of Measure'),readonly=True),
-        
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
@@ -441,10 +449,10 @@ class stock_picking(osv.osv):
             pickings = self.browse(cr, uid, ids, context=context)
             todo = []
             for picking in pickings:
-                if picking.type in('mr','mrr'):
-                    for r in picking.move_lines:
-                        if r.state == 'confirmed':
-                            todo.append(r.id)
+#                if picking.type in('mr','mrr'):
+                for r in picking.move_lines:
+                    if r.state == 'confirmed':
+                        todo.append(r.id)
             if len(todo):
                 self.pool.get('stock.move').check_assign(cr, uid, todo, context=context)
         return resu       
