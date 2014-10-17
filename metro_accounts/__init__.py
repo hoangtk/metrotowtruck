@@ -8,3 +8,4 @@ import stock
 import account_analytic
 import account_voucher
 import res_partner
+import cash_bank_trans

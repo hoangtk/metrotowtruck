@@ -14,6 +14,7 @@
         'metro','account','purchase','account_voucher','account_analytic_plans'
     ],
     'data':[
+        'security/ir.model.access.csv',
        "account_invoice_metro.xml",
        "account_voucher_view.xml",
        "account_invoice_view.xml",
@@ -27,7 +28,8 @@
        "account_report.xml",
        
        "account_analytic_view.xml",
-       "metro_account_view.xml"
+       "metro_account_view.xml",
+       "cash_bank_trans_view.xml"
         ],
     'demo': [],
     'test': [],
