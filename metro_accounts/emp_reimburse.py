@@ -339,9 +339,9 @@ class emp_reimburse(osv.osv):
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': order.date,
-                'ref': 'ERM[%s]'%(order.id,),
+                'ref': _('ERM[%s]')%(order.id,),
                 'period_id': period.id,
-                'narration':_('Employee Reimburse Money, %s\n%s')%(order.emp_id.name,order.description),
+                'narration':_('Employee Reimburse Money, %s\n%s')%(order.emp_id.name,order.description or ''),
                 }
 
     def _prepare_move_line(self, cr, uid, move_name, order, journal, period,  context=None):

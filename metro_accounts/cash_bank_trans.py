@@ -154,7 +154,7 @@ class cash_bank_trans(osv.osv):
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': order.date,
-                'ref': 'CBF[%s]'%(order.id,),
+                'ref': _('WDO[%s]')%(order.id,),
                 'period_id': period.id,
                 'narration':order.description,
                 }

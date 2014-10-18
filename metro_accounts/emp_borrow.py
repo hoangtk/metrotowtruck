@@ -166,7 +166,7 @@ class emp_borrow(osv.osv):
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': order.date,
-                'ref': 'EBM[%s]'%(order.id,),
+                'ref': _('EBM[%s]')%(order.id,),
                 'period_id': period.id,
                 'narration':_('Employee Borrow Money, %s\n%s')%(order.emp_id.name,order.description),
                 }

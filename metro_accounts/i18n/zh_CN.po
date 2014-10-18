@@ -1201,6 +1201,12 @@ msgid "Deposit"
 msgstr "存款"
 
 #. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:0
+#, python-format
+msgid "WDO[%s]"
+msgstr "存取款[%s]"
+
+#. module: metro_account
 #: code:addons/metro_accounts/emp_borrow.py:182
 #, python-format
 msgid "Employee Borrow Money, %s\n%s"
@@ -1210,6 +1216,12 @@ msgstr "员工借款, %s\n%s"
 #: code:addons/metro_accounts/emp_borrow.py:182
 #, python-format
 msgid "Borrow[%s]"
+msgstr "借款[%s]"
+
+#. module: metro_account
+#: code:addons/metro_accounts/emp_borrow.py:0
+#, python-format
+msgid "EBM[%s]"
 msgstr "借款[%s]"
 
 #. module: metro_account
@@ -1236,3 +1248,9 @@ msgstr "%s, 报销"
 #, python-format
 msgid "The reconcile amount can not be greater than the balance %s!"
 msgstr "核销金额不能大于余额%s!"
+
+#. module: metro_account
+#: code:addons/metro_accounts/emp_reimburse.py:0
+#, python-format
+msgid "ERM[%s]"
+msgstr "报销[%s]"
