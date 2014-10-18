@@ -14,20 +14,28 @@
     			</header>
                 <group>
 	                <group>
-	                    <field name="id" readonly="1"/>
 	                    <field name="date"/>
-	                    <field name="trans_type"/>
-	                    <field name="amount"/>
+	                    <label for="trans_type"/>
+	                    <div>
+	                    	<field name="trans_type" class="oe_inline"/>
+	                    	<field name="amount" class="oe_inline"/>
+	                    </div>
+	                    <field name="journal_bank_id" domain="[('type','=','bank')]"/>
 	                </group>
 	                <group>
 	                    <field name="journal_cash_id" domain="[('type','=','cash')]"/>
-	                    <field name="journal_bank_id" domain="[('type','=','bank')]"/>
 	                    <field name="move_id" readonly="1"/>
 	            		<field name="company_id" groups="base.group_multi_company"/>
 	                </group>
                 </group>
-                <label for='description'/>
+                <separator string='Description'/>
                 <field name="description" placeholder='Description...'/>
+                <separator string='Accounting Items'  attrs="{'invisible':[('state','!=','done')]}"/>
+                <field name="move_lines" attrs="{'invisible':[('state','!=','done')]}"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -40,8 +48,8 @@
                     <field name="date"/>
                     <field name="trans_type"/>
                     <field name="amount"/>
-                    <field name="journal_cash_id" domain="[('type','=','cash')]"/>
                     <field name="journal_bank_id" domain="[('type','=','bank')]"/>
+                    <field name="journal_cash_id" domain="[('type','=','cash')]"/>
                     <field name="description"/>
     				<field name="state"/>
             		<field name="company_id" groups="base.group_multi_company"/>

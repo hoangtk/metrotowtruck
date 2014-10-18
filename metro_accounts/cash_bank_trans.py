@@ -25,6 +25,7 @@ from openerp.tools.translate import _
 
 class cash_bank_trans(osv.osv):
     _name = 'cash.bank.trans'
+    _inherit = ['mail.thread']
     _description = "Withdraw/Deposit Order"
     _rec_name = 'id'
     _order = 'id desc'
@@ -41,7 +42,8 @@ class cash_bank_trans(osv.osv):
         'journal_bank_id': fields.many2one('account.journal', 'Bank Journal', required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'description': fields.char('Description', size=128, required=False),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
-        'move_id': fields.many2one('account.move', 'Accounting Entry'),
+        'move_id': fields.many2one('account.move', 'Accounting Entry', readonly=True),
+        'move_lines': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Entry Items', readonly=True),
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(cash_bank_trans,self).default_get(cr, uid, fields_list, context)
@@ -67,7 +69,7 @@ class cash_bank_trans(osv.osv):
         if not ids:
             return []
         if context is None: context = {}
-        return [(id, id) for id in ids]
+        return [(obj_id, '[%s]%s'%(obj_id,_(self._description))) for obj_id in ids]
         
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
@@ -85,7 +87,7 @@ class cash_bank_trans(osv.osv):
             move_ids = []
             if trans.move_id:
                 if trans.move_id.state == 'posted':
-                    raise osv.except_osv(_('Error!'), _('The accounting entry to the transaction was posted, can not be deleted!'))
+                    raise osv.except_osv(_('Error!'), _('The accounting entry to the order was posted, can not be deleted!'))
                 else:
                     move_ids.append(trans.move_id.id)
         if move_ids:     
@@ -98,7 +100,7 @@ class cash_bank_trans(osv.osv):
         return True
     
     def unlink(self, cr, uid, ids, context=None):
-        for data in self.read(cr, uid, ['state'], context=context):
+        for data in self.read(cr, uid, ids, ['state'], context=context):
             if data['state'] not in ('cancelled','draft'):
                 raise osv.except_osv(_('Error!'), _('Only order under Draft or Cancel can be delete!'))
         return super(cash_bank_trans,self).unlink(cr, uid, ids, context)
