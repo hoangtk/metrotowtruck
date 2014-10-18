@@ -1207,6 +1207,12 @@ msgid "WDO[%s]"
 msgstr "存取款[%s]"
 
 #. module: metro_account
+#: code:addons/metro_accounts/emp_borrow.py:0
+#, python-format
+msgid "Employee Borrow Money"
+msgstr "借款单"
+
+#. module: metro_account
 #: code:addons/metro_accounts/emp_borrow.py:182
 #, python-format
 msgid "Employee Borrow Money, %s\n%s"
@@ -1223,6 +1229,12 @@ msgstr "借款[%s]"
 #, python-format
 msgid "EBM[%s]"
 msgstr "借款[%s]"
+
+#. module: metro_account
+#: code:addons/metro_accounts/emp_reimburse.py:0
+#, python-format
+msgid "Employee Reimburse Money"
+msgstr "报销单"
 
 #. module: metro_account
 #: code:addons/metro_accounts/emp_reimburse.py:338
