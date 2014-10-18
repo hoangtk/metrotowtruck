@@ -29,7 +29,9 @@
        
        "account_analytic_view.xml",
        "metro_account_view.xml",
-       "cash_bank_trans_view.xml"
+       "cash_bank_trans_view.xml",
+       "emp_borrow_view.xml",
+       "emp_reimburse_view.xml"
         ],
     'demo': [],
     'test': [],
