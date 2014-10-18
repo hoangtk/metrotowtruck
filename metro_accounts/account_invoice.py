@@ -20,4 +20,13 @@ class account_invoice(osv.osv):
         #update the related picking invoice state
         self.pool.get('stock.picking').write(cr, uid, pick_ids, {'invoice_state':'2binvoiced'},context=context)
         return resu
+    def action_move_create(self, cr, uid, ids, context=None):
+        resu = super(account_invoice,self).action_move_create(cr, uid, ids, context=context)
+        #get the move ids, and unpost them
+        move_obj = self.pool.get('account.move')
+        invs = self.browse(cr, uid, ids, context=context)
+        move_ids = [inv.move_id.id for inv in invs if inv.move_id.state == 'posted']
+        if move_ids:
+            move_obj.button_cancel(cr, uid, move_ids, context)
+        return resu
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

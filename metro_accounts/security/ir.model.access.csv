@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cash_bank_trans,cash.bank.trans account.account,model_cash_bank_trans,account.group_account_invoice,1,1,1,1
+access_emp_borrow,cash.bank.emp_borrow.account,model_emp_borrow,account.group_account_invoice,1,1,1,1
+access_emp_reimburse,cash.bank.emp_reimburse.account,model_emp_reimburse,account.group_account_invoice,1,1,1,1
+access_emp_reimburse_line,cash.bank.emp_reimburse.line.account,model_emp_reimburse_line,account.group_account_invoice,1,1,1,1
+access_emp_reimburse_reconcile,cash.bank.emp_reimburse.reconcile.account,model_emp_reimburse_reconcile,account.group_account_invoice,1,1,1,1
