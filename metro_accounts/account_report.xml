@@ -6,6 +6,12 @@
                 usage="default" string="Accounting Entry GL"/>     
         <report auto="False" id="report_rpt_account_cn_detail" model="rpt.account.cn" header="True"
                 name="rpt.account.cn.detail" rml="metro_accounts/report/rpt_account_cn_detail.rml"
-                usage="default" string="Accounting Entry Detail"/>                    
+                usage="default" string="Accounting Entry Detail"/>
+        <report auto="False" id="report_rpt_inventory_qty" model="rpt.inventory" header="True"
+                name="rpt.inventory.qty" rml="metro_accounts/report/rpt_inventory_qty.rml"
+                usage="default" string="Inventory Quantity Report"/>
+        <report auto="False" id="report_rpt_inventory_amount" model="rpt.inventory" header="True"
+                name="rpt.inventory.amount" rml="metro_accounts/report/rpt_inventory_amount.rml"
+                usage="default" string="Inventory Amount Report"/>                
     </data>
 </openerp>

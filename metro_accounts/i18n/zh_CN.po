@@ -1248,12 +1248,14 @@ msgstr "员工报销借款, %s\n%s"
 #, python-format
 msgid "%s, reimburse reconcile"
 msgstr "%s, 报销核销"
+msgid "Reimburse reconcile[%s]"
+msgstr "报销核销[%s]"
 
 #. module: metro_account
 #: code:addons/metro_accounts/emp_reimburse.py:384
 #, python-format
-msgid "%s, reimburse"
-msgstr "%s, 报销"
+msgid "Reimburse[%s]"
+msgstr "报销[%s]"
 
 #. module: metro_account
 #: code:addons/metro_accounts/emp_reimburse.py:0

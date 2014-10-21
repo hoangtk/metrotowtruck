@@ -40,6 +40,7 @@ class rpt_account_cn(osv.osv_memory):
         'date_from': fields.date("Start Date"),
         'date_to': fields.date("End Date"),
         'target_move': fields.selection([('posted', 'All Posted Entries'),
+                                         ('draft', 'All Unposted Entries'),
                                          ('all', 'All Entries'),
                                         ], 'Target Moves', required=True),
         'account_ids': fields.many2many('account.account', string='Accounts', required=True),
@@ -60,6 +61,24 @@ class rpt_account_cn(osv.osv_memory):
 #        'account_ids': _get_accounts_default,
         'level': 'general',   
     }
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(rpt_account_cn,self).default_get(cr, uid, fields_list, context)
+        #handle the "default_account_type" and "default_account_user_type" parameter
+        account_ids = []
+        if context.get('default_account_type',False):
+            account_types = context.get('default_account_type').split(',')
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type.code','in',account_types)],context=context)
+            if account_ids_inc:
+                account_ids += account_ids_inc
+        if context.get('default_account_user_type',False):
+            account_types = context.get('default_account_user_type').split(',')
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_types)],context=context)
+            if account_ids_inc:
+                account_ids += account_ids_inc
+        if account_ids:
+            resu['account_ids'] = account_ids
+        return resu
+        
     def _check_periods(self, cr, uid, ids, context=None):
         for wiz in self.browse(cr, uid, ids, context=context):
             if wiz.period_from and wiz.period_from.company_id.id != wiz.period_to.company_id.id:
@@ -111,14 +130,6 @@ class rpt_account_cn(osv.osv_memory):
                 raise osv.except_osv(_('Error!'),_('Select a starting and an ending period.'))
             return data.period_from.date_start, data.period_to.date_stop
         
-    def _get_period_range(self, cr, uid, data, context=None):
-        if data.filter == 'filter_date':
-            return data.date_from, data.date_to
-        elif data.filter == 'filter_period':
-            if not data.period_from or not data.period_to:
-                raise osv.except_osv(_('Error!'),_('Select a starting and an ending period.'))
-            return data.period_from.date_start, data.period_to.date_stop  
-        
     def _get_account_balance(self, account, debit, credit):
         if debit == credit: bal_direct = 'balanced'
         if debit > credit: bal_direct = 'debit'
@@ -143,7 +154,9 @@ class rpt_account_cn(osv.osv_memory):
         period_ids = period_obj.build_ctx_periods(cr, uid, rpt.period_from.id, rpt.period_to.id)
         move_state = ['draft','posted']
         if rpt.target_move == 'posted':
-            move_state = ['posted']        
+            move_state = ['posted']      
+        if rpt.target_move == 'draft':
+            move_state = ['draft']          
         #move line common query where
         aml_common_query = 'aml.company_id=%s'%(company_id,)
         seq = 1

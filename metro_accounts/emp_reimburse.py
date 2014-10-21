@@ -365,7 +365,7 @@ class emp_reimburse(osv.osv):
         for line in order.line_dr_ids:
             if line.amount > 0:
                 debit_line = {
-                    'name': _('%s, reimburse reconcile')%(order.emp_id.name,),
+                    'name': _('Reimburse reconcile[%s]')%(order.emp_id.name,),
                     'debit': line.amount,
                     'credit': 0,
                     'account_id': line.account_id.id,
@@ -387,7 +387,7 @@ class emp_reimburse(osv.osv):
             if order.amount_pay < 0:
                 amount_pay_dr_prefix = -1
             cash_line = {
-                'name': _('%s, reimburse')%(order.emp_id.name,),
+                'name': _('Reimburse[%s]')%(order.emp_id.name,),        
                 'debit': amount_pay_dr_prefix*order.amount_pay,
                 'credit': amount_pay_cr_prefix*order.amount_pay,
                 'account_id': order.journal_cash_id.default_credit_account_id.id,
@@ -404,7 +404,7 @@ class emp_reimburse(osv.osv):
         for line in order.line_cr_ids:
             if line.amount > 0:
                 debit_line = {
-                    'name': _('%s, reimburse reconcile')%(order.emp_id.name,),
+                    'name': _('Reimburse reconcile[%s]')%(order.emp_id.name,),
                     'debit': 0,
                     'credit': line.amount,
                     'account_id': line.account_id.id,
