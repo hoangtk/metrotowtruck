@@ -67,7 +67,7 @@ class rpt_account_cn(osv.osv_memory):
         account_ids = []
         if context.get('default_account_type',False):
             account_types = context.get('default_account_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type.code','in',account_types)],context=context)
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types)],context=context)
             if account_ids_inc:
                 account_ids += account_ids_inc
         if context.get('default_account_user_type',False):
@@ -182,19 +182,22 @@ class rpt_account_cn(osv.osv_memory):
                         'name':account.name,
                         'period_id':rpt.period_from.id,
                         'notes':labels['init_bal'],
+                        'debit':debit,
+                        'credit':credit,
                         'bal_direct':labels['bal_direct_%s'%(direction,)],
-                        'balance':balance}
+                        'balance':balance,
+                        'data_level':'init_bal'}
             seq += 1
             rpt_lns.append(rpt_ln)
             balance_sum += balance
             
             #2.loop by periods            
-            year_initial = {}
+            year_sum = {}
             for period in period_obj.browse(cr, uid, period_ids,context=context):
-                #the year initial balance
-                if not year_initial.get(period.fiscalyear_id.code,False):
+                #the year sum data for credit/debit
+                if not year_sum.get(period.fiscalyear_id.code,False):
                     if period.fiscalyear_id.date_start < date_from:
-                        #Only when we start from the middle of a year, then need to sum initial balance
+                        #Only when we start from the middle of a year, then need to sum year
                         cr.execute('SELECT COALESCE(SUM(aml.debit),0) as debit, COALESCE(SUM(aml.credit), 0) as credit \
                                 FROM account_move_line aml \
                                 JOIN account_move am ON (am.id = aml.move_id) \
@@ -205,9 +208,9 @@ class rpt_account_cn(osv.osv_memory):
                                 AND '+ aml_common_query +' '
                                 ,(search_account_ids, tuple(move_state), period.fiscalyear_id.date_start, date_from))
                         row = cr.fetchone()            
-                        year_initial[period.fiscalyear_id.code] = {'debit':row[0],'credit':row[1]}   
+                        year_sum[period.fiscalyear_id.code] = {'debit':row[0],'credit':row[1]}   
                     else:
-                        year_initial[period.fiscalyear_id.code] = {'debit':0.0,'credit':0.0}
+                        year_sum[period.fiscalyear_id.code] = {'debit':0.0,'credit':0.0}
 
                 #detail lines
                 if rpt.level == 'detail':
@@ -233,13 +236,15 @@ class rpt_account_cn(osv.osv_memory):
                                     'code':'', 
                                     'name':'',
                                     'period_id':period.id,
+                                    'aml_id':row['id'], # for detail
                                     'date':row['move_date'], # for detail
                                     'am_name':row['move_name'], # for detail
                                     'notes':row['move_line_name'],
                                     'debit':debit,
                                     'credit':credit,
                                     'bal_direct':labels['bal_direct_%s'%(direction,)],
-                                    'balance':balance_detail}
+                                    'balance':balance_detail,
+                                    'data_level':'detail'}
                         if rpt.show_counter:
                             rpt_ln['counter_account'] = ''
                         rpt_lns.append(rpt_ln)    
@@ -268,13 +273,14 @@ class rpt_account_cn(osv.osv_memory):
                             'debit':debit,
                             'credit':credit,
                             'bal_direct':labels['bal_direct_%s'%(direction,)],
-                            'balance':balance_sum}
+                            'balance':balance_sum,
+                            'data_level':'period_sum'}
                 rpt_lns.append(rpt_ln)    
                 seq += 1  
                 
                 #year sum line  
-                debit_year = debit + year_initial[period.fiscalyear_id.code]['debit']
-                credit_year = credit + year_initial[period.fiscalyear_id.code]['credit']
+                debit_year = debit + year_sum[period.fiscalyear_id.code]['debit']
+                credit_year = credit + year_sum[period.fiscalyear_id.code]['credit']
                 balance_year, direction_year = self._get_account_balance(account, debit_year, credit_year)
                 balance_year = balance_sum
                 rpt_ln = {'seq':seq,
@@ -285,7 +291,12 @@ class rpt_account_cn(osv.osv_memory):
                             'debit':debit_year,
                             'credit':credit_year,
                             'bal_direct':labels['bal_direct_%s'%(direction_year,)],
-                            'balance':balance_year,}
+                            'balance':balance_year,
+                            'data_level':'year_sum'}
+                #increase the year sum value
+                year_sum[period.fiscalyear_id.code]['debit'] = debit_year
+                year_sum[period.fiscalyear_id.code]['credit'] = credit_year
+                
                 rpt_lns.append(rpt_ln)     
                 seq += 1              
         return self.pool.get('rpt.account.cn.line'), rpt_lns    

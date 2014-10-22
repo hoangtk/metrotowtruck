@@ -138,5 +138,22 @@
             <field name="context">{'default_title':'Inventory Amount Report','default_has_amount':True}</field>
             <field name="target">inline</field>
         </record>
+        
+           
+        <menuitem
+            id="rpt_inventory_qty_menu"
+            action="rpt_inventory_qty_action"
+            groups="account.group_account_manager,account.group_account_user"
+            parent="menu_rpt_account_cn"
+            sequence="5"
+           />   
+           
+        <menuitem
+            id="rpt_inventory_amount_menu"
+            action="rpt_inventory_amount_action"
+            groups="account.group_account_manager,account.group_account_user"
+            parent="menu_rpt_account_cn"
+            sequence="6"
+           />             
     </data>
 </openerp>

@@ -56,7 +56,12 @@ class rpt_base(osv.osv_memory):
         'show_result': False,      
         'save_pdf': False,          
     }
-    
+    def default_get(self, cr, uid, fields_list, context=None):
+        resu = super(rpt_base,self).default_get(cr, uid, fields_list, context)
+        #set default title by i18n
+        if context.get('default_title',False):
+            resu['title'] = _(context.get('default_title'))        
+        return resu    
     def run_report(self, cr, uid, ids, context=None):
         rpt = self.browse(cr, uid, ids, context=context)[0]
         rpt_method = getattr(self, 'run_%s'%(rpt.type,))
@@ -99,6 +104,7 @@ class rpt_base_line(osv.osv_memory):
         'seq': fields.integer('Seq', ),
         'code': fields.char('Code', size=64, ),
         'name': fields.char('Name', size=256, ),
+        'data_level': fields.char('Data level code', size=64)
         }
 
 rpt_base_line()

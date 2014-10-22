@@ -8,51 +8,11 @@
 			sequence="6"/>
 			
         <menuitem
-            id="rpt_account_cn_gl_menu"
-            action="rpt_account_cn_gl_action"
-            groups="account.group_account_manager,account.group_account_user"
-            parent="menu_rpt_account_cn"
-            sequence="1"
-           />     
-           
-        <menuitem
             id="rpt_account_cn_detail_menu"
             action="rpt_account_cn_detail_action"
             groups="account.group_account_manager,account.group_account_user"
             parent="menu_rpt_account_cn"
             sequence="2"
-           />    
-           
-        <menuitem
-            id="rpt_account_cn_detail_cash_menu"
-            action="rpt_account_cn_detail_predefine_cash_action"
-            groups="account.group_account_manager,account.group_account_user"
-            parent="menu_rpt_account_cn"
-            sequence="3"
-           />   
-           
-        <menuitem
-            id="rpt_account_cn_detail_bank_menu"
-            action="rpt_account_cn_detail_predefine_bank_action"
-            groups="account.group_account_manager,account.group_account_user"
-            parent="menu_rpt_account_cn"
-            sequence="4"
-           />   
-           
-        <menuitem
-            id="rpt_inventory_qty_menu"
-            action="rpt_inventory_qty_action"
-            groups="account.group_account_manager,account.group_account_user"
-            parent="menu_rpt_account_cn"
-            sequence="5"
-           />   
-           
-        <menuitem
-            id="rpt_inventory_amount_menu"
-            action="rpt_inventory_amount_action"
-            groups="account.group_account_manager,account.group_account_user"
-            parent="menu_rpt_account_cn"
-            sequence="6"
-           />                         
+           />
     </data>
 </openerp>
