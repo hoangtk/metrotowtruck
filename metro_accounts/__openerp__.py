@@ -24,7 +24,10 @@
        
        "wizard/rpt_account_cn_gl_view.xml",
        "wizard/rpt_account_cn_detail_view.xml",
+       "wizard/rpt_account_cn_detail_predefine_view.xml",
+       "wizard/rpt_inventory_view.xml",
        "wizard/rpt_account_cn_menu.xml",
+       "wizard/rpt_account_partner_view.xml",
        "account_report.xml",
        
        "account_analytic_view.xml",

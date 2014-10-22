@@ -21,5 +21,7 @@
 
 import account_move_batch
 import rpt_account_cn
+import rpt_inventory
+import rpt_account_partner
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

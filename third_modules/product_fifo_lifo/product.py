@@ -279,7 +279,17 @@ class product_product(osv.osv):
         what = context.get('what',())
         if not ids:
             ids = self.search(cr, uid, [])
-        res = {}.fromkeys(ids, 0.0)
+        '''
+        Change by johnw, 10/20/2014, add the stocking amount return
+        '''
+#        res = {}.fromkeys(ids, 0.0)
+        res = {}
+        if context.get('need_money',False):
+            for id in ids:
+                res[id] = [0.0,0.0]
+        else:
+            res = {}.fromkeys(ids, 0.0)
+
         if not ids:
             return res
         #set_context: refactor code here
@@ -312,7 +322,11 @@ class product_product(osv.osv):
         if prodlot_id:
             prodlot_clause = ' and prodlot_id = %s '
             where += [prodlot_id]
-
+            
+        '''
+        Change by johnw, 10/20/2014, add the stocking amount return
+        '''
+        '''
         # TODO: perhaps merge in one query.
         if 'in' in what:
             # all moves from a location out of the set to a location in the set
@@ -338,6 +352,33 @@ class product_product(osv.osv):
                 + prodlot_clause + 
                 'group by product_id,product_uom',tuple(where))
             results2 = cr.fetchall()
+        '''
+        #begin
+        if 'in' in what:
+            # all moves from a location out of the set to a location in the set
+            cr.execute(
+                'select sum(product_qty), product_id, product_uom, sum(coalesce(price_unit,0)*product_qty) '\
+                'from stock_move '\
+                'where location_id NOT IN %s '\
+                'and location_dest_id IN %s '\
+                'and product_id IN %s '\
+                'and state IN %s ' + (date_str and 'and '+date_str+' ' or '') +' '\
+                + prodlot_clause + 
+                'group by product_id,product_uom',tuple(where))
+            results = cr.fetchall()
+        if 'out' in what:
+            # all moves from a location in the set to a location out of the set
+            cr.execute(
+                'select sum(product_qty), product_id, product_uom, sum(coalesce(price_unit,0)*product_qty) '\
+                'from stock_move '\
+                'where location_id IN %s '\
+                'and location_dest_id NOT IN %s '\
+                'and product_id  IN %s '\
+                'and state in %s ' + (date_str and 'and '+date_str+' ' or '') + ' '\
+                + prodlot_clause + 
+                'group by product_id,product_uom',tuple(where))
+            results2 = cr.fetchall()        
+        #end
             
         # Get the missing UoM resources
         uom_obj = self.pool.get('product.uom')
@@ -352,6 +393,10 @@ class product_product(osv.osv):
                 
         #TOCHECK: before change uom of product, stock move line are in old uom.
         context.update({'raise-exception': False})
+        '''
+        Change by johnw, 10/20/2014, add the stocking amount return
+        '''
+        '''
         # Count the incoming quantities
         for amount, prod_id, prod_uom in results:
             amount = uom_obj._compute_qty_obj(cr, uid, uoms_o[prod_uom], amount,
@@ -362,6 +407,25 @@ class product_product(osv.osv):
             amount = uom_obj._compute_qty_obj(cr, uid, uoms_o[prod_uom], amount,
                     uoms_o[context.get('uom', False) or product2uom[prod_id]], context=context)
             res[prod_id] -= amount
+        '''
+        # Count the incoming quantities
+        for amount, prod_id, prod_uom,amount_money in results:
+            amount = uom_obj._compute_qty_obj(cr, uid, uoms_o[prod_uom], amount,
+                     uoms_o[context.get('uom', False) or product2uom[prod_id]], context=context)
+            if context.get('need_money'):
+                res[prod_id][0] += amount
+                res[prod_id][1] += amount_money
+            else:
+                res[prod_id] += amount
+        # Count the outgoing quantities
+        for amount, prod_id, prod_uom, amount_money in results2:
+            amount = uom_obj._compute_qty_obj(cr, uid, uoms_o[prod_uom], amount,
+                    uoms_o[context.get('uom', False) or product2uom[prod_id]], context=context)
+            if context.get('need_money'):
+                res[prod_id][0] -= amount
+                res[prod_id][1] -= amount_money
+            else:
+                res[prod_id] -= amount
         return res
 
     _columns = {

@@ -26,62 +26,79 @@ from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
-class rpt_account_cn(osv.osv_memory):
-    _name = "rpt.account.cn"
+class rpt_account_partner(osv.osv_memory):
+    _name = "rpt.account.partner"
     _inherit = "rpt.base"
     _description = "China Account Report"
     _columns = {
         #report data lines
-        'rpt_lines': fields.one2many('rpt.account.cn.line', 'rpt_id', string='Report Line'),
-#        'filter': fields.selection([('filter_date', 'Date'), ('filter_period', 'Periods')], "Filter by", required=True),
-        'filter': fields.selection([('filter_period', 'Periods')], "Filter by", required=True),        
+        'rpt_lines': fields.one2many('rpt.account.partner.line', 'rpt_id', string='Report Line'),
         'period_from': fields.many2one('account.period', 'Start Period'),
         'period_to': fields.many2one('account.period', 'End Period'),
-        'date_from': fields.date("Start Date"),
-        'date_to': fields.date("End Date"),
         'target_move': fields.selection([('posted', 'All Posted Entries'),
                                          ('draft', 'All Unposted Entries'),
                                          ('all', 'All Entries'),
                                         ], 'Target Moves', required=True),
+        'reconcile': fields.selection([('all', 'All Entries'),
+                                         ('full','Full Reconciled'),
+                                         ('partial','Partial Reconciled'),
+                                         ('no','UnReconciled'),
+                                        ], 'Reconcile', required=True),
+        'partner_ids': fields.many2many('res.partner', string='Partners', required=False),
         'account_ids': fields.many2many('account.account', string='Accounts', required=True),
         #report level       
-        'level': fields.selection([('general', 'General'),('detail', 'Detail'),], "Report Level", required=True),     
+        'level': fields.selection([('general', 'General'),('detail', 'Detail'),], "Report Level", required=True), 
+        #report level       
+        'partner_type': fields.selection([('customer', 'Customer'),('supplier', 'Supplier'),], "Partner Type", required=True),         
         #Show counterpart account flag for detail report level   
-        'show_counter': fields.boolean("Show counterpart", required=False),
+        'show_counter': fields.boolean("Show counterpart", required=False),   
+        'no_zero_balance': fields.boolean("Hide data with zero final balance", required=False),   
         }
-    
-    def _get_accounts_default(self, cr, uid, context=None):
-        company_id = self.pool.get('res.users').browse(cr,uid,uid,context).company_id.id
-        return self.pool.get('account.account').search(cr, uid ,[('company_id','=',company_id),'|',('type','=','liquidity'),('type','=','payable')])
         
     _defaults = {
-        'type': 'account_cn',     
-        'filter': 'filter_period',        
-        'target_move': 'posted',
-#        'account_ids': _get_accounts_default,
+        'type': 'account_partner',     
+        'target_move': 'all',
         'level': 'general',   
+        'partner_type': 'supplier',   
+        'reconcile':'all',
     }
     def default_get(self, cr, uid, fields_list, context=None):
-        resu = super(rpt_account_cn,self).default_get(cr, uid, fields_list, context)
-        #handle the "default_account_type" and "default_account_user_type" parameter
+        resu = super(rpt_account_partner,self).default_get(cr, uid, fields_list, context)
         account_ids = []
-        if context.get('default_account_type',False):
-            account_types = context.get('default_account_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types)],context=context)
-            if account_ids_inc:
-                account_ids += account_ids_inc
-        if context.get('default_account_user_type',False):
-            account_types = context.get('default_account_user_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_types)],context=context)
-            if account_ids_inc:
-                account_ids += account_ids_inc
+        #handle the "default_partner_type" parameter, set the default account_ids
+        default_partner_type = context and context.get('default_partner_type', False) or False
+        if default_partner_type:            
+            account_types = []
+            if default_partner_type == 'customer':
+                account_types = ['receivable']
+            if default_partner_type == 'supplier':
+                account_types = ['payable']
+            if account_types:
+                account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types)],context=context)
+                if account_ids_inc:
+                    account_ids += account_ids_inc
         if account_ids:
             resu['account_ids'] = account_ids
+        #set default periods
+        period_from, period_ro = self.get_default_periods(cr, uid, self.pool.get('res.users').browse(cr,uid,uid,context=context).company_id.id,context)
+        resu['period_from'] = period_from
+        resu['period_to'] = period_ro
         return resu
-        
+    def fields_get(self, cr, uid, allfields=None, context=None, write_access=True):
+        resu = super(rpt_account_partner,self).fields_get(cr, uid, allfields,context,write_access)
+        #set  the 'account_id'/'partner_id' domain dynamically by the default_project_type
+        default_partner_type = context and context.get('default_partner_type', False) or False
+        if default_partner_type:            
+            if default_partner_type == 'customer':
+                resu['account_ids']['domain'] = [('type','=','receivable')]
+                resu['partner_ids']['domain'] = [('customer','=',True)]
+            if default_partner_type == 'supplier':
+                resu['account_ids']['domain'] = [('type','=','payable')]
+                resu['partner_ids']['domain'] = [('supplier','=',True)]
+        return resu         
     def _check_periods(self, cr, uid, ids, context=None):
         for wiz in self.browse(cr, uid, ids, context=context):
-            if wiz.period_from and wiz.period_from.company_id.id != wiz.period_to.company_id.id:
+            if wiz.period_from and wiz.period_to and wiz.period_from.company_id.id != wiz.period_to.company_id.id:
                 return False
         return True
 
@@ -89,55 +106,44 @@ class rpt_account_cn(osv.osv_memory):
         (_check_periods, 'The chosen periods have to belong to the same company.', ['period_from','period_to']),
     ]
 
-    def onchange_filter(self, cr, uid, ids, filter, company_id, context=None):
-        res = {'value': {}}
-        if filter == 'filter_no':
-            res['value'] = {'period_from': False, 'period_to': False, 'date_from': False ,'date_to': False}
-        if filter == 'filter_date':
-            res['value'] = {'period_from': False, 'period_to': False, 'date_from': time.strftime('%Y-01-01'), 'date_to': time.strftime('%Y-%m-%d')}
-        if filter == 'filter_period' and company_id:
-            start_period = end_period = False
-            cr.execute('''
-                SELECT * FROM (SELECT p.id
-                               FROM account_period p
-                               WHERE p.company_id = %s
-                               AND p.special = false
-                               AND p.state = 'draft'
-                               ORDER BY p.date_start ASC, p.special ASC
-                               LIMIT 1) AS period_start
-                UNION ALL
-                SELECT * FROM (SELECT p.id
-                               FROM account_period p
-                               WHERE p.company_id = %s
-                               AND p.date_start < NOW()
-                               AND p.special = false
-                               AND p.state = 'draft'
-                               ORDER BY p.date_stop DESC
-                               LIMIT 1) AS period_stop''', (company_id, company_id))
-            periods =  [i[0] for i in cr.fetchall()]
-            if periods and len(periods) > 1:
-                start_period = periods[0]
-                end_period = periods[1]
-#            res['value'] = {'period_from': start_period, 'period_to': end_period, 'date_from': False, 'date_to': False}
-            res['value'] = {'period_from': end_period, 'period_to': end_period, 'date_from': False, 'date_to': False}
-        return res
-
+    def get_default_periods(self, cr, uid, company_id, context=None):
+        start_period = end_period = False
+        cr.execute('''
+            SELECT * FROM (SELECT p.id
+                           FROM account_period p
+                           WHERE p.company_id = %s
+                           AND p.special = false
+                           AND p.state = 'draft'
+                           ORDER BY p.date_start ASC, p.special ASC
+                           LIMIT 1) AS period_start
+            UNION ALL
+            SELECT * FROM (SELECT p.id
+                           FROM account_period p
+                           WHERE p.company_id = %s
+                           AND p.date_start < NOW()
+                           AND p.special = false
+                           AND p.state = 'draft'
+                           ORDER BY p.date_stop DESC
+                           LIMIT 1) AS period_stop''', (company_id, company_id))
+        periods =  [i[0] for i in cr.fetchall()]
+        if periods and len(periods) > 1:
+            start_period = periods[0]
+            end_period = periods[1]
+        return end_period, end_period
+    
     def _get_date_range(self, cr, uid, data, context=None):
-        if data.filter == 'filter_date':
-            return data.date_from, data.date_to
-        elif data.filter == 'filter_period':
-            if not data.period_from or not data.period_to:
-                raise osv.except_osv(_('Error!'),_('Select a starting and an ending period.'))
-            return data.period_from.date_start, data.period_to.date_stop
-        
-    def _get_account_balance(self, account, debit, credit):
+        if not data.period_from or not data.period_to:
+            raise osv.except_osv(_('Error!'),_('Select a starting and an ending period.'))
+        return data.period_from.date_start, data.period_to.date_stop
+                
+    def _get_account_balance(self, partner_type, debit, credit):
         if debit == credit: bal_direct = 'balanced'
         if debit > credit: bal_direct = 'debit'
         if debit < credit: bal_direct = 'credit'
-        balance = account.bal_direct == 'credit' and (credit-debit) or (debit-credit) 
+        balance = partner_type == 'supplier' and (credit-debit) or (debit-credit) 
         return balance, bal_direct          
         
-    def run_account_cn(self, cr, uid, ids, context=None):
+    def run_account_partner(self, cr, uid, ids, context=None):
         if context is None: context = {}         
         rpt = self.browse(cr, uid, ids, context=context)[0]
         account_obj = self.pool.get('account.account')
@@ -156,30 +162,54 @@ class rpt_account_cn(osv.osv_memory):
         if rpt.target_move == 'posted':
             move_state = ['posted']      
         if rpt.target_move == 'draft':
-            move_state = ['draft']          
+            move_state = ['draft']
+
         #move line common query where
         aml_common_query = 'aml.company_id=%s'%(company_id,)
+        if rpt.reconcile == 'full':
+            aml_common_query += '\n and aml.reconcile_id is not null '
+        if rpt.reconcile == 'partial':
+            aml_common_query += '\n and aml.reconcile_partial_id is not null '
+        if rpt.reconcile == 'no':
+            aml_common_query += '\n and (aml.reconcile_id is null and aml.reconcile_partial_id is null) '
+                                    
         seq = 1
-        rpt_lns = []
-        for account in rpt.account_ids:
+        rpt_lns = []        
+        #the search account ids
+        search_account_ids = []
+        for act in rpt.account_ids:
+            search_account_ids += account_obj._get_children_and_consol(cr, uid, [act.id], context=context)
+        search_account_ids = tuple(search_account_ids)
+        #get partner_ids
+        partner_ids = rpt.partner_ids
+        if not partner_ids:
+            partner_domain = [('parent_id','=',False),('company_id','=',company_id)]
+            if rpt.partner_type == 'supplier':
+                partner_domain += [('supplier','=',True)]
+            if rpt.partner_type == 'customer':
+                partner_domain += [('customer','=',True)]
+            partner_ids = self.pool.get('res.partner').search(cr, uid, partner_domain, context=context)
+            partner_ids = self.pool.get('res.partner').browse(cr, uid, partner_ids, context=context)
+        for partner in partner_ids:
+            rpt_lns_row = []
             balance_sum = 0.0
-            search_account_ids = tuple(account_obj._get_children_and_consol(cr, uid, [account.id], context=context))
             #1.the initial balance line
             cr.execute('SELECT COALESCE(SUM(aml.debit),0) as debit, COALESCE(SUM(aml.credit), 0) as credit \
                     FROM account_move_line aml \
                     JOIN account_move am ON (am.id = aml.move_id) \
                     WHERE (aml.account_id IN %s) \
+                    AND (aml.partner_id = %s) \
                     AND (am.state IN %s) \
                     AND (am.date < %s) \
                     AND '+ aml_common_query +' '
-                    ,(search_account_ids, tuple(move_state), date_from))
+                    ,(search_account_ids, partner.id, tuple(move_state), date_from))
             row = cr.fetchone()
             debit = row[0]
             credit = row[1]            
-            balance, direction = self._get_account_balance(account, debit, credit)
+            balance, direction = self._get_account_balance(rpt.partner_type, debit, credit)
             rpt_ln = {'seq':seq,
-                        'code':account.code, 
-                        'name':account.name,
+#                        'code':account.code, 
+                        'name':partner.name,
                         'period_id':rpt.period_from.id,
                         'notes':labels['init_bal'],
                         'debit':debit,
@@ -188,7 +218,7 @@ class rpt_account_cn(osv.osv_memory):
                         'balance':balance,
                         'data_level':'init_bal'}
             seq += 1
-            rpt_lns.append(rpt_ln)
+            rpt_lns_row.append(rpt_ln)
             balance_sum += balance
             
             #2.loop by periods            
@@ -202,11 +232,12 @@ class rpt_account_cn(osv.osv_memory):
                                 FROM account_move_line aml \
                                 JOIN account_move am ON (am.id = aml.move_id) \
                                 WHERE (aml.account_id IN %s) \
+                                AND (aml.partner_id = %s) \
                                 AND (am.state IN %s) \
                                 AND (am.date >= %s) \
                                 AND (am.date < %s) \
                                 AND '+ aml_common_query +' '
-                                ,(search_account_ids, tuple(move_state), period.fiscalyear_id.date_start, date_from))
+                                ,(search_account_ids, partner.id, tuple(move_state), period.fiscalyear_id.date_start, date_from))
                         row = cr.fetchone()            
                         year_sum[period.fiscalyear_id.code] = {'debit':row[0],'credit':row[1]}   
                     else:
@@ -214,29 +245,31 @@ class rpt_account_cn(osv.osv_memory):
 
                 #detail lines
                 if rpt.level == 'detail':
-                    cr.execute('SELECT aml.debit, aml.credit,aml.date_biz as move_date, am.name as move_name, aml.name as move_line_name, \
+                    cr.execute('SELECT aml.account_id,aml.debit, aml.credit,aml.date_biz as move_date, am.name as move_name, aml.name as move_line_name, \
                             aml.id,aml.move_id \
                             FROM account_move_line aml \
                             JOIN account_move am ON (am.id = aml.move_id) \
                             WHERE (aml.account_id IN %s) \
+                            AND (aml.partner_id = %s) \
                             AND (am.state IN %s) \
                             AND (am.period_id = %s) \
                             AND '+ aml_common_query +' \
                             ORDER by aml.date, aml.move_id'
-                            ,(search_account_ids, tuple(move_state), period.id))
+                            ,(search_account_ids, partner.id, tuple(move_state), period.id))
                     rows = cr.dictfetchall()
                     balance_detail = balance_sum
                     for row in rows:
                         #move detail line
                         debit = row['debit']
                         credit = row['credit']            
-                        balance, direction = self._get_account_balance(account, debit, credit)
+                        balance, direction = self._get_account_balance(rpt.partner_type, debit, credit)
                         balance_detail += balance
                         rpt_ln = {'seq':seq,
                                     'code':'', 
                                     'name':'',
                                     'period_id':period.id,
                                     'aml_id':row['id'], # for detail
+                                    'account_id':row['account_id'], # for detail
                                     'date':row['move_date'], # for detail
                                     'am_name':row['move_name'], # for detail
                                     'notes':row['move_line_name'],
@@ -247,7 +280,7 @@ class rpt_account_cn(osv.osv_memory):
                                     'data_level':'detail'}
                         if rpt.show_counter:
                             rpt_ln['counter_account'] = ''
-                        rpt_lns.append(rpt_ln)    
+                        rpt_lns_row.append(rpt_ln)    
                         seq += 1
                 
                 #the period credit/debit
@@ -255,15 +288,16 @@ class rpt_account_cn(osv.osv_memory):
                         FROM account_move_line aml \
                         JOIN account_move am ON (am.id = aml.move_id) \
                         WHERE (aml.account_id IN %s) \
+                        AND (aml.partner_id = %s) \
                         AND (am.state IN %s) \
                         AND (am.period_id = %s) \
                         AND '+ aml_common_query +' '
-                        ,(search_account_ids, tuple(move_state), period.id))
+                        ,(search_account_ids, partner.id, tuple(move_state), period.id))
                 row = cr.fetchone()
                 #period sum line
                 debit = row[0]
                 credit = row[1]            
-                balance, direction = self._get_account_balance(account, debit, credit)
+                balance, direction = self._get_account_balance(rpt.partner_type, debit, credit)
                 balance_sum += balance
                 rpt_ln = {'seq':seq,
                             'code':'', 
@@ -275,13 +309,13 @@ class rpt_account_cn(osv.osv_memory):
                             'bal_direct':labels['bal_direct_%s'%(direction,)],
                             'balance':balance_sum,
                             'data_level':'period_sum'}
-                rpt_lns.append(rpt_ln)    
+                rpt_lns_row.append(rpt_ln)    
                 seq += 1  
                 
                 #year sum line  
                 debit_year = debit + year_sum[period.fiscalyear_id.code]['debit']
                 credit_year = credit + year_sum[period.fiscalyear_id.code]['credit']
-                balance_year, direction_year = self._get_account_balance(account, debit_year, credit_year)
+                balance_year, direction_year = self._get_account_balance(rpt.partner_type, debit_year, credit_year)
                 balance_year = balance_sum
                 rpt_ln = {'seq':seq,
                             'code':'', 
@@ -297,39 +331,57 @@ class rpt_account_cn(osv.osv_memory):
                 year_sum[period.fiscalyear_id.code]['debit'] = debit_year
                 year_sum[period.fiscalyear_id.code]['credit'] = credit_year
                 
-                rpt_lns.append(rpt_ln)     
+                #if total balance is zero and have no zero balance flag then continue
+                if balance_year == 0.0 and rpt.no_zero_balance:
+                    continue
+                
+                rpt_lns_row.append(rpt_ln)
+                
+                rpt_lns += rpt_lns_row
                 seq += 1              
-        return self.pool.get('rpt.account.cn.line'), rpt_lns    
-#        upt_lines = [(0,0,rpt_ln) for rpt_ln in rpt_lns]
-#        self.write(cr, uid, rpt.id, {'rpt_lines':upt_lines,'show_search':False},context=context)
+        #update the reconcile and residual data
+        if rpt.level == 'detail':
+            mvln_ids = [ln['aml_id'] for ln in rpt_lns if ln.get('aml_id',False)]
+            mvln_data = self.pool.get('account.move.line').read(cr, uid, mvln_ids, ['reconcile','amount_residual'])
+#            {'amount_residual': 0.0, 'id': 58854, 'reconcile': 'A1167'}
+            mvlns = {}
+            for mvln in mvln_data:
+                mvlns[mvln['id']] = {'amount_residual':mvln['amount_residual'],'reconcile':mvln['reconcile']}
+            for ln in rpt_lns:
+                aml_id = ln.get('aml_id',False)
+                if aml_id:
+                    mvln = mvlns.get(aml_id,False)
+                    if mvln:
+                        ln.update(mvln)
+        return self.pool.get('rpt.account.partner.line'), rpt_lns    
         return True
     
-#    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-#        resu = super(rpt_account_cn, self).fields_view_get(cr, user, view_id, view_type, context, toolbar, submenu)
-#        return resu
-    
     def _pdf_data(self, cr, uid, ids, form_data, context=None):
-        rpt_name = 'rpt.account.cn.gl'
+        rpt_name = 'rpt.account.partner.gl'
         if form_data['level'] == 'detail':
-            rpt_name = 'rpt.account.cn.detail'
+            rpt_name = 'rpt.account.partner.detail'
         return {'xmlrpt_name': rpt_name}
     
-rpt_account_cn()
+rpt_account_partner()
 
-class rpt_account_cn_line(osv.osv_memory):
-    _name = "rpt.account.cn.line"
+class rpt_account_partner_line(osv.osv_memory):
+    _name = "rpt.account.partner.line"
     _inherit = "rpt.base.line"
     _description = "China Account Report Lines"
     _columns = {
-        'rpt_id': fields.many2one('rpt.account.cn', 'Report'),
+        'rpt_id': fields.many2one('rpt.account.partner', 'Report'),
         #for GL
         'period_id': fields.many2one('account.period', 'Period',),
         
         #for detail
         'aml_id': fields.many2one('account.move.line', 'Move Line', ),
+        'account_id': fields.many2one('account.account','Account'),
         'date': fields.date('Move Date', ),
         'am_name': fields.char('Move Name', size=64, ),
         'counter_account': fields.char('Counter Account', size=64, ),
+        'reconcile': fields.char('Reconcile', size=64 ),
+#        'reconcile_partial': fields.char('Partial Reconcile', size=64 ),
+        'amount_residual': fields.float('Residual Amount', digits_compute=dp.get_precision('Account')),
         
         #for both Gl and detail, move line name or static:期初,本期合计,本年合计
         'notes': fields.char('Notes', size=64, ),
@@ -346,9 +398,9 @@ class rpt_account_cn_line(osv.osv_memory):
         'show_counter': fields.related('rpt_id','show_counter',type='boolean', string="Show counterpart", required=False),
         }
 
-rpt_account_cn_line()
+rpt_account_partner_line()
 
 from openerp.report import report_sxw
-report_sxw.report_sxw('report.rpt.account.cn.gl', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_gl.rml', parser=report_sxw.rml_parse, header='internal landscape')
-report_sxw.report_sxw('report.rpt.account.cn.detail', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_detail.rml', parser=report_sxw.rml_parse, header='internal landscape')
+report_sxw.report_sxw('report.rpt.account.partner.gl', 'rpt.account.partner', 'addons/metro_accounts/report/rpt_account_partner_gl.rml', parser=report_sxw.rml_parse, header='internal landscape')
+report_sxw.report_sxw('report.rpt.account.partner.detail', 'rpt.account.partner', 'addons/metro_accounts/report/rpt_account_partner_detail.rml', parser=report_sxw.rml_parse, header='internal landscape')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

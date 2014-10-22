@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <record id="rpt_account_cn_gl_view" model="ir.ui.view">
-            <field name="name">Accounting Entry General Ledger</field>
+        <record id="rpt_account_cn_detail_predefine_view" model="ir.ui.view">
+            <field name="name">Accounting Entry Detail Predefine</field>
             <field name="model">rpt.account.cn</field>
             <field name="arch" type="xml">
             <form string="Report" version="7.0">
@@ -12,7 +12,7 @@
 					<div class="oe_title">
                         <h1>
                         <!-- 1.Report title -->
-						<label name="rpt_title" string="Accounting General Ledger"/>
+						<field name="title" readonly="1"/>
 						</h1>
 					</div>
 					<div class="oe_right oe_button_box" name="buttons">
@@ -50,58 +50,70 @@
 							<field name="show_counter" invisible="1"/>
 		                </group>
 		                <group colspan="4">
-							<field name="account_ids" domain="[('company_id', '=', company_id)]">
-								<tree>
-									<field name="code"/>
-									<field name="name"/>
-	                    			<field name="type"/>
-	                    			<field name="user_type"/>
-	                    			<field name="bal_direct"/>
-								</tree>
-							</field>
+							<field name="account_ids" domain="[('company_id', '=', company_id)]" widget="many2many_tags"/>
 		                </group> 	                
 	                </group>
                 </group>
                 <field name="show_result" invisible="1"/>
 				<!-- 3.Report lines -->
 				<field name="rpt_lines" readonly="1" attrs="{'invisible':['|',('show_result','!=',True)]}">
-					<tree editable="bottom" 
-						colors="blue:data_level=='period_sum';#009933:data_level in('init_bal','year_sum');"
-						fonts="bold:data_level in ('init_bal','year_sum')">
-						<field name="data_level" invisible="1"/>
-						<!-- <field name="seq"/> -->
-						<field name="code"/>
-						<field name="name"/>
-						<field name="period_id"/>
-						<field name="notes"/>
-						<field name="debit"/>
-						<field name="credit"/>
-						<field name="bal_direct"/>
-						<field name="balance"/>
+					<tree editable="bottom"
+						colors="blue:data_level=='period_sum';green:data_level in('init_bal','year_sum');"
+						fonts="bold:data_level in ('init_bal','period_sum','year_sum')">
+							<field name="data_level" invisible="1"/>
+							<!-- <field name="seq"/> -->
+							<field name="code"/>
+							<field name="name"/>
+							<field name="period_id"/>
+							<field name="date"/>
+							<field name="am_name"/>
+							<field name="notes"/>
+							<field name="counter_account" invisible="1"/>
+							<field name="debit"/>
+							<field name="credit"/>
+							<field name="bal_direct"/>
+							<field name="balance"/>
 					</tree>
 				</field>		
             </form>
             </field>
         </record>   
         
-        <record id="rpt_account_cn_gl_action" model="ir.actions.act_window">
-            <field name="name">Account Entry GL</field>
+        <record id="rpt_account_cn_detail_predefine_cash_action" model="ir.actions.act_window">
+            <field name="name">Cash Account Detail</field>
             <field name="res_model">rpt.account.cn</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="rpt_account_cn_gl_view"/>
-            <field name="context">{'default_level':'general'}</field>
-            <field name="limit">3000</field>
+            <field name="view_id" ref="rpt_account_cn_detail_predefine_view"/>
+            <field name="context">{'default_level':'detail','default_title':'Cash Account Detail','default_account_user_type':'cash'}</field>
             <field name="target">inline</field>
-        </record> 
+        </record>
+               
+        <record id="rpt_account_cn_detail_predefine_bank_action" model="ir.actions.act_window">
+            <field name="name">Bank Account Detail</field>
+            <field name="res_model">rpt.account.cn</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="rpt_account_cn_detail_predefine_view"/>
+            <field name="context">{'default_level':'detail','default_title':'Bank Account Detail','default_account_user_type':'bank'}</field>
+            <field name="target">inline</field>
+        </record>
         
-			
+           
         <menuitem
-            id="rpt_account_cn_gl_menu"
-            action="rpt_account_cn_gl_action"
+            id="rpt_account_cn_detail_cash_menu"
+            action="rpt_account_cn_detail_predefine_cash_action"
             groups="account.group_account_manager,account.group_account_user"
             parent="menu_rpt_account_cn"
-            sequence="1"
+            sequence="3"
+           />   
+           
+        <menuitem
+            id="rpt_account_cn_detail_bank_menu"
+            action="rpt_account_cn_detail_predefine_bank_action"
+            groups="account.group_account_manager,account.group_account_user"
+            parent="menu_rpt_account_cn"
+            sequence="4"
            />           
     </data>
 </openerp>
