@@ -193,7 +193,7 @@
   	<pto>
   	<pto_header>
 
-    <blockTable colWidths="24.0,341.0,17.0,95.0,94.0,108.0,107.0" style="Table3">
+    <blockTable colWidths="24.0,340.0,17.0,95.0,94.0,108.0,108.0" style="Table3">
       <tr>
         <td>
           <para style="P6">序号</para>
@@ -286,7 +286,7 @@
     <para style="P5">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="24.0,341.0,17.0,95.0,94.0,108.0,107.0" style="Table3">
+    <blockTable colWidths="24.0,340.0,17.0,95.0,94.0,108.0,108.0" style="Table3">
       <tr>
         <td>
           <para style="P6">序号</para>
