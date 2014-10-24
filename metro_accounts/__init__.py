@@ -11,3 +11,4 @@ import res_partner
 import cash_bank_trans
 import emp_borrow
 import emp_reimburse
+import account_rpt

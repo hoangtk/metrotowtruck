@@ -23,6 +23,8 @@ import threading
 from openerp import pooler
 from openerp.tools import mail
 from openerp import SUPERUSER_ID
+from openerp.osv import osv
+
 def email_send_template(cr, uid, ids, email_vals, context=None):
     if 'email_template_name' in email_vals:
         threaded_email = threading.Thread(target=_email_send_template, args=(cr, uid, ids, email_vals, context))
@@ -74,3 +76,47 @@ def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_gro
     #close the new cursor
     new_cr.close()        
     return True    
+
+class msg_tool(osv.TransientModel):
+    _name = 'msg.tool'
+    #msg_vals = {'subject':'111','body':'111222333444555','model':'purchase.order','res_id':1719}
+    def send_msg(self, cr, uid, user_ids, msg_vals, unread = False, starred = False, group_ids = None, context=None):
+        """ Process the wizard content and proceed with sending the related
+            email(s), rendering any template patterns on the fly if needed. """
+        if not user_ids and not group_ids:
+            return None
+        if context is None:
+            context = {}        
+        if user_ids is None:
+            user_ids = []
+        #fetch users from group
+        if group_ids:
+            groups = self.pool.get('res.groups').browse(cr, uid, group_ids, context=context)
+            add_user_ids = []
+            for group in groups:
+                add_user_ids = [u.id for u in group.users]
+            user_ids += add_user_ids
+        #get partners
+        users = self.pool.get('res.users').browse(cr, uid, user_ids, context=context)
+        partner_ids = [u.partner_id.id for u in users]
+        
+        msg_vals['partner_ids'] = partner_ids
+        # post the message
+        subtype = 'mail.mt_comment'
+        msg_id = self.pool.get('mail.thread').message_post(cr, uid, [0], type='comment', subtype=subtype, context=context, **msg_vals)
+        upt_vals = {}
+        if 'model' in msg_vals:
+            upt_vals['model'] = msg_vals['model']
+        if 'res_id' in msg_vals:
+            upt_vals['res_id'] = msg_vals['res_id']
+        if upt_vals:
+            self.pool.get('mail.message').write(cr, uid, [msg_id], upt_vals, context=context)
+        #set unread and star flag
+        if unread:
+            for user_id in user_ids:
+                self.pool.get("mail.message").set_message_read(cr, user_id, [msg_id], False, context=context)
+        if starred:
+            for user_id in user_ids:
+                self.pool.get("mail.message").set_message_starred(cr, user_id, [msg_id], True, context=context)
+
+        return msg_id

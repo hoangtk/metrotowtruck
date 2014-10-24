@@ -28,8 +28,8 @@
        "wizard/rpt_inventory_view.xml",
        "wizard/rpt_account_cn_menu.xml",
        "wizard/rpt_account_partner_view.xml",
+       "account_rpt_view.xml",
        "account_report.xml",
-       
        "account_analytic_view.xml",
        "metro_account_view.xml",
        "cash_bank_trans_view.xml",
