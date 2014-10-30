@@ -11,7 +11,7 @@
     'website': 'PY Solutions',
     'images': [],
     'depends': [
-        'metro','account','purchase','account_voucher','account_analytic_plans'
+        'metro','account','purchase','account_voucher','account_analytic_plans',
     ],
     'data':[
         'security/ir.model.access.csv',
@@ -28,13 +28,18 @@
        "wizard/rpt_inventory_view.xml",
        "wizard/rpt_account_cn_menu.xml",
        "wizard/rpt_account_partner_view.xml",
-       "account_report.xml",
+       "account_financial_report_view.xml",
+       "wizard/account_financial_report_wizard_view.xml",
        
+       "account_report.xml",
        "account_analytic_view.xml",
        "metro_account_view.xml",
        "cash_bank_trans_view.xml",
        "emp_borrow_view.xml",
-       "emp_reimburse_view.xml"
+       "emp_reimburse_view.xml",
+       
+       #"res_config_view.xml",
+       "res_company_view.xml",
         ],
     'demo': [],
     'test': [],

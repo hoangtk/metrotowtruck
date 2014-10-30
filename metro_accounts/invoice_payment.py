@@ -102,21 +102,43 @@ class account_invoice(osv.osv):
             if inv.journal_id.type == 'sale':
                 for pay in inv.sale_payment_ids:
                     if not pay.reconcile_id:
+                        '''
                         if pay.account_id.id == inv.account_id.id:
                             #if use same account then do reconcile direct
                             rec_ids.append(pay.id)
                         else:
                             #use the prepayment account did the payments
                             prepay_rec_ids.append(pay.id)
+                        '''
+                        '''
+                        #by johnw, 10/30/2014
+                        if use rec_ids to reconcile directly:
+                            if the account move line amount is difference between prepayment and invoice:
+                                then both the prepay and invlice move lines will be partial reconcile,
+                                then the invoice can not be set to 'paid' since its move lines is partial reconciled, not full reconciled
+                                so all of will use prepay_rec_ids[] to generate one new account move, to make sure the invoice line full reconciled under this case.
+                        ''' 
+                        prepay_rec_ids.append(pay.id)
             if inv.journal_id.type == 'purchase':
                 for pay in inv.purchase_payment_ids:
                     if not pay.reconcile_id:
+                        '''
                         if pay.account_id.id == inv.account_id.id:
                             #if use same account then do reconcile direct
                             rec_ids.append(pay.id)
                         else:
                             #use the prepayment account did the payments
                             prepay_rec_ids.append(pay.id)
+                        '''
+                        '''
+                        #by johnw, 10/30/2014
+                        if use rec_ids to reconcile directly:
+                            if the account move line amount is difference between prepayment and invoice:
+                                then both the prepay and invlice move lines will be partial reconcile,
+                                then the invoice can not be set to 'paid' since its move lines is partial reconciled, not full reconciled
+                                so all of will use prepay_rec_ids[] to generate one new account move, to make sure the invoice line full reconciled under this case.
+                        ''' 
+                        prepay_rec_ids.append(pay.id)
             #reconcile the prepayments using prepayment account
             if len(prepay_rec_ids) > 0:
                 self.add_inv_prepay_reconcile_move(cr,uid,inv,inv_move_line_ids,prepay_rec_ids,context)

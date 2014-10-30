@@ -30,6 +30,7 @@ class rpt_account_cn(osv.osv_memory):
     _name = "rpt.account.cn"
     _inherit = "rpt.base"
     _description = "China Account Report"
+            
     _columns = {
         #report data lines
         'rpt_lines': fields.one2many('rpt.account.cn.line', 'rpt_id', string='Report Line'),
@@ -313,6 +314,8 @@ class rpt_account_cn(osv.osv_memory):
         if form_data['level'] == 'detail':
             rpt_name = 'rpt.account.cn.detail'
         return {'xmlrpt_name': rpt_name}
+    
+    
     
 rpt_account_cn()
 
