@@ -31,7 +31,7 @@ class project_task(base_stage, osv.osv):
     _columns = {
         'workorder_id': fields.many2one('mrp.production.workcenter.line', string='Work Order'),
         'workcenter_id': fields.related('workorder_id','workcenter_id', type='many2one', relation="mrp.workcenter", string='Work Center', readonly=True),
-        'production_id': fields.related('workorder_id','production_id', type='many2one', relation="mrp.production", string='Manufacture Order', readonly=True),
+        'production_id': fields.related('workorder_id','production_id', type='many2one', relation="mrp.production", string='Manufacture Order', readonly=True, store=True),
 #        'mfg_ids': fields.related('production_id','mfg_ids', type='many2many', relation='sale.product',rel='mrp_task_id_rel',id1='task_id',id2='mfg_id',string='MFG IDs', readonly=False,store=True),
         'mfg_ids': fields.many2many(obj='sale.product',rel='mrp_task_id_rel',id1='task_id',id2='mfg_id',string='MFG IDs', readonly=False),
         'product':fields.related('production_id','product_id',type='many2one',relation='product.product',string='Product', readonly=True),

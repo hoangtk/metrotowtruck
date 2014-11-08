@@ -4,7 +4,7 @@ openerp.metro_project = function (instance) {
     var QWeb = instance.web.qweb;
     var _t = instance.web._t;
     var _lt = instance.web._lt;
-
+    /*
     instance.web_kanban.KanbanGroup.include({
         do_action_print: function() {
             var self = this;  		
@@ -30,4 +30,5 @@ openerp.metro_project = function (instance) {
             });    
         },
     });
+    */
 };
