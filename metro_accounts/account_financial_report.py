@@ -94,6 +94,15 @@ class account_financial_report(osv.osv):
                 # it's the amount of the linked report
                 res2 = self._get_balance(cr, uid, [report.account_report_id.id], field_names, False, context=context)
                 for key, value in res2.items():
+                    for field in field_names:
+                        res[report.id][field] += value[field]
+            elif report.type == 'sum':
+                # it's the sum of the children of this account.report
+                res2 = self._get_balance(cr, uid, [rec.id for rec in report.children_ids], field_names, False, context=context)
+#                for key, value in res2.items():
+#                    for field in field_names:
+#                        res[report.id][field] += value[field]
+                for key, value in res2.items():
                     #refer the "add the operator, used in the 'sum' code segment" part
                     operator = '+'
                     if value.get('operator',False):
@@ -103,12 +112,7 @@ class account_financial_report(osv.osv):
                             res[report.id][field] += value[field]
                         elif operator == '-':
                             res[report.id][field] -= value[field]
-            elif report.type == 'sum':
-                # it's the sum of the children of this account.report
-                res2 = self._get_balance(cr, uid, [rec.id for rec in report.children_ids], field_names, False, context=context)
-                for key, value in res2.items():
-                    for field in field_names:
-                        res[report.id][field] += value[field]
+                                                    
             elif report.type == 'account_item':
                 # it's the sum the account items
                 for item in report.account_item_ids:
