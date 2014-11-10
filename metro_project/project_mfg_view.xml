@@ -114,7 +114,7 @@
             <field name="name">project.mfg.task.kanban</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="dept_id" quick_create="0">
+                <kanban_subgrp version="7.0" default_group_by="dept_id" sub_group_by="production_id" quick_create="0">
                     <field name="stage_color"/>
                     <field name="priority"/>
                     <field name="stage_id"/>
@@ -124,7 +124,7 @@
                     <field name="sequence"/>
                     <field name="state" groups="base.group_no_one"/>
                     <field name="kanban_state"/>
-                    <field name="remaining_hours" sum="Remaining Time" groups="project.group_time_work_estimation_tasks"/>
+                    <field name="remaining_hours" avg="Remaining Time" groups="project.group_time_work_estimation_tasks"/>
                     <field name="date_deadline"/>
                     <field name="message_summary"/>
                     <field name="categ_ids"/>
@@ -133,6 +133,7 @@
                     <field name="product"/>
                     <field name="dept_id"/>
                     <field name="dept_mgr_id"/>
+					<field name="production_id"/>
                     <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.stage_color.raw_value)} oe_kanban_card oe_kanban_global_click">
@@ -155,8 +156,8 @@
                             </div>
 
                             <div class="oe_kanban_content">
-                            	<div><b><field name="mfg_ids"/></b></div>
                                 <div><b><field name="name"/></b></div>
+                            	<div><b><field name="mfg_ids"/></b></div>
                                 <div>
                                     <field name="product"/><br/>
                                     <field name="workorder_id"/><br/>
@@ -190,13 +191,13 @@
                         </div>
                     </t>
                     </templates>
-                </kanban>
+                </kanban_subgrp>
             </field>
          </record>              
         <record id="action_view_task_mfg" model="ir.actions.act_window">
             <field name="name">Manufacture Tasks</field>
             <field name="res_model">project.task</field>
-            <field name="view_mode">kanban,tree,form,calendar,gantt,graph</field>
+            <field name="view_mode">kanban_subgrp,tree,form,calendar,gantt,graph</field>
             <field name="search_view_id" ref="project.view_task_search_form"/>
             <field name="domain">[('project_type','=','mfg')]</field>
             <field name="context">{'default_project_type':'mfg','search_default_not_done_cancelled': 1}</field>
@@ -209,7 +210,7 @@
         </record>
         <record id="open_view_task_mfg_list_kanban" model="ir.actions.act_window.view">
             <field name="sequence" eval="0"/>
-            <field name="view_mode">kanban</field>
+            <field name="view_mode">kanban_subgrp</field>
             <field name="view_id" ref="view_mfg_task_kanban"/>
             <field name="act_window_id" ref="action_view_task_mfg"/>
         </record>

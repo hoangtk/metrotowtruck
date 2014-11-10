@@ -38,7 +38,7 @@
        "emp_borrow_view.xml",
        "emp_reimburse_view.xml",
        
-       #"res_config_view.xml",
+#       "res_config_view.xml",
        "res_company_view.xml",
         ],
     'demo': [],
