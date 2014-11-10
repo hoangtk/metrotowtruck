@@ -4,6 +4,4 @@ access_emp_borrow,emp.borrow account,model_emp_borrow,account.group_account_invo
 access_emp_reimburse,emp.reimburse account,model_emp_reimburse,account.group_account_invoice,1,1,1,1
 access_emp_reimburse_line,emp.reimburse.line account,model_emp_reimburse_line,account.group_account_invoice,1,1,1,1
 access_emp_reimburse_reconcile,emp.reimburse.reconcile account,model_emp_reimburse_reconcile,account.group_account_invoice,1,1,1,1
-access_account_rpt,account.rpt account,model_account_rpt,account.group_account_invoice,1,1,1,1
-access_account_rpt_item,account.rpt.item account,model_account_rpt_item,account.group_account_invoice,1,1,1,1
 access_account_financial_report_account_item,account_financial_report_account_item account,model_account_financial_report_account_item,account.group_account_invoice,1,1,1,1
