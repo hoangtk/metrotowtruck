@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
@@ -15,14 +15,20 @@
 #    GNU Affero General Public License for more details.
 #
 #    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
-import account_move_batch
-import rpt_account_cn
-import rpt_inventory
-import rpt_account_partner
-import account_financial_report_wizard
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from openerp.osv import fields, osv
 
+class res_company(osv.osv):
+    _inherit = "res.company"
+    _columns = {
+        'report_bscn_id': fields.many2one('account.financial.report',string='Balance Sheet',  domain="[('parent_id','=',False)]"),
+        'report_plcn_id': fields.many2one('account.financial.report',string='Profit and Loss',  domain="[('parent_id','=',False)]"),
+        'report_cfcn_id': fields.many2one('account.financial.report',string='Cash Flow',  domain="[('parent_id','=',False)]"),
+    }
+
+res_company()
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

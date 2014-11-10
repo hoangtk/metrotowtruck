@@ -153,3 +153,37 @@ class msg_tool(osv.TransientModel):
         '''
                                         
         print msg_id    
+        
+
+def field_get_file(self, cr, uid, ids, field_names, args, context=None):
+    result = dict.fromkeys(ids, {})
+    attachment_obj = self.pool.get('ir.attachment')
+    for obj in self.browse(cr, uid, ids):
+        for field_name in field_names:
+            result[obj.id][field_name] = None
+            file_ids = attachment_obj.search(
+                cr, uid, [('name', '=', field_name),
+                          ('res_id', '=', obj.id),
+                          ('res_model', '=', self._name)],context=context)
+            if file_ids:
+                result[obj.id][field_name] = attachment_obj.browse(cr, uid, file_ids[0]).datas
+    return result
+
+def field_set_file(self, cr, uid, id, field_name, value, args, context=None):
+    attachment_obj = self.pool.get('ir.attachment')
+    file_ids = attachment_obj.search(
+        cr, uid, [('name', '=', field_name),
+                  ('res_id', '=', id),
+                  ('res_model', '=', self._name)])
+    file_id = None
+    if file_ids:
+        file_id = file_ids[0]
+        attachment_obj.write(cr, uid, file_id, {'datas': value})
+    else:
+        file_id = attachment_obj.create(
+            cr, uid, {'name':  field_name,
+                      'res_id': id,
+                      'type': 'binary',
+                      'res_model':self._name,
+                      'datas': value})    
+    return file_id        

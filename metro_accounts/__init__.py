@@ -11,5 +11,6 @@ import res_partner
 import cash_bank_trans
 import emp_borrow
 import emp_reimburse
+import account_financial_report
 #import res_config
-#import res_company
+import res_company
