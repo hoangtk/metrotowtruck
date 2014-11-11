@@ -28,6 +28,7 @@ from openerp.osv import fields,osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp.tools import float_compare
+from openerp.addons.metro import utils
 
 class pur_req(osv.osv):
     _name = "pur.req"
@@ -155,7 +156,38 @@ class pur_req(osv.osv):
             wf_service.trg_delete(uid, 'pur.req', p_id, cr)
             wf_service.trg_create(uid, 'pur.req', p_id, cr)
         return True
-            
+    
+    def _email_notify(self, cr, uid, ids, mail_type, context=None):
+        mail_types = {'confirmed':{'action':'need your approval','groups':['metro_purchase.group_pur_req_checker']},
+                  'approved':{'action':'approved, please issue PO','groups':['metro_purchase.group_pur_req_buyer']},
+                  'rejected':{'action':'was rejected, please check','groups':[]},
+                  'in_purchase':{'action':'is in purchasing','groups':[],},
+                  'done':{'action':'was done','groups':[]},
+                  'cancel':{'action':'was cancelled','groups':[]},
+                  }
+        model_obj = self.pool.get('ir.model.data')
+        if mail_types.get(mail_type,False):
+            action_name = mail_types[mail_type]['action']
+            group_params = mail_types[mail_type]['groups']
+            for order in self.browse(cr, uid, ids, context=context):
+                #email to groups
+                email_group_ids = []
+                for group_param in group_params:
+                    grp_data = group_param.split('.')
+                    test = model_obj.get_object_reference(cr, uid, grp_data[0], grp_data[1])
+                    email_group_ids.append(model_obj.get_object_reference(cr, uid, grp_data[0], grp_data[1])[1])
+                #email to users
+                email_to = None
+                if mail_type != ' confirmed':
+                    email_to = order.user_id.email
+                #email messages             
+                email_subject = 'Purchase Requisition: %s %s'%(order.name,action_name)
+                email_body = email_subject
+                #the current user is the from user
+                email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
+                #send emails
+                utils.email_send_group(cr, uid, email_from, email_to, email_subject,email_body, email_group_ids, context)   
+                
 pur_req()    
 
 class pur_req_line(osv.osv):
