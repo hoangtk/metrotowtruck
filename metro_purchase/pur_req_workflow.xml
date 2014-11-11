@@ -16,33 +16,38 @@
             <field name="name">confirmed</field>
             <field name="split_mode">OR</field>
             <field name="kind">function</field>
-            <field name="action">wkf_confirm_req()</field>
+            <field name="action">wkf_confirm_req()
+_email_notify('confirmed')</field>
         </record>
         <record id="act_approved" model="workflow.activity">
             <field name="wkf_id" ref="pur_req"/>
             <field name="name">approved</field>
             <field name="split_mode">OR</field>
             <field name="kind">function</field>
-            <field name="action">write({'state':'approved'})</field>
+            <field name="action">write({'state':'approved'})
+_email_notify('approved')</field>
         </record>
         <record id="act_rejected" model="workflow.activity">
             <field name="wkf_id" ref="pur_req"/>
             <field name="name">rejected</field>
             <field name="split_mode">OR</field>
             <field name="kind">function</field>
-            <field name="action">write({'state':'rejected'})</field>
+            <field name="action">write({'state':'rejected'})
+_email_notify('rejected')</field>
         </record>
         <record id="act_in_purchase" model="workflow.activity">
             <field name="wkf_id" ref="pur_req"/>
             <field name="name">in_purchase</field>
             <field name="kind">function</field>
-            <field name="action">write({'state':'in_purchase'})</field>
+            <field name="action">write({'state':'in_purchase'})
+_email_notify('in_purchase')</field>
         </record>
         <record id="act_done" model="workflow.activity">
             <field name="wkf_id" ref="pur_req"/>
             <field name="name">done</field>
             <field name="kind">function</field>
-            <field name="action">write({'state':'done'})</field>
+            <field name="action">write({'state':'done'})
+_email_notify('done')</field>
             <field name="flow_stop">True</field>
             <field name="join_mode">AND</field>
         </record>
@@ -51,7 +56,8 @@
             <field name="name">cancel</field>
             <field name="kind">function</field>
             <field name="flow_stop">True</field>
-            <field name="action">wkf_cancel_req()</field>
+            <field name="action">wkf_cancel_req()
+_email_notify('cancel')</field>
         </record>
 <!-- transition -->
         <record id="trans_draft_confirmed" model="workflow.transition">

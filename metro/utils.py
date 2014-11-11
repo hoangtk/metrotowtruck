@@ -57,20 +57,24 @@ def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_grou
         threaded_email.start()
     return True
 
-def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, context=None):
+def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, context=None):
     pool =  pooler.get_pool(cr.dbname)
     new_cr = pooler.get_db(cr.dbname).cursor()
     emails = []
     if email_to: emails.append(email_to)
-    if email_to_group_id: 
+    if email_to_group_ids: 
         #get the group user's addresses by group id
         group_obj = pool.get("res.groups")
-        if not isinstance(email_to_group_id, (int, long)):
-            email_to_group_id = long(email_to_group_id)
+        if not isinstance(email_to_group_ids, (list, int, long)):
+            email_to_group_ids = long(email_to_group_ids)
         #we can use SUPERUSER_ID to ignore the record rule for res_users and res_partner,  the email should send to all users in the group.
 #        group = group_obj.browse(new_cr,SUPERUSER_ID,email_to_group_id,context=context)
-        group = group_obj.browse(new_cr,uid,email_to_group_id,context=context)
-        emails = [user.email for user in group.users if user.email]
+        if isinstance(email_to_group_ids, (int, long)):
+            email_to_group_ids = [email_to_group_ids]
+        groups = group_obj.browse(new_cr,uid,email_to_group_ids,context=context)
+        emails = []
+        for group in groups:
+            emails += [user.email for user in group.users if user.email]
     if emails:
         mail.email_send(email_from, emails, subject, body)
     #close the new cursor
