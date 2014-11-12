@@ -84,7 +84,19 @@
         <field name="domain">[('type','=','c2b')]</field>
         <field name="context">{'default_type':'c2b'}</field>        
         <field name="search_view_id" ref="view_cash_bank_trans_search"/>
-    </record>  
+    </record>         
+    <record id="action_cash_bank_trans_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_cash_bank_trans_tree"/>
+        <field name="act_window_id" ref="action_cash_bank_trans"/>
+    </record>
+    <record id="action_cash_bank_trans_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_cash_bank_trans_form"/>
+        <field name="act_window_id" ref="action_cash_bank_trans"/>
+    </record>
 		
     <menuitem
         id="menu_cash_bank_trans"
@@ -238,7 +250,7 @@
                     <field name="trans_type" invisible="1"/>
                     <field name="amount"/>
                     <field name="journal_bank_id" domain="[('type','in',('bank','cash'))]" string="Receipt/Payment Method"/>
-                    <field name="journal_cash_id" domain="[('type','=','cash')]" string="Finance account"/>
+                    <field name="account_to_id" domain="[('type','=','cash')]" string="Payments/Receipts account"/>
                     <field name="description"/>
     				<field name="state"/>
             		<field name="company_id"/>
@@ -253,10 +265,9 @@
                 <search string="Search Receipts/Payments">
                     <field name="id"/>
                     <field name="date"/>
-                    <field name="journal_cash_id"/>
-                    <field name="journal_bank_id"/>
+                    <field name="journal_bank_id" string="Receipt/Payment Method"/>
+                    <field name="journal_cash_id" string="Payments/Receipts account"/>
                     <field name="description"/>
-                    
                     <filter icon="terp-document-new" name="withdraw" string="Withdraw" domain="[('trans_type','=','withdraw')]"/>
                     <filter icon="terp-document-new" name="deposit" string="Deposit" domain="[('trans_type','=','deposit')]"/>
                 </search>
