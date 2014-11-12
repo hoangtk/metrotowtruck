@@ -48,7 +48,7 @@
                     <field name="date"/>
                     <field name="amount"/>
 	                <field name="reimbursed"/>
-                    <field name="journal_cash_id" domain="[('type','=','cash')]"/>
+                    <field name="journal_cash_id" domain="[('type','in',('cash','bank'))]"/>
                     <field name="property_account_emp_borrow"/>
                     <field name="description"/>
     				<field name="state"/>
@@ -83,7 +83,7 @@
 		
     <menuitem
         id="menu_emp_borrow"
-        sequence="1"
+        sequence="3"
         parent="account.menu_finance_bank_and_cash"
         action="action_emp_borrow"
         groups="account.group_account_invoice"/>        

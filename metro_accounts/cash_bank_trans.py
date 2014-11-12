@@ -36,26 +36,32 @@ class cash_bank_trans(osv.osv):
              ('cancelled','Cancel')
             ], 'Status', readonly=True, size=32, track_visibility='onchange',),                
         'date': fields.date('Date',readonly=True, states={'draft':[('readonly',False)]}),
+        'type': fields.selection([('c2b','Withdraw/Deposit Order'),('b2b','Bank Trans'),('o_pay_rec','Other Payments/Receipts')],'Order Type',select=True,required=True,readonly=True),
         'trans_type': fields.selection([('withdraw','Withdraw'),('deposit','Deposit')],'Type',select=True,required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'amount':fields.float('Amount', digits_compute=dp.get_precision('Account'),readonly=True, states={'draft':[('readonly',False)]}),
-        'journal_cash_id': fields.many2one('account.journal', 'Cash Journal', required=True,readonly=True, states={'draft':[('readonly',False)]}),
+        'journal_cash_id': fields.many2one('account.journal', 'Cash Journal', required=False,readonly=True, states={'draft':[('readonly',False)]}),
         'journal_bank_id': fields.many2one('account.journal', 'Bank Journal', required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'description': fields.char('Description', size=128, required=False),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'move_id': fields.many2one('account.move', 'Accounting Entry', readonly=True),
         'move_lines': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Entry Items', readonly=True),
+        #account for other payments/receipts
+        'account_to_id': fields.many2one('account.account', 'To account', domain=[('type','!=','view')],required=True,readonly=True, states={'draft':[('readonly',False)]}),
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(cash_bank_trans,self).default_get(cr, uid, fields_list, context)
-        journal_cash_id = self.pool.get('account.journal').search(cr ,uid,[('type','=','cash')],context=context)[0]
-        journal_bank_id = self.pool.get('account.journal').search(cr ,uid,[('type','=','bank')],context=context)[0]
-        resu.update({'journal_cash_id':journal_cash_id,'journal_bank_id':journal_bank_id})
+        if context.get('default_type',False) == 'c2b':
+            #for the cash bank tranfer, auto set the journal
+            journal_cash_id = self.pool.get('account.journal').search(cr ,uid,[('type','=','cash')],context=context)[0]
+            journal_bank_id = self.pool.get('account.journal').search(cr ,uid,[('type','=','bank')],context=context)[0]
+            resu.update({'journal_cash_id':journal_cash_id,'journal_bank_id':journal_bank_id})
         return resu    
     
     _defaults = {
         'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.voucher',context=c),
         'state': 'draft',
-        'date': fields.date.context_today
+        'date': fields.date.context_today,
+        'type':'c2b'
     }
     def _check_amount(self, cr, uid, ids, context=None):
         for pay in self.browse(cr, uid, ids, context=context):
@@ -69,7 +75,21 @@ class cash_bank_trans(osv.osv):
         if not ids:
             return []
         if context is None: context = {}
-        return [(obj_id, '[%s]%s'%(obj_id,_(self._description))) for obj_id in ids]
+        sel_types = {}
+        for sel in self._columns['type'].selection:
+            sel_types[sel[0]] = sel[1]
+            
+        obj_types = self.read(cr, uid, ids, ['type','trans_type'], context=context)
+        ret_names = []
+        for obj_type in obj_types:
+            name_prefix = sel_types[obj_type['type']]
+            if obj_type['type'] == 'o_pay_rec':
+                name_prefix = obj_type['trans_type'] == 'Withdraw' and 'Other Payments' or 'Other Receipts'
+            #get the different title by various type
+            data_name = '%s[%s]'%(_(name_prefix), obj_type['id'])
+            ret_names.append((obj_type['id'], data_name))
+    
+        return ret_names
         
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
@@ -118,7 +138,11 @@ class cash_bank_trans(osv.osv):
         trans = self.browse(cr, uid, id, context=context)
         period_id = period_obj.find(cr, uid, dt=trans.date, context=context)[0]
         period = period_obj.browse(cr, uid, period_id, context=context)
-        journal = trans.trans_type=='withdraw' and trans.journal_cash_id or trans.journal_bank_id
+        journal = None
+        if trans.type != 'o_pay_rec':
+            journal = trans.trans_type=='withdraw' and trans.journal_cash_id or trans.journal_bank_id
+        else:
+            journal = trans.journal_bank_id
         
         move_name =  self._get_payment_move_name(cr, uid, journal, period, context=context)
         move_vals = self._prepare_payment_move(cr, uid, move_name, trans, journal, period,context=context)
@@ -151,10 +175,17 @@ class cash_bank_trans(osv.osv):
         return name
 
     def _prepare_payment_move(self, cr, uid, move_name, order, journal,period, context=None):
+        ref_prefix = 'CashBankTrans[%s]'
+        if order.type == 'c2b':
+            ref_prefix = 'CashBankTrans[%s]'
+        elif  order.type == 'b2b':
+            ref_prefix = 'BankTrans[%s]'
+        elif  order.type == 'o_pay_rec':
+            ref_prefix = order.trans_type == 'withdraw' and 'OtherPayments[%s]' or 'OtherReceipts[%s]' 
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': order.date,
-                'ref': _('WDO[%s]')%(order.id,),
+                'ref': _(ref_prefix)%(order.id,),
                 'period_id': period.id,
                 'narration':order.description,
                 }
@@ -181,36 +212,48 @@ class cash_bank_trans(osv.osv):
         cash_credit_prefix = 0
         bank_credit_prefix = 0
         ln_desc = ''
+        
+        if order.type == 'c2b':
+            ln_cash_desc = order.trans_type == 'withdraw' and _('Withdraw') or _('Deposit')
+            ln_bank_desc = ln_cash_desc
+        elif  order.type == 'b2b':
+            #for the 'b2', the trans_type is 'withdraw'
+            ln_cash_desc = _('In')
+            ln_bank_desc = _('Out')
+        elif  order.type == 'o_pay_rec':
+            ln_bank_desc = order.trans_type == 'withdraw' and _('Other Payments') or _('Other Receipts')
+            ln_cash_desc = ln_bank_desc
+            
         if order.trans_type == 'withdraw':
             cash_debit_prefix = 1
             bank_credit_prefix = 1
-            ln_desc = _('Withdraw')
         if order.trans_type == 'deposit':
             cash_credit_prefix = 1
             bank_debit_prefix = 1
-            ln_desc = _('Deposit')
         
         # cash line
         cash_line = {
-            'name': ln_desc,
+            'name': ln_cash_desc,
             'debit': cash_debit_prefix*amount,
             'credit': cash_credit_prefix*amount,
-            'account_id': order.journal_cash_id.default_debit_account_id.id,
+            'account_id': order.type != 'o_pay_rec' and order.journal_cash_id.default_debit_account_id.id or order.account_to_id.id,
             'journal_id': journal.id,
             'period_id': period.id,
             'date': order.date,
+            'date_biz': order.date,
             'amount_currency': amount_currency,
             'currency_id': currency_id,
         }
         #bank line
         bank_line = {
-            'name': ln_desc,
+            'name': ln_bank_desc,
             'debit': bank_debit_prefix*amount,
             'credit': bank_credit_prefix*amount,
             'account_id': order.journal_bank_id.default_debit_account_id.id,
             'journal_id': journal.id,
             'period_id': period.id,
             'date': order.date,
+            'date_biz': order.date,
             'amount_currency': amount_currency,
             'currency_id': currency_id,
         }
