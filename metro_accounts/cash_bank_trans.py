@@ -180,6 +180,8 @@ class cash_bank_trans(osv.osv):
             ref_prefix = 'CashBankTrans[%s]'
         elif  order.type == 'b2b':
             ref_prefix = 'BankTrans[%s]'
+        elif  order.type == 'o_pay_rec':
+            ref_prefix = order.trans_type == 'withdraw' and 'OtherPayments[%s]' or 'OtherReceipts[%s]' 
         return {'name': move_name,
                 'journal_id': journal.id,
                 'date': order.date,

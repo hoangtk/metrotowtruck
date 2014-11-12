@@ -393,7 +393,7 @@ msgstr "现金流量表"
 #: model:ir.actions.act_window,name:metro_accounts.action_emp_reimburse
 #: model:ir.ui.menu,name:metro_accounts.menu_emp_reimburse
 msgid "Employee Reimburse"
-msgstr "员工报销"
+msgstr "员工报销/还款"
 
 #. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_account_partner_gl_customer_action
@@ -1918,6 +1918,18 @@ msgstr "存取款[%s]"
 msgid "BankTrans[%s]"
 msgstr "转账[%s]"
 
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:164
+#, python-format
+msgid "OtherPayments[%s]"
+msgstr "其他付款[%s]"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:164
+#, python-format
+msgid "OtherReceipts[%s]"
+msgstr "其他收款[%s]"
+ 
 #. module: metro_account
 #: code:addons/metro_accounts/emp_borrow.py:0
 #, python-format

@@ -138,7 +138,7 @@
 		
     <menuitem
         id="menu_emp_reimburse"
-        sequence="6"
+        sequence="4"
         parent="account.menu_finance_bank_and_cash"
         action="action_emp_reimburse"
         groups="account.group_account_invoice"/>        

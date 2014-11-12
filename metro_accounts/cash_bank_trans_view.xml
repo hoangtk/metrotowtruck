@@ -288,7 +288,7 @@
 		
     <menuitem
         id="menu_other_rec"
-        sequence="3"
+        sequence="5"
         parent="account.menu_finance_bank_and_cash"
         action="action_other_rec"
         groups="account.group_account_invoice"/>
@@ -318,7 +318,7 @@
     
     <menuitem
         id="menu_other_pay"
-        sequence="4"
+        sequence="6"
         parent="account.menu_finance_bank_and_cash"
         action="action_other_pay"
         groups="account.group_account_invoice"/>
