@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-10 03:54+0000\n"
-"PO-Revision-Date: 2014-11-10 12:00+0800\n"
+"POT-Creation-Date: 2014-11-12 06:50+0000\n"
+"PO-Revision-Date: 2014-11-12 14:53+0800\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -15,6 +15,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
 "X-Generator: Poedit 1.5.7\n"
+
+#. module: metro_accounts
+#: selection:cash.bank.trans,type:0
+msgid "Other Payments/Receipts"
+msgstr "其他收/付款"
 
 #. module: metro_accounts
 #: field:emp.reimburse,amount:0
@@ -52,6 +57,11 @@ msgstr "类别:"
 #: view:account.financial.report.account.item:0
 msgid "Group By..."
 msgstr "Group By..."
+
+#. module: metro_accounts
+#: report:rpt.account.cn.detail:0 report:rpt.account.partner.detail:0
+msgid "凭证号"
+msgstr "凭证号"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_show_counter
@@ -124,6 +134,11 @@ msgid "名称"
 msgstr "名称"
 
 #. module: metro_accounts
+#: view:cash.bank.trans:0
+msgid "Other Receipts/Payments"
+msgstr "其他收/付款"
+
+#. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_title
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_partner_title
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_inventory_title
@@ -133,9 +148,7 @@ msgid "Report Title"
 msgstr "报表标题"
 
 #. module: metro_accounts
-#: field:account.config.settings,report_bscn_id:0
 #: model:ir.actions.act_window,name:metro_accounts.account_financial_report_bscn_action
-#: model:ir.model.fields,field_description:metro_accounts.field_account_config_settings_report_bscn_id
 #: model:ir.model.fields,field_description:metro_accounts.field_res_company_report_bscn_id
 #: model:ir.ui.menu,name:metro_accounts.account_financial_report_bscn_menu
 #: field:res.company,report_bscn_id:0
@@ -210,9 +223,9 @@ msgid "Post account entries by batch"
 msgstr "凭证批量过账"
 
 #. module: metro_accounts
-#: help:emp.borrow,reimbursed:0
-msgid "The Voucher has been totally paid."
-msgstr "The Voucher has been totally paid."
+#: view:cash.bank.trans:0
+msgid "Bank Form"
+msgstr "转出行"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_counter_account
@@ -221,6 +234,11 @@ msgstr "The Voucher has been totally paid."
 #: field:rpt.account.partner.line,counter_account:0
 msgid "Counter Account"
 msgstr "对方科目"
+
+#. module: metro_accounts
+#: view:cash.bank.trans:0
+msgid "Finance account"
+msgstr "会计科目"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_line_data_level
@@ -233,10 +251,9 @@ msgid "Data level code"
 msgstr "Data level code"
 
 #. module: metro_accounts
-#: view:emp.reimburse:0 field:emp.reimburse,line_dr_ids:0
-#: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_line_dr_ids
-msgid "Debits"
-msgstr "借方"
+#: view:cash.bank.trans:0
+msgid "Bank From"
+msgstr "转出行"
 
 #. module: metro_accounts
 #: field:emp.reimburse.reconcile,reconcile:0
@@ -295,12 +312,12 @@ msgid "借方"
 msgstr "借方"
 
 #. module: metro_accounts
-#: field:account.config.settings,report_plcn_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_config_settings_report_plcn_id
+#: model:ir.actions.act_window,name:metro_accounts.account_financial_report_plcn_action
 #: model:ir.model.fields,field_description:metro_accounts.field_res_company_report_plcn_id
+#: model:ir.ui.menu,name:metro_accounts.account_financial_report_plcn_menu
 #: field:res.company,report_plcn_id:0
 msgid "Profit and Loss"
-msgstr "损益表"
+msgstr "损益类"
 
 #. module: metro_accounts
 #: field:cash.bank.trans,amount:0 field:emp.borrow,amount:0
@@ -331,11 +348,6 @@ msgstr "加"
 #: view:account.move.batch:0
 msgid "Note: Only unposted entries can be post!"
 msgstr "注意: 只有未记账的凭证可以过账!"
-
-#. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_rptcn
-msgid "Account Report China"
-msgstr "中国财务报表"
 
 #. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_inventory_amount_action
@@ -371,8 +383,6 @@ msgid "Move Name"
 msgstr "凭证名称"
 
 #. module: metro_accounts
-#: field:account.config.settings,report_cfcn_id:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_config_settings_report_cfcn_id
 #: model:ir.model.fields,field_description:metro_accounts.field_res_company_report_cfcn_id
 #: field:res.company,report_cfcn_id:0
 msgid "Cash Flow"
@@ -383,7 +393,7 @@ msgstr "现金流量表"
 #: model:ir.actions.act_window,name:metro_accounts.action_emp_reimburse
 #: model:ir.ui.menu,name:metro_accounts.menu_emp_reimburse
 msgid "Employee Reimburse"
-msgstr "报销单"
+msgstr "员工报销"
 
 #. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_account_partner_gl_customer_action
@@ -460,10 +470,9 @@ msgid "Accounts"
 msgstr "科目"
 
 #. module: metro_accounts
-#: model:ir.model.fields,field_description:metro_accounts.field_rpt_inventory_line_income_price
-#: field:rpt.inventory.line,income_price:0
-msgid "Income Price"
-msgstr "入库价格"
+#: view:cash.bank.trans:0 selection:cash.bank.trans,type:0
+msgid "Bank Trans"
+msgstr "银行转账"
 
 #. module: metro_accounts
 #: field:account.financial.report,operator:0
@@ -503,9 +512,9 @@ msgstr ""
 "{'invisible': [('type','not in',['accounts','account_item','account_type'])]}"
 
 #. module: metro_accounts
-#: report:rpt.account.cn.detail:0 report:rpt.account.partner.detail:0
-msgid "凭证号"
-msgstr "凭证号"
+#: view:cash.bank.trans:0
+msgid "Search Receipts/Payments"
+msgstr "搜索其他收付款"
 
 #. module: metro_accounts
 #: field:cash.bank.trans,move_id:0 field:emp.borrow,move_id:0
@@ -547,10 +556,9 @@ msgid "Period"
 msgstr "期间"
 
 #. module: metro_accounts
-#: model:ir.actions.act_window,name:metro_accounts.account_financial_report_plcn_action
-#: model:ir.ui.menu,name:metro_accounts.account_financial_report_plcn_menu
-msgid "Profit Loss"
-msgstr "损益表"
+#: view:cash.bank.trans:0 selection:cash.bank.trans,trans_type:0
+msgid "Withdraw"
+msgstr "取款"
 
 #. module: metro_accounts
 #: selection:account.financial.report.account.item,fetch_logic:0
@@ -558,13 +566,9 @@ msgid "Credit Balance"
 msgstr "贷方余额"
 
 #. module: metro_accounts
-#: field:cash.bank.trans,message_summary:0 field:emp.borrow,message_summary:0
-#: field:emp.reimburse,message_summary:0
-#: model:ir.model.fields,field_description:metro_accounts.field_cash_bank_trans_message_summary
-#: model:ir.model.fields,field_description:metro_accounts.field_emp_borrow_message_summary
-#: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_message_summary
-msgid "Summary"
-msgstr "总计"
+#: view:cash.bank.trans:0
+msgid "Bank To"
+msgstr "转入行"
 
 #. module: metro_accounts
 #: field:account.invoice,auto_reconcile_purchase_pay:0
@@ -694,6 +698,12 @@ msgid "Reconcile Advance Payments"
 msgstr "核销预付款"
 
 #. module: metro_accounts
+#: model:ir.actions.act_window,name:metro_accounts.rpt_account_partner_gl_supplier_action
+#: model:ir.ui.menu,name:metro_accounts.rpt_account_partner_gl_supplier_menu
+msgid "Supplier Payable GL"
+msgstr "供应商应付总账"
+
+#. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_account_cn_detail_action
 #: model:ir.ui.menu,name:metro_accounts.rpt_account_cn_detail_menu
 msgid "Account Entry Detail"
@@ -758,9 +768,10 @@ msgid "代码"
 msgstr "代码"
 
 #. module: metro_accounts
-#: view:emp.reimburse:0
-msgid "Search Employee Reimburse"
-msgstr "查找报销单"
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_inventory_line_income_price
+#: field:rpt.inventory.line,income_price:0
+msgid "Income Price"
+msgstr "入库价格"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_inventory_has_amount
@@ -810,6 +821,11 @@ msgid "End Period"
 msgstr "截止期间"
 
 #. module: metro_accounts
+#: view:emp.reimburse:0
+msgid "Search Employee Reimburse"
+msgstr "查找报销单"
+
+#. module: metro_accounts
 #: view:cash.bank.trans:0 selection:cash.bank.trans,trans_type:0
 msgid "Deposit"
 msgstr "存款"
@@ -837,7 +853,6 @@ msgid "Credit Amount"
 msgstr "贷方金额"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_rptcn_line
 #: model:ir.model,name:metro_accounts.model_rpt_account_cn_line
 #: model:ir.model,name:metro_accounts.model_rpt_account_partner_line
 msgid "China Account Report Lines"
@@ -860,8 +875,9 @@ msgid "Inventory Report"
 msgstr "库存报表"
 
 #. module: metro_accounts
-#: view:cash.bank.trans:0
+#: view:cash.bank.trans:0 selection:cash.bank.trans,type:0
 #: model:ir.actions.act_window,name:metro_accounts.action_cash_bank_trans
+#: model:ir.model,name:metro_accounts.model_cash_bank_trans
 #: model:ir.ui.menu,name:metro_accounts.menu_cash_bank_trans
 msgid "Withdraw/Deposit Order"
 msgstr "存取款单"
@@ -925,10 +941,9 @@ msgid "Start Date"
 msgstr "开始日期"
 
 #. module: metro_accounts
-#: field:account.invoice,purchase_ids:0
-#: model:ir.model.fields,field_description:metro_accounts.field_account_invoice_purchase_ids
-msgid "Purchase Orders"
-msgstr "采购订单"
+#: view:cash.bank.trans:0
+msgid "Payments/Receipts account"
+msgstr "收付款科目"
 
 #. module: metro_accounts
 #: view:account.move.batch:0 view:accounting.report:0
@@ -946,9 +961,9 @@ msgid "Balance Direction"
 msgstr "余额方向"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_rpt_item
-msgid "Account Report Item"
-msgstr "报表项目"
+#: report:rpt.inventory.qty:0
+msgid "单位"
+msgstr "单位"
 
 #. module: metro_accounts
 #: field:account.voucher,receipt_number:0
@@ -1019,6 +1034,11 @@ msgid "Draft"
 msgstr "草稿"
 
 #. module: metro_accounts
+#: report:rpt.account.partner.gl:0
+msgid "客户应收总账"
+msgstr "客户应收总账"
+
+#. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_account_partner_detail_customer_action
 #: model:ir.ui.menu,name:metro_accounts.rpt_account_partner_detail_customer_menu
 msgid "Customer Receivable Detail"
@@ -1059,7 +1079,7 @@ msgstr "确认"
 #: model:ir.model,name:metro_accounts.model_emp_borrow
 #: model:ir.ui.menu,name:metro_accounts.menu_emp_borrow
 msgid "Employee Borrow Money"
-msgstr "借款单"
+msgstr "员工借款"
 
 #. module: metro_accounts
 #: view:account.move:0
@@ -1145,9 +1165,16 @@ msgid "Dr/Cr"
 msgstr "借贷"
 
 #. module: metro_accounts
-#: report:rpt.account.partner.gl:0
-msgid "客户应收总账"
-msgstr "客户应收总账"
+#: view:cash.bank.trans:0
+msgid "Receipt/Payment Method"
+msgstr "收付款方式"
+
+#. module: metro_accounts
+#: view:cash.bank.trans:0
+#: model:ir.actions.act_window,name:metro_accounts.action_bank_trans
+#: model:ir.ui.menu,name:metro_accounts.menu_bank_trans
+msgid "Bank Transfer"
+msgstr "银行转账"
 
 #. module: metro_accounts
 #: selection:rpt.account.cn,target_move:0
@@ -1242,20 +1269,18 @@ msgid "All Unposted Entries"
 msgstr "未登帐"
 
 #. module: metro_accounts
-#: report:rpt.inventory.qty:0
-msgid "单位"
-msgstr "单位"
-
-#. module: metro_accounts
 #: selection:account.financial.report.account.item,fetch_logic:0
 msgid "Credit Total"
 msgstr "贷方发生额"
 
 #. module: metro_accounts
-#: model:ir.actions.act_window,name:metro_accounts.rpt_account_partner_gl_supplier_action
-#: model:ir.ui.menu,name:metro_accounts.rpt_account_partner_gl_supplier_menu
-msgid "Supplier Payable GL"
-msgstr "供应商应付总账"
+#: field:cash.bank.trans,message_summary:0 field:emp.borrow,message_summary:0
+#: field:emp.reimburse,message_summary:0
+#: model:ir.model.fields,field_description:metro_accounts.field_cash_bank_trans_message_summary
+#: model:ir.model.fields,field_description:metro_accounts.field_emp_borrow_message_summary
+#: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_message_summary
+msgid "Summary"
+msgstr "总计"
 
 #. module: metro_accounts
 #: field:account.financial.report,code:0
@@ -1351,6 +1376,12 @@ msgid "Partner Entry Detail"
 msgstr "应收应付明细账"
 
 #. module: metro_accounts
+#: field:cash.bank.trans,type:0
+#: model:ir.model.fields,field_description:metro_accounts.field_cash_bank_trans_type
+msgid "Order Type"
+msgstr "Order Type"
+
+#. module: metro_accounts
 #: view:emp.reimburse:0
 msgid "Total Allocation"
 msgstr "Total Allocation"
@@ -1362,6 +1393,12 @@ msgid "Has credits"
 msgstr "Has credits"
 
 #. module: metro_accounts
+#: field:cash.bank.trans,account_to_id:0
+#: model:ir.model.fields,field_description:metro_accounts.field_cash_bank_trans_account_to_id
+msgid "To account"
+msgstr "To account"
+
+#. module: metro_accounts
 #: report:rpt.inventory.qty:0
 msgid "期初数量"
 msgstr "期初数量"
@@ -1371,11 +1408,6 @@ msgstr "期初数量"
 #: field:rpt.inventory.line,end_qty:0
 msgid "End Quantity"
 msgstr "期末数量"
-
-#. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_rpt_item_account
-msgid "Account Report Item Account"
-msgstr "报表项目科目"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_inventory_line_income_amount
@@ -1401,14 +1433,15 @@ msgid "Account"
 msgstr "科目"
 
 #. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_cash_bank_trans
-msgid "cash.bank.trans"
-msgstr "cash.bank.trans"
-
-#. module: metro_accounts
 #: report:rpt.account.partner.detail:0
 msgid "供应商应付明细账"
 msgstr "供应商应付明细账"
+
+#. module: metro_accounts
+#: view:emp.reimburse:0 field:emp.reimburse,line_dr_ids:0
+#: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_line_dr_ids
+msgid "Debits"
+msgstr "借方"
 
 #. module: metro_accounts
 #: constraint:cash.bank.trans:0 constraint:emp.borrow:0
@@ -1419,11 +1452,6 @@ msgstr "金额必须大于零"
 #: model:ir.model,name:metro_accounts.model_accounting_report
 msgid "Accounting Report"
 msgstr "会计报表"
-
-#. module: metro_accounts
-#: model:ir.model,name:metro_accounts.model_account_config_settings
-msgid "account.config.settings"
-msgstr "account.config.settings"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_partner_line_amount_residual
@@ -1443,11 +1471,6 @@ msgid "Account Entry GL"
 msgstr "总分类账"
 
 #. module: metro_accounts
-#: view:cash.bank.trans:0 selection:cash.bank.trans,trans_type:0
-msgid "Withdraw"
-msgstr "取款"
-
-#. module: metro_accounts
 #: field:account.financial.report,excel_template_file_name:0
 #: model:ir.model.fields,field_description:metro_accounts.field_account_financial_report_excel_template_file_name
 msgid "User Excel Template File Name"
@@ -1460,9 +1483,10 @@ msgid "Product"
 msgstr "产品"
 
 #. module: metro_accounts
-#: view:account.invoice:0
-msgid "Payment Method"
-msgstr "付款方式"
+#: model:ir.actions.act_window,name:metro_accounts.action_other_rec
+#: model:ir.ui.menu,name:metro_accounts.menu_other_rec
+msgid "Other Receipts"
+msgstr "其他收款"
 
 #. module: metro_accounts
 #: field:emp.reimburse,deduct_salary:0
@@ -1493,6 +1517,11 @@ msgid "Batch action on the account move"
 msgstr "凭证明细批量操作"
 
 #. module: metro_accounts
+#: help:emp.borrow,reimbursed:0
+msgid "The Voucher has been totally paid."
+msgstr "The Voucher has been totally paid."
+
+#. module: metro_accounts
 #: field:account.financial.report,default_excel_template_file_name:0
 #: model:ir.model.fields,field_description:metro_accounts.field_account_financial_report_default_excel_template_file_name
 msgid "Default Excel Template File Name"
@@ -1510,15 +1539,21 @@ msgid "Credits"
 msgstr "贷方"
 
 #. module: metro_accounts
+#: view:cash.bank.trans:0
+msgid "Search Bank Transfer"
+msgstr "搜索银行转账"
+
+#. module: metro_accounts
 #: field:emp.reimburse.reconcile,amount_original:0
 #: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_reconcile_amount_original
 msgid "Original Amount"
 msgstr "原金额"
 
 #. module: metro_accounts
-#: report:rpt.inventory.amount:0
-msgid "期初"
-msgstr "期初"
+#: model:ir.actions.act_window,name:metro_accounts.action_other_pay
+#: model:ir.ui.menu,name:metro_accounts.menu_other_pay
+msgid "Other Payments"
+msgstr "其他付款"
 
 #. module: metro_accounts
 #: view:emp.reimburse:0
@@ -1608,10 +1643,21 @@ msgid "本期出库"
 msgstr "本期出库"
 
 #. module: metro_accounts
+#: view:account.invoice:0
+msgid "Payment Method"
+msgstr "付款方式"
+
+#. module: metro_accounts
 #: field:emp.reimburse,property_account_salary:0
 #: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_property_account_salary
 msgid "Employee Salary Account"
 msgstr "工资科目"
+
+#. module: metro_accounts
+#: field:account.invoice,purchase_ids:0
+#: model:ir.model.fields,field_description:metro_accounts.field_account_invoice_purchase_ids
+msgid "Purchase Orders"
+msgstr "采购订单"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_partner_partner_type
@@ -1677,6 +1723,11 @@ msgid "Show Searching"
 msgstr "显示查询"
 
 #. module: metro_accounts
+#: report:rpt.inventory.amount:0
+msgid "期初"
+msgstr "期初"
+
+#. module: metro_accounts
 #: model:ir.ui.menu,name:metro_accounts.menu_rpt_account_cn
 msgid "Account CN"
 msgstr "中国财务"
@@ -1684,7 +1735,6 @@ msgstr "中国财务"
 #. module: metro_accounts
 #: view:account.financial.report:0
 #: model:ir.model,name:metro_accounts.model_account_financial_report
-#: model:ir.model,name:metro_accounts.model_account_rpt
 msgid "Account Report"
 msgstr "科目报表"
 
@@ -1723,6 +1773,7 @@ msgstr "产品"
 #: report:rpt.inventory.amount:0
 msgid "位"
 msgstr "位"
+
 ########################manual########################
 #. module: account_voucher
 #: model:ir.actions.act_window,name:account_voucher.action_vendor_payment
@@ -1808,28 +1859,64 @@ msgid "Only order under Draft or Cancel can be delete!"
 msgstr "只有草稿和取消的单据可以删除！"
 
 #. module: metro_account
-#: code:addons/metro_accounts/cash_bank_trans.py:0
+#: code:addons/metro_accounts/cash_bank_trans.py:84
 #, python-format
 msgid "Withdraw/Deposit Order"
 msgstr "存取款单"
 
 #. module: metro_account
-#: code:addons/metro_accounts/cash_bank_trans.py:178
+#: code:addons/metro_accounts/cash_bank_trans.py:84
+#, python-format
+msgid "Other Payments"
+msgstr "其他付款"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:84
+#, python-format
+msgid "Other Receipts"
+msgstr "其他收款"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:84
+#, python-format
+msgid "Bank Trans"
+msgstr "银行转帐"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:195
 #, python-format
 msgid "Withdraw"
 msgstr "取款"
 
 #. module: metro_account
-#: code:addons/metro_accounts/cash_bank_trans.py:182
+#: code:addons/metro_accounts/cash_bank_trans.py:195
 #, python-format
 msgid "Deposit"
 msgstr "存款"
 
 #. module: metro_account
-#: code:addons/metro_accounts/cash_bank_trans.py:0
+#: code:addons/metro_accounts/cash_bank_trans.py:199
 #, python-format
-msgid "WDO[%s]"
+msgid "In"
+msgstr "转入"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:200
+#, python-format
+msgid "Out"
+msgstr "转出"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:160
+#, python-format
+msgid "CashBankTrans[%s]"
 msgstr "存取款[%s]"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:162
+#, python-format
+msgid "BankTrans[%s]"
+msgstr "转账[%s]"
 
 #. module: metro_account
 #: code:addons/metro_accounts/emp_borrow.py:0

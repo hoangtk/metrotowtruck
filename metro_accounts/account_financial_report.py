@@ -254,15 +254,15 @@ class account_account(osv.osv):
         except:
             pass
         if name:
-            ids = self.search(cr, user, [('code', '=like', name+"%")]+args, limit=limit)
+            ids = self.search(cr, user, [('code', '=like', name+"%")]+args, limit=limit, context=context)
             if not ids:
-                ids = self.search(cr, user, [('shortcut', '=', name)]+ args, limit=limit)
+                ids = self.search(cr, user, [('shortcut', '=', name)]+ args, limit=limit, context=context)
             if not ids:
-                ids = self.search(cr, user, [('name', operator, name)]+ args, limit=limit)
+                ids = self.search(cr, user, [('name', operator, name)]+ args, limit=limit, context=context)
             if not ids and len(name.split()) >= 2:
                 #Separating code and name of account for searching
                 operand1,operand2 = name.split(' ',1) #name can contain spaces e.g. OpenERP S.A.
-                ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2)]+ args, limit=limit)
+                ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2)]+ args, limit=limit, context=context)
         else:
             ids = self.search(cr, user, args, context=context, limit=limit)
         return self.name_get(cr, user, ids, context=context)
