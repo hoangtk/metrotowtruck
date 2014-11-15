@@ -130,7 +130,7 @@ class ir_cron(osv.osv):
                 start_time = time.time()
                 call_resu = method(cr, uid, *args)
                 if call_resu:
-                    call_log += "return result:\n" + call_resu + "\n"
+                    call_log += "return result:\n" + str(call_resu) + "\n"
                 end_time = time.time()    
                 msg = '%.3fs (%s, %s)' % (end_time - start_time, model_name, method_name)         
                 call_log += msg + "\n"       
