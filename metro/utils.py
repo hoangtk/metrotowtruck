@@ -191,3 +191,42 @@ def field_set_file(self, cr, uid, id, field_name, value, args, context=None):
                       'res_model':self._name,
                       'datas': value})    
     return file_id        
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
+
+def deal_dtargs(obj,args,dt_fields):  
+    new_args = []
+    for arg in args:
+        fld_name = arg[0]
+        if fld_name in dt_fields:
+            fld_operator = arg[1]
+            fld_val = arg[2]
+            fld = obj._columns.get(fld_name)
+            '''
+            ['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+            the user inputed is '2013-12-13 00:00:00', subtract 8 hours, then get this value
+            ''' 
+            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
+                time_start = [fld_name,'>=',fld_val]
+                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+                time_obj += relativedelta(days=1)
+                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+                new_args.append(time_start)
+                new_args.append(time_end)
+            else:
+                new_args.append(arg)
+        else:
+            new_args.append(arg)    
+    #TODO: refer fields.datetime.context_timestamp() to deal with the timezone
+    #TODO: Improve the code in line#1014@osv/expression.py to handel the timezone for the datatime field:
+    '''
+                if field._type == 'datetime' and right and len(right) == 10:
+                    if operator in ('>', '>='):
+                        right += ' 00:00:00'
+                    elif operator in ('<', '<='):
+                        right += ' 23:59:59'
+                    push(create_substitution_leaf(leaf, (left, operator, right), working_model))    
+    '''
+    return new_args
