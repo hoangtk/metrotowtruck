@@ -8,10 +8,6 @@ from openerp.tools.translate import _
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
-
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
     
 def clock_connect(clock, ip, port):
     if not clock.Connect_Net(ip,port):
@@ -102,7 +98,6 @@ def clock_user_delete(zk, emp_code):
     return True
 
 def clock_user_get(zk, emp_code, pwd = False, finger_print = False): 
-    print sys.getdefaultencoding()
     devid = 1 
     clock_emp_code = emp_code
     if isinstance(emp_code, type(u' ')):
@@ -131,7 +126,6 @@ def clock_user_get(zk, emp_code, pwd = False, finger_print = False):
     return False
 
 def clock_user_get_all(zk, ret_dict = False, pwd = False, finger_print = False): 
-    print sys.getdefaultencoding()
     devid = 1 
     emps = []
     if ret_dict:
