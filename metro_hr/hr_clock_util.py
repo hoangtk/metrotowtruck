@@ -2,6 +2,8 @@
 
 from win32com.client import Dispatch
 from datetime import datetime  
+import sys
+    
 from openerp.tools.translate import _
 
 from openerp.osv import fields, osv
@@ -65,7 +67,7 @@ def clock_user_set(zk, emp, sync_pwd=False, new_clock_pwd = False, sync_fp = Fal
     #set base info
     if isinstance(emp.emp_code, type(u' ')):
         clock_emp_code = long(emp.emp_code)  
-    clock_emp_role = ''
+    clock_emp_role = 0
     if isinstance(emp.clock_role, type(u' ')):
         clock_emp_role = long(emp.clock_role)
     clock_emp_pwd = new_clock_pwd
@@ -96,6 +98,7 @@ def clock_user_delete(zk, emp_code):
     return True
 
 def clock_user_get(zk, emp_code, pwd = False, finger_print = False): 
+    sys.setdefaultencoding('utf-8')
     devid = 1 
     clock_emp_code = emp_code
     if isinstance(emp_code, type(u' ')):
@@ -124,6 +127,7 @@ def clock_user_get(zk, emp_code, pwd = False, finger_print = False):
     return False
 
 def clock_user_get_all(zk, ret_dict = False, pwd = False, finger_print = False): 
+    sys.setdefaultencoding('utf-8')
     devid = 1 
     emps = []
     if ret_dict:
