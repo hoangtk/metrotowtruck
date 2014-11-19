@@ -24,7 +24,47 @@ from openerp import pooler
 from openerp.tools import mail
 from openerp import SUPERUSER_ID
 from openerp.osv import osv
+from openerp.modules.registry import RegistryManager
+from datetime import datetime
+import time
+import pytz
+import logging
 
+_logger = logging.getLogger(__name__)
+
+def utc_timestamp(cr, uid, timestamp, context=None):
+    """Returns the given timestamp converted to the client's timezone.
+       This method is *not* meant for use as a _defaults initializer,
+       because datetime fields are automatically converted upon
+       display on client side. For _defaults you :meth:`fields.datetime.now`
+       should be used instead.
+
+       :param datetime timestamp: naive datetime value (expressed in LOCAL)
+                                  to be converted to the client timezone
+       :param dict context: the 'tz' key in the context should give the
+                            name of the User/Client timezone (otherwise
+                            UTC is used)
+       :rtype: datetime
+       :return: timestamp converted to timezone-aware datetime in UTC
+    """
+    assert isinstance(timestamp, datetime), 'Datetime instance expected'
+    if context and context.get('tz'):
+        tz_name = context['tz']  
+    else:
+        registry = RegistryManager.get(cr.dbname)
+        tz_name = registry.get('res.users').read(cr, SUPERUSER_ID, uid, ['tz'])['tz']
+    if tz_name:
+        try:
+            utc = pytz.timezone('UTC')
+            context_tz = pytz.timezone(tz_name)
+            context_timestamp = context_tz.localize(timestamp, is_dst=False) # UTC = no DST
+            return context_timestamp.astimezone(utc)
+        except Exception:
+            _logger.debug("failed to compute context/client-specific timestamp, "
+                          "using the UTC value",
+                          exc_info=True)
+    return timestamp
+    
 def email_send_template(cr, uid, ids, email_vals, context=None):
     if 'email_template_name' in email_vals:
         threaded_email = threading.Thread(target=_email_send_template, args=(cr, uid, ids, email_vals, context))

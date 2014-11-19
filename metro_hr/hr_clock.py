@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 from openerp.tools.translate import _
 import traceback
 import hr_clock_util as clock_util
+from openerp.addons.metro import utils
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
@@ -48,8 +49,7 @@ class hr_clock(osv.osv):
             if employee.state == 'present': action = 'sign_out'
             if employee.state == 'absent': action = 'sign_in'
             #convert to UTC time
-            time_struct = time.mktime(data['time'].timetuple())
-            data['time'] = datetime.utcfromtimestamp(time_struct)
+            data['time'] = utils.utc_timestamp(cr, uid, data['time'], context)
             vals = {'name':data['time'],
                     'employee_id': emp_id,
                     'action': action,  
@@ -81,7 +81,7 @@ class hr_clock(osv.osv):
                     v_mode = verify_modes[s[2]]
                     io_mode = inout_modes[s[3]]
                     log_date = datetime.strptime('%s-%s-%s %s:%s:%s'%s[4:10], '%Y-%m-%d %H:%M:%S')
-                    print 'Emp Code:%s  VerifyMode:%s InOutMode:%s DateTime:%s WorkCode:%s' %(emp_code, v_mode, io_mode, log_date, s[10])
+#                    print 'Emp Code:%s  VerifyMode:%s InOutMode:%s DateTime:%s WorkCode:%s' %(emp_code, v_mode, io_mode, log_date, s[10])
                     #the md5 source to gen md5
                     md5_src = '%s%s%s%s%s%s%s%s%s%s'%s[1:]
                     attend_data = {'emp_code':emp_code, 'notes':'%s by %s'%(io_mode,v_mode), 'time':log_date, 'clock_id':clock_id}                    
