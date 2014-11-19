@@ -24,7 +24,47 @@ from openerp import pooler
 from openerp.tools import mail
 from openerp import SUPERUSER_ID
 from openerp.osv import osv
+from openerp.modules.registry import RegistryManager
+from datetime import datetime
+import time
+import pytz
+import logging
 
+_logger = logging.getLogger(__name__)
+
+def utc_timestamp(cr, uid, timestamp, context=None):
+    """Returns the given timestamp converted to the client's timezone.
+       This method is *not* meant for use as a _defaults initializer,
+       because datetime fields are automatically converted upon
+       display on client side. For _defaults you :meth:`fields.datetime.now`
+       should be used instead.
+
+       :param datetime timestamp: naive datetime value (expressed in LOCAL)
+                                  to be converted to the client timezone
+       :param dict context: the 'tz' key in the context should give the
+                            name of the User/Client timezone (otherwise
+                            UTC is used)
+       :rtype: datetime
+       :return: timestamp converted to timezone-aware datetime in UTC
+    """
+    assert isinstance(timestamp, datetime), 'Datetime instance expected'
+    if context and context.get('tz'):
+        tz_name = context['tz']  
+    else:
+        registry = RegistryManager.get(cr.dbname)
+        tz_name = registry.get('res.users').read(cr, SUPERUSER_ID, uid, ['tz'])['tz']
+    if tz_name:
+        try:
+            utc = pytz.timezone('UTC')
+            context_tz = pytz.timezone(tz_name)
+            context_timestamp = context_tz.localize(timestamp, is_dst=False) # UTC = no DST
+            return context_timestamp.astimezone(utc)
+        except Exception:
+            _logger.debug("failed to compute context/client-specific timestamp, "
+                          "using the UTC value",
+                          exc_info=True)
+    return timestamp
+    
 def email_send_template(cr, uid, ids, email_vals, context=None):
     if 'email_template_name' in email_vals:
         threaded_email = threading.Thread(target=_email_send_template, args=(cr, uid, ids, email_vals, context))
@@ -191,3 +231,42 @@ def field_set_file(self, cr, uid, id, field_name, value, args, context=None):
                       'res_model':self._name,
                       'datas': value})    
     return file_id        
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
+
+def deal_dtargs(obj,args,dt_fields):  
+    new_args = []
+    for arg in args:
+        fld_name = arg[0]
+        if fld_name in dt_fields:
+            fld_operator = arg[1]
+            fld_val = arg[2]
+            fld = obj._columns.get(fld_name)
+            '''
+            ['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+            the user inputed is '2013-12-13 00:00:00', subtract 8 hours, then get this value
+            ''' 
+            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
+                time_start = [fld_name,'>=',fld_val]
+                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+                time_obj += relativedelta(days=1)
+                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+                new_args.append(time_start)
+                new_args.append(time_end)
+            else:
+                new_args.append(arg)
+        else:
+            new_args.append(arg)    
+    #TODO: refer fields.datetime.context_timestamp() to deal with the timezone
+    #TODO: Improve the code in line#1014@osv/expression.py to handel the timezone for the datatime field:
+    '''
+                if field._type == 'datetime' and right and len(right) == 10:
+                    if operator in ('>', '>='):
+                        right += ' 00:00:00'
+                    elif operator in ('<', '<='):
+                        right += ' 23:59:59'
+                    push(create_substitution_leaf(leaf, (left, operator, right), working_model))    
+    '''
+    return new_args

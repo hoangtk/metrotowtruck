@@ -9,3 +9,5 @@ access_exhibit_calendar,access_exhibit_calendar,model_exhibit_calendar,metro.gro
 access_exhibit_type,access_exhibit_type,model_exhibit_type,metro.group_metro_base_user,1,1,1,1
 access_hr_medical_type_hr_manager,access_hr_medical_type_hr_manager,model_hr_medical_type,base.group_hr_manager,1,1,1,1
 access_hr_medical_type_all,access_hr_medical_type_all,model_hr_medical_type,base.group_user,1,0,0,0
+access_hr_clock_hr_manager,access_hr_clock_hr_manager,model_hr_clock,base.group_hr_manager,1,1,1,1
+access_hr_clock_all,access_hr_clock_all,model_hr_clock,base.group_user,1,0,0,0
