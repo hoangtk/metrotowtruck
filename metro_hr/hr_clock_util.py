@@ -65,6 +65,7 @@ def clock_user_set(zk, emp, sync_pwd=False, new_clock_pwd = False, sync_fp = Fal
     #set base info
     if isinstance(emp.emp_code, type(u' ')):
         clock_emp_code = long(emp.emp_code)  
+    clock_emp_role = ''
     if isinstance(emp.clock_role, type(u' ')):
         clock_emp_role = long(emp.clock_role)
     clock_emp_pwd = new_clock_pwd

@@ -35,7 +35,7 @@
                    		attrs="{'invisible':['|',('step_no','!=','employee'),('sync_direction','not in',('clock2server','user2delete'))]}">
                    <!-- <group name="step_employee_c2s" string="Employess of Clock" 
                    		attrs="{'invisible':[('step_no', '!=', 'sync'), '|',('step_no','!=','employee'),('sync_direction','!=','clock2server')]}"> -->
-                   		<field name="id"/>
+                   		<field name="id" invisible="1"/>
 	                    <field name="emp_ids_clock" colspan="2" nolabel="1" domain="[('order_id','=',id)]"
 	                    	context="{'form_view_ref':'metro_hr.hr_clock_emp_sync_emp_tree'}">
 		                    <tree string="Employess" editable="bottom" create="1" edit="0" delete="1">
@@ -49,7 +49,7 @@
                    <group name="step_sync" attrs="{'invisible':[('step_no','!=','sync')]}">
 	                    <div>
 		                	<!-- sync data options -->
-		                	<div name="div_sync" attrs="{'invisible':[('sync_direction','not in',('server2clock','server2clock'))]}">
+		                	<div name="div_sync" attrs="{'invisible':[('sync_direction','not in',('server2clock','clock2server'))]}">
 			                	<separator string="Sync Options"/>
 			                  	<field name="sync_opt_base"/> <label for="sync_opt_base"/>
 			                  	<field name="sync_opt_fp"/> <label for="sync_opt_fp"/>
