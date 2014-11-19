@@ -44,7 +44,6 @@
         'wizard/hr_clock_emp_sync_view.xml',
         'hr_clock_view.xml',
         'hr_data.xml',
-        'hr_data.xml',
     ],
     'demo_xml': [],
     'test': [],

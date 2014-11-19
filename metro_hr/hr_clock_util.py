@@ -135,6 +135,8 @@ def clock_user_get_all(zk, ret_dict = False, pwd = False, finger_print = False):
                 #(True, u'800', u'\u5a34\u5b2d\u762f\x00\uaddc\u74fe', u'123', 0, True)
                 emp_code = '%03d'%(long(s[1]),)
                 emp_name = s[2]
+                #remove the special character for the Chinese character, starts with '\x00', see above sample data
+                emp_name = emp_name[:emp_name.find(u'\x00')]
                 emp_card_id = None
                 ec = zk.GetStrCardNumber()
                 if ec: emp_card_id = ec[1]
