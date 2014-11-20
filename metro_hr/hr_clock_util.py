@@ -15,7 +15,7 @@ def clock_connect(clock, ip, port):
 
 def clock_disconnect(clock):
     #finished beep and disconnect
-    clock.Beep(1000)
+#    clock.Beep(1000)
     return clock.Disconnect()  
 
 def clock_obj():
