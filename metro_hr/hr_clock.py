@@ -108,24 +108,27 @@ class hr_clock(osv.osv):
         clock = clock_util.clock_obj()
         run_log = ''
         for clock_data in self.browse(cr, uid, ids, context=context):
-            #connect clock
-            clock_util.clock_connect(clock, clock_data.ip,clock_data.port)
-            #download data
-            log_cnt = self._clock_download_log(cr, uid, clock_data.id, clock, emp_codes = emp_codes, context=context)
-            #if download the whole clock data, then log the message
-            if not emp_codes:
-                #calling from cron or the clock GUI
-                msg = u'download clock[%s] log end at %s, log count:%s'%(clock_data.name,datetime.now(), log_cnt)
-                run_log += msg + "\n"
-                self.message_post(cr, uid, clock_data.id, 
-                                  type='comment', subtype='mail.mt_comment', 
-                                  subject='download log data', 
-                                  body=msg,
-                                  content_subtype="plaintext",
-                                  context=context)
-            #disconnect clock
-            clock_util.clock_disconnect(clock)
-            
+            try:     
+                #connect clock
+                clock_util.clock_connect(clock, clock_data.ip,clock_data.port)
+                #download data
+                log_cnt = self._clock_download_log(cr, uid, clock_data.id, clock, emp_codes = emp_codes, context=context)
+                #if download the whole clock data, then log the message
+                if not emp_codes:
+                    #calling from cron or the clock GUI
+                    msg = u'download clock[%s] log end at %s, log count:%s'%(clock_data.name,datetime.now(), log_cnt)
+                    run_log += msg + "\n"
+                    self.message_post(cr, uid, clock_data.id, 
+                                      type='comment', subtype='mail.mt_comment', 
+                                      subject='download log data', 
+                                      body=msg,
+                                      content_subtype="plaintext",
+                                      context=context)
+                #disconnect clock
+                clock_util.clock_disconnect(clock)
+            except Exception,e:
+                formatted_info = "".join(traceback.format_exception(*(sys.exc_info())))
+                run_log += 'download clock[%s] with exception at %s'%(clock_data.name, datetime.now()) + "\n" + formatted_info + "\n"
         return run_log
     
     
