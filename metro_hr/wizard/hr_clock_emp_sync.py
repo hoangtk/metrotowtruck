@@ -59,7 +59,9 @@ class hr_clock_emp_sync(osv.osv_memory):
         'sync_opt_pwd' : fields.boolean('Password'),
         'step_no' : fields.selection([('clock','Select Clock'),('employee','Select Employee'),('sync','Do Sync')],string='Wizard Step'),
     }
-                        
+    
+    _defaults = {'sync_opt_base':True, 'step_no':'clock'}       
+    
     def default_get(self, cr, uid, fields, context=None):
         """
          To get default values for the object.
@@ -70,18 +72,13 @@ class hr_clock_emp_sync(osv.osv_memory):
          @param context: A standard dictionary
          @return: A dictionary with default values for all field in ``fields``
         """
-        vals = {'sync_opt_base':True,
-                    'step_no':'clock'}
+        vals = super(hr_clock_emp_sync, self).default_get(cr, uid, fields, context=context)
+        if not vals:
+            vals = {}
         #clock id
         if context.get('active_model','') == 'hr.clock' and context.get('active_id'):
             clock_id = context.get('active_id')
             vals['clock_id'] = clock_id
-        #set default values
-        for item, value in context.items():
-            if isinstance(item, type(u' ')) and item.startswith('default_'):
-                fld_name = item[8:]
-                if self._columns.get(fld_name):
-                    vals[fld_name] = value
                                 
         return vals
     
