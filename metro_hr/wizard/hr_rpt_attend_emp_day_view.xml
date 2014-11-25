@@ -34,7 +34,7 @@
 							    <field name="date_from" domain="[('company_id', '=', company_id)]" class="oe_inline" widget="date"/> -
 							    <field name="date_to" domain="[('company_id', '=', company_id)]" class="oe_inline" widget="date"/>  
 	                        </div>	
-	                        <field name="emp_ids" widget="many2many_tags"/>
+	                        <field name="emp_ids"/>
 		                </group>               
 	                </group>
                 </group>

@@ -47,7 +47,7 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
 
     _defaults = {
         'type': 'attend_emp_day',     
-        'emp_ids':[342,171]
+#        'emp_ids':[342,171]
     }
     def default_get(self, cr, uid, fields, context=None):
         vals = super(hr_rpt_attend_emp_day, self).default_get(cr, uid, fields, context=context)
