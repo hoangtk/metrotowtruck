@@ -107,6 +107,12 @@
             		<field name="mfg_id" readonly="1"/>
             		<field name="move_dest_id" readonly="1"/>
                 </xpath>
+                <!-- Add supplier bank name and account -->
+                <field name="partner_id" position="after">
+                	<field name="bank_name"/>
+                	<field name="bank_account"/>
+                </field>   
+                
                 <!-- set fields readonly --> 
                 <field name="order_line" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>

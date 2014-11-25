@@ -108,6 +108,9 @@ class purchase_order(osv.osv):
         'comments': fields.text('Comments'),       
 #        'change_log_line': fields.function(_change_log_line, type='one2many', relation='change.log.po.line', string='Line Changing'),
         'change_log_line': fields.one2many('change.log.po.line','po_id','Line Changing Log', readonly=True),  
+        #partner bank info
+        'bank_name': fields.related('partner_id', 'bank_name', type='char', string='Bank Name'),
+        'bank_account': fields.related('partner_id', 'bank_account', type='char', string='Bank Account Name'),
     }
     _defaults = {
         'is_sent_supplier': False,
