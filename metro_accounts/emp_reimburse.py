@@ -166,6 +166,7 @@ class emp_reimburse(osv.osv):
         'description': fields.char('Description', size=128, required=False),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'move_id': fields.many2one('account.move', 'Accounting Entry', readonly=True),
+        'move_state': fields.related('move_id', 'state', type='selection', selection=[('draft','Unposted'), ('posted','Posted')], string='Entry State'),
         'move_lines': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Accounting Items', readonly=True),
         'line_ids': fields.one2many('emp.reimburse.line', 'order_id', 'Reimbursement Detail', readonly=True, states={'draft':[('readonly',False)]} ),
         'has_cr': fields.function(_amount, string='Has dedits', type='boolean',  multi='amount'),
