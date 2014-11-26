@@ -107,6 +107,8 @@ class stock_picking(osv.osv):
                 #get the move lines
                 
             for move_line in move.line_id:
+                if move_line.quantity == 0.0:
+                    continue
                 if move_line.account_id.id == accounts['property_stock_valuation_account_id']:
                     '''
                     #merge the stock valuation values to one line
@@ -177,6 +179,8 @@ class stock_picking(osv.osv):
                 line_ids =  new_move_vals['valuation_line_id'] + new_move_vals.get('line_id') 
             else:
                 line_ids =  new_move_vals.get('line_id') + new_move_vals['valuation_line_id']
+            if not line_ids:
+                continue
             new_move_vals['line_id'] = line_ids
             new_move_id = move_obj.create(cr, uid, new_move_vals, context=context)
             new_move_ids.append(new_move_id)
