@@ -35,6 +35,7 @@
                 	<field name="notes"/>
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/>
+                	<field name="clock_log_id" readonly="1"/>
                 </field>
             </field>
         </record> 
@@ -53,6 +54,9 @@
                 	<field name="clock_id"/>
                 	<field name="notes"/>
                 	<field name="calendar_id"/>
+                	<field name="cale_period_id"/>
+                	<field name="day"/>
+                	<field name="clock_log_id" readonly="1"/>
                 </field>
             </field>
         </record> 
@@ -117,6 +121,7 @@
 		                    
 		                    <field name="hour_from" widget="float_time"/>
 		                    <field name="hour_to" widget="float_time"/>
+		                    <field name="days_work"/>
 		                    
 		                    <field name="hours_non_work" widget="float_time"/>
 		                    <field name="hours_work_ot" widget="float_time"/>
@@ -135,6 +140,11 @@
 		                    <field name="punch_out_early" widget="float_time"/>
 		                    
 		                    <field name="date_from"/>
+		                    
+		                    <field name="hours_work_ot2" widget="float_time"/>
+		                    <field name="hours_work_normal2" widget="float_time"/>
+		                    <field name="is_full_ot2"/>
+		                    <field name="days_work2"/>
 		                </tree>
                     </field>
                     </sheet>
@@ -226,6 +236,7 @@
                         	<field name="hr_att_no_out_time" nolabel="1" class="oe_inline" attrs="{'invisible':[('hr_att_no_out_option','!=','early')]}"/>
                         	<label string="Minutes" attrs="{'invisible':[('hr_att_no_out_option','!=','early')]}"/>
                         </div>
+                        <field name="month_attend_days_law"/>
                     </group>
                 </xpath>
             </field>

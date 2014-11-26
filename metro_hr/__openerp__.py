@@ -45,6 +45,7 @@
         'wizard/hr_emp_worktime_view.xml',
         'wizard/hr_attend_calc_action_view.xml',
         'wizard/hr_rpt_attend_emp_day_view.xml',
+        'wizard/hr_rpt_attend_month_view.xml',
         'hr_attendance_view.xml',
         'hr_clock_view.xml',
         'hr_data.xml',

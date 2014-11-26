@@ -61,6 +61,8 @@
 							<field name="is_late"/>
 							<field name="is_early"/>
 							<field name="is_absent"/>
+							<field name="hours_normal2" widget="float_time"/>
+							<field name="hours_ot2" widget="float_time"/>
 					</tree>
 				</field>		
             </form>
@@ -73,7 +75,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="hr_rpt_attend_emp_day_view"/>
-            <field name="context">{'default_title':'Attendance Day Report'}</field>
+            <field name="context">{'default_title':'Attendances Report'}</field>
             <field name="target">inline</field>
         </record>
 		

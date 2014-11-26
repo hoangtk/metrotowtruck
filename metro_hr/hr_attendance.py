@@ -10,7 +10,9 @@ from dateutil.relativedelta import relativedelta
 from openerp.tools.translate import _
 import traceback
 import hr_clock_util as clock_util
+
 from openerp.addons.metro import utils
+import openerp.addons.decimal_precision as dp
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
@@ -208,12 +210,13 @@ class resource_calendar_attendance(osv.osv):
     _inherit = "resource.calendar.attendance"
     def _calc_hours(self, cr, uid, ids, field_names, args, context=None):
         vals = dict((id,dict((field_name,0) for field_name in field_names)) for id in ids)
-        for data in self.read(cr, uid, ids, ['hour_to','hour_from','hours_non_work','hours_work_ot'], context=context):
+        for data in self.read(cr, uid, ids, ['hour_to','hour_from','hours_non_work','hours_work_ot','hours_work_ot2'], context=context):
             vals[data['id']]['hours_total'] = data['hour_to'] - data['hour_from']
             vals[data['id']]['hours_work'] = vals[data['id']]['hours_total'] - data['hours_non_work']
             vals[data['id']]['hours_work_normal'] = vals[data['id']]['hours_work'] - data['hours_work_ot']
             vals[data['id']]['is_full_ot'] = vals[data['id']]['hours_work'] == data['hours_work_ot']
-            
+            vals[data['id']]['hours_work_normal2'] = vals[data['id']]['hours_work'] - data['hours_work_ot2']
+            vals[data['id']]['is_full_ot2'] = vals[data['id']]['hours_work'] == data['hours_work_ot2']
         return vals
         
     '''
@@ -237,8 +240,16 @@ class resource_calendar_attendance(osv.osv):
         'hours_work': fields.function(_calc_hours, type='float', string='Working hours', multi='hours_all', help='[Total hours] - [Non work hours]'),
         'hours_work_normal': fields.function(_calc_hours, type='float', string='Working hours(normal)', multi='hours_all', help='[Working hours] - [Working hours(OT)]'),
         
-        'is_full_ot': fields.function(_calc_hours, type='boolean', string='Full OT', multi='hours_all', help='[Working hours] - [Working hours(OT)]'),
+        'is_full_ot': fields.function(_calc_hours, type='boolean', string='Full OT', multi='hours_all'),
+        'days_work': fields.float('Work Days', digits_compute=dp.get_precision('Product Unit of Measure')),
+        
+        #second setting
+        'hours_work_ot2': fields.float('Working hours(OT)2'),        
+        'hours_work_normal2': fields.function(_calc_hours, type='float', string='Working hours(normal)2', multi='hours_all', help='[Working hours] - [Working hours(OT)2]'),
+        'is_full_ot2': fields.function(_calc_hours, type='boolean', string='Full OT2', multi='hours_all'),
+        'days_work2': fields.float('Work Days2', digits_compute=dp.get_precision('Product Unit of Measure')),        
         }   
+    _defaults={'days_work':1, 'days_work2':1}
     
 class res_company(osv.osv):
     _inherit = "res.company"
@@ -254,6 +265,8 @@ class res_company(osv.osv):
         'hr_att_no_out_option':fields.selection([('early', 'Leave Early'), ('absent', 'Absenteeism')], 'How to Deal No Sign Out',
                                                 help = " the configuration how to deal with the attendance only have sign out"),
         'hr_att_no_out_time': fields.integer('No Out to Subtract Minutes',
-                                                help="if 'Leave Early', then this field identify the minutes that will be substract from the 'WorkHours'"),        
+                                                help="if 'Leave Early', then this field identify the minutes that will be substract from the 'WorkHours'"),      
+        'month_attend_days_law': fields.float('Month working days in law')  
     }    
+    _defaults={'month_attend_days_law':21.75}
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

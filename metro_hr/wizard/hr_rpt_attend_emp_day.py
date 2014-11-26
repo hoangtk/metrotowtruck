@@ -105,6 +105,25 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
         self._convert_save_dates(cr, uid, vals, context)
         resu = super(hr_rpt_attend_emp_day, self).write(cr, uid, ids, vals, context=context)
         return resu
+    
+    def _attend_hours(self, hours_valid, period):
+        if hours_valid > period.hours_work_normal:
+            hours_normal = period.hours_work_normal
+        else:
+            hours_normal = hours_valid
+        hours_ot = hours_valid - hours_normal
+        if hours_ot > period.hours_work_ot:
+            hours_ot = period.hours_work_ot
+        #the second time group                        
+        if hours_valid > period.hours_work_normal2:
+            hours_normal2 = period.hours_work_normal2
+        else:
+            hours_normal2 = hours_valid
+        hours_ot2 = hours_valid - hours_normal2
+        if hours_ot2 > period.hours_work_ot2:
+            hours_ot2 = period.hours_work_ot2
+        return hours_normal, hours_ot, hours_normal2, hours_ot2
+    
     def run_attend_emp_day(self, cr, uid, ids, context=None):
         '''
         1.Query all data with both in/out by date range, store the result in attends_normal
@@ -163,8 +182,6 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
         date_from_local = fields.datetime.context_timestamp(cr, uid, date_from, context)
         date_to_local = fields.datetime.context_timestamp(cr, uid, date_to, context)
         days = rrule.rrule(rrule.DAILY, dtstart=date_from_local,until=date_to_local)
-        for day_dt in days:
-            print day_dt
         emps = emp_obj.browse(cr, uid, emp_ids, context)
         seq = 0
         for emp in emps:            
@@ -186,7 +203,9 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
                                     'hours_ot':None,
                                     'is_late':False,
                                     'is_early':False,
-                                    'is_absent':False, }
+                                    'is_absent':False, 
+                                    'hours_normal2':None,
+                                    'hours_ot2':None,}
                     rpt_lns.append(rpt_line)
                     continue
                 for period in emp.calendar_id.attendance_ids:
@@ -206,7 +225,9 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
                                     'hours_ot':None,
                                     'is_late':False,
                                     'is_early':False,
-                                    'is_absent':False, }
+                                    'is_absent':False, 
+                                    'hours_normal2':None,
+                                    'hours_ot2':None,}
                     rpt_lns.append(rpt_line)
                     #find the normal attendance by employee/day/period
                     attend_key = '%s-%s-%s'%(emp.id, day, period.id)
@@ -216,20 +237,16 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
                         hour_in = attend['in_time'].hour + attend['in_time'].minute/60.0
                         hour_out = attend['out_time'].hour + attend['out_time'].minute/60.0
                         hours_valid = hour_out - hour_in - period.hours_non_work
-                        if hours_valid > period.hours_work_normal:
-                            hours_normal = period.hours_work_normal
-                        else:
-                            hours_normal = hours_valid
-                        hours_ot = hours_valid - hours_normal
-                        if hours_ot > period.hours_work_ot:
-                            hours_ot = period.hours_work_ot
+                        attend_hours = self._attend_hours(hours_valid, period)                            
                         rpt_line.update({'period_id':period.id, 
                                             'sign_in':hour_in,
                                             'sign_out':hour_out,
-                                            'hours_normal':hours_normal,
-                                            'hours_ot':hours_ot,
+                                            'hours_normal':attend_hours[0],
+                                            'hours_ot':attend_hours[1],
                                             'is_late':attend['in_action']=='sign_in_late',
                                             'is_early':attend['out_action']=='sign_out_early',
+                                            'hours_normal2':attend_hours[2],
+                                            'hours_ot2':attend_hours[3],
                                             })
                         continue
                     #the abnormal attendance, with sign in or out record only, or without any attendance
@@ -246,37 +263,38 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
                         hours_ot = None
                         is_late = False
                         is_early = False
-                        is_absent = False                                                
+                        is_absent = False    
+                        hours_normal2 = None
+                        hours_ot2 = None                                            
                         #Only have sign in record
                         if attend.action in ('sign_in','sign_in_late'):
                             hour_in = attend_time.hour + attend_time.minute/60.0
                             if emp.calendar_id.no_out_option == 'early':
                                 #treat as leave early
-                                is_early = True
+                                if not period.is_full_ot:
+                                    is_early = True
                                 hours_valid = period.hour_to - hour_in -  period.hours_non_work - emp.calendar_id.no_out_time/60.0
                             else:
                                 #treat as absent
-                                is_absent = True
+                                if not period.is_full_ot:
+                                    is_absent = True
                                 hours_valid = 0.0
                         #Only have sign out record
                         if attend.action in ('sign_out','sign_out_early'):
                             hour_out = attend_time.hour + attend_time.minute/60.0
                             if emp.calendar_id.no_in_option == 'late':
                                 #treat as leave early
-                                is_late = True
+                                if not period.is_full_ot:
+                                    is_late = True
                                 hours_valid = hour_out - period.hour_from - period.hours_non_work - emp.calendar_id.no_in_time/60.0
                             else:
                                 #treat as absent
-                                is_absent = True
+                                if not period.is_full_ot:
+                                    is_absent = True
                                 hours_valid = 0.0
                         if hours_valid:
-                            if hours_valid > period.hours_work_normal:
-                                hours_normal = period.hours_work_normal
-                            else:
-                                hours_normal = hours_valid
-                            hours_ot = hours_valid - hours_normal
-                            if hours_ot > period.hours_work_ot:
-                                hours_ot = period.hours_work_ot
+                            hours_normal, hours_ot, hours_normal2, hours_ot2 = self._attend_hours(hours_valid, period)
+                            
                         rpt_line.update({'period_id':period.id, 
                                             'sign_in':hour_in,
                                             'sign_out':hour_out,
@@ -285,9 +303,12 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
                                             'is_late':is_late,
                                             'is_early':is_early,
                                             'is_absent':is_absent,
+                                            'hours_normal2':hours_normal2,
+                                            'hours_ot2':hours_ot2,
                                             })
                     else:
-                        rpt_line.update({'is_absent':True})
+                        if not period.is_full_ot:
+                            rpt_line.update({'is_absent':True})
         '''========return data to rpt_base.run_report()========='''    
         return self.pool.get('hr.rpt.attend.emp.day.line'), rpt_lns
     
@@ -299,7 +320,7 @@ hr_rpt_attend_emp_day()
 class hr_rpt_attend_emp_day_line(osv.osv_memory):
     _name = "hr.rpt.attend.emp.day.line"
     _inherit = "rpt.base.line"
-    _description = "Inventory Report Lines"
+    _description = "HR Attendance Employee Day Report Lines"
     _columns = {
         'rpt_id': fields.many2one('hr.rpt.attend.emp.day', 'Report'),
         'seq': fields.integer('Sequence',),
@@ -319,13 +340,17 @@ class hr_rpt_attend_emp_day_line(osv.osv_memory):
         
         'sign_in':fields.float('Sign In'),
         'sign_out':fields.float('Sign Out'),
-        #the hours that defined should be working
+        #the hours that working normal in fact
         'hours_normal':fields.float('Work Normal'),
-        #the hours that working in fact
+        #the hours that working OT in fact
         'hours_ot':fields.float('Work OT'),
         'is_late':fields.boolean('Be Late'),
         'is_early':fields.boolean('Leave Early'),
         'is_absent':fields.boolean('Absenteeism'),
+        #the hours that working normal2 in fact
+        'hours_normal2':fields.float('Work Normal2'),
+        #the hours that working OT2 in fact
+        'hours_ot2':fields.float('Work OT2'),
     }
 
 hr_rpt_attend_emp_day_line()
