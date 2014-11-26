@@ -25,3 +25,4 @@ import wizard
 import change_log
 import purchase_payment
 import procurement
+import res_partner

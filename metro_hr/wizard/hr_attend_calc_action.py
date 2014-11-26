@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
@@ -15,14 +15,19 @@
 #    GNU Affero General Public License for more details.
 #
 #    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
-import hr_clock_emp_sync
-import hr_emp_worktime
-import hr_attend_calc_action
-import hr_rpt_attend_emp_day
-import hr_rpt_attend_month
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from openerp.osv import osv,fields
+from openerp.tools.translate import _
 
+class hr_attend_calc_action(osv.osv_memory):
+    _name = 'hr.attend.calc.action'
+    _description = 'Calculate attendance action'
+    
+    def do_calc(self, cr, uid, ids, context=None):
+        if context.get('active_model') == 'hr.attendance' and context.get('active_ids'):
+            self.pool.get('hr.attendance').calc_action(cr, uid, context.get('active_ids'),context=context)
+        return True
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

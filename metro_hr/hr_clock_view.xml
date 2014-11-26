@@ -88,31 +88,6 @@
         sequence="30" 
         groups="base.group_hr_manager"/>
         
-        <record model="ir.ui.view" id="view_hr_attendance_filter_ext">
-            <field name="name">view_hr_attendance_filter_ext</field>
-            <field name="model">hr.attendance</field>
-            <field name="inherit_id" ref="hr_attendance.view_hr_attendance_filter"/>
-            <field name="arch" type="xml">
-            	<!-- remove 'today' filter, user can query by day directly, the current today filter have issues since the UTC time-->
-                <filter name="today" position="replace">
-                </filter>
-            </field>
-        </record>
-        
-        <record model="ir.ui.view" id="view_hr_attendance_tree_ext">
-            <field name="name">view_hr_attendance_filter_ext</field>
-            <field name="model">hr.attendance</field>
-            <field name="inherit_id" ref="hr_attendance.view_attendance_who"/>
-            <field name="arch" type="xml">
-            	<!-- remove 'today' filter, user can query by day directly, the current today filter have issues since the UTC time-->
-                <field name="action" position="after">
-                	<field name="clock_id"/>
-                </field>
-                <field name="action" position="attributes">
-                	<attribute name="invisible">1</attribute>
-                </field>
-            </field>
-        </record>        
 <!-- Add the clock related fields -->        
         <record model="ir.ui.view" id="view_employee_form_clock">
             <field name="name">view_employee_form_clock</field>

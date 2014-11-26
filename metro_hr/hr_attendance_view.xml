@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>        
+        <record model="ir.ui.view" id="view_hr_attendance_filter_ext">
+            <field name="name">view_hr_attendance_filter_ext</field>
+            <field name="model">hr.attendance</field>
+            <field name="inherit_id" ref="hr_attendance.view_hr_attendance_filter"/>
+            <field name="arch" type="xml">
+            	<!-- remove 'today' filter, user can query by day directly, the current today filter have issues since the UTC time-->
+                <filter name="today" position="replace">
+                	<filter icon="terp-go-today" string="Today" name="today" domain="[('name','=',current_date)]" />
+                	<filter icon="terp-go-today" string="Today's Valid" name="today_valid" 
+                		domain="[('name','=',current_date), ('action','in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
+                </filter>
+                <field name="action" position="after">
+                	<!-- <field name="clock_id"/>
+                	<field name="calendar_id"/>
+                	<field name="cale_period_id"/> -->
+                	<filter icon="terp-personal" string="Valid" name="valid" domain="[('action','in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
+                	<filter icon="terp-personal" string="Invalid" name="invalid" domain="[('action','not in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
+                </field>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="view_hr_attendance_tree_ext">
+            <field name="name">view_hr_attendance_filter_ext</field>
+            <field name="model">hr.attendance</field>
+            <field name="inherit_id" ref="hr_attendance.view_attendance_who"/>
+            <field name="arch" type="xml">
+                <field name="day" position="attributes">
+                	<attribute name="invisible">0</attribute>
+                </field>
+                <field name="action" position="after">
+                	<field name="clock_id"/>
+                	<field name="notes"/>
+                	<field name="calendar_id"/>
+                	<field name="cale_period_id"/>
+                	<field name="clock_log_id" readonly="1"/>
+                </field>
+            </field>
+        </record> 
+        
+        <record model="ir.ui.view" id="view_attendance_form_ext">
+            <field name="name">view_attendance_form_ext</field>
+            <field name="model">hr.attendance</field>
+            <field name="inherit_id" ref="hr_attendance.view_attendance_form"/>
+            <field name="arch" type="xml">
+            	<xpath expr="//sheet" position="before">
+            		<header>
+            			<button name="calc_action" string="Recalculate Action" type="object"/>
+            		</header>
+            	</xpath>
+                <field name="action_desc" position="after">
+                	<field name="clock_id"/>
+                	<field name="notes"/>
+                	<field name="calendar_id"/>
+                	<field name="cale_period_id"/>
+                	<field name="day"/>
+                	<field name="clock_log_id" readonly="1"/>
+                </field>
+            </field>
+        </record> 
+        
+        <record id="hr_attendance.open_view_attendance" model="ir.actions.act_window">
+            <field name="name">Attendances</field>
+            <field name="context">{"search_default_today_valid":1}</field>
+        </record>
+                
+<!-- Employee working time calendar -->        
+        <record id="view_emp_worktime_tree" model="ir.ui.view">
+            <field name="name">view_emp_worktime_tree</field>
+            <field name="model">resource.calendar</field>
+            <field name="arch" type="xml">
+                <tree string="Working Time">
+                    <field name="name"/>
+                    <field name="type" invisible="1"/>
+                    <field name="manager"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </tree>
+            </field>
+        </record>  
+        
+        <record id="view_emp_worktime_form" model="ir.ui.view">
+            <field name="name">emp_worktime_form</field>
+            <field name="model">resource.calendar</field>
+            <field name="arch" type="xml">
+                <form string="Working Time" version="7.0">
+                    <field name="id" invisible="1"/>
+                	<header>
+                		<button name="%(action_hr_emp_worktime)d" string="Add Employees" type="action"/>
+                		<button name="%(hr.open_view_employee_list_my)d" string="Employees" type="action"
+                			context="{'default_calendar_id': id, 'search_default_calendar_id': id}"/>
+                	</header>
+                    <sheet>
+                    <group col="4">
+                        <field name="name"/>
+                    	<field name="type" invisible="1"/>
+                    	<field name="tolerence_start_stop_default"/>
+                    	<field name="tolerence_late_early_default"/>
+                    	
+                        <label for="no_in_option"/>
+                        <div>
+                        	<field name="no_in_option" nolabel="1" class="oe_inline"/>
+                        	<field name="no_in_time" nolabel="1" class="oe_inline" attrs="{'invisible':[('no_in_option','!=','late')]}"/>
+                        	<label string="Minutes" attrs="{'invisible':[('no_in_option','!=','late')]}"/>
+                        </div>
+                        <label for="no_out_option"/>
+                        <div>
+                        	<field name="no_out_option" nolabel="1" class="oe_inline"/>
+                        	<field name="no_out_time" nolabel="1" class="oe_inline" attrs="{'invisible':[('no_out_option','!=','early')]}"/>
+                        	<label string="Minutes" attrs="{'invisible':[('no_out_option','!=','early')]}"/>
+                        </div>
+                           
+                        <field name="manager"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+                    <field name="attendance_ids">
+		                <tree string="Working Time" editable="top">
+		                    <field name="name"/>
+		                    <field name="dayofweek"/>
+		                    
+		                    <field name="hour_from" widget="float_time"/>
+		                    <field name="hour_to" widget="float_time"/>
+		                    <field name="days_work"/>
+		                    
+		                    <field name="hours_non_work" widget="float_time"/>
+		                    <field name="hours_work_ot" widget="float_time"/>
+		                    <field name="is_full_ot"/>
+		                    
+		                    <field name="hours_total" widget="float_time"/>
+		                    <field name="hours_work" widget="float_time"/>
+		                    <field name="hours_work_normal" widget="float_time"/>
+        
+		                    <field name="punch_in_start" widget="float_time"/>
+		                    <field name="punch_in_stop" widget="float_time"/>
+		                    <field name="punch_in_late" widget="float_time"/>
+		                    
+		                    <field name="punch_out_start" widget="float_time"/>
+		                    <field name="punch_out_stop" widget="float_time"/>
+		                    <field name="punch_out_early" widget="float_time"/>
+		                    
+		                    <field name="date_from"/>
+		                    
+		                    <field name="hours_work_ot2" widget="float_time"/>
+		                    <field name="hours_work_normal2" widget="float_time"/>
+		                    <field name="is_full_ot2"/>
+		                    <field name="days_work2"/>
+		                </tree>
+                    </field>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="action_emp_worktime" model="ir.actions.act_window">
+            <field name="name">Working Time</field>
+            <field name="res_model">resource.calendar</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="resource.view_resource_calendar_search"/>
+            <field name="domain">[('type','=','emp_wt')]</field>
+            <field name="context">{'default_type':'emp_wt'}</field>
+            <field name="help">Define working hours of employees</field>
+        </record>
+
+        <record id="action_emp_worktime_view_tree" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_emp_worktime_tree"/>
+            <field name="act_window_id" ref="action_emp_worktime"/>
+        </record>
+        <record id="action_emp_worktime_view_form" model="ir.actions.act_window.view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_emp_worktime_form"/>
+            <field name="act_window_id" ref="action_emp_worktime"/>
+        </record>
+                
+        <menuitem 
+        action="action_emp_worktime" 
+        id="menu_view_emp_resource_calendar"
+        parent="hr_attendance.menu_hr_attendance" sequence="31"/>  
+        
+<!-- Employee add the working time -->
+        <record model="ir.ui.view" id="metro_employee_tree_view_attend">
+            <field name="name">metro_employee_tree_view_attend</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="metro_employee_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="emp_card_id" position="after">
+                	<field name="calendar_id" string="Working Time"/>
+                </field>
+            </field>
+        </record>     
+        <record model="ir.ui.view" id="metro_employee_form_view_attend">
+            <field name="name">metro_employee_form_view_attend</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="metro_employee_form_view"/>
+            <field name="arch" type="xml">
+                <field name="emp_card_id" position="after">
+                	<field name="calendar_id" string="Working Time"/>
+                </field>
+            </field>
+        </record>    
+        <record model="ir.ui.view" id="metro_view_employee_filter_attend">
+            <field name="name">metro_view_employee_filter_attend</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="metro_view_employee_filter"/>
+            <field name="arch" type="xml">
+                <field name="emp_card_id" position="after">
+                	<field name="calendar_id" string="Working Time"/>
+                </field>
+            </field>
+        </record>          
+
+<!-- Company add the configuration parameter for attendance -->
+        <record model="ir.ui.view" id="view_company_form_attend">
+            <field name="name">view_company_form_attend</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="model">res.company</field>
+            <field name="arch" type="xml">
+				<xpath expr="//group[@name='account_grp']" position="after">
+                    <group name="timesheets_hr_att" string="Attendance">
+                        <field name="hr_att_tole_start_stop_default"/>
+                        <field name="hr_att_tole_late_early_default"/>
+                        <label for="hr_att_no_in_option"/>
+                        <div>
+                        	<field name="hr_att_no_in_option" nolabel="1" class="oe_inline"/>
+                        	<field name="hr_att_no_in_time" nolabel="1" class="oe_inline" attrs="{'invisible':[('hr_att_no_in_option','!=','late')]}"/>
+                        	<label string="Minutes" attrs="{'invisible':[('hr_att_no_in_option','!=','late')]}"/>
+                        </div>
+                        <label for="hr_att_no_out_option"/>
+                        <div>
+                        	<field name="hr_att_no_out_option" nolabel="1" class="oe_inline"/>
+                        	<field name="hr_att_no_out_time" nolabel="1" class="oe_inline" attrs="{'invisible':[('hr_att_no_out_option','!=','early')]}"/>
+                        	<label string="Minutes" attrs="{'invisible':[('hr_att_no_out_option','!=','early')]}"/>
+                        </div>
+                        <field name="month_attend_days_law"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+                
+    </data>
+</openerp>

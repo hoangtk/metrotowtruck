@@ -14,7 +14,7 @@ from openerp.addons.metro import utils
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
-
+        
 class hr_clock(osv.osv):
     _name = 'hr.clock'
     _inherit = ['mail.thread']
@@ -45,9 +45,16 @@ class hr_clock(osv.osv):
             emp_id = emp_code[0]
             employee = emp_obj.browse(cr, uid, emp_id, context=context)
             #decide the sign in or out
-            action = 'sign_in'
-            if employee.state == 'present': action = 'sign_out'
-            if employee.state == 'absent': action = 'sign_in'
+            action = 'action'
+            '''
+            #move to download_log() to calculate all new attendance together, to improve the performance.
+            calendar_id = None
+            if employee.calendar_id:
+                calendar_id = employee.calendar_id.id
+                #find the time point by the calendar_id and attendance log time
+                action = attendence_obj.action_by_cale_time(cr, uid, employee.calendar_id, data['time'], context=context)
+            '''
+            calendar_id = employee.calendar_id and employee.calendar_id.id or None
             #convert to UTC time
             data['time'] = utils.utc_timestamp(cr, uid, data['time'], context)
             vals = {'name':data['time'],
@@ -55,13 +62,17 @@ class hr_clock(osv.osv):
                     'action': action,  
                     'clock_log_id':md5, 
                     'notes':data['notes'],
-                    'clock_id':data['clock_id']}
-            attendence_obj.create(cr, uid, vals, context=context)
+                    'clock_id':data['clock_id'],
+                    'calendar_id': calendar_id}
+            return attendence_obj.create(cr, uid, vals, context=context)
+        else:
+            return 0
         
     def _clock_download_log(self, cr, uid, clock_id, clock, emp_codes = False, context=False):  
         _logger = logging.getLogger(__name__)
         devid = 1
         log_cnt = 0
+        new_attend_ids = []
         verify_modes = {0:'Password',1:'Finger',2:'IC Card'}
         inout_modes = {0:'Check-In',1:'Check-Out',2:'Break-Out',3:'Break-In',4:'OT-In',5:'OT-Out'}
         serial_no = clock.GetSerialNumber(devid,None)  
@@ -85,12 +96,14 @@ class hr_clock(osv.osv):
                     #the md5 source to gen md5
                     md5_src = '%s%s%s%s%s%s%s%s%s%s'%s[1:]
                     attend_data = {'emp_code':emp_code, 'notes':'%s by %s'%(io_mode,v_mode), 'time':log_date, 'clock_id':clock_id}                    
-                    self._attend_create(cr, uid, md5_src, attend_data, context=context)
+                    new_id = self._attend_create(cr, uid, md5_src, attend_data, context=context)
+                    if new_id > 0:
+                        new_attend_ids.append(new_id)
                     log_cnt += 1
                 else:  
                     break  
             _logger.info('#########download clock log end at %s, log count:%s##########'%(datetime.now(), log_cnt))
-        return log_cnt
+        return log_cnt, new_attend_ids
             
     def download_log(self, cr, uid, ids = False, context=False, emp_ids=False):
         if not context:
@@ -112,7 +125,10 @@ class hr_clock(osv.osv):
                 #connect clock
                 clock_util.clock_connect(clock, clock_data.ip,clock_data.port)
                 #download data
-                log_cnt = self._clock_download_log(cr, uid, clock_data.id, clock, emp_codes = emp_codes, context=context)
+                log_cnt, attend_ids = self._clock_download_log(cr, uid, clock_data.id, clock, emp_codes = emp_codes, context=context)
+                #do the attendance action calculation
+                if attend_ids:
+                    self.pool.get('hr.attendance').calc_action(cr, uid, attend_ids, context=context)
                 #if download the whole clock data, then log the message
                 if not emp_codes:
                     #calling from cron or the clock GUI
@@ -127,8 +143,16 @@ class hr_clock(osv.osv):
                 #disconnect clock
                 clock_util.clock_disconnect(clock)
             except Exception,e:
+                traceback.print_exc() 
                 formatted_info = "".join(traceback.format_exception(*(sys.exc_info())))
-                run_log += 'download clock[%s] with exception at %s'%(clock_data.name, datetime.now()) + "\n" + formatted_info + "\n"
+                msg = 'download clock[%s] with exception at %s'%(clock_data.name, datetime.now()) + "\n" + formatted_info
+                run_log += msg + "\n"
+                self.message_post(cr, uid, clock_data.id, 
+                                  type='comment', subtype='mail.mt_comment', 
+                                  subject='download log data', 
+                                  body=msg,
+                                  content_subtype="plaintext",
+                                  context=context)
         return run_log
     
     
@@ -191,39 +215,4 @@ class hr_employee(osv.osv):
         'clock_fp9':fields.text('Finger Print9', readonly=False),
         'clock_fp10':fields.text('Finger Print10', readonly=False),
     } 
-                            
-from metro import utils
-class hr_attendance(osv.osv):
-    _inherit = "hr.attendance"
-    _columns = {
-        'clock_log_id': fields.char('Clock Log ID', size=32, select=1),
-        'clock_id': fields.many2one('hr.clock', string='Clock'),
-        'notes': fields.char('Notes', size=128),
-    }
-    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
-        new_args = utils.deal_dtargs(self,args,['name'])
-        return super(hr_attendance,self).search(cr, user, new_args, offset, limit, order, context, count)
-    def _altern_si_so(self, cr, uid, ids, context=None):
-        """ Alternance sign_in/sign_out check.
-            Previous (if exists) must be of opposite action.
-            Next (if exists) must be of opposite action.
-        """
-        for att in self.browse(cr, uid, ids, context=context):
-            #do not check for the log from clock, johnw, 11/15/2014
-            if att.clock_log_id:
-                continue
-            # search and browse for first previous and first next records
-            prev_att_ids = self.search(cr, uid, [('employee_id', '=', att.employee_id.id), ('name', '<', att.name), ('action', 'in', ('sign_in', 'sign_out'))], limit=1, order='name DESC')
-            next_add_ids = self.search(cr, uid, [('employee_id', '=', att.employee_id.id), ('name', '>', att.name), ('action', 'in', ('sign_in', 'sign_out'))], limit=1, order='name ASC')
-            prev_atts = self.browse(cr, uid, prev_att_ids, context=context)
-            next_atts = self.browse(cr, uid, next_add_ids, context=context)
-            # check for alternance, return False if at least one condition is not satisfied
-            if prev_atts and prev_atts[0].action == att.action: # previous exists and is same action
-                return False
-            if next_atts and next_atts[0].action == att.action: # next exists and is same action
-                return False
-            if (not prev_atts) and (not next_atts) and att.action != 'sign_in': # first attendance must be sign_in
-                return False
-        return True
-    _constraints = [(_altern_si_so, 'Error ! Sign in (resp. Sign out) must follow Sign out (resp. Sign in)', ['action'])]
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
