@@ -1012,6 +1012,7 @@ class metro_pur_order(order):
         return bool_name
           
 report_sxw.report_sxw('report.purchase.order.metro','purchase.order','addons/metro_purchase/report/purchase_order.rml',parser=metro_pur_order)
+report_sxw.report_sxw('report.purchase.quotation.metro','purchase.order','addons/metro_purchase/report/purchase_quotation.rml',parser=metro_pur_order)
 
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 def deal_args(obj,args):  
