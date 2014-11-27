@@ -6,6 +6,11 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_form"/>
             <field name="arch" type="xml">
+            	<field name="payment_ids" position="before">
+            		<separator string="Payment vouchers"/>
+            		<field name="payment_voucher_ids" context="{'form_view_ref':'account_voucher.view_vendor_receipt_form'}"/>
+            		<separator string="Payment journal items"/>
+            	</field>
             	<field name="payment_ids" position="after">
                     <group name="sale_payments" string="Sale Advance Payments" colspan="4">
                         <field name="sale_payment_ids" nolabel="1">
@@ -49,6 +54,11 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
+            	<field name="payment_ids" position="before">
+            		<separator string="Payment vouchers"/>
+            		<field name="payment_voucher_ids" context="{'form_view_ref':'account_voucher.view_vendor_payment_form'}"/>
+            		<separator string="Payment journal items"/>
+            	</field>
             	<field name="payment_ids" position="after">
                     <group name="purchase_payments" string="Purchase Advance Payments" colspan="4">
                         <field name="purchase_payment_ids" nolabel="1">

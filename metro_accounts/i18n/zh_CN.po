@@ -2041,3 +2041,8 @@ msgstr "供应商应付明细账"
 #, python-format
 msgid "Customer Receivable Detail"
 msgstr "客户应收明细账"
+
+#. module: account_voucher
+#: view:account.voucher:0
+msgid "Payment Ref"
+msgstr "单号"

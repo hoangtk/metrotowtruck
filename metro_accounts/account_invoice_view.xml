@@ -43,7 +43,20 @@
             		<field name="move_id" groups="account.group_account_user"/>
             	</field>
             </field>
-        </record>     
+        </record>   
+          
+        <record id="view_account_invoice_filter_ext" model="ir.ui.view">
+            <field name="name">view_account_invoice_filter_ext</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+            	<!-- move 'move_id' after the 'origin' -->
+            	<filter name="unpaid" position="after">
+            		<filter name="paid" string="Paid" domain="[('state','=','paid')]" help="Paid Invoices"/>
+            	</filter>
+            </field>
+        </record>   
+        
         <!-- improve the query parameters for supplier payments -->
         <record id="view_voucher_filter_vendor_pay_ext" model="ir.ui.view">
             <field name="name">invoice_customer_form_ext</field>

@@ -24,8 +24,10 @@ class account_invoice(osv.osv):
             result[invoice.id] = payments
         return result 
 
-    def _compute_lines(self, cr, uid, ids, name, args, context=None):
-        result = {}
+    def _compute_lines(self, cr, uid, ids, field_names, args, context=None):
+        result = dict((id,
+                       dict((field,None) for field in field_names)
+                       ) for id in ids)
         for invoice in self.browse(cr, uid, ids, context=context):
             src = []
             lines = []
@@ -42,9 +44,20 @@ class account_invoice(osv.osv):
                     lines += [x for x in temp_lines if (x and x not in lines)]
                     src.append(m.id)
 
-            lines = filter(lambda x: x not in src, lines)
+            lines = filter(lambda x: x not in src, lines)            
+            result[invoice.id]['payment_ids'] = lines
             
-            result[invoice.id] = lines
+            if 'payment_voucher_ids' in field_names:
+                #get the voucher
+                cr.execute('select distinct a.id \
+                from account_voucher a \
+                join account_move_line b on a.move_id = b.move_id \
+                where b.id = ANY(%s)',((lines,))) 
+                voucher_ids = cr.fetchall()  
+                #fetchall result: [(921,)(922,)(923,)]
+                pay_voucher_ids = [voucher_id for voucher_id, in voucher_ids]
+                result[invoice.id]['payment_voucher_ids'] = pay_voucher_ids
+                
         return result          
     _columns={
         'sale_ids': fields.many2many('sale.order', 'sale_order_invoice_rel', 'invoice_id', 'order_id', 'Sale Orders', readonly=True,),
@@ -54,7 +67,8 @@ class account_invoice(osv.osv):
         'purchase_payment_ids': fields.function(_purchase_payments, relation='account.move.line', type="many2many", string='Purchase Payments'),
         'auto_reconcile_purchase_pay': fields.boolean('Auto Reconcile Purchase Payment',help='Auto reconcile the purchase order payments when valid the invoice'),
         #the invoice payment ids
-        'payment_ids': fields.function(_compute_lines, relation='account.move.line', type="many2many", string='Payments'),
+        'payment_ids': fields.function(_compute_lines, relation='account.move.line', type="many2many", string='Payments',multi='payinfo'),#the invoice payment ids
+        'payment_voucher_ids': fields.function(_compute_lines, relation='account.voucher', type="many2many", string='Vouchers',multi='payinfo'),
     }
     _defaults={'auto_reconcile_sale_pay':True,'auto_reconcile_purchase_pay':True}
     
