@@ -184,6 +184,16 @@ class resource_calendar(osv.osv):
         ('name_uniq', 'unique(name)', 'Calendar must be unique!'),
     ]
     
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        name_old = self.read(cr, uid, id, ['name'], context=context)['name']
+        default.update({
+            'name':'%s(Copy)'%(name_old,),
+        })
+        return super(resource_calendar, self).copy(cr, uid, id, default, context)
+        
+    
     def default_get(self, cr, uid, fields, context=None):
         vals = super(resource_calendar, self).default_get(cr, uid, fields, context=context)
         if not vals:
