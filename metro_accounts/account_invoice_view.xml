@@ -44,5 +44,27 @@
             	</field>
             </field>
         </record>     
+        <!-- improve the query parameters for supplier payments -->
+        <record id="view_voucher_filter_vendor_pay_ext" model="ir.ui.view">
+            <field name="name">invoice_customer_form_ext</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor_pay"/>
+            <field name="arch" type="xml">
+            	<field name="number" position="replace">
+            		<field name="number" string="Voucher" filter_domain="['|', ('number','ilike',self), ('reference','ilike',self)]"/>
+            	</field>
+            </field>
+        </record>  
+        <record id="view_voucher_filter_customer_pay_ext" model="ir.ui.view">
+            <field name="name">invoice_customer_form_ext</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_filter_customer_pay"/>
+            <field name="arch" type="xml">
+            	<field name="number" position="replace">
+            		<field name="number" string="Voucher" filter_domain="['|', ('number','ilike',self), ('reference','ilike',self)]"/>
+            	</field>
+            </field>
+        </record>   
+        
     </data>
 </openerp>
