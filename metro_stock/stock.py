@@ -602,7 +602,7 @@ def deal_args(obj,args):
     new_args = []
     for arg in args:
         fld_name = arg[0]
-        if fld_name == 'date':
+        if fld_name in ('date', 'date_done'):
             fld_operator = arg[1]
             fld_val = arg[2]
             fld = obj._columns.get(fld_name)

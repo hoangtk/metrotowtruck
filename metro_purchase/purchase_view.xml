@@ -72,7 +72,7 @@
 					<separator string="Incoming Shipments"/>
                 	<field name="picking_ids"/>  
                  	<separator string="Invoices"/>
-                	<field name="invoice_ids"/>
+                	<field name="invoice_ids" readonly="1"/>
                 </xpath>     
                  <xpath expr="//field[@name='partner_ref']" position="replace" >
                 </xpath>     

@@ -1301,6 +1301,7 @@ msgstr "导入盘点库存"
 
 #. module: metro_stock
 #: view:stock.picking.in:0
+#: view:stock.picking.in:0
 msgid "Date of Reception"
 msgstr "入库时间"
 

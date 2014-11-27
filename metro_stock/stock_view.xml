@@ -400,6 +400,7 @@
             <field name="arch" type="xml">
                 <field name="stock_journal_id" position="before">
                 	<field name="date"/>
+                	<field name="date_done"/>
                 </field>
             </field>
         </record>   
@@ -410,6 +411,7 @@
             <field name="arch" type="xml">
                 <field name="stock_journal_id" position="before">
                 	<field name="date"/>
+                	<field name="date_done" string="Date of Deliver"/>
                 	<field name="partner_id"/>
                 </field>
             </field>
@@ -424,6 +426,7 @@
             	</field>	
                 <field name="stock_journal_id" position="before">
                 	<field name="date"/>
+                	<field name="date_done" string="Date of Reception"/>
                 	<field name="partner_id"/>
                 </field>
             </field>
@@ -719,7 +722,7 @@
 				</field>
             </field>
         </record>		
-        
+        <!--  for the incoming and deliver products -->
         <record id="metro_view_move_tree_reception_picking" model="ir.ui.view">
             <field name="name">metro.stock.move.tree2</field>
             <field name="model">stock.move</field>
@@ -736,6 +739,9 @@
             		<field name="product_uom_base_qty"/>
             		<field name="product_uom_base"/>
             	</field>
+            	<field name="picking_id" position="attributes">
+            		<attribute name="invisible">0</attribute>
+				</field>
             </field>
         </record>		
                 
@@ -760,6 +766,9 @@
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
             		<field name="product_uom_base"/>
+            	</field>
+            	<field name="origin" position="after">
+            		<field name="date"/>
             	</field>
             </field>
         </record>                 
@@ -801,6 +810,19 @@
             		<field name="supplier_prod_name"/>
             		<field name="origin"/>
             	</field>
+            	<!-- remove the  groups="base.group_no_one" -->
+            	<field name="date" position='replace'>
+            		 <field name="date"/>
+            		 <field name="type"/>
+            	</field>
+            	<filter string="Today"  position='after'>
+            		 <separator/>
+            		 <filter string="Getting Goods" name="move_incoming" domain="[('type','=','in')]"/>
+            		 <filter string="Sending Goods" name="move_incoming" domain="[('type','=','out')]"/>
+            		 <filter string="Internal" name="move_incoming" domain="[('type','=','internal')]"/>
+            		 <filter string="Material Request" name="move_incoming" domain="[('type','=','mr')]"/>
+            		 <filter string="Material Return" name="move_incoming" domain="[('type','=','mrr')]"/>
+            	</filter>
             </field>
         </record> 
         
