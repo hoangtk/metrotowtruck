@@ -27,3 +27,7 @@
 .openerp .oe_form_sheet_width {
   max-width: 100%;
 }
+/*extend the file upload's file name length*/
+.openerp .oe_form_editable .oe_form .oe_form_field_binary input {
+  width: 150px;
+}
