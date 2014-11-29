@@ -18,7 +18,7 @@
                         	type="action" context="{'default_sync_direction':'clock2server'}"/>
                         <button name="%(action_hr_clock_emp_sync)d" string="Delete Employees on Clock"
                         	type="action" context="{'default_sync_direction':'user2delete'}"
-                        	confirm="Delete employees will erase all user data, including base info, finger print, password and the attendance log \nAre you sure to continue? "/>
+                        	confirm="Delete employees will erase all user data, including base info, finger print, password and the attendance log. Are you sure to continue? "/>
                         <!-- 
                         ClearSLog()
                         ClearData()
