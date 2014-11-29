@@ -162,7 +162,7 @@ class pur_req(osv.osv):
                   'approved':{'action':'approved, please issue PO','groups':['metro_purchase.group_pur_req_buyer']},
                   'rejected':{'action':'was rejected, please check','groups':[]},
                   'in_purchase':{'action':'is in purchasing','groups':[],},
-                  'done':{'action':'was done','groups':[]},
+                  'done':{'action':'was done','groups':['metro_purchase.group_pur_req_buyer']},
                   'cancel':{'action':'was cancelled','groups':[]},
                   }
         model_obj = self.pool.get('ir.model.data')
@@ -174,19 +174,21 @@ class pur_req(osv.osv):
                 email_group_ids = []
                 for group_param in group_params:
                     grp_data = group_param.split('.')
-                    test = model_obj.get_object_reference(cr, uid, grp_data[0], grp_data[1])
                     email_group_ids.append(model_obj.get_object_reference(cr, uid, grp_data[0], grp_data[1])[1])
                 #email to users
                 email_to = None
-                if mail_type != ' confirmed':
+                if mail_type in (' rejected', 'done', 'cancel'):
                     email_to = order.user_id.email
+                email_cc = None
+                if mail_type in ('approved', 'in_purchase'):
+                    email_cc = order.user_id.email
                 #email messages             
                 email_subject = 'Purchase Requisition: %s %s'%(order.name,action_name)
                 email_body = email_subject
                 #the current user is the from user
                 email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
                 #send emails
-                utils.email_send_group(cr, uid, email_from, email_to, email_subject,email_body, email_group_ids, context)   
+                utils.email_send_group(cr, uid, email_from, email_to, email_subject,email_body, email_group_ids, email_cc=email_cc,context=context)   
                 
 pur_req()    
 

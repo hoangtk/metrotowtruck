@@ -145,6 +145,22 @@ class hr_employee(osv.osv):
 			ids = self.search(cr, user, args, limit=limit, context=context)
 		result = self.name_get(cr, user, ids, context=context)
 		return result 	
+	
+	#update user related employee_id
+	def update_emp_user(self, cr, uid, user_id, emp_id, context=None):
+		if user_id and emp_id:
+			self.pool.get('res.user').write(cr, uid, user_id, {'employee_id':emp_id}, context=context)
+	def write(self, cr, uid, ids, vals, context=None):
+		resu = super(hr_employee, self).write(cr, uid, ids, vals, context=context)
+		if 	'user_id' in vals:
+			self.update_user_emp(cr, uid, vals['user_id'], ids[0], context)
+		return resu
+	def create(self, cr, uid, vals, context=None):
+		new_id = super(hr_employee, self).create(cr, uid, vals, context=context)
+		if 	'user_id' in vals:
+			self.update_user_emp(cr, uid, vals['user_id'], new_id, context)
+		return new_id		
+	
 	def sync_clock(self, cr, uid, ids=None, context=None):
 		_logger.info('begining sync_clock...')
 		if not context:
@@ -274,22 +290,57 @@ class hr_holiday_calendar(osv.osv):
     }
 hr_holiday_calendar() 
 
+'''
+Add 'employee_id' to res_users, to manage the rules convention
+--update by the employee's user setting
+update res_users c
+set employee_id = a.id
+from hr_employee a,
+resource_resource b 
+where a.resource_id = b.id
+and b.user_id = c.id
+
+--Record rule on hr.holiday using the employee_id
+[('employee_id','child_of', [user.employee_id.id])]
+and below is also working
+[('employee_id','in', user.employee_id and [emp.id for emp in user.employee_id.child_ids] or [])]
+
+'''
 class res_users(osv.osv):
-    _name = 'res.users'
-    _inherit = 'res.users'
-    def _get_emp_image(self, cr, uid, ids, names, args, context=None):
-    	result = dict.fromkeys(ids,{'img_emp':False, 'img_emp_medium':False, 'img_emp_small':False})
-    	#get the images from employee
-    	for user in self.browse(cr, uid, ids, context=context):
-    		if user.employee_ids:
-    			#result[user.id] = tools.image_get_resized_images(user.employee_ids[0].image,medium_name='img_emp_medium',small_name='img_emp_small')
-    			result[user.id] = {'img_emp':user.employee_ids[0].image, 'img_emp_medium':user.employee_ids[0].image_medium, 'img_emp_small':user.employee_ids[0].image_small}
-    	return result
-    _columns = {
+	_name = 'res.users'
+	_inherit = 'res.users'
+	def _get_emp_image(self, cr, uid, ids, names, args, context=None):
+		result = dict.fromkeys(ids,{'img_emp':False, 'img_emp_medium':False, 'img_emp_small':False})
+		#get the images from employee
+		for user in self.browse(cr, uid, ids, context=context):
+#			if user.employee_ids:
+#				result[user.id] = {'img_emp':user.employee_ids[0].image, 'img_emp_medium':user.employee_ids[0].image_medium, 'img_emp_small':user.employee_ids[0].image_small}
+			if user.employee_id:
+				result[user.id] = {'img_emp':user.employee_id.image, 
+								'img_emp_medium':user.employee_id.image_medium, 
+								'img_emp_small':user.employee_id.image_small}
+		return result
+	_columns = {
 		'img_emp': fields.function(_get_emp_image, string="Image", type="binary", multi="_get_image",),  
 		'img_emp_medium': fields.function(_get_emp_image, string="Medium-sized image", type="binary", multi="_get_image",),  
-		'img_emp_small': fields.function(_get_emp_image, string="Small-sized image", type="binary", multi="_get_image",),  
+		'img_emp_small': fields.function(_get_emp_image, string="Small-sized image", type="binary", multi="_get_image",),
+		'employee_id': fields.many2one('hr.employee', 'Employee'),
 	}			  
-    def copy(self, cr, uid, id, default=None, context=None):
-		default.update({'employee_ids':[]})
+	def copy(self, cr, uid, id, default=None, context=None):
+		default.update({'employee_ids':[], 'employee_id':None})
 		return super(res_users,self).copy(cr, uid, id, default, context)
+	
+	#update employee related user_id
+	def update_emp_user(self, cr, uid, user_id, emp_id, context=None):
+		if user_id and emp_id:
+			self.pool.get('hr.employee').write(cr, uid, emp_id, {'user_id':user_id}, context=context)
+	def write(self, cr, uid, ids, vals, context=None):
+		resu = super(hr_employee, self).write(cr, uid, ids, vals, context=context)
+		if 	'employee_id' in vals:
+			self.update_emp_user(cr, uid, ids[0], vals['employee_id'], context)
+		return resu
+	def create(self, cr, uid, vals, context=None):
+		new_id = super(hr_employee, self).create(cr, uid, vals, context=context)
+		if 	'employee_id' in vals:
+			self.update_emp_user(cr, uid, new_id, vals['employee_id'], context)
+		return new_id		

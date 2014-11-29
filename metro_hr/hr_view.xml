@@ -161,12 +161,15 @@
 					<field name="image" position="replace">
 						<field name="img_emp" widget='image' class="oe_avatar oe_left" options='{"preview_image": "img_emp_medium"}' readonly="1"/>	
 					</field>
+					<field name="company_id" position="after">
+						<field name="employee_id"/>
+					</field>
 					<!-- show employee list -->
-					<page string="Access Rights" position="after">
+					<!-- <page string="Access Rights" position="after">
 						<page string="Employees">
 							<field name="employee_ids" readonly="1"/>
 						</page>
-					</page>
+					</page> -->
 				</data>
 			</field>
 		</record>

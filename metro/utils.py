@@ -29,6 +29,7 @@ from datetime import datetime
 import time
 import pytz
 import logging
+from openerp.tools import resolve_attr 
 
 _logger = logging.getLogger(__name__)
 
@@ -89,19 +90,23 @@ def _email_send_template(cr, uid, ids, email_vals, context=None):
                 email_tmpl_obj.send_mail(new_cr, uid, tmpl_ids[0], id, force_send=True, context=context)
     #close the new cursor
     new_cr.close()
-    return True    
+    return True
 
-def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, context=None):
+def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, email_cc=None, context=None):
     if email_from and (email_to or email_to_group_id):
-        threaded_email = threading.Thread(target=_email_send_group, args=(cr, uid, email_from, email_to, subject, body, email_to_group_id, context))
+        threaded_email = threading.Thread(target=_email_send_group, args=(cr, uid, email_from, email_to, subject, body, email_to_group_id, email_cc, context))
         threaded_email.start()
     return True
 
-def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, context=None):
+def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, email_cc=None, context=None):
     pool =  pooler.get_pool(cr.dbname)
     new_cr = pooler.get_db(cr.dbname).cursor()
     emails = []
-    if email_to: emails.append(email_to)
+    if email_to: 
+        if isinstance(email_to, type(u' ')):
+            emails.append(email_to)
+        else:
+            emails += email_to
     if email_to_group_ids: 
         #get the group user's addresses by group id
         group_obj = pool.get("res.groups")
@@ -116,10 +121,59 @@ def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_gro
         for group in groups:
             emails += [user.email for user in group.users if user.email]
     if emails:
-        mail.email_send(email_from, emails, subject, body)
+        #remove duplicated email address
+        emails = list(set(emails))
+        email_ccs = []
+        if email_cc: 
+            if isinstance(email_cc, type(u' ')):
+                email_ccs.append(email_cc)
+            else:
+                email_ccs += email_cc
+        mail.email_send(email_from, emails, subject, body, email_cc=email_ccs)
     #close the new cursor
     new_cr.close()        
     return True    
+
+def email_notify(cr, uid, obj_name, obj_ids, actions, action, subject_fields = None, email_to = None, context=None):
+    '''
+    @param param:obj_name the model name that related to email, 'hr.holiday'
+    @param param:object ids list, [1,2,3...]
+    @param param:actions, one dict that define the action name and related message and groups
+    actions = {'confirmed':{'msg':'need your approval','groups':['metro_purchase.group_pur_req_checker']},
+                  'approved':{'msg':'approved, please issue PO','groups':['metro_purchase.group_pur_req_buyer']},
+                  'rejected':{'msg':'was rejected, please check','groups':[]},
+                  'in_purchase':{'msg':'is in purchasing','groups':[],},
+                  'done':{'msg':'was done','groups':[]},
+                  'cancel':{'msg':'was cancelled','groups':[]},
+                  }  
+    @param param: optional, subject_fields, one list that will generated the subject, if missing then user object.name
+    @param email_to:optional, email to addresss
+    '''
+    pool =  pooler.get_pool(cr.dbname)
+    model_obj = pool.get('ir.model.data')
+    obj_obj = pool.get(obj_name)
+    if actions.get(action,False):
+        msg = actions[action].get('msg')
+        group_params = actions[action].get('groups')
+        for order in obj_obj.browse(cr, uid, obj_ids, context=context):
+            #email to groups
+            email_group_ids = []
+            for group_param in group_params:
+                grp_data = group_param.split('.')
+                email_group_ids.append(model_obj.get_object_reference(cr, uid, grp_data[0], grp_data[1])[1])
+            #email messages      
+            subject_sub = ""       
+            if not subject_fields:
+                subject_sub = order._description
+            else:
+                for field in subject_fields:
+                    subject_sub +=  '%s,'%(resolve_attr(order, field),)
+            email_subject = '%s: %s %s'%(obj_obj._description, subject_sub, msg)
+            email_body = email_subject
+            #the current user is the from user
+            email_from = pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
+            #send emails
+            email_send_group(cr, uid, email_from, email_to, email_subject,email_body, email_group_ids, context) 
 
 class msg_tool(osv.TransientModel):
     _name = 'msg.tool'

@@ -51,11 +51,20 @@ class material_request(osv.osv):
     }
     _defaults = {
         'type': 'mr',
+        'move_type': 'one',
         'state': 'creating',
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'Order Reference must be unique!'),
     ]
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'move_type':self._defaults['move_type'],
+        })
+        res = super(material_request, self).copy(cr, uid, id, default, context)
+        return res       
 
     def check_access_rights(self, cr, uid, operation, raise_exception=True):
         #override in order to redirect the check of acces rights on the stock.picking object
