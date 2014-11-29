@@ -36,7 +36,6 @@
     'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image", "hr_recruitment", "hr_contract"],
     'init_xml': [],
     'update_xml': [
-        'security/ir.model.access.csv',
         'hr_view.xml',
         'hr_timesheet_view.xml',
         'hr_contract_view.xml',
@@ -48,7 +47,9 @@
         'wizard/hr_rpt_attend_month_view.xml',
         'hr_attendance_view.xml',
         'hr_clock_view.xml',
+        'hr_holidays.xml',
         'hr_data.xml',
+        'security/ir.model.access.csv',
     ],
     'demo_xml': [],
     'test': [],

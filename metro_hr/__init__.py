@@ -25,4 +25,5 @@ import hr_contract
 import hr_clock_util
 import hr_clock
 import hr_attendance
+import hr_holidays
 import wizard
