@@ -147,9 +147,10 @@ class hr_employee(osv.osv):
 		return result 	
 	
 	#update user related employee_id
-	def update_emp_user(self, cr, uid, user_id, emp_id, context=None):
+	def update_user_emp(self, cr, uid, user_id, emp_id, context=None):
 		if user_id and emp_id:
-			self.pool.get('res.user').write(cr, uid, user_id, {'employee_id':emp_id}, context=context)
+			#use sql to update, avoie the dead looping calling with res_user.update_emp_user()
+			cr.execute('update res_users set employee_id = %s where id = %s',(emp_id, user_id))
 	def write(self, cr, uid, ids, vals, context=None):
 		resu = super(hr_employee, self).write(cr, uid, ids, vals, context=context)
 		if 	'user_id' in vals:
@@ -333,7 +334,9 @@ class res_users(osv.osv):
 	#update employee related user_id
 	def update_emp_user(self, cr, uid, user_id, emp_id, context=None):
 		if user_id and emp_id:
-			self.pool.get('hr.employee').write(cr, uid, emp_id, {'user_id':user_id}, context=context)
+			#use sql to update, avoie the dead looping calling with hr_employee.update_user_emp()
+			resource_id = self.pool.get('hr.employee').browse(cr, uid, emp_id, context=context).resource_id.id
+			cr.execute('update resource_resource set user_id = %s where id = %s',(user_id, resource_id))
 	def write(self, cr, uid, ids, vals, context=None):
 		resu = super(res_users, self).write(cr, uid, ids, vals, context=context)
 		if 	'employee_id' in vals:
