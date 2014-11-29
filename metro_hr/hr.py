@@ -335,12 +335,12 @@ class res_users(osv.osv):
 		if user_id and emp_id:
 			self.pool.get('hr.employee').write(cr, uid, emp_id, {'user_id':user_id}, context=context)
 	def write(self, cr, uid, ids, vals, context=None):
-		resu = super(hr_employee, self).write(cr, uid, ids, vals, context=context)
+		resu = super(res_users, self).write(cr, uid, ids, vals, context=context)
 		if 	'employee_id' in vals:
 			self.update_emp_user(cr, uid, ids[0], vals['employee_id'], context)
 		return resu
 	def create(self, cr, uid, vals, context=None):
-		new_id = super(hr_employee, self).create(cr, uid, vals, context=context)
+		new_id = super(res_users, self).create(cr, uid, vals, context=context)
 		if 	'employee_id' in vals:
 			self.update_emp_user(cr, uid, new_id, vals['employee_id'], context)
 		return new_id		

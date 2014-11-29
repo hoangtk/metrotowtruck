@@ -48,6 +48,7 @@
         'wizard/hr_rpt_attend_month_view.xml',
         'hr_attendance_view.xml',
         'hr_clock_view.xml',
+        'hr_holidays.xml',
         'hr_data.xml',
     ],
     'demo_xml': [],
