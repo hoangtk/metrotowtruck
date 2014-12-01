@@ -1272,7 +1272,7 @@ msgstr "指纹7"
 #: field:hr.holidays,ticket_approve_id:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_holidays_ticket_approve_id
 msgid "Department Approval(ticket)"
-msgstr "部门神品(纸质单)"
+msgstr "部门审批(纸质单)"
 
 #. module: metro_hr
 #: field:hr.employee,clock_fp5:0
@@ -1509,7 +1509,7 @@ msgstr "无签出处理方式"
 #. module: metro_hr
 #: view:hr.clock:0
 msgid "Download Attendance Log"
-msgstr "下载打卡记录"
+msgstr "下载考勤记录"
 
 #. module: metro_hr
 #: model:ir.model,name:metro_hr.model_hr_rpt_attend_emp_day_line
