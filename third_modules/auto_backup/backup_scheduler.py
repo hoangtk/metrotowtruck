@@ -25,6 +25,7 @@ import socket
 import os
 import time
 import base64
+from datetime import datetime
 
 from osv import fields,osv
 import tools
@@ -87,7 +88,8 @@ class db_backup(osv.osv):
                         os.makedirs(rec.bkp_dir)
                 except:
                     raise
-                bkp_file='%s_%s.dump' % (rec.name, time.strftime('%Y%m%d_%H_%M_%S'))
+                cur_date = fields.datetime.context_timestamp(cr, user, datetime.now(), context)
+                bkp_file='%s_%s.dump' % (rec.name, cur_date.strftime('%Y%m%d_%H_%M_%S'))
                 file_path = os.path.join(rec.bkp_dir,bkp_file)
                 fp = open(file_path,'wb')
                 uri = 'http://' + rec.host + ':' + rec.port
