@@ -40,6 +40,18 @@ class hr_attendance(osv.osv):
         #redefined the _day_compute() method, to record the local day on this field
         'day': fields.function(_day_compute, type='char', string='Day', store=True, select=1, size=32),
     }
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        name_old = self.read(cr, uid, id, ['name'], context=context)['name']
+        default.update({
+            'notes':None,
+            'clock_log_id':None,
+            'clock_id':None,
+            'day':None,
+        })
+        return super(hr_attendance, self).copy(cr, uid, id, default, context)
+    
     def _altern_si_so(self, cr, uid, ids, context=None):
         #disable this constraint
         return True
