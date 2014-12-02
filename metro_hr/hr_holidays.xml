@@ -75,6 +75,24 @@
             </field>
         </record>
         
+        <!-- remove ''search_default_my_leaves':1',
+		 the my leaves showing by default, 
+		 since there are record rules that by different roels see different data -->
+        <record model="ir.actions.act_window" id="hr_holidays.open_ask_holidays">
+            <field name="context">{'default_type': 'remove'}</field>
+        </record>
+        
+        <!-- change sequence from calendar/tree/form to tree/form/calendar -->
+        <record model="ir.actions.act_window.view" id="hr_holidays.action_open_ask_holidays_tree">
+            <field name="sequence" eval="1"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="hr_holidays.action_open_ask_holidays_form">
+            <field name="sequence" eval="2"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="hr_holidays.action_open_ask_holidays_calendar">
+            <field name="sequence" eval="3"/>
+        </record>
+        
 <!-- Holidays: Leave Allocation -->
         <record id="holiday_allocation_form_view" model="ir.ui.view">
             <field name="name">holiday_allocation_form_view</field>

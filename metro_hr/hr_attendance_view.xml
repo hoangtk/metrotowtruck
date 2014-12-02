@@ -31,12 +31,12 @@
                 	<attribute name="invisible">0</attribute>
                 </field>
                 <field name="action" position="after">
-                	<field name="clock_id"/>
-                	<field name="notes"/>
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/>
                 </field>
                 <field name="day" position="after">
+                	<field name="notes"/>
+                	<field name="clock_id" readonly="1"/>
                 	<field name="clock_log_id" readonly="1"/>
                 </field>
             </field>
@@ -53,11 +53,11 @@
             		</header>
             	</xpath>
                 <field name="action_desc" position="after">
-                	<field name="clock_id"/>
-                	<field name="notes"/>
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/>
                 	<field name="day"/>
+                	<field name="notes"/>
+                	<field name="clock_id" readonly="1"/>
                 	<field name="clock_log_id" readonly="1"/>
                 </field>
             </field>

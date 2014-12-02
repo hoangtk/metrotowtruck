@@ -30,6 +30,7 @@ class hr_holidays_status(osv.osv):
     
 class hr_holidays(osv.osv):
     _inherit = "hr.holidays"
+    _order = "date_from desc, type desc"
     def _double_validation(self, cr, uid, ids, field_names, arg, context=None):
         res = {}
         for leave in self.browse(cr, uid, ids, context=context):
@@ -54,7 +55,8 @@ class hr_holidays(osv.osv):
     def unlink(self, cr, uid, ids, context=None):
         for order in self.read(cr, uid, ids, ['state','name'], context=context):
             if order['state'] not in ('draft','refused'):
-                raise osv.except_osv(_('Error!'),_('%s can not be delete, only "To Submit" or "Refused" request can be delete!')%(order['name'],)) 
+                raise osv.except_osv(_('Error!'),_('%s can not be delete, only "To Submit" or "Refused" request can be delete!')%(order['name'],))
+        return super(hr_holidays, self).unlink(cr, uid, ids, context)
     def onchange_employee(self, cr, uid, ids, employee_id):
         result = {'value': {'department_id': False, 'job_id': False, 'emp_code': False}}
         if employee_id:
