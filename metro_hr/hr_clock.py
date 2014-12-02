@@ -132,7 +132,7 @@ class hr_clock(osv.osv):
                 #if download the whole clock data, then log the message
                 if not emp_codes:
                     #calling from cron or the clock GUI
-                    msg = u'download clock[%s] log end at %s, log count:%s'%(clock_data.name,datetime.now(), log_cnt)
+                    msg = u'download clock[%s] log end at %s, log count:%s, new log count:%s'%(clock_data.name,datetime.now(), log_cnt, len(attend_ids))
                     run_log += msg + "\n"
                     self.message_post(cr, uid, clock_data.id, 
                                       type='comment', subtype='mail.mt_comment', 
