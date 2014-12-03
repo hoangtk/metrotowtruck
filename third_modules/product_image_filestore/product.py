@@ -51,8 +51,9 @@ class product_product(orm.Model):
                     result[image_type] = attachment_obj.browse(cr, uid, att_image_id).datas
             # Clean the image field
             if result:
-                self.write(cr, uid, id, {'image': None})
-                return result
+                if self.check_access_rights(cr, uid, 'write', raise_exception=False):
+                    self.write(cr, uid, id, {'image': None})
+                return result            
         return False
 
     def _get_image(self, cr, uid, ids, name, args, context=None):
