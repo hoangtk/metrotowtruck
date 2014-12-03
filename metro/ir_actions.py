@@ -28,6 +28,7 @@ from socket import gethostname
 
 from openerp import netsvc
 from openerp.osv import fields,osv
+from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
