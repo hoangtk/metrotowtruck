@@ -34,7 +34,32 @@ class partner(osv.osv):
         'street2': fields.char('Street2', size=128, translate=True),
         'city': fields.char('City', size=128, translate=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'parent_name': fields.related('parent_id', 'name', type='char', readonly=True, string='Parent name'),
     }
+    def name_get(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        res = []
+        for record in self.browse(cr, uid, ids, context=context):
+            name = record.name
+            if record.parent_id:
+                '''
+                when current partner can read by user, but parent can not be read
+                if use record.parent_id.name, then the _read_flat() will be trigger on parent_id, and the access checking will throw error
+                use related field parent_name can avoid this issue, since in the related._fnct_read(), SUPERUSER_ID will be use to call read()  
+                '''
+                #name =  "%s (%s)" % (name, record.parent_id.name)
+                name = "%s, %s" % (record.parent_name, name)
+            if context.get('show_address'):
+                name = name + "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
+                name = name.replace('\n\n','\n')
+                name = name.replace('\n\n','\n')
+            if context.get('show_email') and record.email:
+                name = "%s <%s>" % (name, record.email)
+            res.append((record.id, name))
+        return res        
 partner()      
 
 class res_country_state(osv.osv):
