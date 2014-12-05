@@ -13,23 +13,23 @@ if dbname == 'metro_production':
 username = raw_input('Enter user name : ')
 pwd = raw_input('Enter password : ')
 '''
-host = 'localhost'
-port = '9069'
-dbname = 'metro_1125'
-username = 'erpadmin'
-pwd = 'develop'
+#host = 'localhost'
+#port = '9069'
+#dbname = 'metro_1125'
+#username = 'erpadmin'
+#pwd = 'develop'
 
 #host = '10.1.1.141'
 #port = '80'
-#dbname = 'metro_prod_0328'
+#dbname = 'metro_test'
 #username = 'erpadmin'
-#pwd = 'develop'
+#pwd = 'erp123-test'
 #
-#host = '10.1.1.140'
-#port = '80'
-#dbname = 'metro_production'
-#username = 'erpadmin'
-#pwd = 'erp123'
+host = '10.1.1.140'
+port = '80'
+dbname = 'metro_production'
+username = 'erpadmin'
+pwd = 'erp123'
 
 sock_common = xmlrpclib.ServerProxy ('http://%s:%s/xmlrpc/common'%(host,port))
 uid = sock_common.login(dbname, username, pwd)
@@ -44,8 +44,8 @@ for prod_id in prod_ids:
     cnt += 1
     dealed_ids.append(prod_id)
     print 'done: %s'%(cnt,)
-    if cnt >= 500:
-        break
+#    if cnt >= 500:
+#        break
     
 print dealed_ids    
 print 'done...'

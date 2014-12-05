@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Root Menus -->
+        <menuitem id="menu_hr_root_emppay" parent="hr.menu_hr_root" name="Payroll2" sequence="30"/>
+        <menuitem id="menu_hr_emppay_configure" parent="hr.menu_hr_configuration" name="Payroll2" groups="base.group_hr_manager" sequence="45"/>
+
+        <!-- Allowance&Deduction Rules -->
+        
+        <record id="view_hr_emppay_alwded_list" model="ir.ui.view">
+            <field name="name">view_hr_emppay_alwded_list</field>
+            <field name="model">hr.emppay.alwded</field>
+            <field name="arch" type="xml">
+                <tree string="Payroll Allowance&amp;Deduction" editable="bottom">
+                    <field name="sequence"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="type_calc"/>
+                    <field name="amount"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_alwded_form" model="ir.ui.view">
+            <field name="name">view_hr_emppay_alwded_form</field>
+            <field name="model">hr.emppay.alwded</field>
+            <field name="arch" type="xml">
+                <form string="Payroll Allowance&amp;Deduction" version="7.0">
+                    <field name="sequence"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="type_calc"/>
+                    <field name="amount"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_alwded_search" model="ir.ui.view">
+            <field name="name">view_hr_emppay_alwded_search</field>
+            <field name="model">hr.emppay.alwded</field>
+            <field name="arch" type="xml">
+                <search string="Search Allowance&amp;Deduction">
+                    <field name="name" string="Allowance&amp;Deduction" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+                    <field name="type"/>
+                </search>
+            </field>
+        </record>
+        
+        <record id="action_hr_emppay_alwded" model="ir.actions.act_window">
+            <field name="name">Payroll Allowance&amp;Deduction</field>
+            <field name="res_model">hr.emppay.alwded</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_emppay_alwded_list"/>
+            <field name="search_view_id" ref="view_hr_emppay_alwded_search"/>
+        </record>
+
+        <menuitem id="menu_hr_emppay_alwded" action="action_hr_emppay_alwded" parent="menu_hr_emppay_configure" sequence="12"/>
+        
+        <!-- Social Insurances -->
+        
+        <record id="view_hr_emppay_si_list" model="ir.ui.view">
+            <field name="name">view_hr_emppay_si_list</field>
+            <field name="model">hr.emppay.si</field>
+            <field name="arch" type="xml">
+                <tree string="Social Insurances" editable="bottom">
+                    <field name="sequence"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="amount_base"/>
+                    <field name="rate_company"/>
+                    <field name="rate_personal"/>
+                    <field name="amount_company" sum="Company Total"/>
+                    <field name="amount_personal" sum="Employee Total"/>
+                    <field name="company_id" groups="base.group_multi_company"/>        
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_si_form" model="ir.ui.view">
+            <field name="name">view_hr_emppay_si_form</field>
+            <field name="model">hr.emppay.si</field>
+            <field name="arch" type="xml">
+                <form string="Social Insurances" version="7.0">
+                    <field name="sequence"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="amount_base"/>
+                    <field name="rate_company"/>
+                    <field name="rate_personal"/>
+                    <field name="amount_company"/>
+                    <field name="amount_personal"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_si_search" model="ir.ui.view">
+            <field name="name">view_hr_emppay_si_search</field>
+            <field name="model">hr.emppay.si</field>
+            <field name="arch" type="xml">
+                <search string="Search Social Insurances">
+                    <field name="name" string="Social Insurances" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+                </search>
+            </field>
+        </record>
+        
+        <record id="action_hr_emppay_si" model="ir.actions.act_window">
+            <field name="name">Social Insurances</field>
+            <field name="res_model">hr.emppay.si</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_emppay_si_list"/>
+            <field name="search_view_id" ref="view_hr_emppay_si_search"/>
+        </record>
+
+        <menuitem id="menu_hr_emppay_si" action="action_hr_emppay_si" parent="menu_hr_emppay_configure" sequence="12"/>        
+        
+<!-- Employee Payroll Pay -->
+        
+        <record id="view_hr_emppay_list" model="ir.ui.view">
+            <field name="name">view_hr_emppay_list</field>
+            <field name="model">hr.emppay</field>
+            <field name="arch" type="xml">
+                <tree colors="gray:state == 'cancel'" string="Payslips">
+                	<field name="number"/>
+                	<field name="employee_id"/>
+                	<field name="name"/>
+                	<field name="date_from"/>
+                	<field name="date_to"/>
+                	<field name="state"/>
+					<field name="company_id" groups="base.group_multi_company"/>       
+                    <field name="emppay_run_id"/>     
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_form" model="ir.ui.view">
+            <field name="name">view_hr_emppay_form</field>
+            <field name="model">hr.emppay</field>
+            <field name="arch" type="xml">
+                <form string="Payslip" version="7.0">
+                <header>
+                    <button string="Confirm" name="hr_verify_sheet" states="draft" class="oe_highlight"/>
+                    <button string="Set to Draft" name="draft" states="cancel"/>
+                    <button string="Cancel Payslip" name="cancel_sheet" states="draft,verify"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,verify,done"/>
+                </header>
+                <sheet>
+                    <group col="4">
+                    	<field name="employee_id" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"/>
+                        <field name="contract_id" domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" context="{'default_employee_id': employee_id}"/>
+                        <label for="date_from" string="Range" class="oe_inline"/>
+                        <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)" class="oe_inline"/> -
+                        <field name="date_to" class="oe_inline"/>
+                        <field name="number"/>
+                        <field name="name"/>
+                    </group>
+                    <notebook>
+                        <page string="Worked Days &amp; Inputs">
+                            <separator string="Other Inputs"/>
+                            <field name="input_line_ids" colspan="4" nolabel="1">
+                                <tree string="Input Data" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="amount"/>
+                                    <field name="contract_id"/>
+                                    <field name="sequence" invisible="True"/>
+                                </tree>
+                                <form string="Payslip Line">
+                                    <group col="4">
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="payslip_id"/>
+                                        <field name="sequence"/>
+                                        <field name="amount"/>
+                                        <field name="contract_id"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Salary Computation" >
+                            <field name="line_ids" colspan="4" nolabel="1">
+                                <tree string="Salary Structure" editable="bottom" colors="blue:total == 0">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="category_id"/>
+                                    <field name="sequence" invisible="1"/>
+                                    <field name="quantity"/>
+                                    <field name="rate"/>
+                                    <field name="amount"/>
+                                    <field name="total"/>
+                                </tree>
+                                <form string="Payslip Line">
+                                    <group col="4">
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="category_id"/>
+                                        <field name="sequence"/>
+                                        <field name="quantity"/>
+                                        <field name="rate"/>
+                                        <field name="amount"/>
+                                        <field name="total"/>
+                                        <field name="salary_rule_id"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Details By Salary Rule Category">
+                            <field name="details_by_salary_rule_category" context="{'group_by':'category_id'}" domain="[('appears_on_payslip', '=', True)]">
+                                <tree string="Payslip Lines" colors="blue:total == 0">
+                                    <field name="category_id"/>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="total"/>
+                                </tree>
+                            </field>
+                       </page>
+                       <page string="Other Information">
+                            <group>
+                                <group string="Miscellaneous">
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="payslip_run_id" domain="[('state','=','draft')]"/>
+                                </group>
+                                <group name="accounting" string="Accounting">
+                                    <field name="paid" readonly="1"/>
+                                </group>
+                            </group>
+                            <div colspan="4">
+                                <field name="note" Placeholder="Add an internal note..."/>
+                            </div>
+                       </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_search" model="ir.ui.view">
+            <field name="name">view_hr_emppay_search</field>
+            <field name="model">hr.emppay</field>
+            <field name="arch" type="xml">
+                <search string="Search Payslip">
+                    <field name="name" string="Allowance&amp;Deduction" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
+                    <field name="type"/>
+                </search>
+            </field>
+        </record>
+        
+        <record id="action_hr_emppay" model="ir.actions.act_window">
+            <field name="name">Payslip</field>
+            <field name="res_model">hr.emppay</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_emppay_list"/>
+            <field name="search_view_id" ref="view_hr_emppay_search"/>
+        </record>
+
+        <menuitem id="menu_hr_emppay" action="action_hr_emppay" parent="menu_hr_root_emppay" sequence="12"/>
+                
+    </data>
+</openerp>
+

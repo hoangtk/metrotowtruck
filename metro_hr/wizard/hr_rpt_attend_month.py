@@ -33,11 +33,21 @@ import openerp.addons.decimal_precision as dp
 '''
 Attendance monthly report
 '''
-class hr_rpt_attend_month(osv.osv_memory):
+class hr_rpt_attend_month(osv.osv):
     _name = "hr.rpt.attend.month"
-    _inherit = "rpt.base"
     _description = "HR Attendance monthly report"
     _columns = {
+        'name': fields.char('Report Name', size=16, required=False),
+        'title': fields.char('Report Title', required=False),
+        'type': fields.char('Report Type', size=16, required=True),
+        'company_id': fields.many2one('res.company','Company',required=True,),     
+        #show/hide search fields on GUI
+        'show_search': fields.boolean('Show Searching', ),   
+        #show/hide search result
+        'show_result': fields.boolean('Show Result', ),
+        #show/hide search result
+        'save_pdf': fields.boolean('Can Save PDF', ),
+        
         #report data lines
         'rpt_lines': fields.one2many('hr.rpt.attend.month.line', 'rpt_id', string='Report Line'),
         'date_from': fields.datetime("Start Date", required=True),
@@ -46,6 +56,11 @@ class hr_rpt_attend_month(osv.osv_memory):
         }
 
     _defaults = {
+        'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.rptcn', context=c),
+        'show_search': True,        
+        'show_result': False,      
+        'save_pdf': False,      
+        
         'type': 'attend_month',     
 #        'emp_ids':[342,171]
     }
@@ -61,7 +76,11 @@ class hr_rpt_attend_month(osv.osv_memory):
             date_to = datetime.strptime(time.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
             date_to_utc = utils.utc_timestamp(cr, uid, date_to, context)        
             vals.update({'date_to':date_to_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
-        
+
+        #set default title by i18n
+        if context.get('default_title',False):
+            vals['title'] = _(context.get('default_title'))        
+    
         return vals
                 
     def _check_dates(self, cr, uid, ids, context=None):
@@ -106,6 +125,22 @@ class hr_rpt_attend_month(osv.osv_memory):
         resu = super(hr_rpt_attend_month, self).write(cr, uid, ids, vals, context=context)
         return resu
       
+    def run_report(self, cr, uid, ids, context=None):
+        rpt = self.browse(cr, uid, ids, context=context)[0]
+        rpt_method = getattr(self, 'run_%s'%(rpt.type,))
+        #get report data
+        rpt_line_obj,  rpt_lns = rpt_method(cr, uid, ids, context)
+        #remove the old lines
+        unlink_ids = rpt_line_obj.search(cr, uid, [('rpt_id','=',rpt.id)], context=context)
+        rpt_line_obj.unlink(cr ,uid, unlink_ids, context=context)
+        #create new lines
+        for rpt_line in rpt_lns:
+            rpt_line['rpt_id'] = rpt.id
+            rpt_line_obj.create(cr ,uid, rpt_line, context=context)  
+        #update GUI elements
+        self.write(cr, uid, rpt.id, {'show_search':False,'show_result':True,'save_pdf':True},context=context)
+        return True
+    
     def run_attend_month(self, cr, uid, ids, context=None):
         '''
         1.Call hr_rpt_attend_emp_day.run_attend_emp_day() to get all detail data
@@ -195,13 +230,29 @@ class hr_rpt_attend_month(osv.osv_memory):
     def _pdf_data(self, cr, uid, ids, form_data, context=None):
         return {'xmlrpt_name': 'hr.rpt.attend.month'}
     
+    def save_pdf(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        form_data = self.read(cr, uid, ids[0], context=context)
+        rptxml_name = self._pdf_data(cr, uid, ids[0], form_data, context=context)['xmlrpt_name']
+        datas = {
+                 'model': self._name,
+                 'ids': [ids[0]],
+                 'form': form_data,
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': rptxml_name, 'datas': datas, 'nodestroy': True}    
+        
 hr_rpt_attend_month()
 
-class hr_rpt_attend_month_line(osv.osv_memory):
+class hr_rpt_attend_month_line(osv.osv):
     _name = "hr.rpt.attend.month.line"
-    _inherit = "rpt.base.line"
     _description = "HR Attendance Monthly Report Lines"
+    _order = 'seq'
     _columns = {
+        'code': fields.char('Code', size=64, ),
+        'name': fields.char('Name', size=256, ),
+        'data_level': fields.char('Data level code', size=64),
+        
         'rpt_id': fields.many2one('hr.rpt.attend.month', 'Report'),
         'seq': fields.integer('Sequence',),
         'emp_id': fields.many2one('hr.employee', 'Employee',),

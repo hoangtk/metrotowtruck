@@ -49,6 +49,8 @@
         'hr_clock_view.xml',
         'hr_holidays.xml',
         'hr_data.xml',
+        'emppay/hr_emppay_view.xml',
+        'emppay/ir.model.access.csv',
         'security/ir.model.access.csv',
     ],
     'demo_xml': [],
