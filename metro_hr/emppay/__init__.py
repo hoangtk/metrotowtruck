@@ -21,5 +21,5 @@
 ##############################################################################
 
 import hr_emppay
-
+import hr_contact_emppay_batchset
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

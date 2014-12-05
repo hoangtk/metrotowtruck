@@ -67,7 +67,7 @@ class hr_contract_alwded(osv.osv):
     _order = 'type, sequence'
     _columns = {
         'contract_id': fields.many2one('hr.contract', required=True, select=True),
-        'alwded_id': fields.many2one('hr.emppay.alwded', required=True),
+        'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True),
         'sequence': fields.related('alwded_id', 'sequence', type='integer', string='#', store=True, readonly=True),
         'type': fields.related('alwded_id', 'type', type='selection', selection=[('alw','Allowance'),('ded','Deduction')],
                                     string='Type', store=True, readonly=True),
@@ -80,6 +80,10 @@ class hr_contract_alwded(osv.osv):
     _defaults={
                'type_calc':'fixed',
                }
+    def onchange_alwded_id(self, cr, uid, ids, alwded_id, context=None):
+        alwded = self.pool.get('hr.emppay.alwded').browse(cr, uid, alwded_id, context=context)
+        vals = {'sequence':alwded.sequence, 'type':alwded.type, 'type_calc':alwded.type_calc, 'amount':alwded.amount}
+        return {'value':vals}
         
 class hr_emppay_si(osv.osv):
     """
@@ -122,22 +126,33 @@ class hr_contract_si(osv.osv):
         res = dict((id,dict((field_name,None) for field_name in field_names)) for id in ids)
         for si in self.browse(cr, uid, ids, context=context):
             if 'amount_company' in field_names:
-                res[si.id]['amount'] = si.amount_base * si.rate_company
+                res[si.id]['amount_company'] = si.amount_base * si.rate_company
             if 'amount_personal' in field_names:
-                res[si.id]['amount'] = si.amount_base * si.rate_personal
-        return res
+                res[si.id]['amount_personal'] = si.amount_base * si.rate_personal
+        return res    
+    
+    _order = 'sequence'
     
     _columns = {
         'contract_id': fields.many2one('hr.contract', required=True, select=True),
-        'si_id': fields.many2one('hr.emppay.si', required=True),
+        'si_id': fields.many2one('hr.emppay.si', 'Social Insurance', required=True),
         'sequence': fields.related('si_id', 'sequence', type='integer', string='#', store=True, readonly=True),
         #default get from hr_salary_si, user can change
         'amount_base':fields.float('Base Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         'rate_company':fields.float('Company Rate', digits_compute=dp.get_precision('Payroll'), required=True),
         'rate_personal':fields.float('Personal Rate', digits_compute=dp.get_precision('Payroll'), required=True),
-        'amount_company':fields.function(_amount_all, 'Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_all"),
-        'amount_personal':fields.function(_amount_all, 'Personal Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_all"),
+        'amount_company':fields.function(_amount_all, string='Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_all"),
+        'amount_personal':fields.function(_amount_all, string='Personal Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_all"),
     }
+    def onchange_si_id(self, cr, uid, ids, si_id, context=None):
+        si = self.pool.get('hr.emppay.si').browse(cr, uid, si_id, context=context)
+        vals = {'sequence':si.sequence, 
+                'amount_base':si.amount_base, 
+                'rate_company':si.rate_company, 
+                'rate_personal':si.rate_personal,
+                'amount_company':si.amount_company, 
+                'amount_personal':si.amount_personal}
+        return {'value':vals}
     
 class hr_contract(osv.osv):
     _inherit = 'hr.contract'
@@ -152,21 +167,40 @@ class hr_contract(osv.osv):
                 si_total_company += si.amount_company
                 si_total_personal += si.amount_personal
             if 'si_total_company' in field_names:
-                res[si.id]['si_total_company'] = si_total_company
+                res[contract.id]['si_total_company'] = si_total_company
             if 'si_total_personal' in field_names:
-                res[si.id]['si_total_personal'] = si_total_personal
+                res[contract.id]['si_total_personal'] = si_total_personal
         return res
     
     _columns = {
-        'alwded_ids': fields.many2one('hr.contract.alwded', 'contract_id', 'Allowance&Deduction'),
-        'si_ids': fields.many2one('hr.contract.si', 'contract_id', 'Social Insurance'),
-        'si_total_company':fields.function(_amount_emppay, 'Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_emppay"),
-        'si_total_personal':fields.function(_amount_emppay, 'Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_emppay"),
+        'alwded_ids': fields.one2many('hr.contract.alwded', 'contract_id', 'Allowance&Deduction'),
+        'si_ids': fields.one2many('hr.contract.si', 'contract_id', 'Social Insurance'),
+        'si_total_company':fields.function(_amount_emppay, string='Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_emppay"),
+        'si_total_personal':fields.function(_amount_emppay, string='Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_emppay"),
         
         'wage2':fields.float('Wage2', digits_compute=dp.get_precision('Payroll')),
         'pit_base':fields.float('PIT Start Point', digits_compute=dp.get_precision('Payroll')),
 
     }
+    
+    def get_contract(self, cr, uid, employee_id, date_from, date_to, context=None):
+        """
+        @param employee: browse record of employee
+        @param date_from: date field
+        @param date_to: date field
+        @return: returns the ids of all the contracts for the given employee that need to be considered for the given dates
+        """
+        contract_obj = self.pool.get('hr.contract')
+        clause = []
+        #a contract is valid if it ends between the given dates
+        clause_1 = ['&',('date_end', '<=', date_to),('date_end','>=', date_from)]
+        #OR if it starts between the given dates
+        clause_2 = ['&',('date_start', '<=', date_to),('date_start','>=', date_from)]
+        #OR if it starts before the date_from and finish after the date_end (or never finish)
+        clause_3 = [('date_start','<=', date_from),'|',('date_end', '=', False),('date_end','>=', date_to)]
+        clause_final =  [('employee_id', '=', employee_id),'|','|'] + clause_1 + clause_2 + clause_3
+        contract_ids = contract_obj.search(cr, uid, clause_final, context=context)
+        return contract_ids    
     
 class res_company(osv.osv):
     _inherit = "res.company"

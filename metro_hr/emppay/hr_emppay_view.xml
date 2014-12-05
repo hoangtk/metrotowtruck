@@ -5,7 +5,50 @@
         <menuitem id="menu_hr_root_emppay" parent="hr.menu_hr_root" name="Payroll2" sequence="30"/>
         <menuitem id="menu_hr_emppay_configure" parent="hr.menu_hr_configuration" name="Payroll2" groups="base.group_hr_manager" sequence="45"/>
 
-        <!-- Allowance&Deduction Rules -->
+<!-- Contract View -->
+        <record id="hr_contract_view_form_emppay" model="ir.ui.view">
+            <field name="name">hr_contract_view_form_emppay</field>
+            <field name="model">hr.contract</field>
+            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+            <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='wage']" position="after">
+                    <field name="pit_base"/>
+                    <field name="wage2"/>
+                </xpath>
+                <separator string="Notes" position="before">
+                	<separator string="Allowance and Deduction"/>
+                	<field name="alwded_ids">
+                        <tree string="Allowance and Deduction" editable="bottom">
+		                    <field name="alwded_id" on_change="onchange_alwded_id(alwded_id,context)"/>
+		                    <field name="sequence"/>
+		                    <field name="type"/>
+		                    <field name="type_calc"/>
+		                    <field name="amount"/>
+                        </tree>
+                	</field>
+                	<group col="4">
+                		<field name="si_total_company"/>
+                		<field name="si_total_personal"/>
+                	</group>
+                	<separator string="Social Insurance"/>
+                	<field name="si_ids">
+                        <tree string="Allowance and Deduction" editable="bottom">
+		                    <field name="si_id" on_change="onchange_si_id(si_id,context)"/>
+		                    <field name="sequence"/>
+		                    <field name="amount_base"/>
+		                    <field name="rate_company"/>
+		                    <field name="rate_personal"/>
+		                    <field name="amount_company" sum="Company Total"/>
+		                    <field name="amount_personal" sum="Employee Total"/>
+                        </tree>
+                	</field>
+                </separator>
+            </data>
+            </field>
+        </record>
+        
+<!-- Allowance&Deduction Rules -->
         
         <record id="view_hr_emppay_alwded_list" model="ir.ui.view">
             <field name="name">view_hr_emppay_alwded_list</field>
@@ -61,7 +104,7 @@
 
         <menuitem id="menu_hr_emppay_alwded" action="action_hr_emppay_alwded" parent="menu_hr_emppay_configure" sequence="12"/>
         
-        <!-- Social Insurances -->
+<!-- Social Insurances -->
         
         <record id="view_hr_emppay_si_list" model="ir.ui.view">
             <field name="name">view_hr_emppay_si_list</field>
@@ -153,88 +196,24 @@
                 <sheet>
                     <group col="4">
                     	<field name="employee_id" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"/>
-                        <field name="contract_id" domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" context="{'default_employee_id': employee_id}"/>
-                        <label for="date_from" string="Range" class="oe_inline"/>
-                        <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)" class="oe_inline"/> -
-                        <field name="date_to" class="oe_inline"/>
+                        <field name="contract_id" 
+	                        domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" 
+	                        on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" 
+	                        context="{'default_employee_id': employee_id}"/>
+                       <label for="date_from" string="Dates"/>
+                       <div>
+						    <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)" class="oe_inline"/> -
+						    <field name="date_to" class="oe_inline"/>  
+                       </div>	
                         <field name="number"/>
                         <field name="name"/>
                     </group>
-                    <notebook>
-                        <page string="Worked Days &amp; Inputs">
-                            <separator string="Other Inputs"/>
-                            <field name="input_line_ids" colspan="4" nolabel="1">
-                                <tree string="Input Data" editable="bottom">
-                                    <field name="name"/>
-                                    <field name="code"/>
-                                    <field name="amount"/>
-                                    <field name="contract_id"/>
-                                    <field name="sequence" invisible="True"/>
-                                </tree>
-                                <form string="Payslip Line">
-                                    <group col="4">
-                                        <field name="name"/>
-                                        <field name="code"/>
-                                        <field name="payslip_id"/>
-                                        <field name="sequence"/>
-                                        <field name="amount"/>
-                                        <field name="contract_id"/>
-                                    </group>
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Salary Computation" >
-                            <field name="line_ids" colspan="4" nolabel="1">
-                                <tree string="Salary Structure" editable="bottom" colors="blue:total == 0">
-                                    <field name="name"/>
-                                    <field name="code"/>
-                                    <field name="category_id"/>
-                                    <field name="sequence" invisible="1"/>
-                                    <field name="quantity"/>
-                                    <field name="rate"/>
-                                    <field name="amount"/>
-                                    <field name="total"/>
-                                </tree>
-                                <form string="Payslip Line">
-                                    <group col="4">
-                                        <field name="name"/>
-                                        <field name="code"/>
-                                        <field name="category_id"/>
-                                        <field name="sequence"/>
-                                        <field name="quantity"/>
-                                        <field name="rate"/>
-                                        <field name="amount"/>
-                                        <field name="total"/>
-                                        <field name="salary_rule_id"/>
-                                    </group>
-                                </form>
-                            </field>
-                        </page>
-                        <page string="Details By Salary Rule Category">
-                            <field name="details_by_salary_rule_category" context="{'group_by':'category_id'}" domain="[('appears_on_payslip', '=', True)]">
-                                <tree string="Payslip Lines" colors="blue:total == 0">
-                                    <field name="category_id"/>
-                                    <field name="name"/>
-                                    <field name="code"/>
-                                    <field name="total"/>
-                                </tree>
-                            </field>
-                       </page>
-                       <page string="Other Information">
-                            <group>
-                                <group string="Miscellaneous">
-                                    <field name="company_id" groups="base.group_multi_company"/>
-                                    <field name="payslip_run_id" domain="[('state','=','draft')]"/>
-                                </group>
-                                <group name="accounting" string="Accounting">
-                                    <field name="paid" readonly="1"/>
-                                </group>
-                            </group>
-                            <div colspan="4">
-                                <field name="note" Placeholder="Add an internal note..."/>
-                            </div>
-                       </page>
-                    </notebook>
+                    <separator string="Allowance&amp;Deduction"/>
+                    <group col="4">
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="emppay_run_id" domain="[('state','=','draft')]"/>
+                    </group>
+                    <field name="note" Placeholder="Add an internal note..."/>
                 </sheet>
                 </form>
             </field>
@@ -245,14 +224,24 @@
             <field name="model">hr.emppay</field>
             <field name="arch" type="xml">
                 <search string="Search Payslip">
-                    <field name="name" string="Allowance&amp;Deduction" filter_domain="['|',('name','ilike',self),('code','ilike',self)]"/>
-                    <field name="type"/>
+                    <field name="name" string="Payslips" filter_domain="['|',('name','ilike',self),('number','ilike',self)]"/>
+                    <field name="date_from"/>
+                    <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Slip"/>
+                    <filter icon="terp-camera_test" string="Done" domain="[('state','=','done')]" help="Done Slip"/>
+                    <field name="employee_id"/>
+                    <field name="emppay_run_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}"/>
+                        <filter string="PaySlip Batch" name="payslip_run_id" icon="terp-folder-orange" context="{'group_by':'emppay_run_id'}"/>
+                        <filter string="Companies" name="company_id" groups="base.group_multi_company" icon="terp-go-home" context="{'group_by':'company_id'}"/>
+                        <filter string="States" name="state" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
+                    </group>
                 </search>
             </field>
         </record>
         
         <record id="action_hr_emppay" model="ir.actions.act_window">
-            <field name="name">Payslip</field>
+            <field name="name">Employee Payslips</field>
             <field name="res_model">hr.emppay</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
@@ -260,7 +249,7 @@
             <field name="search_view_id" ref="view_hr_emppay_search"/>
         </record>
 
-        <menuitem id="menu_hr_emppay" action="action_hr_emppay" parent="menu_hr_root_emppay" sequence="12"/>
+        <menuitem id="menu_hr_emppay" action="action_hr_emppay" parent="menu_hr_root_emppay" sequence="1"/>
                 
     </data>
 </openerp>

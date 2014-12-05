@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+         <act_window name="Set Contract Payroll Info"
+            res_model="hr.contract.emppay.batchset"
+            src_model="hr.employee"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="action_hr_contract_emppay_batchset"/>
+            
+         <act_window name="Set Contract Payroll Info"
+            res_model="hr.contract.emppay.batchset"
+            src_model="hr.contract"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True"
+            id="action_hr_contract_emppay_batchset"/>    
+                   
+        <record id="view_hr_contract_emppay_batchset_form" model="ir.ui.view">
+            <field name="name">view_hr_contract_emppay_batchset_form</field>
+            <field name="model">hr.contract.emppay.batchset</field>
+            <field name="arch" type="xml">
+                <form string="Set Contract Payroll Info" version="7.0">
+                	<group col="4">
+	                    <field name="wage2_set"/>
+	                    <field name="pit_base_set"/>
+	                    <field name="wage2" attrs="{'invisible':[('wage2_set','=',False)]}"/>
+	                    <field name="pit_base" attrs="{'invisible':[('pit_base_set','=',False)]}"/>
+                	</group>
+	                <field name="alwded_ids_set"/>
+	               	<separator string="Allowance and Deduction" attrs="{'invisible':[('alwded_ids_set','=',False)]}"/>
+	               	<field name="alwded_ids" attrs="{'invisible':[('alwded_ids_set','=',False)]}">
+	                       <tree string="Allowance and Deduction" editable="bottom">
+		                    <field name="alwded_id" on_change="onchange_alwded_id(alwded_id,context)"/>
+		                    <field name="sequence"/>
+		                    <field name="type"/>
+		                    <field name="type_calc"/>
+		                    <field name="amount"/>
+	                       </tree>
+	               	</field>
+	                <field name="si_ids_set"/>
+	               	<separator string="Social Insurance" attrs="{'invisible':[('si_ids_set','=',False)]}"/>
+	               	<field name="si_ids" attrs="{'invisible':[('si_ids_set','=',False)]}">
+	                       <tree string="Allowance and Deduction" editable="bottom">
+		                    <field name="si_id" on_change="onchange_si_id(si_id,context)"/>
+		                    <field name="sequence"/>
+		                    <field name="amount_base"/>
+		                    <field name="rate_company"/>
+		                    <field name="rate_personal"/>
+		                    <field name="amount_company" sum="Company Total"/>
+		                    <field name="amount_personal" sum="Employee Total"/>
+	                       </tree>
+	               	</field>
+	                <label string="Contracts to Set"/>
+	                <field name="contract_ids" widget='many2many_tags'/>
+	                <footer>
+			            <button name="set_data" string="Set" type="object" class="oe_highlight" 
+			            	confirm="Are you sure to set the contract data to the selected employees?"/>
+			            <button name="clear_set_data" string="Clear and Set" type="object" class="oe_highlight" 
+			            	confirm="Are you sure to set the contract data to the selected employees?"/>
+	                    or
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</openerp>

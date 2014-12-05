@@ -30,9 +30,8 @@
         """,
         
         
-    'author': 'PureThrottle Inc.',
-    'maintainer': 'PureThrottle Inc.',
-    'website': 'http://www.purethrottle.com/',
+    'author': 'Metro Trucks.',
+    'website': 'http://www.metrotowertrucks.com/',
     'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image", "hr_recruitment", "hr_contract"],
     'init_xml': [],
     'update_xml': [
@@ -51,6 +50,7 @@
         'hr_data.xml',
         'emppay/hr_emppay_view.xml',
         'emppay/ir.model.access.csv',
+        'emppay/hr_contact_emppay_batchset_view.xml',
         'security/ir.model.access.csv',
     ],
     'demo_xml': [],
