@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        
+<!-- Employee Payroll Pay Sheet-->
+        <record id="hr_emppay_sheet_filter" model="ir.ui.view">
+            <field name="name">hr_emppay_sheet_filter</field>
+            <field name="model">hr.emppay.sheet</field>
+            <field name="arch" type="xml">
+                <search string="Search Payroll">
+                    <field name="name" string="Payroll"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="attend_month_id"/>
+                    <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Payroll"/>
+                    <filter name="done_filter" icon="terp-camera_test" string="Done" domain="[('state','=','close')]" help="Done Payroll"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="hr_emppay_sheet_tree" model="ir.ui.view">
+            <field name="name">hr_emppay_sheet_tree</field>
+            <field name="model">hr.emppay.sheet</field>
+            <field name="arch" type="xml">
+                <tree string="Payroll">
+                    <field name="name"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="state"/>
+                    <field name="attend_month_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="hr_emppay_sheet_form" model="ir.ui.view">
+            <field name="name">hr_emppay_sheet_form</field>
+            <field name="model">hr.emppay.sheet</field>
+            <field name="arch" type="xml">
+                <form string="Payroll" version="7.0">
+                <header>
+                    <button name="add_from_att_report" type="object" states="draft" string="Generate from Attendance Report"/>
+                    <button name="add_from_att_record" type="object" states="draft" string="Generate from Attendance Records"/>
+                    <button name="action_close" type="object" string="Close" states="draft" class="oe_highlight"/>
+                    <button name="action_draft" type="object" string="Set to Draft" states="done"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                	<group col="4">
+                		<field name="name" readonly="1"/>
+	                    <label for= 'date_from' string="Period" class="oe_inline"/>
+                		<div>
+	                        <field name="date_from" class="oe_inline"/> - <field name="date_to" class="oe_inline"/>
+                		</div>
+                		<field name="attend_month_id"/>
+                		<field name="note" Placeholder="Add an internal note..."/>
+                	</group>
+                    <separator string="Payslips"/>
+                    <field name="emppay_ids">
+		                <tree string="Payslips">
+		                	<field name="employee_id"/>
+		                	<field name="contract_id"/>
+		                	<field name="wage"/>
+		                	<field name="wage2"/>
+		                	
+		                	<field name="attend_id"/>
+		                	
+		                	<field name="days_work"/>
+		                	<field name="days_attend"/>
+		                	<field name="hours_ot"/>
+		                	<field name="hours_ot_we"/>
+		                	<field name="hours_ot_holiday"/>
+		                	
+		                	<field name="days_work2"/>
+		                	<field name="days_attend2"/>
+		                	<field name="hours_ot2"/>
+		                	<field name="hours_ot_we2"/>
+		                	<field name="hours_ot_holiday2"/>
+        		                	
+		                	<field name="state"/>
+		                </tree>                    	
+                    </field>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_hr_emppay_sheet" model="ir.actions.act_window">
+            <field name="name">Payroll</field>
+            <field name="res_model">hr.emppay.sheet</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="hr_emppay_sheet_tree"/>
+            <field name="search_view_id" ref="hr_emppay_sheet_filter"/>
+        </record>
+        
+        <menuitem action="action_hr_emppay_sheet" id="menu_hr_emppay_sheet" parent="menu_hr_root_emppay" sequence="1"/>
+        
+<!-- Employee Payroll Pay Slip-->
+        
+        <record id="view_hr_emppay_list" model="ir.ui.view">
+            <field name="name">view_hr_emppay_list</field>
+            <field name="model">hr.emppay</field>
+            <field name="arch" type="xml">
+                <tree colors="gray:state == 'cancel'" string="Payslips">
+                	<field name="name"/>
+                	<field name="employee_id"/>
+                	<field name="date_from"/>
+                	<field name="date_to"/>
+                	<field name="state"/>
+					<field name="company_id" groups="base.group_multi_company"/>       
+                    <field name="emppay_sheet_id"/>     
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_form" model="ir.ui.view">
+            <field name="name">view_hr_emppay_form</field>
+            <field name="model">hr.emppay</field>
+            <field name="arch" type="xml">
+                <form string="Payslip" version="7.0">
+                <header>
+                    <button string="Confirm" name="hr_verify_sheet" states="draft" class="oe_highlight"/>
+                    <button string="Set to Draft" name="draft" states="cancel"/>
+                    <button string="Cancel Payslip" name="cancel_sheet" states="draft,verify"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,verify,done"/>
+                </header>
+                <sheet>
+                    <group col="4">
+                    	<field name="employee_id" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"/>
+                        <field name="contract_id" 
+	                        domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" 
+	                        on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" 
+	                        context="{'default_employee_id': employee_id}"/>
+                       <label for="date_from" string="Dates"/>
+                       <div>
+						    <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)" class="oe_inline"/> -
+						    <field name="date_to" class="oe_inline"/>  
+                       </div>	
+                        <field name="name"/>
+                    </group>
+                    <separator string="Allowance"/>
+	               	<field name="alw_ids" context="{'default_type':'alw'}">
+	                       <tree string="Allowance" editable="bottom">
+		                    <field name="sequence"/>
+		                    <field name="code"/>
+		                    <field name="name"/>
+		                    <field name="type" invisible="1"/>
+		                    <field name="type_calc"/>
+		                    <field name="amount"/>
+	                       </tree>
+	               	</field>
+                    <separator string="Deduction"/>
+	               	<field name="ded_ids" context="{'default_type':'ded'}">
+	                       <tree string="Deduction" editable="bottom">
+		                    <field name="sequence"/>
+		                    <field name="code"/>
+		                    <field name="name"/>
+		                    <field name="type" invisible="1"/>
+		                    <field name="type_calc"/>
+		                    <field name="amount"/>
+	                       </tree>
+	               	</field>
+                    <separator string="Social Insurance"/>
+	               	<field name="si_ids">
+	                       <tree string="Social Insurance" editable="bottom">
+		                    <field name="sequence"/>
+		                    <field name="code"/>
+		                    <field name="name"/>
+		                    <field name="amount_base"/>
+		                    <field name="rate_company"/>
+		                    <field name="rate_personal"/>
+		                    <field name="amount_company" sum="Company Total"/>
+		                    <field name="amount_personal" sum="Employee Total"/>
+	                       </tree>
+	               	</field>
+                    <group col="4">
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="emppay_sheet_id" domain="[('state','=','draft')]"/>
+                    </group>
+                    <field name="note" Placeholder="Add an internal note..."/>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_hr_emppay_search" model="ir.ui.view">
+            <field name="name">view_hr_emppay_search</field>
+            <field name="model">hr.emppay</field>
+            <field name="arch" type="xml">
+                <search string="Search Payslip">
+                    <field name="name" string="Payslips" filter_domain="['|',('name','ilike',self),('number','ilike',self)]"/>
+                    <field name="date_from"/>
+                    <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Slip"/>
+                    <filter icon="terp-camera_test" string="Done" domain="[('state','=','done')]" help="Done Slip"/>
+                    <field name="employee_id"/>
+                    <field name="emppay_sheet_id"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}"/>
+                        <filter string="PaySlip Sheet" name="emppay_sheet_id" icon="terp-folder-orange" context="{'group_by':'emppay_sheet_id'}"/>
+                        <filter string="Companies" name="company_id" groups="base.group_multi_company" icon="terp-go-home" context="{'group_by':'company_id'}"/>
+                        <filter string="States" name="state" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        
+        <record id="action_hr_emppay" model="ir.actions.act_window">
+            <field name="name">Employee Payslips</field>
+            <field name="res_model">hr.emppay</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_emppay_list"/>
+            <field name="search_view_id" ref="view_hr_emppay_search"/>
+        </record>
+
+        <menuitem action="action_hr_emppay" id="menu_hr_emppay" parent="menu_hr_root_emppay" sequence="2"/>                
+
+<!-- 
+1.Add button to genrate payroll from attendance report
+2.Show the related payrolls in attendance report
+ -->    
+        <record id="hr_rpt_attend_month_view_emppay" model="ir.ui.view">
+            <field name="name">hr_rpt_attend_month_view_emppay</field>
+            <field name="model">hr.rpt.attend.month</field>
+            <field name="inherit_id" ref="hr_rpt_attend_month_view"/>
+            <field name="arch" type="xml">
+            <data>
+                <button name="save_pdf" position="after">
+                	<button name="new_payroll" string="Generate Payroll" type="object"/>
+                	<field name="id" invisible="1"/>
+                	<button name="%(action_hr_emppay_sheet)d" string="Payrolls" type="action"
+                		context="{'search_default_attend_month_id': id}"/>
+                </button>
+                <field name="rpt_lines" position="after">
+                	<field name="emppay_sheet_ids"/>
+                </field>
+            </data>
+            </field>
+        </record>                
+    </data>
+</openerp>
+

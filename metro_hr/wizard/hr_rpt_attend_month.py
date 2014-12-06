@@ -99,6 +99,8 @@ class hr_rpt_attend_month(osv.osv):
     def name_get(self, cr, uid, ids, context=None):
         if not ids:
             return []
+        if isinstance(ids,(int,long)):
+            ids = [ids]
         res = []
         for id in ids:
             res.append((id,'%s'%(id,) ))
@@ -215,6 +217,8 @@ class hr_rpt_attend_month(osv.osv):
 
             seq += 1
             rpt_line = {'seq': seq,
+                            'code': emp.code,
+                            'name': emp.name,
                             'emp_id': emp.id,
                             'days_work':days_work,
                             'days_attend': days_attend,

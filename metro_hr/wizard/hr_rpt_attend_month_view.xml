@@ -8,20 +8,13 @@
             <form string="Report" version="7.0">
                 <field name="name" invisible="1"/>
                 <field name="type" invisible="1"/>
-                <group colspan="4">
-					<div class="oe_title">
-                        <h1>
-                        <!-- 1.Report title -->
-						<field name="title" readonly="1"/>
-						</h1>
-					</div>
-					<div class="oe_right oe_button_box" name="buttons">
-	                    	<field name="show_search"/>
-	                    	<field name="save_pdf" invisible="1"/>
-	                    	<button name="run_report" string="Search" type="object" default_focus="1" class="oe_highlight"/>
-	                    	<button name="save_pdf" string="PDF" type="object" attrs="{'invisible':[('save_pdf','!=',True)]}"/>
-					</div>
-                </group>                
+                <field name="title" invisible="1"/>
+				<div class="oe_right oe_button_box" name="buttons">
+                    	<field name="show_search"/>
+                    	<field name="save_pdf" invisible="1"/>
+                    	<button name="run_report" string="Search" type="object" default_focus="1" class="oe_highlight"/>
+                    	<button name="save_pdf" string="PDF" type="object" attrs="{'invisible':[('save_pdf','!=',True)]}"/>
+				</div>             
                 <group name="options" attrs="{'invisible':[('show_search','!=',True)]}">
 	                <group colspan="4" name="options_common">
 						<field name="company_id" groups="base.group_multi_company" widget="selection"/>			
