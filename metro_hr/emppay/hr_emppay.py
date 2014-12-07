@@ -381,6 +381,10 @@ class hr_emppay_sheet(osv.osv):
     def create(self, cr, uid, values, context=None):
         if not 'name' in values or values['name'] == '':
             name = self.pool.get('ir.sequence').get(cr, uid, 'emppay.payroll')
+            if values['attend_month_id']:
+                attendance_name = self.pool.get('hr.rpt.attend.month').read(cr, uid, values['attend_month_id'], ['name'], context=context)['name']
+                if attendance_name:
+                    name += '-' + attendance_name
             values['name'] = name
         new_id = super(hr_emppay_sheet,self).create(cr, uid, values, context=context)
         return new_id

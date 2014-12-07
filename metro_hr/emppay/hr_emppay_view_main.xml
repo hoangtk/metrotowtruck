@@ -50,16 +50,16 @@
                 		<field name="name" readonly="1"/>
 	                    <label for= 'date_from' string="Period" class="oe_inline"/>
                 		<div>
-	                        <field name="date_from" class="oe_inline"/>
+	                        <field name="date_from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
 	                         - 
-	                        <field name="date_to" class="oe_inline"/>
+	                        <field name="date_to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
                 		</div>
                 		<field name="attend_month_id" readonly="1"/>
 						<field name="company_id" groups="base.group_multi_company"/>       
                 		<field name="note" Placeholder="Add an internal note..."/>
                 	</group>
                     <separator string="Payslips"/>
-                    <field name="emppay_ids">
+                    <field name="emppay_ids" attrs="{'readonly':[('state','!=','draft')]}">
 		                <tree string="Payslips">                                  		                
 		                	<field name="employee_id"/>
 							<field name="wage_attend"/>
@@ -101,7 +101,7 @@
 		                    </group>
 		                    <notebook>
 		                    	<page name="base" string="Payslip">
-				                    <group name="attend_wage">
+				                    <group name="attend_wage" string="Attendance">
 					                	<field name="attend_id" invisible="1"/>
 				                    	<group name="attend">
 						                	<field name="days_work"/>
@@ -114,20 +114,9 @@
 						                	<field name="wage"/>        	
 						                	<field name="wage_attend"/>	
 						                	<field name="wage_ot"/>
-						                	<field name="alw_total"/>
-						                	<field name="ded_total"/>
-						                	<field name="si_total_personal"/>
-						                	<field name="si_total_company"/>
-						                	<!-- wage_attend + wage_ot + alw_total - ded_total - si_total_personal -->
-						                	<field name="wage_total"/>
-						                	<!-- wage_attend + wage_ot + alw_total - si_total_personal -->
-						                	<field name="wage_tax"/>
-						                	<field name="pit"/>
-						                	<!-- wage_total - PIT -->
-						                	<field name="wage_pay"/>
 				                    	</group>     	
 				                    </group>
-				                    <group name="attend_wage2">
+				                    <group name="attend_wage2" string="Attendance2">
 				                    	<group name="attend2">
 						                	<field name="days_work2"/>
 						                	<field name="days_attend2"/>
@@ -140,6 +129,23 @@
 						                	<field name="wage_attend2"/>	
 						                	<field name="wage_ot2"/>
 						                	<field name="wage_bonus2"/>
+				                    	</group>
+				                    </group>
+				                    <group name="wage_detail" string="Wage Detail">
+				                    	<group>
+						                	<field name="alw_total"/>
+						                	<field name="ded_total"/>
+						                	<field name="si_total_personal"/>
+						                	<field name="si_total_company"/>
+				                    	</group>
+				                    	<group>
+						                	<!-- wage_attend + wage_ot + alw_total - ded_total - si_total_personal -->
+						                	<field name="wage_total"/>
+						                	<!-- wage_attend + wage_ot + alw_total - si_total_personal -->
+						                	<field name="wage_tax"/>
+						                	<field name="pit"/>
+						                	<!-- wage_total - PIT -->
+						                	<field name="wage_pay"/>
 				                    	</group>
 				                    </group>
 		                    	</page>
