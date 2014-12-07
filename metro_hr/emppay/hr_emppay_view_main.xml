@@ -38,10 +38,11 @@
             <field name="arch" type="xml">
                 <form string="Payroll" version="7.0">
                 <header>
-                    <button name="add_from_att_report" type="object" states="draft" string="Generate from Attendance Report"/>
-                    <button name="add_from_att_record" type="object" states="draft" string="Generate from Attendance Records"/>
-                    <button name="action_close" type="object" string="Close" states="draft" class="oe_highlight"/>
-                    <button name="action_draft" type="object" string="Set to Draft" states="done"/>
+                    <button name="add_from_att_report" type="object" states="draft" string="Generate from Attendance Report" groups="account.group_account_invoice"/>
+                    <!-- <button name="add_from_att_record" type="object" states="draft" string="Generate from Attendance Records"/> -->
+                    <button name="action_verify" type="object" string="Verify" states="draft" class="oe_highlight" groups="account.group_account_invoice"/>
+                    <button name="action_pay" type="object" string="Pay" states="verified" class="oe_highlight" groups="account.group_account_invoice"/>
+                    <button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -49,20 +50,32 @@
                 		<field name="name" readonly="1"/>
 	                    <label for= 'date_from' string="Period" class="oe_inline"/>
                 		<div>
-	                        <field name="date_from" class="oe_inline"/> - <field name="date_to" class="oe_inline"/>
+	                        <field name="date_from" class="oe_inline"/>
+	                         - 
+	                        <field name="date_to" class="oe_inline"/>
                 		</div>
-                		<field name="attend_month_id"/>
+                		<field name="attend_month_id" readonly="1"/>
+						<field name="company_id" groups="base.group_multi_company"/>       
                 		<field name="note" Placeholder="Add an internal note..."/>
                 	</group>
                     <separator string="Payslips"/>
                     <field name="emppay_ids">
-		                <tree string="Payslips">
+		                <tree string="Payslips">                                  		                
 		                	<field name="employee_id"/>
-		                	<field name="contract_id"/>
-		                	<field name="wage"/>
+							<field name="wage_attend"/>
+							<field name="wage_ot"/>
+		                	<field name="alw_total"/>
+		                	<field name="ded_total"/>
+		                	<field name="si_total_personal"/>
+		                	<field name="wage_total"/>
+		                	<field name="pit"/>
+		                	<field name="wage_pay"/>
+		                	<field name="state" invisible="1"/>
+		                			                	
+		                	<!-- <field name="wage"/>
 		                	<field name="wage2"/>
 		                	
-		                	<field name="attend_id"/>
+		                	<field name="attend_id" invisible="1"/>
 		                	
 		                	<field name="days_work"/>
 		                	<field name="days_attend"/>
@@ -74,10 +87,102 @@
 		                	<field name="days_attend2"/>
 		                	<field name="hours_ot2"/>
 		                	<field name="hours_ot_we2"/>
-		                	<field name="hours_ot_holiday2"/>
-        		                	
-		                	<field name="state"/>
-		                </tree>                    	
+		                	<field name="hours_ot_holiday2"/> -->
+		                </tree>      
+		                <form string="Payslips" version="7.0">
+		                    <group col="4">
+		                    	<field name="employee_id"/>
+		                        <field name="contract_id" 
+			                        domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" 
+			                        context="{'default_employee_id': employee_id}"/>
+		                        <field name="name"/>
+		                    	<field name="note" Placeholder="Add an internal note..."/>
+		                        <field name="state" invisible="1"/>
+		                    </group>
+		                    <notebook>
+		                    	<page name="base" string="Payslip">
+				                    <group name="attend_wage">
+					                	<field name="attend_id" invisible="1"/>
+				                    	<group name="attend">
+						                	<field name="days_work"/>
+						                	<field name="days_attend"/>
+						                	<field name="hours_ot"/>
+						                	<field name="hours_ot_we"/>
+						                	<field name="hours_ot_holiday"/>
+				                    	</group>
+				                    	<group name="wage">      
+						                	<field name="wage"/>        	
+						                	<field name="wage_attend"/>	
+						                	<field name="wage_ot"/>
+						                	<field name="alw_total"/>
+						                	<field name="ded_total"/>
+						                	<field name="si_total_personal"/>
+						                	<field name="si_total_company"/>
+						                	<!-- wage_attend + wage_ot + alw_total - ded_total - si_total_personal -->
+						                	<field name="wage_total"/>
+						                	<!-- wage_attend + wage_ot + alw_total - si_total_personal -->
+						                	<field name="wage_tax"/>
+						                	<field name="pit"/>
+						                	<!-- wage_total - PIT -->
+						                	<field name="wage_pay"/>
+				                    	</group>     	
+				                    </group>
+				                    <group name="attend_wage2">
+				                    	<group name="attend2">
+						                	<field name="days_work2"/>
+						                	<field name="days_attend2"/>
+						                	<field name="hours_ot2"/>
+						                	<field name="hours_ot_we2"/>
+						                	<field name="hours_ot_holiday2"/>
+				                    	</group>
+				                    	<group name="wage2">
+						                	<field name="wage2"/>
+						                	<field name="wage_attend2"/>	
+						                	<field name="wage_ot2"/>
+						                	<field name="wage_bonus2"/>
+				                    	</group>
+				                    </group>
+		                    	</page>
+		                    	<page name="alw" string="Allowance">
+					               	<field name="alw_ids" context="{'default_type':'alw'}">
+				                       <tree string="Allowance" editable="bottom">
+					                    <field name="sequence"/>
+					                    <field name="code"/>
+					                    <field name="name"/>
+					                    <field name="type" invisible="1"/>
+					                    <field name="type_calc"/>
+					                    <field name="amount" sum="Total"/>
+				                       </tree>
+					               	</field>
+		                    	</page>
+		                    	<page name="alw" string="Deduction">
+					               	<field name="ded_ids" context="{'default_type':'ded'}">
+				                       <tree string="Deduction" editable="bottom">
+					                    <field name="sequence"/>
+					                    <field name="code"/>
+					                    <field name="name"/>
+					                    <field name="type" invisible="1"/>
+					                    <field name="type_calc"/>
+					                    <field name="amount" sum="Total"/>
+				                       </tree>
+					               	</field>
+		                    	</page>
+		                    	<page name="alw" string="Social Insurance">
+					               	<field name="si_ids">
+				                       <tree string="Social Insurance" editable="bottom">
+					                    <field name="sequence"/>
+					                    <field name="code"/>
+					                    <field name="name"/>
+					                    <field name="amount_base"/>
+					                    <field name="rate_company"/>
+					                    <field name="rate_personal"/>
+					                    <field name="amount_company" sum="Company Total"/>
+					                    <field name="amount_personal" sum="Employee Total"/>
+				                       </tree>
+					               	</field>
+		                    	</page>
+		                    </notebook>
+		                </form>              	
                     </field>
                 </sheet>
                 </form>
@@ -101,14 +206,42 @@
             <field name="name">view_hr_emppay_list</field>
             <field name="model">hr.emppay</field>
             <field name="arch" type="xml">
-                <tree colors="gray:state == 'cancel'" string="Payslips">
+                <tree colors="gray:state == 'cancel'" string="Payslips"> 
+                    <field name="emppay_sheet_id"/>
                 	<field name="name"/>
                 	<field name="employee_id"/>
                 	<field name="date_from"/>
                 	<field name="date_to"/>
+                	
+                	<field name="attend_id" invisible="1"/>
+                	
+                	<field name="wage"/>
+                	<!-- <field name="days_work"/> -->
+                	<field name="days_attend"/>
+					<field name="wage_attend"/>
+                	<!-- <field name="hours_ot"/>
+                	<field name="hours_ot_we"/>
+                	<field name="hours_ot_holiday"/> -->
+					<field name="wage_ot"/>
+                	<field name="alw_total"/>
+                	<field name="ded_total"/>
+                	<field name="si_total_personal"/>
+                	<field name="wage_total"/>
+                	<field name="pit"/>
+                	<field name="wage_pay"/>
+                	
+                	<field name="wage2"/>
+                	<!-- <field name="days_work2"/>
+                	<field name="days_attend2"/>
+				    <field name="wage_attend2"/>	
+                	<field name="hours_ot2"/>
+                	<field name="hours_ot_we2"/>
+                	<field name="hours_ot_holiday2"/> -->
+                	<field name="wage_ot2"/>
+                	<field name="wage_bonus2"/>
+		                	
                 	<field name="state"/>
-					<field name="company_id" groups="base.group_multi_company"/>       
-                    <field name="emppay_sheet_id"/>     
+					<field name="company_id" groups="base.group_multi_company"/>      
                 </tree>
             </field>
         </record>
@@ -119,65 +252,121 @@
             <field name="arch" type="xml">
                 <form string="Payslip" version="7.0">
                 <header>
-                    <button string="Confirm" name="hr_verify_sheet" states="draft" class="oe_highlight"/>
-                    <button string="Set to Draft" name="draft" states="cancel"/>
-                    <button string="Cancel Payslip" name="cancel_sheet" states="draft,verify"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,verify,done"/>
+                    <button name="action_verify" type="object" string="Verify" states="draft" class="oe_highlight" groups="account.group_account_invoice"/>
+                    <button name="action_pay" type="object" string="Pay" states="verified" class="oe_highlight" groups="account.group_account_invoice"/>
+                    <button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager"/>
+                    <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
+                	<div>
+                		<h1>
+                			<label for="employee_id" class="oe_edit_only"/>
+                    		<field name="employee_id"/>
+                		</h1>
+                	</div>
                     <group col="4">
-                    	<field name="employee_id" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)"/>
                         <field name="contract_id" 
 	                        domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" 
-	                        on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" 
 	                        context="{'default_employee_id': employee_id}"/>
-                       <label for="date_from" string="Dates"/>
-                       <div>
-						    <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)" class="oe_inline"/> -
+	                    <label for="date_from" string="Dates"/>
+	                    <div>
+						    <field name="date_from" class="oe_inline"/> -
 						    <field name="date_to" class="oe_inline"/>  
-                       </div>	
+	                    </div>	
                         <field name="name"/>
-                    </group>
-                    <separator string="Allowance"/>
-	               	<field name="alw_ids" context="{'default_type':'alw'}">
-	                       <tree string="Allowance" editable="bottom">
-		                    <field name="sequence"/>
-		                    <field name="code"/>
-		                    <field name="name"/>
-		                    <field name="type" invisible="1"/>
-		                    <field name="type_calc"/>
-		                    <field name="amount"/>
-	                       </tree>
-	               	</field>
-                    <separator string="Deduction"/>
-	               	<field name="ded_ids" context="{'default_type':'ded'}">
-	                       <tree string="Deduction" editable="bottom">
-		                    <field name="sequence"/>
-		                    <field name="code"/>
-		                    <field name="name"/>
-		                    <field name="type" invisible="1"/>
-		                    <field name="type_calc"/>
-		                    <field name="amount"/>
-	                       </tree>
-	               	</field>
-                    <separator string="Social Insurance"/>
-	               	<field name="si_ids">
-	                       <tree string="Social Insurance" editable="bottom">
-		                    <field name="sequence"/>
-		                    <field name="code"/>
-		                    <field name="name"/>
-		                    <field name="amount_base"/>
-		                    <field name="rate_company"/>
-		                    <field name="rate_personal"/>
-		                    <field name="amount_company" sum="Company Total"/>
-		                    <field name="amount_personal" sum="Employee Total"/>
-	                       </tree>
-	               	</field>
-                    <group col="4">
                         <field name="company_id" groups="base.group_multi_company"/>
-                        <field name="emppay_sheet_id" domain="[('state','=','draft')]"/>
+                        <field name="emppay_sheet_id" readonly="1"/>
+                    	<field name="note" Placeholder="Add an internal note..."/>
                     </group>
-                    <field name="note" Placeholder="Add an internal note..."/>
+                    <notebook>
+                    	<page name="base" string="Payslip">
+		                    <group name="attend_wage" string="Attendance">
+			                	<field name="attend_id" invisible="1"/>
+		                    	<group name="attend">
+				                	<field name="days_work"/>
+				                	<field name="days_attend"/>
+				                	<field name="hours_ot"/>
+				                	<field name="hours_ot_we"/>
+				                	<field name="hours_ot_holiday"/>
+		                    	</group>
+		                    	<group name="wage">      
+				                	<field name="wage"/>        	
+				                	<field name="wage_attend"/>	
+				                	<field name="wage_ot"/>
+		                    	</group>     	
+		                    </group>
+		                    <group name="attend_wage2" string="Attendance2">
+		                    	<group name="attend2">
+				                	<field name="days_work2"/>
+				                	<field name="days_attend2"/>
+				                	<field name="hours_ot2"/>
+				                	<field name="hours_ot_we2"/>
+				                	<field name="hours_ot_holiday2"/>
+		                    	</group>
+		                    	<group name="wage2">
+				                	<field name="wage2"/>
+				                	<field name="wage_attend2"/>	
+				                	<field name="wage_ot2"/>
+				                	<field name="wage_bonus2"/>
+		                    	</group>
+		                    </group>
+		                    <group name="wage_detail" string="Wage Detail">
+		                    	<group>
+				                	<field name="alw_total"/>
+				                	<field name="ded_total"/>
+				                	<field name="si_total_personal"/>
+				                	<field name="si_total_company"/>
+		                    	</group>
+		                    	<group>
+				                	<!-- wage_attend + wage_ot + alw_total - ded_total - si_total_personal -->
+				                	<field name="wage_total"/>
+				                	<!-- wage_attend + wage_ot + alw_total - si_total_personal -->
+				                	<field name="wage_tax"/>
+				                	<field name="pit"/>
+				                	<!-- wage_total - PIT -->
+				                	<field name="wage_pay"/>
+		                    	</group>
+		                    </group>		                    
+                    	</page>
+                    	<page name="alw" string="Allowance">
+			               	<field name="alw_ids" context="{'default_type':'alw'}">
+		                       <tree string="Allowance" editable="bottom">
+			                    <field name="sequence"/>
+			                    <field name="code"/>
+			                    <field name="name"/>
+			                    <field name="type" invisible="1"/>
+			                    <field name="type_calc"/>
+			                    <field name="amount" sum="Total"/>
+		                       </tree>
+			               	</field>
+                    	</page>
+                    	<page name="alw" string="Deduction">
+			               	<field name="ded_ids" context="{'default_type':'ded'}">
+		                       <tree string="Deduction" editable="bottom">
+			                    <field name="sequence"/>
+			                    <field name="code"/>
+			                    <field name="name"/>
+			                    <field name="type" invisible="1"/>
+			                    <field name="type_calc"/>
+			                    <field name="amount" sum="Total"/>
+		                       </tree>
+			               	</field>
+                    	</page>
+                    	<page name="alw" string="Social Insurance">
+			               	<field name="si_ids">
+		                       <tree string="Social Insurance" editable="bottom">
+			                    <field name="sequence"/>
+			                    <field name="code"/>
+			                    <field name="name"/>
+			                    <field name="amount_base"/>
+			                    <field name="rate_company"/>
+			                    <field name="rate_personal"/>
+			                    <field name="amount_company" sum="Company Total"/>
+			                    <field name="amount_personal" sum="Employee Total"/>
+		                       </tree>
+			               	</field>
+                    	</page>
+                    </notebook>
                 </sheet>
                 </form>
             </field>
@@ -191,12 +380,13 @@
                     <field name="name" string="Payslips" filter_domain="['|',('name','ilike',self),('number','ilike',self)]"/>
                     <field name="date_from"/>
                     <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Slip"/>
-                    <filter icon="terp-camera_test" string="Done" domain="[('state','=','done')]" help="Done Slip"/>
+                    <filter icon="terp-camera_test" string="Verified" domain="[('state','=','verified')]" help="Verified Slip"/>
+                    <filter icon="terp-camera_test" string="Paid" domain="[('state','=','paid')]" help="Paid Slip"/>
                     <field name="employee_id"/>
                     <field name="emppay_sheet_id"/>
                     <group expand="0" string="Group By...">
                         <filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}"/>
-                        <filter string="PaySlip Sheet" name="emppay_sheet_id" icon="terp-folder-orange" context="{'group_by':'emppay_sheet_id'}"/>
+                        <filter string="Payroll" name="emppay_sheet_id" icon="terp-folder-orange" context="{'group_by':'emppay_sheet_id'}"/>
                         <filter string="Companies" name="company_id" groups="base.group_multi_company" icon="terp-go-home" context="{'group_by':'company_id'}"/>
                         <filter string="States" name="state" icon="terp-stock_effects-object-colorize" context="{'group_by':'state'}"/>
                     </group>
@@ -205,7 +395,7 @@
         </record>
         
         <record id="action_hr_emppay" model="ir.actions.act_window">
-            <field name="name">Employee Payslips</field>
+            <field name="name">Payslips</field>
             <field name="res_model">hr.emppay</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
@@ -226,14 +416,16 @@
             <field name="arch" type="xml">
             <data>
                 <button name="save_pdf" position="after">
-                	<button name="new_payroll" string="Generate Payroll" type="object"/>
+                	<button name="new_payroll" string="Generate Payroll" type="object" states="done"/>
                 	<field name="id" invisible="1"/>
-                	<button name="%(action_hr_emppay_sheet)d" string="Payrolls" type="action"
+                	<button name="%(action_hr_emppay_sheet)d" string="Payrolls" type="action" states="done"
                 		context="{'search_default_attend_month_id': id}"/>
                 </button>
-                <field name="rpt_lines" position="after">
-                	<field name="emppay_sheet_ids"/>
-                </field>
+                <page name="employee" position="after">
+                	<page name="payroll" string="Payrolls">
+                		<field name="emppay_sheet_ids"/>
+                	</page>
+                </page>
             </data>
             </field>
         </record>                
