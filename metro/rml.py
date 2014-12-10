@@ -56,5 +56,15 @@ class rml_parser_ext(report_sxw.rml_parse):
     #[[ids2name(rpt.emp_ids)]]
     def ids2name(self,obj_ids):
         obj_names = [obj.name for obj in obj_ids]
-        return ', '.join(obj_names)  
+        return ', '.join(obj_names)
+      
+    #add the 'idx' field, can be used in the inner of repeatIn loop of rml
+    def repeatIn(self, lst, name,nodes_parent=False):
+        ret_lst = super(rml_parser_ext,self).repeatIn(lst, name,nodes_parent)
+        i = 0
+        for obj in ret_lst:
+            i = i + 1
+            obj.get(name).idx = i
+        return ret_lst
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
