@@ -89,7 +89,7 @@
                 <form string="Working Time" version="7.0">
                     <field name="id" invisible="1"/>
                 	<header>
-                		<button name="%(action_hr_emp_worktime)d" string="Add Employees" type="action"/>
+                		<button name="%(action_hr_emp_worktime_batch)d" string="Add Employees" type="action"/>
                 		<button name="%(hr.open_view_employee_list_my)d" string="Employees" type="action"
                 			context="{'default_calendar_id': id, 'search_default_calendar_id': id}"/>
                 	</header>
@@ -223,7 +223,7 @@
             <field name="model">res.company</field>
             <field name="arch" type="xml">
 				<xpath expr="//group[@name='account_grp']" position="after">
-                    <group name="timesheets_hr_att" string="Attendance">
+                    <group name="hr_att" string="Attendance">
                         <field name="hr_att_tole_start_stop_default"/>
                         <field name="hr_att_tole_late_early_default"/>
                         <label for="hr_att_no_in_option"/>

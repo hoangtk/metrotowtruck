@@ -26,7 +26,7 @@ from openerp.tools.translate import _
 class stock_invoice_move(osv.osv_memory):
     _name = "stock.invoice.move"
     _columns = {
-        'order_id': fields.many2one('stock.invoice.onshipping.single', string='Order',required=True),
+        'order_id': fields.many2one('stock.invoice.onshipping.single', string='Order',required=True,ondelete='cascade'),
         'move_id': fields.many2one('stock.move', string='Move Line',required=True),
         'product_id': fields.many2one('product.product', string='Product',readonly=True),
         'product_qty': fields.float('Quantity',type='float',readonly=True),

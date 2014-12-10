@@ -107,26 +107,38 @@ class hr_rpt_attend_emp_day(osv.osv_memory):
         return resu
     
     def _attend_hours(self, hours_valid, period):
-        
-        if hours_valid+0.5 >= period.hours_work_normal:
+        '''
+        if hours_valid > period.hours_work_normal:
             hours_normal = period.hours_work_normal
-        else:         
+        else:
             hours_normal = hours_valid
-                                              
         hours_ot = hours_valid - hours_normal
-        if hours_ot+0.5 >= period.hours_work_ot:
+        if hours_ot > period.hours_work_ot:
             hours_ot = period.hours_work_ot
-                
         #the second time group                        
-        if hours_valid+0.5 >= period.hours_work_normal2:
+        if hours_valid > period.hours_work_normal2:
             hours_normal2 = period.hours_work_normal2
         else:
             hours_normal2 = hours_valid
-               
         hours_ot2 = hours_valid - hours_normal2
-        if hours_ot2+0.5 >= period.hours_work_ot2:
+        if hours_ot2 > period.hours_work_ot2:
             hours_ot2 = period.hours_work_ot2
-            
+        '''
+        if hours_valid > period.hours_work_normal:
+            hours_normal = period.hours_work_normal
+        else:
+            hours_normal = hours_valid
+        hours_ot = hours_valid - hours_normal
+        if hours_ot > period.hours_work_ot:
+            hours_ot = period.hours_work_ot
+        #the second time group                        
+        if hours_valid > period.hours_work_normal2:
+            hours_normal2 = period.hours_work_normal2
+        else:
+            hours_normal2 = hours_valid
+        hours_ot2 = hours_valid - hours_normal2
+        if hours_ot2 > period.hours_work_ot2:
+            hours_ot2 = period.hours_work_ot2        
         return hours_normal, hours_ot, hours_normal2, hours_ot2
     
     def run_attend_emp_day(self, cr, uid, ids, context=None):

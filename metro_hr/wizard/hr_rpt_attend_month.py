@@ -30,23 +30,46 @@ from openerp.addons.metro import utils
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+from openerp import netsvc
 '''
 Attendance monthly report
 '''
-class hr_rpt_attend_month(osv.osv_memory):
+class hr_rpt_attend_month(osv.osv):
     _name = "hr.rpt.attend.month"
-    _inherit = "rpt.base"
     _description = "HR Attendance monthly report"
+    _inherit = ['mail.thread']
     _columns = {
+        'name': fields.char('Report Name', size=16, required=False),
+        'title': fields.char('Report Title', required=False),
+        'type': fields.char('Report Type', size=16, required=True),
+        'company_id': fields.many2one('res.company','Company',required=True),  
+        
         #report data lines
         'rpt_lines': fields.one2many('hr.rpt.attend.month.line', 'rpt_id', string='Report Line'),
         'date_from': fields.datetime("Start Date", required=True),
         'date_to': fields.datetime("End Date", required=True),
         'emp_ids': fields.many2many('hr.employee', string='Employees'),
+        
+        'state': fields.selection([
+            ('draft', 'Draft'),
+            ('confirmed', 'Waiting Approve'),
+            ('done', 'Done'),
+            ('rejected', 'Rejected'),
+            ('cancel', 'Cancel'),
+        ], 'Status', select=True, readonly=True, track_visibility='onchange', 
+            help='* When the report is created the status is \'Draft\'.\
+            \n* If the payslip is confirmed, the status is \'Waiting Approve\'. \
+            \n* If the payslip is approved then status is set to \'Done\'.\
+            \n* If the payslip is rejected then status is set to \'Rejected\'.\
+            \n* When user cancel payslip the status is \'Cancel\'.'),        
+    
+        'note': fields.text('Description', readonly=False, states={'done':[('readonly',True)]}),
         }
 
     _defaults = {
-        'type': 'attend_month',     
+        'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.rptcn', context=c),
+        'type': 'attend_month',   
+        'state': 'draft',  
 #        'emp_ids':[342,171]
     }
     def default_get(self, cr, uid, fields, context=None):
@@ -61,7 +84,11 @@ class hr_rpt_attend_month(osv.osv_memory):
             date_to = datetime.strptime(time.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
             date_to_utc = utils.utc_timestamp(cr, uid, date_to, context)        
             vals.update({'date_to':date_to_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
-        
+
+        #set default title by i18n
+        if context.get('default_title',False):
+            vals['title'] = _(context.get('default_title'))        
+    
         return vals
                 
     def _check_dates(self, cr, uid, ids, context=None):
@@ -74,15 +101,53 @@ class hr_rpt_attend_month(osv.osv_memory):
         (_check_dates, 'The date end must be after the date start.', ['date_from','date_to']),
     ]
     
+    def wkf_confirm(self, cr, uid, ids, context=None):
+        for rpt in self.browse(cr, uid, ids, context=context):
+            if not rpt.rpt_lines:
+                raise osv.except_osv(_('Error!'),_('No attendance data, can not confirm, please generate attendance first!'))
+        self.write(cr, uid, ids, {'state':'confirmed'}, context=context)
+        return True
+    
+    def wkf_cancel(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'cancel'}, context=context)
+        return True
+    
+    def action_done_cancel(self, cr, uid, ids, context=None):
+        if not len(ids):
+            return False        
+        #update status
+        self.wkf_cancel(cr, uid, ids, context=context)
+        wf_service = netsvc.LocalService("workflow")
+        #recrate workflow and do draft-->cancel
+        for p_id in ids:
+            # Deleting the existing instance of workflow for PO
+            wf_service.trg_delete(uid, 'hr.rpt.attend.month', p_id, cr)
+            wf_service.trg_create(uid, 'hr.rpt.attend.month', p_id, cr)
+            wf_service.trg_validate(uid, 'hr.rpt.attend.month', p_id, 'cancel', cr)
+        return True
+        
+    def action_cancel_draft(self, cr, uid, ids, context=None):
+        if not len(ids):
+            return False
+        self.write(cr, uid, ids, {'state':'draft'})
+        wf_service = netsvc.LocalService("workflow")
+        for p_id in ids:
+            # Deleting the existing instance of workflow for PO
+            wf_service.trg_delete(uid, 'hr.rpt.attend.month', p_id, cr)
+            wf_service.trg_create(uid, 'hr.rpt.attend.month', p_id, cr)
+        return True
+    
     def get_report_name(self, cr, uid, id, rpt_name, context=None):
         return "Attendance Monthly Report"
             
     def name_get(self, cr, uid, ids, context=None):
         if not ids:
             return []
+        if isinstance(ids,(int,long)):
+            ids = [ids]
         res = []
-        for id in ids:
-            res.append((id,'%s'%(id,) ))
+        for row in self.read(cr, uid, ids, ['name'], context=context):
+            res.append((row['id'],'[%s]%s'%(row['id'],row['name']) ))
         return res
     def _convert_save_dates(self, cr, uid, vals, context):
         #convert to the date like '2013-01-01' to UTC datetime to store
@@ -97,15 +162,48 @@ class hr_rpt_attend_month(osv.osv_memory):
             date_to = date_to.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
             vals['date_to'] = date_to
             
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        default['rpt_lines'] = None
+        return super(hr_rpt_attend_month, self).copy(cr, uid, id, default, context)
+    
     def create(self, cr, uid, vals, context=None):
+        if 'name' not in vals or not vals['name']:
+            date_from = datetime.strptime(vals['date_to'], DEFAULT_SERVER_DATETIME_FORMAT)
+            name = '%s-%s'%(date_from.year, date_from.month)
+            vals['name'] = name
         self._convert_save_dates(cr, uid, vals, context)
         id_new = super(hr_rpt_attend_month, self).create(cr, uid, vals, context=context)
         return id_new
+    
     def write(self, cr, uid, ids, vals, context=None):
         self._convert_save_dates(cr, uid, vals, context)
         resu = super(hr_rpt_attend_month, self).write(cr, uid, ids, vals, context=context)
         return resu
-      
+    
+    def unlink(self, cr, uid, ids, context=None):
+        for rpt in self.read(cr, uid, ids, ['state'], context=context):
+            if rpt['state'] not in ('draft','cancel'):
+                raise osv.except_osv(_('Error'),_('Only order with Draft/Cancel state can be delete!'))
+        return super(hr_rpt_attend_month, self).unlink(cr, uid, ids, context=context)
+    
+    def run_report(self, cr, uid, ids, context=None):
+        rpt = self.browse(cr, uid, ids, context=context)[0]
+        if not rpt.emp_ids:
+            raise osv.except_osv(_('Warning!'),_('Please select employees to get attendance!'))
+        rpt_method = getattr(self, 'run_%s'%(rpt.type,))
+        #get report data
+        rpt_line_obj,  rpt_lns = rpt_method(cr, uid, ids, context)
+        #remove the old lines
+        unlink_ids = rpt_line_obj.search(cr, uid, [('rpt_id','=',rpt.id)], context=context)
+        rpt_line_obj.unlink(cr ,uid, unlink_ids, context=context)
+        #create new lines
+        for rpt_line in rpt_lns:
+            rpt_line['rpt_id'] = rpt.id
+            rpt_line_obj.create(cr ,uid, rpt_line, context=context)  
+        return True
+    
     def run_attend_month(self, cr, uid, ids, context=None):
         '''
         1.Call hr_rpt_attend_emp_day.run_attend_emp_day() to get all detail data
@@ -180,6 +278,8 @@ class hr_rpt_attend_month(osv.osv_memory):
 
             seq += 1
             rpt_line = {'seq': seq,
+                            'code': emp.code,
+                            'name': emp.name,
                             'emp_id': emp.id,
                             'days_work':days_work,
                             'days_attend': days_attend,
@@ -195,13 +295,29 @@ class hr_rpt_attend_month(osv.osv_memory):
     def _pdf_data(self, cr, uid, ids, form_data, context=None):
         return {'xmlrpt_name': 'hr.rpt.attend.month'}
     
+    def save_pdf(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        form_data = self.read(cr, uid, ids[0], context=context)
+        rptxml_name = self._pdf_data(cr, uid, ids[0], form_data, context=context)['xmlrpt_name']
+        datas = {
+                 'model': self._name,
+                 'ids': [ids[0]],
+                 'form': form_data,
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': rptxml_name, 'datas': datas, 'nodestroy': True}    
+        
 hr_rpt_attend_month()
 
-class hr_rpt_attend_month_line(osv.osv_memory):
+class hr_rpt_attend_month_line(osv.osv):
     _name = "hr.rpt.attend.month.line"
-    _inherit = "rpt.base.line"
     _description = "HR Attendance Monthly Report Lines"
+    _order = 'seq'
     _columns = {
+        'code': fields.char('Code', size=64, ),
+        'name': fields.char('Name', size=256, ),
+        'data_level': fields.char('Data level code', size=64),
+        
         'rpt_id': fields.many2one('hr.rpt.attend.month', 'Report'),
         'seq': fields.integer('Sequence',),
         'emp_id': fields.many2one('hr.employee', 'Employee',),
