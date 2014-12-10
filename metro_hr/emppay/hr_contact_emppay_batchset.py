@@ -31,8 +31,8 @@ class hr_set_alwded(osv.osv_memory):
     _description = 'Contact Salary''s allowance and the deduction'
     _order = 'type, sequence'
     _columns = {
-        'set_id': fields.many2one('hr.contract.emppay.batchset', required=True, select=True),
-        'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True),
+        'set_id': fields.many2one('hr.contract.emppay.batchset', required=True, select=True, ondelete='cascade'),
+        'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True, ondelete='cascade'),
         'sequence': fields.related('alwded_id', 'sequence', type='integer', string='#', store=True, readonly=True),
         'type': fields.related('alwded_id', 'type', type='selection', selection=[('alw','Allowance'),('ded','Deduction')],
                                     string='Type', store=True, readonly=True),
@@ -66,7 +66,7 @@ class hr_set_si(osv.osv_memory):
     _order = 'sequence'
     
     _columns = {
-        'set_id': fields.many2one('hr.contract.emppay.batchset', required=True, select=True),
+        'set_id': fields.many2one('hr.contract.emppay.batchset', required=True, select=True, ondelete='cascade'),
         'si_id': fields.many2one('hr.emppay.si', 'Social Insurance', required=True),
         'sequence': fields.related('si_id', 'sequence', type='integer', string='#', store=True, readonly=True),
         #default get from hr_salary_si, user can change

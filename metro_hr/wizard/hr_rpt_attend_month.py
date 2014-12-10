@@ -62,6 +62,8 @@ class hr_rpt_attend_month(osv.osv):
             \n* If the payslip is approved then status is set to \'Done\'.\
             \n* If the payslip is rejected then status is set to \'Rejected\'.\
             \n* When user cancel payslip the status is \'Cancel\'.'),        
+    
+        'note': fields.text('Description', readonly=False, states={'done':[('readonly',True)]}),
         }
 
     _defaults = {
@@ -168,7 +170,7 @@ class hr_rpt_attend_month(osv.osv):
     
     def create(self, cr, uid, vals, context=None):
         if 'name' not in vals or not vals['name']:
-            date_from = datetime.strptime(vals['date_from'], DEFAULT_SERVER_DATETIME_FORMAT)
+            date_from = datetime.strptime(vals['date_to'], DEFAULT_SERVER_DATETIME_FORMAT)
             name = '%s-%s'%(date_from.year, date_from.month)
             vals['name'] = name
         self._convert_save_dates(cr, uid, vals, context)

@@ -40,6 +40,7 @@
                         </div>	        
 						<field name="company_id" groups="base.group_multi_company" widget="selection"
 							 attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>   
+						<field name="note"/>
 	                </group>
                 </group>
                 <notebook>

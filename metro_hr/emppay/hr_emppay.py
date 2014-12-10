@@ -134,7 +134,7 @@ class hr_contract_si(osv.osv):
     _order = 'sequence'
     
     _columns = {
-        'contract_id': fields.many2one('hr.contract', 'Contract', required=True, select=True),
+        'contract_id': fields.many2one('hr.contract', 'Contract', required=True, select=True, ondelete='cascade'),
         'si_id': fields.many2one('hr.emppay.si', 'Social Insurance', required=True),
         'sequence': fields.related('si_id', 'sequence', type='integer', string='#', store=True, readonly=True),
         #default get from hr_salary_si, user can change
@@ -393,13 +393,8 @@ class hr_emppay_sheet(osv.osv):
         for rpt in self.read(cr, uid, ids, ['state'], context=context):
             if rpt['state'] not in ('draft'):
                 raise osv.except_osv(_('Error'),_('Only order with Draft state can be delete!'))
-            
-        emppay_ids = []
-        for order in self.browse(cr, uid, ids, context=context):
-            emppay_ids += [emppay.id for emppay in order.emppay_ids]
-        self.pool.get('hr.emppay').unlink(cr, uid, emppay_ids, context=context)
         
-        return super(hr_rpt_attend_month, self).unlink(cr, uid, ids, context=context)
+        return super(hr_emppay_sheet, self).unlink(cr, uid, ids, context=context)
         
     def action_draft(self, cr, uid, ids, context=None):
         return self._set_state(cr, uid, ids, 'draft', context)
@@ -422,14 +417,61 @@ class hr_emppay_sheet(osv.osv):
         order = self.browse(cr,uid,ids[0],context=context)
         if not order.attend_month_id:
             raise osv.except_osv(_('Invalid Action!'), _('Please set the Attendance Report first.'))
+        payroll = self.browse(cr, uid, ids[0], context=context)
+        unlink_slip_ids = [slip.id for slip in payroll.emppay_ids]
+        self.pool.get('hr.emppay').unlink(cr, uid, unlink_slip_ids, context=context)
         return self.pool.get('hr.rpt.attend.month').add_payroll(cr, uid, order.attend_month_id.id, ids[0], remove_old_slips = False, context=context)        
     
 #    def add_from_att_record(self, cr, uid, ids, context=None):
 #        return self.write(cr, uid, ids, {'state': 'close'}, context=context)        
-
+    def _pdf_data(self, cr, uid, ids, form_data, context=None):
+        return {'xmlrpt_name': 'hr.rpt.attend.month'}
+    
+    '''
+    def print_slip(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        form_data = self.read(cr, uid, ids[0], context=context)
+        datas = {
+                 'model': self._name,
+                 'ids': [ids[0]],
+                 'form': form_data,
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.sheet.slip', 'datas': datas, 'nodestroy': True} 
+    '''
+    
+    def print_sheet_slip(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        order = self.browse(cr, uid, ids[0], context=context)
+        emppay_ids = [emppay.id for emppay in order.emppay_ids]
+        return self.pool.get('hr.emppay').print_slip(cr, uid, emppay_ids, context=context)
+    
 hr_emppay_sheet()
-
-
+'''
+from openerp.report import report_sxw
+from openerp.addons.metro.rml import rml_parser_ext
+class payslip_print(rml_parser_ext):
+    def __init__(self, cr, uid, name, context):
+        super(payslip_print, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'list_alw':self.list_alw,
+            'list_ded':self.list_ded,
+        })
+    def list_alw(self,slip):
+        ret = ''
+        for alw in slip.alw_ids:
+            ret += '%s: %s; '%(alw.name,alw.amount)
+        return ret
+    def list_ded(self,slip):
+        ret = ''
+        for item in slip.ded_ids:
+            ret += '%s: %s; '%(item.name,item.amount)
+#        ret += '%s: %s'%(u'社保(SI)',slip.si_total_personal)
+        return ret
+'''    
+#report_sxw.report_sxw('report.hr.emppay.sheet.slip', 'hr.emppay.sheet', 'addons/metro_hr/emppay/hr_emppay_sheet_slip.rml', parser=payslip_print, header='internal landscape')
 
 class hr_emppay_ln_alwded(osv.osv):
     """
@@ -442,7 +484,7 @@ class hr_emppay_ln_alwded(osv.osv):
     _description = 'Salary allowance and the deduction'
     _order = 'type, sequence'
     _columns = {
-        'emppay_id': fields.many2one('hr.emppay', 'Payslip', required=True, select=True),
+        'emppay_id': fields.many2one('hr.emppay', 'Payslip', required=True, select=True, ondelete='cascade'),
         'sequence': fields.integer('#', required=True),
         'code':fields.char('Reference', size=64, required=True, select=True),
         'name':fields.char('Name', size=256, required=True, translate=True),
@@ -474,7 +516,7 @@ class hr_emppay_ln_si(osv.osv):
         return res
     
     _columns = {
-        'emppay_id': fields.many2one('hr.emppay', 'Payslip', required=True, select=True),
+        'emppay_id': fields.many2one('hr.emppay', 'Payslip', required=True, select=True, ondelete='cascade'),
         'sequence': fields.integer('#', required=True, select=True),
         'code':fields.char('Reference', size=64, required=True),
         'name':fields.char('Name', size=256, required=True, translate=True),
@@ -499,7 +541,14 @@ class hr_emppay(osv.osv):
             wage_ot = 0.0
             if slip.days_work and slip.days_work != 0:
                 wage_attend = slip.wage*slip.days_attend/slip.days_work
-                wage_ot = slip.wage/slip.days_work/8*(slip.hours_ot + slip.hours_ot_we*2 + slip.hours_ot_holiday*3)
+                
+                wage_hourly = slip.wage/slip.days_work/8.0
+                wage_ot = wage_hourly * slip.hours_ot
+                wage_ot_we = wage_hourly * slip.hours_ot_we * 2
+                wage_ot_holiday = wage_hourly * slip.hours_ot_holiday * 3
+                wage_ot_total = wage_ot + wage_ot_we + wage_ot_holiday
+                
+                wage_work = wage_attend + wage_ot_total
             
             alw_total = 0.0
             for alw in slip.alw_ids:
@@ -515,15 +564,17 @@ class hr_emppay(osv.osv):
                 si_total_personal += si.amount_personal
                 si_total_company += si.amount_company
                 
-            wage_total = wage_attend + wage_ot + alw_total - ded_total - si_total_personal
-            wage_tax = wage_attend + wage_ot + alw_total - si_total_personal
+            wage_total = wage_attend + wage_ot + alw_total
+            wage_pay = wage_total - ded_total - si_total_personal
+            wage_tax = wage_total - si_total_personal
             
             pit = max([
                         (wage_tax - slip.contract_id.pit_base)*rate[0]-rate[1] 
                         for rate in [(0.03, 0), (0.1, 105), (0.2, 555), (0.25, 1005), (0.3, 2755), (0.35, 5505), (0.45, 13505)]
                         ])
+            pit = max([pit,0])
             
-            wage_pay = wage_total - pit
+            wage_net = wage_pay - pit
                         
             '''
             The reason use 'month_attend_days_law' is that the days_attends is based on the month_attend_days_law
@@ -532,26 +583,42 @@ class hr_emppay(osv.osv):
             '''
             month_attend_days_law = slip.company_id.month_attend_days_law                            
             wage_attend2 = slip.wage2*slip.days_attend2/month_attend_days_law
-            wage_ot2 = slip.wage2/month_attend_days_law/8*(slip.hours_ot2 + slip.hours_ot_we2*2 + slip.hours_ot_holiday2*3)
+            
+            wage_hourly2 = slip.wage2/month_attend_days_law/8.0
+            wage_ot2 = wage_hourly2 * slip.hours_ot2
+            wage_ot_we2 = wage_hourly2 * slip.hours_ot_we2 * 2
+            wage_ot_holiday2 = wage_hourly2 * slip.hours_ot_holiday2 * 3
+            wage_ot_total2 = wage_ot2 + wage_ot_we2 + wage_ot_holiday2
+
             wage_bonus2 = wage_attend + wage_ot - wage_attend2 - wage_ot2
+            wage_work2 = wage_attend2 + wage_ot2 + wage_bonus2
             
             res[slip.id].update({'wage_attend':wage_attend,
                                'wage_ot':wage_ot,
+                               'wage_ot_we':wage_ot_we,
+                               'wage_ot_holiday':wage_ot_holiday,
+                               'wage_ot_total':wage_ot_total,
+                               'wage_work':wage_work,
                                'alw_total':alw_total,
+                               'wage_total':wage_total,
                                'ded_total':ded_total,
                                'si_total_personal':si_total_personal,                               
                                'si_total_company':si_total_company,
                                
-                               'wage_total':wage_total,
+                               'wage_pay':wage_pay,
                                
                                'wage_tax':wage_tax,
                                'pit':pit,
                                
-                               'wage_pay':wage_pay,  
+                               'wage_net':wage_net,  
                                
                                'wage_attend2':wage_attend2, 
-                               'wage_ot2':wage_ot2,  
+                               'wage_ot2':wage_ot2,
+                               'wage_ot_we2':wage_ot_we2,
+                               'wage_ot_holiday2':wage_ot_holiday2,
+                               'wage_ot_total2':wage_ot_total2,
                                'wage_bonus2':wage_bonus2,  
+                               'wage_work2':wage_work2,
                                })              
         return res
     
@@ -564,9 +631,9 @@ class hr_emppay(osv.osv):
         
         #Below from employee contract, 数据为只读
         #contract.wage
-        'wage':fields.float('Wage', digits_compute=dp.get_precision('Payroll')),
+        'wage':fields.float('Contract Wage', digits_compute=dp.get_precision('Payroll')),
         #contract.wage2
-        'wage2':fields.float('Wage2', digits_compute=dp.get_precision('Payroll')),     
+        'wage2':fields.float('Contract Wage2', digits_compute=dp.get_precision('Payroll')),     
         #attendance report line id
         'attend_id':fields.many2one('hr.rpt.attend.month.line', 'Attendance'),
         
@@ -577,10 +644,10 @@ class hr_emppay(osv.osv):
         'hours_ot_we': fields.float('Hours OT(Week End)', readonly=True),#0
         'hours_ot_holiday': fields.float('Hours OT(Law Holiday)', readonly=True), #0
         #Below from attend data, user can change, 数据为只读, 下面相关字段的显示使用组来限制
-        'days_work2': fields.related('attend_id','days_work2',type='float',string='Work Days',  readonly=True), #attend_line_id.days_work2
-        'days_attend2': fields.related('attend_id','days_attend2',type='float',string='Days Attended',  readonly=True),#attend_line_id.days_attend2
-        'hours_ot2': fields.related('attend_id','hours_ot2_nonwe',type='float',string='Hours OT(Normal)',  readonly=True),#attend_line_id.hours_ot2_nonwe
-        'hours_ot_we2': fields.related('attend_id','hours_ot2_we',type='float',string='Hours OT(Week End)',  readonly=True),#attend_line_id.hours_ot2_we
+        'days_work2': fields.related('attend_id','days_work2',type='float',string='Work Days2',  readonly=True), #attend_line_id.days_work2
+        'days_attend2': fields.related('attend_id','days_attend2',type='float',string='Days Attended2',  readonly=True),#attend_line_id.days_attend2
+        'hours_ot2': fields.related('attend_id','hours_ot2_nonwe',type='float',string='Hours OT(Normal)2',  readonly=True),#attend_line_id.hours_ot2_nonwe
+        'hours_ot_we2': fields.related('attend_id','hours_ot2_we',type='float',string='Hours OT(Week End)2',  readonly=True),#attend_line_id.hours_ot2_we
         'hours_ot_holiday2': fields.float('Hours OT(Law Holiday)', readonly=True), #0   
         
         #copy from contract_id.alwded_ids
@@ -596,8 +663,22 @@ class hr_emppay(osv.osv):
                                       digits_compute=dp.get_precision('Payroll'), multi="_wage_all"), 
         'wage_ot':fields.function(_wage_all, string='Wage(OT)', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        'wage_ot_we':fields.function(_wage_all, string='Wage(OT Weekend)', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        'wage_ot_holiday':fields.function(_wage_all, string='Wage(OT Holiday)', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),                
+        'wage_ot_total':fields.function(_wage_all, string='Wage(OT Total)', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                  help="Wage(OT) + Wage(OT Weekend) + Wage(OT Holiday)"),
+        'wage_work':fields.function(_wage_all, string='Wage(Work)', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                  help="Wage(attend) + Wage(OT)"),
         'alw_total':fields.function(_wage_all, string='Allowance', type='float',  store=True,
                                     digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        #wage_attend + wage_ot + alw_total
+        'wage_total':fields.function(_wage_all, string='Wage(total)', type='float',  store=True,
+                                     digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                     help="Wage(attend) + Wage(OT) + Allowance"),
         'ded_total':fields.function(_wage_all, string='Deduction', type='float',  store=True,
                                     digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
         'si_total_personal':fields.function(_wage_all, string='SI(Personal)', type='float',  store=True,
@@ -605,23 +686,37 @@ class hr_emppay(osv.osv):
         'si_total_company':fields.function(_wage_all, string='SI(Company)', type='float',  store=True,
                                            digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
         #wage_attend + wage_ot + alw_total - ded_total - si_total_personal
-        'wage_total':fields.function(_wage_all, string='Wage(total)', type='float',  store=True,
-                                     digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        'wage_pay':fields.function(_wage_all, string='Wage(Pay)', type='float',  store=True,
+                                     digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                     help="Wage(total) - Deduction - SI(Personal)"),
         #wage_attend + wage_ot + alw_total - si_total_personal
         'wage_tax':fields.function(_wage_all, string='Wage(for tax)', type='float',  store=True,
-                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                     help="Wage(total) - SI(Personal)"),
         'pit':fields.function(_wage_all, string='PIT', type='float',  store=True,
                               digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
         #wage_total - PIT
-        'wage_pay':fields.function(_wage_all, string='Wage to Pay', type='float',  store=True,
-                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),  
+        'wage_net':fields.function(_wage_all, string='Wage(Net)', type='float',  store=True,
+                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                     help="Wage(Pay) - PIT"),  
                        
         'wage_attend2':fields.function(_wage_all, string='Wage(attend)2', type='float', store=True,
                                       digits_compute=dp.get_precision('Payroll'), multi="_wage_all"), 
+
         'wage_ot2':fields.function(_wage_all, string='Wage(OT)2', type='float',  store=True,
-                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"), 
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        'wage_ot_we2':fields.function(_wage_all, string='Wage(OT Weekend)2', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        'wage_ot_holiday2':fields.function(_wage_all, string='Wage(OT Holiday)2', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),                
+        'wage_ot_total2':fields.function(_wage_all, string='Wage(OT Total)2', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                  help="Wage(OT)2 + Wage(OT Weekend)2 + Wage(OT Holiday)2"),
         'wage_bonus2':fields.function(_wage_all, string='Wage(Bonus)2', type='float',  store=True,
-                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),                                             
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        'wage_work2':fields.function(_wage_all, string='Wage(Work)2', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
+                                  help="Wage(attend)2 + Wage(OT)2 + Wage(Bonus)2"),                                             
                 
         'state': fields.selection([
             ('draft', 'Draft'),
@@ -633,7 +728,7 @@ class hr_emppay(osv.osv):
             \n* If the payslip is paid then status is set to \'Paid\'.'),
         'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'note': fields.text('Description', readonly=True, states={'draft':[('readonly',False)]}),
-        'emppay_sheet_id': fields.many2one('hr.emppay.sheet', 'Payroll', readonly=True, states={'draft': [('readonly', False)]}),
+        'emppay_sheet_id': fields.many2one('hr.emppay.sheet', 'Payroll', readonly=True, states={'draft': [('readonly', False)]}, ondelete='cascade'),
         
     }
     _defaults = {
@@ -684,8 +779,43 @@ class hr_emppay(osv.osv):
             if payslip.state not in  ['draft']:
                 raise osv.except_osv(_('Warning!'),_('You cannot delete a payslip which is not draft!'))
         return super(hr_emppay, self).unlink(cr, uid, ids, context)
-    
+    def print_slip(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        form_data = self.read(cr, uid, ids, context=context)
+        datas = {
+                 'model': 'hr.emppay',
+                 'ids': ids,
+                 'form': form_data,
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip', 'datas': datas, 'nodestroy': True} 
+        
 hr_emppay()
+
+from openerp.report import report_sxw
+from openerp.addons.metro.rml import rml_parser_ext
+class emppay_slip_print(rml_parser_ext):
+    def __init__(self, cr, uid, name, context):
+        super(emppay_slip_print, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'list_alw':self.list_alw,
+            'list_ded':self.list_ded,
+        })
+    def list_alw(self,slip):
+        ret = ''
+        for alw in slip.alw_ids:
+            ret += '%s: %s; '%(alw.name,alw.amount)
+        return ret
+    def list_ded(self,slip):
+        ret = ''
+        for item in slip.ded_ids:
+            ret += '%s: %s; '%(item.name,item.amount)
+#        ret += '%s: %s'%(u'社保(SI)',slip.si_total_personal)
+        return ret
+    
+report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=emppay_slip_print, header='internal landscape')
+
 
 class hr_employee(osv.osv):
     '''

@@ -40,6 +40,7 @@
                 <header>
                     <button name="add_from_att_report" type="object" states="draft" string="Generate from Attendance Report" groups="account.group_account_invoice"/>
                     <!-- <button name="add_from_att_record" type="object" states="draft" string="Generate from Attendance Records"/> -->
+                    <button name="print_sheet_slip" type="object" string="Print Slips"/>
                     <button name="action_verify" type="object" string="Verify" states="draft" class="oe_highlight" groups="account.group_account_invoice"/>
                     <button name="action_pay" type="object" string="Pay" states="verified" class="oe_highlight" groups="account.group_account_invoice"/>
                     <button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager"/>
@@ -64,30 +65,17 @@
 		                	<field name="employee_id"/>
 							<field name="wage_attend"/>
 							<field name="wage_ot"/>
+							<field name="wage_ot_we"/>
+							<field name="wage_ot_holiday"/>
+							<field name="wage_ot_total"/>
 		                	<field name="alw_total"/>
+		                	<field name="wage_total"/>
 		                	<field name="ded_total"/>
 		                	<field name="si_total_personal"/>
-		                	<field name="wage_total"/>
-		                	<field name="pit"/>
 		                	<field name="wage_pay"/>
+		                	<field name="pit"/>
+		                	<field name="wage_net"/>
 		                	<field name="state" invisible="1"/>
-		                			                	
-		                	<!-- <field name="wage"/>
-		                	<field name="wage2"/>
-		                	
-		                	<field name="attend_id" invisible="1"/>
-		                	
-		                	<field name="days_work"/>
-		                	<field name="days_attend"/>
-		                	<field name="hours_ot"/>
-		                	<field name="hours_ot_we"/>
-		                	<field name="hours_ot_holiday"/>
-		                	
-		                	<field name="days_work2"/>
-		                	<field name="days_attend2"/>
-		                	<field name="hours_ot2"/>
-		                	<field name="hours_ot_we2"/>
-		                	<field name="hours_ot_holiday2"/> -->
 		                </tree>      
 		                <form string="Payslips" version="7.0">
 		                    <group col="4">
@@ -113,7 +101,11 @@
 				                    	<group name="wage">      
 						                	<field name="wage"/>        	
 						                	<field name="wage_attend"/>	
-						                	<field name="wage_ot"/>
+											<field name="wage_ot"/>
+											<field name="wage_ot_we"/>
+											<field name="wage_ot_holiday"/>
+						                	<field name="wage_ot_total"/>
+				                			<field name="wage_work"/>
 				                    	</group>     	
 				                    </group>
 				                    <group name="attend_wage2" string="Attendance2">
@@ -127,8 +119,12 @@
 				                    	<group name="wage2">
 						                	<field name="wage2"/>
 						                	<field name="wage_attend2"/>	
-						                	<field name="wage_ot2"/>
+											<field name="wage_ot2"/>
+											<field name="wage_ot_we2"/>
+											<field name="wage_ot_holiday2"/>							                	
+						                	<field name="wage_ot_total2"/>
 						                	<field name="wage_bonus2"/>
+				                			<field name="wage_work2"/>
 				                    	</group>
 				                    </group>
 				                    <group name="wage_detail" string="Wage Detail">
@@ -139,13 +135,15 @@
 						                	<field name="si_total_company"/>
 				                    	</group>
 				                    	<group>
-						                	<!-- wage_attend + wage_ot + alw_total - ded_total - si_total_personal -->
+						                	<!-- wage_attend + wage_ot_total + alw_total -->
 						                	<field name="wage_total"/>
-						                	<!-- wage_attend + wage_ot + alw_total - si_total_personal -->
+						                	<!-- wage_attend + wage_ot_total + alw_total - ded_total - si_total_personal -->
+						                	<field name="wage_pay"/>
+						                	<!-- wage_attend + wage_ot_total + alw_total - si_total_personal -->
 						                	<field name="wage_tax"/>
 						                	<field name="pit"/>
-						                	<!-- wage_total - PIT -->
-						                	<field name="wage_pay"/>
+						                	<!-- wage_pay - PIT -->
+						                	<field name="wage_net"/>
 				                    	</group>
 				                    </group>
 		                    	</page>
@@ -229,12 +227,16 @@
                 	<field name="hours_ot_we"/>
                 	<field name="hours_ot_holiday"/> -->
 					<field name="wage_ot"/>
+					<field name="wage_ot_we"/>
+					<field name="wage_ot_holiday"/>
+					<field name="wage_ot_total"/>
                 	<field name="alw_total"/>
+                	<field name="wage_total"/>
                 	<field name="ded_total"/>
                 	<field name="si_total_personal"/>
-                	<field name="wage_total"/>
-                	<field name="pit"/>
                 	<field name="wage_pay"/>
+                	<field name="pit"/>
+                	<field name="wage_net"/>
                 	
                 	<field name="wage2"/>
                 	<!-- <field name="days_work2"/>
@@ -243,7 +245,10 @@
                 	<field name="hours_ot2"/>
                 	<field name="hours_ot_we2"/>
                 	<field name="hours_ot_holiday2"/> -->
-                	<field name="wage_ot2"/>
+					<field name="wage_ot2"/>
+					<field name="wage_ot_we2"/>
+					<field name="wage_ot_holiday2"/>			
+                	<field name="wage_ot_total2"/>
                 	<field name="wage_bonus2"/>
 		                	
                 	<field name="state"/>
@@ -259,6 +264,7 @@
                 <form string="Payslip" version="7.0">
                 <header>
                     <button name="action_verify" type="object" string="Verify" states="draft" class="oe_highlight" groups="account.group_account_invoice"/>
+                    <button name="print_slip" type="object" string="Print Slip"/>
                     <button name="action_pay" type="object" string="Pay" states="verified" class="oe_highlight" groups="account.group_account_invoice"/>
                     <button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager"/>
                     <field name="state" widget="statusbar"/>
@@ -298,7 +304,11 @@
 		                    	<group name="wage">      
 				                	<field name="wage"/>        	
 				                	<field name="wage_attend"/>	
-				                	<field name="wage_ot"/>
+									<field name="wage_ot"/>
+									<field name="wage_ot_we"/>
+									<field name="wage_ot_holiday"/>
+				                	<field name="wage_ot_total"/>
+				                	<field name="wage_work"/>
 		                    	</group>     	
 		                    </group>
 		                    <group name="attend_wage2" string="Attendance2">
@@ -312,8 +322,12 @@
 		                    	<group name="wage2">
 				                	<field name="wage2"/>
 				                	<field name="wage_attend2"/>	
-				                	<field name="wage_ot2"/>
+									<field name="wage_ot2"/>
+									<field name="wage_ot_we2"/>
+									<field name="wage_ot_holiday2"/>													                	
+				                	<field name="wage_ot_total2"/>
 				                	<field name="wage_bonus2"/>
+				                	<field name="wage_work2"/>
 		                    	</group>
 		                    </group>
 		                    <group name="wage_detail" string="Wage Detail">
@@ -324,13 +338,15 @@
 				                	<field name="si_total_company"/>
 		                    	</group>
 		                    	<group>
-				                	<!-- wage_attend + wage_ot + alw_total - ded_total - si_total_personal -->
+				                	<!-- wage_attend + wage_ot_total + alw_total -->
 				                	<field name="wage_total"/>
-				                	<!-- wage_attend + wage_ot + alw_total - si_total_personal -->
+				                	<!-- wage_attend + wage_ot_total + alw_total - ded_total - si_total_personal -->
+				                	<field name="wage_pay"/>
+				                	<!-- wage_attend + wage_ot_total + alw_total - si_total_personal -->
 				                	<field name="wage_tax"/>
 				                	<field name="pit"/>
-				                	<!-- wage_total - PIT -->
-				                	<field name="wage_pay"/>
+				                	<!-- wage_pay - PIT -->
+				                	<field name="wage_net"/>
 		                    	</group>
 		                    </group>		                    
                     	</page>
