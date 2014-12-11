@@ -877,8 +877,9 @@ class purchase_order_line(osv.osv):
         self._update_prod_supplier(cr, uid, ids, vals, context)
         #if price_unit changed then update it to product_product.standard_price
         if vals.has_key('price_unit'):
-            standard_price = self.pool.get('product.uom')._compute_price(cr, uid, po_line.product_uom.id, vals["price_unit"],po_line.product_id.uom_id.id)
-            self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)
+            #standard_price = self.pool.get('product.uom')._compute_price(cr, uid, po_line.product_uom.id, vals["price_unit"],po_line.product_id.uom_id.id)
+            #self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)
+            self.pool.get('product.product').write(cr,uid,[po_line.product_id.id],{'uom_po_price':vals["price_unit"]},context=context)
             
         return resu
     def create(self, cr, user, vals, context=None):
@@ -897,8 +898,9 @@ class purchase_order_line(osv.osv):
         #if price_unit changed then update it to product_product.standard_price
         if vals.has_key('price_unit'):
             prod = self.pool.get('product.product').browse(cr, user, vals['product_id'], context=context)
-            standard_price = self.pool.get('product.uom')._compute_price(cr, user, vals["product_uom"], vals["price_unit"],prod.uom_id.id)            
-            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)
+            #standard_price = self.pool.get('product.uom')._compute_price(cr, user, vals["product_uom"], vals["price_unit"],prod.uom_id.id)            
+            #self.pool.get('product.product').write(cr,user,[vals['product_id']],{'standard_price':standard_price,'uom_po_price':vals["price_unit"]},context=context)
+            self.pool.get('product.product').write(cr,user,[vals['product_id']],{'uom_po_price':vals["price_unit"]},context=context)
             
         #only when orders confirmed, then record the po lines adding
         uid = user
@@ -1120,7 +1122,7 @@ def metro_po_line_onchange_product_id(self, cr, uid, ids, pricelist_id, product_
             price = product_pricelist.price_get(cr, uid, [pricelist_id],
                     product.id, qty or 1.0, partner_id or False, {'uom': uom_id, 'date': date_order})[pricelist_id]
         else:
-            price = product.standard_price
+            price = product.uom_po_price
     else:
         price = price_unit
         
