@@ -262,18 +262,7 @@ limit 1
 
 			if len(check_ids) and self.has_related_product(cr, uid, check_ids, context):
 				raise osv.except_osv(_('Unit of Measure categories Mismatch!'), _("New Unit of Measure '%s' must belong to same Unit of Measure category '%s' as of old Unit of Measure '%s'. If you need to change the unit of measure, you may deactivate this product from the 'Procurements' tab and create a new one.") % (new_uom.name, old_uom.category_id.name, old_uom.name,))
-		#auto calculate the standard_price from uom_po_price
-		if 'uom_po_price' in vals and 'standard_price' not in vals:
-			prod = self.browse(cr, uid, ids[0],context)
-			uom_id = prod.uom_id.id
-			uom_po_id = prod.uom_po_id.id
-			if 'uom_id' in vals:
-				uom_id = vals["uom_po_id"]			
-			if 'uom_po_id' in vals:
-				uom_po_id = vals["uom_po_id"]
-			uom_price = self.pool.get('product.uom')._compute_price(cr, uid, uom_po_id, vals["uom_po_price"],uom_id)
-			vals.update({'standard_price':uom_price})
-			
+
 		resu = super(product_product, self).write(cr, uid, ids, vals, context=context)
 		#update the 'Multi Units Single Product's uom category
 		self.update_msp_uom_categ(cr, uid, ids[0], vals, context)
