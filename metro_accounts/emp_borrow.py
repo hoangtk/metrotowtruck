@@ -55,6 +55,7 @@ class emp_borrow(osv.osv):
         'description': fields.char('Description', size=128, required=False),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'move_id': fields.many2one('account.move', 'Accounting Entry', readonly=True),
+        'move_state': fields.related('move_id', 'state', type='selection', selection=[('draft','Unposted'), ('posted','Posted')], string='Entry State'),
         'move_lines': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Accounting Items', readonly=True),
         'reimbursed': fields.function(_check_reimbursed, string='Reimbursed', type='boolean', help="The Voucher has been totally paid."),
     } 
