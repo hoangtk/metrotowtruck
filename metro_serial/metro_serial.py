@@ -105,7 +105,7 @@ class ir_attachment(osv.osv):
             
         return super(ir_attachment, self).create(cr, uid, vals, context)
             
-class Serials(osv.osv):
+class mttl_serials(osv.osv):
     
     def _generate_serial_number(self, cursor, user, *args):
         try:

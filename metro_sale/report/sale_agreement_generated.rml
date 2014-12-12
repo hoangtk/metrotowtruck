@@ -322,9 +322,7 @@
       <blockTable colWidths="203.0,94.0,58.0,70.0,42.0,70.0" style="Table5">
         <tr>
           <td>
-            <para style="terp_default_9">[[ format(line.name) ]]</para>
-            <para style="terp_default_9">[[', '.join(map(lambda x: x.serial, line.serial_ids))]]</para>
-            <para style="terp_default_9">[[serial_names(line.serial_ids)]]</para>
+            <para style="terp_default_9">[[ format(line.name) ]] </para>
           </td>
           <td>
             <para style="terp_default_Centre_9">[[ ', '.join(map(lambda x: x.name, line.tax_id)) ]]</para>
@@ -423,6 +421,12 @@
       </tr>
     </blockTable>
     <section>
+      <para style="terp_default_8">
+        <font color="white"> </font>
+      </para>
+      <para style="terp_default_8">
+        <font color="white"> </font>
+      </para>
       <pageBreak/>
       <para style="P4">
         <font color="white"> </font>
@@ -531,6 +535,9 @@
           </td>
         </tr>
       </blockTable>
+      <para style="P16">
+        <font color="white"> </font>
+      </para>
     </section>
   </story>
 </document>

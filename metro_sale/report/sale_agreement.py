@@ -22,13 +22,13 @@
 import time
 
 from openerp.report import report_sxw
-
 class sale_agreement(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context=None):
         super(sale_agreement, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time, 
             'show_discount':self._show_discount,
+            'serial_names':self.serial_names,
         })
 
     def _show_discount(self, uid, context=None):
@@ -38,7 +38,11 @@ class sale_agreement(report_sxw.rml_parse):
         except:
             return False
         return group_id in [x.id for x in self.pool.get('res.users').browse(cr, uid, uid, context=context).groups_id]
-            
+    
+    def serial_names(self,serial_ids):
+#        obj_names = [obj.serial for obj in serial_ids]        
+#        return ', '.join(obj_names)
+        return ', '.join(map(lambda x: x.serial, serial_ids))
 
 report_sxw.report_sxw('report.sale.agreement', 'sale.order', 'addons/metro_sale/report/sale_agreement.rml', parser=sale_agreement, header="external")
 
