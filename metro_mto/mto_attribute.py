@@ -31,9 +31,10 @@ class attribute_attribute(orm.Model):
     _inherit = "attribute.attribute"
     _columns = {
         'type': fields.char('Type'),
-        'standard_option_id': fields.many2one('attribute.option', 'Standard Option', domain="[('attribute_id','=',id)]"),     
-        'price_standard': fields.float('Standard Price', digits_compute= dp.get_precision('Product Price')),
-        'weight_standard': fields.float('Standard Weight(kg)', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'standard_option_id': fields.many2one('attribute.option', 'Standard Option', domain="[('attribute_id','=',id)]"),
+        #johnw, 12/12/2014, useless fields ,removed     
+        #'price_standard': fields.float('Standard Price', digits_compute= dp.get_precision('Product Price')),
+        #'weight_standard': fields.float('Standard Weight(kg)', digits_compute=dp.get_precision('Product Unit of Measure')),
         'currency_id': fields.many2one('res.currency', 'Currency', required=True),
         'm2m_tags': fields.boolean('Many2Many Tags'),
         'notes': fields.text('Notes'),
@@ -47,12 +48,12 @@ class attribute_attribute(orm.Model):
         'currency_id': _get_currency_id,
         'm2m_tags': False
     }    
-    def onchange_standard_option(self, cr, uid, ids, standard_option_id, context=None):
-        vals = {'price_standard': 0, 'weight_standard': 0}
-        if standard_option_id and standard_option_id > 0:
-            data = self.pool.get('attribute.option').read(cr, uid, [standard_option_id], ['price','weight'],context=context)
-            vals.update({'price_standard': data[0]['price'], 'weight_standard': data[0]['weight']})
-        return {'value':vals}
+#    def onchange_standard_option(self, cr, uid, ids, standard_option_id, context=None):
+#        vals = {'price_standard': 0, 'weight_standard': 0}
+#        if standard_option_id and standard_option_id > 0:
+#            data = self.pool.get('attribute.option').read(cr, uid, [standard_option_id], ['price','weight'],context=context)
+#            vals.update({'price_standard': data[0]['price'], 'weight_standard': data[0]['weight']})
+#        return {'value':vals}
     def name_get(self, cr, user, ids, context=None):
         if context is None:
             context = {}
@@ -68,6 +69,12 @@ class attribute_attribute(orm.Model):
                 s_opt_id = d.get('standard_option_id')
                 if s_opt_id:
                     name = '%s [%s]' % (name,s_opt_id.name)
+                    #add the price and weight
+                    if s_opt_id.price:
+                        name = '%s [$%s]' % (name,s_opt_id.price)
+                    if s_opt_id.weight:
+                        name = '%s [%s]' % (name,s_opt_id.weight)
+            '''
             #add the price and weight
             price = d.get('price_standard',0.0)
             weight = d.get('weight_standard',0.0)
@@ -75,6 +82,7 @@ class attribute_attribute(orm.Model):
                 name = '%s [$%s]' % (name,price)
             if weight > 0:
                 name = '%s [%s]' % (name,weight)
+            '''
             return (d['id'], name)
 
         result = []
@@ -84,8 +92,8 @@ class attribute_attribute(orm.Model):
                       'name': attr.name,
                       'attribute_type': attr.attribute_type,
                       'standard_option_id': attr.standard_option_id,
-                      'price_standard': attr.price_standard,
-                      'weight_standard': attr.weight_standard
+#                      'price_standard': attr.price_standard,
+#                      'weight_standard': attr.weight_standard
                       }
             result.append(_name_get(mydict))
         return result        
@@ -124,7 +132,10 @@ class attribute_option(orm.Model):
                     weight_str = '%s%s'%((price_str != '') and "," or "",weight_str)
                 name = '%s(%s%s)'%(name,price_str,weight_str)
             result.append((opt.id,name))
-        return result     
+        return result
+    
+    '''
+    #price_standard,weight_standard were removed, so the code below is useless
     def write(self, cr, user, ids, vals, context=None):
         resu = super(attribute_option, self).write(cr, user, ids, vals, context)
         if vals.has_key('price') or vals.has_key('weight'):
@@ -139,5 +150,6 @@ class attribute_option(orm.Model):
                 attr_ids = attr_obj.search(cr, user, [('standard_option_id','=',id)],context=context)
                 attr_obj.write(cr, user, attr_ids, attr_vals, context=context)
         return resu
+    '''
 
        

@@ -49,6 +49,14 @@
       <blockLeftPadding length="1"/>
       <blockRightPadding length="1"/>
     </blockTableStyle>
+    <blockTableStyle id="Table2">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <blockTopPadding length="1"/>
+      <blockBottomPadding length="1"/>
+      <blockLeftPadding length="1"/>
+      <blockRightPadding length="1"/>
+    </blockTableStyle>
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
@@ -57,6 +65,7 @@
     <paraStyle name="P3" fontName="Helvetica" fontSize="6.0" leading="8" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P4" fontName="Helvetica-Bold" fontSize="18.0" leading="22" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P5" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="14.0" leading="17" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -103,25 +112,20 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="151.0,167.0,107.0,109.0" style="Tableau1">
+    <blockTable colWidths="181.0,159.0,196.0" style="Tableau1">
       <tr>
         <td>
           <para style="P2">Model: [[o.design_tmpl_id.name]]</para>
         </td>
         <td>
-          <para style="P2">Product:[[o.product_id.default_code]],[[o.product_id.name]]</para>
+          <para style="P2">Price: $[[o.list_price]]</para>
         </td>
         <td>
-          <para style="P2">[[not o.print_price and removeParentNode('para')]]Price: $[[o.list_price]]</para>
-        </td>
-        <td>
-          <para style="P2">[[not o.print_weight and removeParentNode('para')]]Weight: [[o.weight]]KG</para>
+          <para style="P2">Weight: [[o.weight]]KG</para>
         </td>
       </tr>
     </blockTable>
-    <para style="P3">
-      <font color="white"> </font>
-    </para>
+    <para style="P3">sss</para>
     <section>
       <para style="P3">[[repeatIn(o.design_tmpl_id.attribute_group_ids,'attr_group')]]</para>
       <blockTable colWidths="533.0" style="table_attr">
@@ -137,8 +141,22 @@
             </para>
             <section>
               <para style="P3">[[repeatIn(attr_group.attribute_ids,'attr_loc')]]</para>
+              <para style="P6">[[attr_loc.sequence]].[[attr_loc.attribute_id.field_description]]</para>
+              <section>
+                <para style="terp_default_9">[[attr_loc.attribute_id.attribute_type != 'select' and removeParentNode('section')]]</para>
+                <para style="P3">[[repeatIn(attr_loc.attribute_id.option_ids,'sel_opt')]]</para>
+                <para style="terp_default_9">[[get_attr(o,attr_loc.attribute_id.name).id==sel_opt.id and '*' or '']][[sel_opt.name]]</para>
+              </section>
               <para style="terp_default_9">
-                <font face="Helvetica" size="12.0">[[attr_loc.sequence]].[[attr_loc.attribute_id.field_description]]:[[attr_value(o,attr_loc.attribute_id)]]</font>
+                <font color="white"> </font>
+              </para>
+              <section>
+                <para style="terp_default_9">[[attr_loc.attribute_id.attribute_type != 'multiselect' and removeParentNode('section')]]</para>
+                <para style="P3">[[repeatIn(attr_loc.attribute_id.option_ids,'opt_multi')]]</para>
+                <para style="terp_default_9">[[opt_multi.id in get_attr(o,attr_loc.attribute_id.name,'multiselect') and '*' or '']][[opt_multi.name]]</para>
+              </section>
+              <para style="terp_default_9">
+                <font color="white"> </font>
               </para>
             </section>
             <para style="P3">
@@ -156,6 +174,22 @@
       </tr>
     </blockTable>
     <para style="terp_default_9">
+      <font color="white"> </font>
+    </para>
+    <para style="terp_default_9">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="18.0,516.0" style="Table2">
+      <tr>
+        <td>
+          <para style="P2">M</para>
+        </td>
+        <td>
+          <para style="P2">Value</para>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="Standard">
       <font color="white"> </font>
     </para>
   </story>

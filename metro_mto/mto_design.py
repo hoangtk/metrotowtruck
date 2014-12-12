@@ -10,12 +10,15 @@ class mto_design(osv.osv):
     _name = "mto.design"
     _columns = {
         'name': fields.char('Configuration#', size=64,required=True,readonly=False),
-        'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), required=True),
+        'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price Sale'), required=True),
         'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Stock Weight')),
         'description': fields.text('Description'),
         'multi_images': fields.text("Multi Images"),
         'design_tmpl_id': fields.many2one('attribute.set', 'Template', domain=[('type','=','design')], required=True),
-        'change_ids': fields.one2many('mto.design.change','mto_design_id', string='Changes')
+        'change_ids': fields.one2many('mto.design.change','mto_design_id', string='Changes'),
+        'product_id': fields.many2one('product.product', string='Product'),
+        'print_price': fields.boolean('Print Price'),
+        'print_weight': fields.boolean('Print Weight')
     }    
     _defaults={'name':'/'}
     def _attr_grp_ids(self, cr, uid, ids, field_names, arg=None, context=None):
@@ -55,6 +58,7 @@ class mto_design(osv.osv):
             if result['fields'][field]['type'] == 'text':
                 if 'size' in result['fields'][field]: del result['fields'][field]['size']
         return result    
+    
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         if context is None:
             context = {}
@@ -73,16 +77,17 @@ class mto_design(osv.osv):
             notebook = eview.xpath("//notebook[@string='attributes_notebook']")[0]
             attributes_notebook, toupdate_fields = self.pool.get('attribute.attribute')._build_attributes_notebook(cr, uid, context['attribute_group_ids'], context=context, notebook=notebook, attr_holder_name='attributes_placeholder')
             result['fields'].update(self.fields_get(cr, uid, toupdate_fields, context))
-            '''
+
             #for the usage with new notebook
-            attributes_notebook, toupdate_fields = self.pool.get('attribute.attribute')._build_attributes_notebook(cr, uid, context['attribute_group_ids'], context=context)
-            result['fields'].update(self.fields_get(cr, uid, toupdate_fields, context))
-            placeholder = eview.xpath("//separator[@string='attributes_placeholder']")[0]
-            placeholder.getparent().replace(placeholder, attributes_notebook)
-            '''
+#            attributes_notebook, toupdate_fields = self.pool.get('attribute.attribute')._build_attributes_notebook(cr, uid, context['attribute_group_ids'], context=context)
+#            result['fields'].update(self.fields_get(cr, uid, toupdate_fields, context))
+#            placeholder = eview.xpath("//separator[@string='attributes_placeholder']")[0]
+#            placeholder.getparent().replace(placeholder, attributes_notebook)
+
             result['arch'] = etree.tostring(eview, pretty_print=True)
             result = self._fix_size_bug(cr, uid, result, context=context)
         return result    
+    
     def save_and_close_design(self, cr, uid, ids, context=None):
         return {'type': 'ir.actions.act_window_close'}
     def act_pdf(self, cr, uid, ids, context=None):

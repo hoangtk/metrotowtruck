@@ -192,10 +192,11 @@
 	                    
 	                    <field name="size" attrs="{'invisible':[('attribute_type', '!=', 'char')]}"/>
 	                    <field name="translate" attrs="{'invisible':[('attribute_type', 'not in', ('char', 'text'))]}"/>
-	                    <field name="standard_option_id" attrs="{'invisible':[('attribute_type', '!=', 'select')]}" on_change="onchange_standard_option(standard_option_id, context)"/>
-	                    <field name="price_standard" />
+	                    <field name="standard_option_id" attrs="{'invisible':[('attribute_type', '!=', 'select')]}"/>
+	                    <!--  on_change="onchange_standard_option(standard_option_id, context)"/> -->
+	                    <!-- <field name="price_standard" /> -->
                     	<field name="currency_id" />
-	                    <field name="weight_standard" />
+	                    <!-- <field name="weight_standard" /> -->
 	                    <newline />
 	                    <group colspan="4" attrs="{'invisible':[('attribute_type', 'not in', ['select', 'multiselect'])]}">
 	                        <group groups="base.group_advanced_attribute">
@@ -229,9 +230,9 @@
                     <field name="attribute_type" />
                     <field name="model_id" invisible="context.get('force_model')"/>
                     <field name="standard_option_id"/>
-                    <field name="price_standard" />
+                    <!-- <field name="price_standard" /> -->
                     <field name="currency_id" />
-                    <field name="weight_standard" />
+                    <!-- <field name="weight_standard" /> -->
                 </tree>
             </field>
         </record>
