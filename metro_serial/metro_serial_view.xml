@@ -328,6 +328,7 @@
                           <separator string="Customer Information" colspan="2"/>
                           <field name="partner_id"/>
                           <field name="destination_id"/>
+                          <field name="dealer_id"/>
 		                    </group>
 	                    </page>
                         <page string="Vehicle Information">
@@ -405,6 +406,17 @@
                                 <field name="image" widget="image_multi" colspan="4"/>
                             </group>
 	                    </page>
+	                    <page string="Attachment">
+	                        <field name="attachment_lines" nolabel="1" colspan="4"
+	                                context="{'o2m_attach': True}">
+	                           <tree string="Attachment">
+	                                <field name="name"/>
+	                                <field name="attach_type_id"/>
+	                                <field name="create_uid"/>
+	                                <field name="create_date"/>
+	                            </tree>
+	                        </field>
+	                    </page>	                    
 	                    <page string="Notes">
 	                    	<field name="notes"/>
 	                    </page>
@@ -452,5 +464,28 @@
             <field name="code">serial.number</field>
         </record>
 
+<!-- dealer flag on customer form -->
+        <record id="view_metro_partner_dealer" model="ir.ui.view">
+            <field name="name">view_metro_partner_dealer</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <field name="customer" position="after">
+                	<field name="dealer"/>
+                </field>
+            </field>
+        </record>
+        <record id="view_res_partner_filter_dealer" model="ir.ui.view">
+            <field name="name">view_res_partner_filter_dealer</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+                <filter name="customer" position="after">
+                   <filter string="Dealers" name="dealer" domain="[('dealer','=',1)]" help="Dealers"/>
+                </filter>
+            </field>
+        </record>
+        
+        
     </data>
 </openerp>

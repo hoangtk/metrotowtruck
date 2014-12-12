@@ -10,7 +10,7 @@
     """,
     'author': 'Prakhar Bansal',
     'website': 'http://www.prakharbansal.com',
-    'depends': ['metro'],
+    'depends': ['metro','metro_attachment','metro_partner'],
     'init_xml': [],
 	'demo': [],
     'update_xml': [

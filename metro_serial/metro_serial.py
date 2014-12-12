@@ -85,6 +85,26 @@ class WarrantyHistory(osv.osv):
                    ('on_hold','On Hold')], 'Status'),
     }
 
+class partner(osv.osv):
+    _inherit="res.partner"
+    _columns = {
+        'dealer':fields.boolean('Dealer'),
+    }
+    
+class ir_attachment(osv.osv):
+    _inherit = "ir.attachment"
+    _columns = {
+        'mttl_serials_id': fields.many2one('mttl.serials', 'Serial'),
+    }
+    def create(self, cr, uid, vals, context=None):
+        if context is None:
+            context = {}
+        if vals.get('mttl_serials_id'):
+            vals['mttl_serials_id'] = vals['mttl_serials_id']
+            vals['res_model'] = 'mttl.serials'             
+            
+        return super(ir_attachment, self).create(cr, uid, vals, context)
+            
 class Serials(osv.osv):
     
     def _generate_serial_number(self, cursor, user, *args):
@@ -109,6 +129,7 @@ class Serials(osv.osv):
         'country':fields.many2one('mttl.countries', 'Country', required=True, help="Country of manufacture"),
         'chassis':fields.many2one('mttl.chassis', 'Chassis', required=True, help="Who supplied the chassis, or was it sold as a kit?"),
         'partner_id':fields.many2one('res.partner', 'Customer', change_default=True, help="Last known owner of this unit", domain="[('customer','=',True)]"),
+        'dealer_id':fields.many2one('res.partner', 'Dealer', change_default=True, help="Last known owner of this unit", domain="[('dealer','=',True)]"),
         'destination_id':fields.many2one('res.partner', 'Destination', change_default=True, help="Last known location of this unit", domain="[('customer','=',True)]"),
         'serial_number':fields.char('Serial Number',size=17, required=True, help="The Computed Serial Number.  Verify that no periods or question marks are present"),
         
@@ -162,7 +183,8 @@ class Serials(osv.osv):
         'notes':fields.text('Notes'),
         
         'image':fields.text('Images'),
-        
+        #attachments
+        'attachment_lines': fields.one2many('ir.attachment', 'mttl_serials_id', 'Attachment'),
     }
     
     _defaults = {
