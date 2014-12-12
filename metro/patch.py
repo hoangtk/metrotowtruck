@@ -88,11 +88,14 @@ def metro_rpt_index(self, req, action, token):
                     pass
                 except Exception, e:
                     raise e
-                file_name = '%s_%s' % (file_name, model_rec_name)
+                #johnw, if the get_report_name returned full name then no need to add object name
+                if not file_name.endswith(report_struct['format']):
+                    file_name = '%s_%s' % (file_name, model_rec_name)
     except Exception:
         pass
-    
-    file_name = '%s.%s' % (file_name, report_struct['format'])
+    #johnw, if the get_report_name returned full name then no need to add extension
+    if not file_name.endswith(report_struct['format']):
+        file_name = '%s.%s' % (file_name, report_struct['format'])
 
     return req.make_response(report,
          headers=[

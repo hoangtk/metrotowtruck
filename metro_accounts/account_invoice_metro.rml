@@ -426,8 +426,10 @@
   </story>
   <story>
   
+  <!--
   <para style="terp_default_Centre_10">[[  (True in (map(lambda x: x.checkbox, o.sale_order_ids)) or (o.check==True) or removeParentNode('story')) ]]</para>
-  
+  -->
+  <para style="terp_default_Centre_10">[[  not o.payinfo_id and removeParentNode('story') ]]</para>
     <para style="terp_default_8">[[ setLang(o.partner_id.lang) ]]</para>
 	<blockTable colWidths="297.0,233.0" style="Table_Partner_Address">
       <tr>
@@ -494,7 +496,8 @@
       <font color="white"> </font>
     </para>
      
-    <para style="terp_default_9">[[ format(o.company_id.info) ]]</para>
+    <!-- <para style="terp_default_9">[[ format(o.company_id.info) ]]</para> -->
+    <para style="terp_default_9">[[ format(o.payinfo_id.content) ]]</para>
  <para style="terp_default_2">
       <font color="white"> </font>
     </para>

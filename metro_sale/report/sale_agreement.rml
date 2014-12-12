@@ -295,7 +295,7 @@
     <para style="terp_default_9">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="203.0,94.0,57.0,70.0,43.0,70.0" repeatRows="1" style="Table4">
+    <blockTable colWidths="203.0,94.0,57.0,70.0,43.0,69.0" repeatRows="1" style="Table4">
       <tr>
         <td>
           <para style="terp_tblheader_Details">Description</para>
@@ -310,9 +310,7 @@
           <para style="terp_tblheader_Details_Right">Unit Price</para>
         </td>
         <td>
-          <para style="terp_tblheader_Details_Right">
-            <font face="Helvetica">[[not show_discount(user.id) and removeParentNode('para')]]Disc.(%)</font>
-          </para>
+          <para style="terp_tblheader_Details_Right">[[not show_discount(user.id) and removeParentNode('para')]]Disc.(%)</para>
         </td>
         <td>
           <para style="terp_tblheader_Details_Right">Subtotal</para>
@@ -330,10 +328,10 @@
             <para style="terp_default_Centre_9">[[ ', '.join(map(lambda x: x.name, line.tax_id)) ]]</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(line.product_uos and line.product_uos_qty or line.product_uom_qty) ]] [[ line.product_uos and line.product_uos.name or line.product_uom.name ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(line.product_uos and line.product_uos_qty or line.product_uom_qty, digits=get_digits(dp='Product UoS')) ]] [[ line.product_uos and line.product_uos.name or line.product_uom.name ]]</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(line.price_unit , digits=get_digits(dp='Product Price'))]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(line.price_unit , digits=get_digits(dp='Product Price Sale'))]]</para>
           </td>
           <td>
             <para style="P3">[[show_discount(user.id) and formatLang(line.discount, digits=get_digits(dp='Discount')) or '']]</para>
@@ -426,12 +424,12 @@
       <pageBreak/>
       <para style="P4">
         <font color="white"> </font>
-      </para>	
-      <para style="P5">[[not o.checkbox and o.state and removeParentNode('section')]]Wire Transfer Information</para>
+      </para>
+      <para style="P5">[[not o.payinfo_id and removeParentNode('section')]]Wire Transfer Information</para>
       <para style="terp_default_9">
         <font color="white"> </font>
       </para>
-      <para style="terp_default_9">[[not o.checkbox and removeParentNode('para')]] [[o.company_id.info]]</para>
+      <para style="terp_default_9">[[not o.payinfo_id and removeParentNode('para')]] [[o.payinfo_id.content]]</para>
       <para style="terp_default_8">
         <font color="white"> </font>
       </para>

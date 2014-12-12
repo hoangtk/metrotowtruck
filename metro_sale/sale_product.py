@@ -51,6 +51,35 @@ class sale_product(osv.osv):
                  'priority': '2',}
     _order = 'id desc'
     
+    def name_get(self, cr, uid, ids, context=None):
+        if context is None or not context.get('full_name',False):
+            return super(sale_product,self).name_get(cr, uid, ids, context=context)
+        if not ids:
+            return []
+        if context is None: context = {}
+        names = []
+        for obj in self.browse(cr, uid, ids, context=context):
+            name = '%s-[%s]%s'%(obj.name, obj.product_id.default_code, obj.product_id.name)
+            names.append((obj.id,name))     
+        return names               
+        
+    def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=100):
+        if context is None or not context.get('full_name',False):
+            return super(sale_product,self).name_search(cr, user, name, args=args, operator=operator, context=context, limit=limit)
+        if not args:
+            args = []
+        args = args[:]
+        ids = []
+        if name:
+            ids = self.search(cr, user, [('name', '=like', name+"%")]+args, limit=limit)
+            if not ids:
+                product_ids = self.pool.get('product.product').search(cr, user, ['|','|',('default_code','like',name+'%'),('name','like','%'+name+'%'),('cn_name','like','%'+name+'%')])
+                if product_ids:
+                    ids = self.search(cr, user, [('product_id', 'in', product_ids)]+ args, limit=limit)
+        else:
+            ids = self.search(cr, user, args, context=context, limit=limit)
+        return self.name_get(cr, user, ids, context=context)
+                
     def copy_data(self, cr, uid, id, default=None, context=None):
         res = super(sale_product,self).copy_data(cr, uid, id, default=default, context=context)
         if res:
@@ -265,4 +294,5 @@ class mttl_serials(osv.osv):
     _inherit = "mttl.serials"
     _columns = {
         'mfg_id_id': fields.many2one('sale.product', 'MFG ID'),
+        'mfg_id_product': fields.related('mfg_id_id', 'product_id', type="many2one", relation="product.product", string="Product")
     }       

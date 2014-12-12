@@ -7,7 +7,8 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <field name="client_order_ref" position="after">
-                <field name="checkbox"/>
+            	<!-- <field name="checkbox"/> -->
+                <field name="payinfo_id" domain="[('company_id','=',company_id)]"/>
             </field>
 			<xpath expr="//page[@string='Other Information']" position="before">
 				<page name="contact_log" string="Contacts Log">
@@ -21,10 +22,10 @@
 				<label for="serial_ids"/>
                 <field name="serial_ids"/>
 			</xpath>       
-			<xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+			<!-- <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
 				<field name="mto_design_id"/>
                 <field name="serial_ids" widget="many2many_tags"/>
-			</xpath>
+			</xpath> -->
             <field name="partner_id" position="attributes">
                 <attribute name="domain">[('customer','=',True),('is_company','=',True)]</attribute>
             </field>
@@ -37,7 +38,8 @@
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
             <field name="date_invoice" position="after">
-                <field name="check"/>
+                <!-- <field name="check"/> -->
+                <field name="payinfo_id" domain="[('company_id','=',company_id)]"/>
             </field>
          </field>
        </record>  
@@ -47,9 +49,19 @@
         <field name="model">res.company</field>
         <field name="inherit_id" ref="base.view_company_form"/>
         <field name="arch" type="xml">
-            <field name="currency_id" position="after">
+			<!-- <field name="currency_id" position="after">
                 <field name="info"/>
-            </field>
+            </field> -->        
+            <page string="Configuration" position="after">
+	            <page string="Payment Information">
+	                <field name="sale_payinfo_ids">
+	                	<tree string="Payment Information" editable="bottom">
+	                		<field name="name"/>
+	                		<field name="content"/>
+	                	</tree>
+	                </field>
+	            </page>
+            </page>
          </field>
        </record>  
     </data>
