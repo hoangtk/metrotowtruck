@@ -16,12 +16,18 @@
 				</page>
 			</xpath>    
 			<xpath expr="//field[@name='order_line']/form//div[@name='discount']" position="after">
-				<field name="mto_design_id"/>
-			</xpath>    
+				<field name="mto_design_id" on_change="onchange_config(mto_design_id)"/>
+			</xpath>       
+			<!-- reason to add  onchange_config to price_unit's onchange is the mto_design_id's onchange will return product_id, 
+			and then will trigger product_id_change(), it will also set the price/weight/name,
+			so we add this, then onchange_config() will call again under this case, the price/weight/name will be set again by onchange_config's result -->
+			<xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
+				<attribute name="on_change">onchange_config(mto_design_id)</attribute>
+			</xpath> 
 			<xpath expr="//field[@name='order_line']/form/field[@name='name']" position="after">
 				<label for="serial_ids"/>
                 <field name="serial_ids"/>
-			</xpath>       
+			</xpath>			
 			<!-- <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
 				<field name="mto_design_id"/>
                 <field name="serial_ids" widget="many2many_tags"/>

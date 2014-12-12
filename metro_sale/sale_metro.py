@@ -48,6 +48,7 @@ class sale_order_line(osv.osv):
         'serial_ids': fields.many2many('mttl.serials', 'sale_serial_rel','line_id','serials_id',string='Serials',),        
         'price_unit': fields.float('Unit Price', required=True, digits_compute= dp.get_precision('Product Price Sale'), readonly=True, states={'draft': [('readonly', False)]}),
     }
+    
     def copy_data(self, cr, uid, id, default=None, context=None):
         if not default:
             default = {}
@@ -55,8 +56,18 @@ class sale_order_line(osv.osv):
             'mto_design_id': None,
             'serial_ids': None,
         })         
-        return super(sale_order_line, self).copy_data(cr, uid, id, default, context=context)                
-     
+        return super(sale_order_line, self).copy_data(cr, uid, id, default, context=context)     
+           
+    def onchange_config(self, cr, uid, ids, config_id, context=None):
+        val= {}
+        if config_id:
+            config = self.pool.get('mto.design').browse(cr, uid, config_id, context=context)
+            val = {'product_id':config.product_id.id,
+                   'price_unit':config.list_price,
+                   'th_weight':config.weight,
+                   'name':'%s(%s)'%(config.product_id.name, config.name)}    
+        return {'value':val}        
+        
 class account_invoice(osv.osv):
 
     _inherit="account.invoice"
