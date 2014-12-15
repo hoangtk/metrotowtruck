@@ -92,13 +92,13 @@ def _email_send_template(cr, uid, ids, email_vals, context=None):
     new_cr.close()
     return True
 
-def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, email_cc=None, context=None):
+def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, email_cc=None, context=None, attachments=None):
     if email_from and (email_to or email_to_group_id):
-        threaded_email = threading.Thread(target=_email_send_group, args=(cr, uid, email_from, email_to, subject, body, email_to_group_id, email_cc, context))
+        threaded_email = threading.Thread(target=_email_send_group, args=(cr, uid, email_from, email_to, subject, body, email_to_group_id, email_cc, context, attachments))
         threaded_email.start()
     return True
 
-def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, email_cc=None, context=None):
+def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, email_cc=None, context=None, attachments=None):
     pool =  pooler.get_pool(cr.dbname)
     new_cr = pooler.get_db(cr.dbname).cursor()
     emails = []
@@ -129,7 +129,7 @@ def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_gro
                 email_ccs.append(email_cc)
             else:
                 email_ccs += email_cc
-        mail.email_send(email_from, emails, subject, body, email_cc=email_ccs)
+        mail.email_send(email_from, emails, subject, body, email_cc=email_ccs, attachments=attachments)
     #close the new cursor
     new_cr.close()        
     return True    

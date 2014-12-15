@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <report auto="False" id="report_hr_welcome_checklist" model="hr.employee" header="True"
+                name="hr.welcome.checklist" rml="metro_hr/report/hr_welcome_checklist.rml"
+                usage="default" string="Welcome Cheklist"/>                         
+    </data>
+</openerp>

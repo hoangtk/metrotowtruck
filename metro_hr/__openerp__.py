@@ -35,6 +35,7 @@
     'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image", "hr_recruitment", "hr_contract"],
     'init_xml': [],
     'update_xml': [
+        'wizard/hr_send_checklist.xml',
         'hr_view.xml',
         'hr_timesheet_view.xml',
         'hr_contract_view.xml',
@@ -56,6 +57,7 @@
         'emppay/hr_contact_emppay_batchset_view.xml',
         'emppay/hr_emppay_report.xml',
         'security/ir.model.access.csv',
+        'hr_report.xml',
     ],
     'demo_xml': [],
     'test': [],
