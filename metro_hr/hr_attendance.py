@@ -16,7 +16,7 @@ import openerp.addons.decimal_precision as dp
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
-from metro import utils
+from openerp.addons.metro import utils
 
 class hr_attendance(osv.osv):
     _inherit = "hr.attendance"

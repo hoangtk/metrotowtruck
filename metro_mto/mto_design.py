@@ -10,14 +10,19 @@ class mto_design(osv.osv):
     _name = "mto.design"
     _columns = {
         'name': fields.char('Configuration#', size=64,required=True,readonly=False),
-        'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), required=True),
+        'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price Sale'), required=True),
         'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Stock Weight')),
         'description': fields.text('Description'),
         'multi_images': fields.text("Multi Images"),
         'design_tmpl_id': fields.many2one('attribute.set', 'Template', domain=[('type','=','design')], required=True),
-        'change_ids': fields.one2many('mto.design.change','mto_design_id', string='Changes')
+        'change_ids': fields.one2many('mto.design.change','mto_design_id', string='Changes'),
+        'product_id': fields.many2one('product.product', string='Product'),
+        'print_price': fields.boolean('Print Price'),
+        'print_weight': fields.boolean('Print Weight'),
+        #common, sale
+        'type': fields.char('Type')
     }    
-    _defaults={'name':'/'}
+    _defaults={'name':'/', 'type':'common'}
     def _attr_grp_ids(self, cr, uid, ids, field_names, arg=None, context=None):
         res = {}
         for design in self.browse(cr, uid, ids, context=context):
@@ -30,7 +35,12 @@ class mto_design(osv.osv):
         ir_model_data_id = ir_model_data_obj.search(cr, uid, [['model', '=', 'ir.ui.view'], ['name', '=', 'mto_design_form_view_normal']], context=context)
         if ir_model_data_id:
             res_id = ir_model_data_obj.read(cr, uid, ir_model_data_id, fields=['res_id'])[0]['res_id']
-        grp_ids = self._attr_grp_ids(cr, uid, [ids[0]], [], None, context)[ids[0]]
+        id = None
+        if isinstance(ids, list):
+            id = ids[0]
+        else:
+            id = ids
+        grp_ids = self._attr_grp_ids(cr, uid, [id], [], None, context)[id]
         ctx = {'open_attributes': True, 'attribute_group_ids': grp_ids}
 
         return {
@@ -43,7 +53,7 @@ class mto_design(osv.osv):
             'type': 'ir.actions.act_window',
             'nodestroy': True,
             'target': 'new',
-            'res_id': ids and ids[0] or False,
+            'res_id': id or False,
         }
 
     def _fix_size_bug(self, cr, uid, result, context=None):
@@ -55,6 +65,7 @@ class mto_design(osv.osv):
             if result['fields'][field]['type'] == 'text':
                 if 'size' in result['fields'][field]: del result['fields'][field]['size']
         return result    
+    
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         if context is None:
             context = {}
@@ -73,16 +84,17 @@ class mto_design(osv.osv):
             notebook = eview.xpath("//notebook[@string='attributes_notebook']")[0]
             attributes_notebook, toupdate_fields = self.pool.get('attribute.attribute')._build_attributes_notebook(cr, uid, context['attribute_group_ids'], context=context, notebook=notebook, attr_holder_name='attributes_placeholder')
             result['fields'].update(self.fields_get(cr, uid, toupdate_fields, context))
-            '''
+
             #for the usage with new notebook
-            attributes_notebook, toupdate_fields = self.pool.get('attribute.attribute')._build_attributes_notebook(cr, uid, context['attribute_group_ids'], context=context)
-            result['fields'].update(self.fields_get(cr, uid, toupdate_fields, context))
-            placeholder = eview.xpath("//separator[@string='attributes_placeholder']")[0]
-            placeholder.getparent().replace(placeholder, attributes_notebook)
-            '''
+#            attributes_notebook, toupdate_fields = self.pool.get('attribute.attribute')._build_attributes_notebook(cr, uid, context['attribute_group_ids'], context=context)
+#            result['fields'].update(self.fields_get(cr, uid, toupdate_fields, context))
+#            placeholder = eview.xpath("//separator[@string='attributes_placeholder']")[0]
+#            placeholder.getparent().replace(placeholder, attributes_notebook)
+
             result['arch'] = etree.tostring(eview, pretty_print=True)
             result = self._fix_size_bug(cr, uid, result, context=context)
         return result    
+    
     def save_and_close_design(self, cr, uid, ids, context=None):
         return {'type': 'ir.actions.act_window_close'}
     def act_pdf(self, cr, uid, ids, context=None):
@@ -119,10 +131,18 @@ class mto_design(osv.osv):
                         
         resu = super(mto_design, self).create(cr, uid, data, context)
         return resu
+    
     def write(self, cr, uid, ids, vals, context=None):        
         resu = super(mto_design, self).write(cr, uid, ids, vals, context=context)
         self.update_price(cr, uid, ids, context)
         return resu
+
+    def copy(self, cr, uid, id, default=None, context=None):
+        if default is None:
+            default = {}
+        default['name'] = self.pool.get('ir.sequence').get(cr, uid, 'mto.design')
+        return super(mto_design, self).copy(cr, uid, id, default, context=context)
+        
     def _get_attr_pw_name(self, design, attr):
         price_attr, weight_attr = self._get_attr_pw(design, attr)
         name = attr.field_description
@@ -179,6 +199,9 @@ class mto_design(osv.osv):
             weight_total = design.design_tmpl_id.weight_standard + weight_total
             cr.execute("""update mto_design set
                     list_price=%s, weight=%s where id=%s""", (price_total, weight_total, design.id))    
+            #update related so lies, johnw, 12/13/2014
+            cr.execute("""update sale_order_line set
+                    price_unit=%s, th_weight=%s where mto_design_id=%s""", (price_total, weight_total, design.id))    
     def copy_data(self, cr, uid, id, default=None, context=None):
         res = super(mto_design,self).copy_data(cr, uid, id, default=default, context=context)
         if res:

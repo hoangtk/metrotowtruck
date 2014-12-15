@@ -92,13 +92,13 @@ def _email_send_template(cr, uid, ids, email_vals, context=None):
     new_cr.close()
     return True
 
-def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, email_cc=None, context=None):
+def email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_id=False, email_cc=None, context=None, attachments=None):
     if email_from and (email_to or email_to_group_id):
-        threaded_email = threading.Thread(target=_email_send_group, args=(cr, uid, email_from, email_to, subject, body, email_to_group_id, email_cc, context))
+        threaded_email = threading.Thread(target=_email_send_group, args=(cr, uid, email_from, email_to, subject, body, email_to_group_id, email_cc, context, attachments))
         threaded_email.start()
     return True
 
-def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, email_cc=None, context=None):
+def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_group_ids=False, email_cc=None, context=None, attachments=None):
     pool =  pooler.get_pool(cr.dbname)
     new_cr = pooler.get_db(cr.dbname).cursor()
     emails = []
@@ -129,7 +129,7 @@ def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_gro
                 email_ccs.append(email_cc)
             else:
                 email_ccs += email_cc
-        mail.email_send(email_from, emails, subject, body, email_cc=email_ccs)
+        mail.email_send(email_from, emails, subject, body, email_cc=email_ccs, attachments=attachments)
     #close the new cursor
     new_cr.close()        
     return True    
@@ -338,3 +338,57 @@ def deal_args_dt(cr, uid, obj,args,dt_fields,context=None):
                     push(create_substitution_leaf(leaf, (left, operator, right), working_model))    
     '''
     return new_args
+
+def set_seq(cr, uid, data, table_name=None, context=None):
+    '''
+    Set the new data sequence in the related model's create() or write method.
+    @param data: the dict data will be create 
+    @param table_name: table name
+    '''
+    if not data or data.get('sequence') and data['sequence'] > 0: 
+        return
+    #get max seq in db
+    seq_max = 0
+    cr.execute('select max(sequence) as seq from %s'%(table_name))
+    seq_max = cr.fetchone()[0]
+    if seq_max is None:
+        seq_max = 0
+    seq_max += 1
+    data['sequence'] = seq_max
+        
+def set_seq_o2m(cr, uid, lines, m_table_name=None, o_id_name=None, o_id=None, context=None):
+    '''
+    Set the one2many list sequence in the 'one' in 'one2many' model's create() or write method.
+    @param lines: one list that contains list of line of one2many lines  
+    @param m_table_name: 'many' table name
+    @param o_id_name: field name of 'many' table related to 'one' table
+    @param o_id:'one' id value of field 'o_id_name'   
+    '''
+    '''
+    line's format in lines:
+    **create**:[0,False,{values...}]
+    **write**:[1,%so_line_id%,{values...}]
+    **delete**:[2, %so_line_id%, False]
+    **no change**:[4, %so_line_id%, False]
+    '''
+    if not lines: 
+        return
+    #get max seq in db
+    seq_max = 0
+    if m_table_name and o_id_name and o_id:
+        cr.execute('select max(sequence) as seq from %s where %s=%s'%(m_table_name, o_id_name, o_id))
+        seq_max = cr.fetchone()[0]
+        if seq_max is None:
+            seq_max = 0
+    #get max seq from saving data
+    lines_deal = []
+    for line in lines:
+        data = line[2]
+        if data and data.get('sequence') and data['sequence'] and seq_max < data['sequence']:
+            seq_max = data['sequence']
+        elif line[0] == 0:
+            lines_deal.append(line)
+    #generate the new seq
+    for line in lines_deal:
+        seq_max += 1
+        line[2]['sequence'] = seq_max

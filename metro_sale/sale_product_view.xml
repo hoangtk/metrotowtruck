@@ -145,6 +145,7 @@
         <field name="arch" type="xml">
             <field name="serial" position="after">
                 <field name="mfg_id_id"/>
+                <field name="mfg_id_product"/>
             </field>
          </field>
 	</record>     
@@ -154,7 +155,8 @@
         <field name="inherit_id" ref="metro_serial.mttl_serials_form"/>
         <field name="arch" type="xml">
             <field name="serial" position="after">
-                <field name="mfg_id_id"/>
+                <field name="mfg_id_id" context="{'full_name':True}"/>
+                <field name="mfg_id_product" readonly="1"/>
             </field>
          </field>
 	</record>  

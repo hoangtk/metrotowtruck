@@ -91,6 +91,16 @@ class container_type(osv.osv):
 
 container_type()
 
+class shipment_cost(osv.osv):
+    
+    _name = "shipment.cost"
+    _columns = {
+        'shipment_id':fields.many2one('shipment.shipment', string='Shipment', ondelete='cascade'),
+        'name':fields.char('Cost Name', size=64, required=True),
+        'amount': fields.float('Amount'),
+    }
+
+container_type()
 
 class shipment_shipment(osv.osv):
     
@@ -155,11 +165,14 @@ class shipment_shipment(osv.osv):
         'hs_code_id':fields.many2one('hs.code','HS Code'),
         'description':fields.text('Description of Goods'),
         'tracking_link' : fields.function(_get_tracking_link, fnct_inv=_set_tracking_link, type="char", string="Tracking Link", store=True),
-        'shipping_cost':fields.integer('Shipping Cost'),
-        'crane_at_factory':fields.integer(' Crane At Factory'),
-        'factory_to_port':fields.integer('Factory to Port '),
-        'brokerage':fields.integer('Brokerage'),
-        'port_to_customer':fields.integer('Port to Customer'),
+        
+#        'shipping_cost':fields.integer('Shipping Cost'),
+#        'crane_at_factory':fields.integer(' Crane At Factory'),
+#        'factory_to_port':fields.integer('Factory to Port '),
+#        'brokerage':fields.integer('Brokerage'),
+#        'port_to_customer':fields.integer('Port to Customer'),
+        'cost_ids':fields.one2many('shipment.cost', 'shipment_id', string = 'Costs'),
+        
         'product_ids':fields.one2many('product.shipment','partner_ref','Product'),
         'note':fields.text('Notes'),
         'image':fields.text('Images'),
@@ -205,6 +218,15 @@ class shipment_shipment(osv.osv):
     def previous_state(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state' : 'transit'}, context=context)
     
+    def go_track(self, cr, uid, ids, context=None):
+        tracking_link = self.read(cr, uid, ids[0], ['tracking_link'], context=context)['tracking_link']
+        if tracking_link:
+            return {'name':'Ship Tracking',
+                    'type': 'ir.actions.act_url', 
+                    'url': tracking_link, 
+                    'target': 'new',} 
+        return True
+                            
 shipment_shipment()
 
 

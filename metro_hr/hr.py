@@ -25,6 +25,8 @@ import tools
 from tools.translate import _
 from openerp.addons.metro import mdb
 from openerp.tools.misc import resolve_attr
+from openerp.addons.metro import utils
+
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -92,6 +94,7 @@ class hr_employee(osv.osv):
 		'emp_card_id': fields.char('Employee Card ID', size=16),
         'multi_images': fields.text("Multi Images"),
         'room_no': fields.char("Room#",size=16),
+        'bunk_no': fields.char('Bunk#',size=16),
         'emergency_contacter': fields.char("Emergency Contacter",size=32),
         'emergency_phone': fields.char("Emergency Phone",size=32),
         'known_medical_cond': fields.text("Known Medical Conditions"),
@@ -99,6 +102,13 @@ class hr_employee(osv.osv):
         'known_allergies': fields.text("Known Allergies"),
         'recruit_source_id': fields.many2one('hr.recruitment.source', 'Recruitment Source'),
         'degree_id': fields.many2one('hr.recruitment.degree', 'Degree'),
+        #added per marc's request
+        'date_orient_session': fields.date('Orientation Session Date'),
+        'web_chat_no': fields.char('QQ#',size=16),
+        'name_tag': fields.char('Name Tag',size=64),
+        'tools_assigned': fields.char('Tools Assigned',size=128),
+        'business_card': fields.char('Business Cards',size=128),
+        'computer_id': fields.char('Computer ID',size=128),
 	}
 	_sql_constraints = [
 		('emp_code_uniq', 'unique(emp_code)', 'Employee Code must be unique!'),
@@ -110,6 +120,13 @@ class hr_employee(osv.osv):
 		emp_code = '%03d'%(emp_id[0] + 1,)
 		values.update({'emp_code':emp_code})
 		return values
+
+	def get_report_name(self, cr, uid, id, rpt_name, context=None):
+		if rpt_name == 'hr.welcome.checklist':
+			return "Employee Welcome Cheklist"
+		else:
+			return None	
+
 	#add the emp_code return in the name
 	def name_get(self, cr, user, ids, context=None):
 		if context is None:

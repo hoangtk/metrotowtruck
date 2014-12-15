@@ -11,6 +11,9 @@
                 	<filter icon="terp-go-today" string="Today" name="today" domain="[('name','=',current_date)]" />
                 	<filter icon="terp-go-today" string="Today's Valid" name="today_valid" 
                 		domain="[('name','=',current_date), ('action','in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
+                	<separator/>
+                	<filter icon="terp-go-today" string="China Employees" name="china_employees" domain="[('employee_id.country_id.name','in',('China','China ','China-CN'))]"/>
+                	<filter icon="terp-go-today" string="Foreign Employees" name="china_employees" domain="[('employee_id.country_id.name','not in',('China','China ','China-CN'))]"/>
                 </filter>
                 <field name="action" position="after">
                 	<!-- <field name="clock_id"/>

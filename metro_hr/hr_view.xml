@@ -45,16 +45,13 @@
 							</group>
 						</group>
 					</xpath>		
+					<field name='mobile_phone' position='after'>
+		            	<field name="web_chat_no"/>
+					</field>
 					<xpath expr="//group[@string='Birth']" position="after">
 	                    <group string="Others" colspan="4">
 		                    <group>
-		                        <field name="recruit_source_id"/>
 		                        <field name="degree_id"/>
-		                        <field name="room_no"/>
-		                    </group>
-		                    <group>
-		                    	<field name="known_medical_type" widget="many2many_tags"/>
-		                        <field name="known_allergies"/>
 		                    </group>
 	                    </group>
 					</xpath>
@@ -62,6 +59,27 @@
 	                    <field name="emergency_contacter"/>
 	                    <field name="emergency_phone"/>
                     </field>
+                    <group name="active_group" position="after">
+	                    <group string="Others" colspan="4">
+		                    <group>
+		                        <field name="recruit_source_id"/>
+		                        <field name="date_orient_session"/>
+		                        <field name="name_tag"/>
+		                        <field name="tools_assigned"/>
+		                        <field name="business_card"/>
+		                        <field name="computer_id"/>
+		                    </group>
+		                    <group>
+		                    	<field name="known_medical_type" widget="many2many_tags"/>
+		                        <field name="known_allergies"/>
+		                        <field name="room_no"/>
+		                        <field name="bunk_no"/>
+		                    </group>
+	                    </group>
+                    </group>
+                    <xpath expr="//div[@name='button_box']" position="inside">
+                        <button name="%(action_hr_send_checklist_batch)d" string="Send Welcome Cheklist" type="action" groups="base.group_hr_manager"/>
+                    </xpath>
 				</data>
 			</field>
          </record>

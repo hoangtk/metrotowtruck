@@ -1,3 +1,4 @@
+==========no need to change now, johnw, 12/12/2014==========
 change the 'Disc.(%)' column header to below:
 <para style="terp_tblheader_Details_Right">[[not show_discount(user.id) and removeParentNode('para')]]Disc.(%)</para>
 

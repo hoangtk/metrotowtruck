@@ -106,7 +106,11 @@
 			                    <field name="ship_origination_address_id" attrs="{'invisible':[('method','!=','courier')]}"/>
 			                    <field name="ship_partner_address_id" attrs="{'invisible':[('method','!=','courier')]}"/>
 			                    <field name="customer_id"/>
-		                    	<field name="tracking_link" widget="url" placeholder="e.g http://www.google.com" attrs="{'readonly':[('tracking_mark','=',True)]}"/>
+			                    <label for="tracking_link"/>			                    
+			                    <div>
+			                    	<field name="tracking_link" widget="url" class="oe_edit_only" placeholder="e.g http://www.google.com" attrs="{'readonly':[('tracking_mark','=',True)]}"/>
+			                    	<button name="go_track" string="View" type="object"/>
+			                    </div>
 		                    </group>
 		                    <group>
 			                    <group string="Dates" attrs="{'invisible':[('method','=',False)]}">
@@ -132,13 +136,19 @@
 		                    </group>
                     	</page>
 	                    <page string="Costs">
-		                    <group col="6" colspan="3">
+	                    	<field name="cost_ids">
+	                    		<tree string="Costs" editable="bottom">
+	                    			<field name="name"/>
+	                    			<field name="amount" sum='Amount'/>
+	                    		</tree>
+	                    	</field>
+		                    <!-- <group col="6" colspan="3">
 			                    <field name="shipping_cost"/>
 			                    <field name="crane_at_factory" attrs="{'invisible':[('method','=','courier')]}"/>
 			                    <field name="factory_to_port" attrs="{'invisible':[('method','=','courier')]}"/>
 			                    <field name="brokerage"/>
 			                    <field name="port_to_customer" attrs="{'invisible':[('method','=','courier')]}"/>
-		                    </group> 
+		                    </group> --> 
 	                    </page>
 	                    <page string="Packing List">
 	                     	<field name="product_ids">

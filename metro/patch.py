@@ -82,17 +82,23 @@ def metro_rpt_index(self, req, action, token):
             model_rec_name = model_obj.name_get(context['active_ids'],context)[0][1]            
             if model_rec_name:
                 #added by john, to call the object report name getting method to get the file name
+                new_file_name = None
                 try:
-                    file_name = model_obj.get_report_name(context['active_ids'][0],action['report_name'],context)  
+                    new_file_name = model_obj.get_report_name(context['active_ids'][0],action['report_name'],context)  
                 except AttributeError, e:
                     pass
                 except Exception, e:
                     raise e
-                file_name = '%s_%s' % (file_name, model_rec_name)
+                #johnw, if the get_report_name returned full name then no need to add object name
+                if new_file_name:
+                    file_name = new_file_name
+                    if not file_name.endswith(report_struct['format']):
+                        file_name = '%s_%s' % (file_name, model_rec_name)
     except Exception:
         pass
-    
-    file_name = '%s.%s' % (file_name, report_struct['format'])
+    #johnw, if the get_report_name returned full name then no need to add extension
+    if not file_name.endswith(report_struct['format']):
+        file_name = '%s.%s' % (file_name, report_struct['format'])
 
     return req.make_response(report,
          headers=[
