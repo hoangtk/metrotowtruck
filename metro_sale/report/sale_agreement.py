@@ -22,13 +22,14 @@
 import time
 
 from openerp.report import report_sxw
-class sale_agreement(report_sxw.rml_parse):
+from openerp.addons.metro.rml import rml_parser_ext  
+class sale_agreement(rml_parser_ext):
     def __init__(self, cr, uid, name, context=None):
         super(sale_agreement, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time, 
             'show_discount':self._show_discount,
-            'serial_names':self.serial_names,
+            'attr_value': self.attr_value,
         })
 
     def _show_discount(self, uid, context=None):
@@ -39,11 +40,14 @@ class sale_agreement(report_sxw.rml_parse):
             return False
         return group_id in [x.id for x in self.pool.get('res.users').browse(cr, uid, uid, context=context).groups_id]
     
-    def serial_names(self,serial_ids):
-#        obj_names = [obj.serial for obj in serial_ids]        
-#        return ', '.join(obj_names)
-        return ', '.join(map(lambda x: x.serial, serial_ids))
-
+    def attr_value(self,data,attr):
+        attr_value = getattr(data,attr.name)
+        if attr_value and attr.attribute_type == 'select':
+            attr_value = attr_value.name
+        if attr_value and attr.attribute_type == 'multiselect':
+            attr_value = ','.join([opt.name for opt in attr_value])
+        return attr_value
+    
 report_sxw.report_sxw('report.sale.agreement', 'sale.order', 'addons/metro_sale/report/sale_agreement.rml', parser=sale_agreement, header="external")
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -16,7 +16,12 @@
 				</page>
 			</xpath>    
 			<xpath expr="//field[@name='order_line']/form//div[@name='discount']" position="after">
-				<field name="mto_design_id" on_change="onchange_config(mto_design_id)"/>
+				<label for='mto_design_id'/>
+				<div>
+					<field name="mto_design_id" on_change="onchange_config(mto_design_id)" options='{"no_open": True}' domain="[('type','=','common')]" class="oe_inline"/>					
+					<button name="edit_config" string="Edit" context="{'config_id':mto_design_id}" type='object' attrs="{'invisible':[('mto_design_id','=',False)]}" class="oe_inline"/>
+					<!-- <button name="new_config" string="New" context="{'config_id':mto_design_id}" type='object' attrs="{'invisible':[('mto_design_id','=',False)]}" class="oe_inline"/> -->
+				</div>
 			</xpath>       
 			<!-- reason to add  onchange_config to price_unit's onchange is the mto_design_id's onchange will return product_id, 
 			and then will trigger product_id_change(), it will also set the price/weight/name,
@@ -70,5 +75,26 @@
             </page>
          </field>
        </record>  
+<!-- Add so_line_id to mto_design -->
+		<record id="mto_design_tree_view_so" model="ir.ui.view">
+			<field name="name">"mto_design_tree_view_so"</field>
+			<field name="model">mto.design</field>
+			<field name="inherit_id" ref="metro_mto.mto_design_tree_view"/>
+			<field name="arch" type="xml">
+				<field name="weight" position="after">
+					<field name="so_line_id"/>
+				</field>    
+			</field> 
+		</record>
+		<record id="mto_design_form_view_so" model="ir.ui.view">
+			<field name="name">"mto_design_form_view_so"</field>
+			<field name="model">mto.design</field>
+			<field name="inherit_id" ref="metro_mto.mto_design_form_view"/>
+			<field name="arch" type="xml">
+				<field name="weight" position="after">
+					<field name="so_line_id"/>
+				</field>    
+			</field> 
+		</record>
     </data>
 </openerp>

@@ -2,15 +2,24 @@
 from osv import fields,osv
 from openerp import netsvc
 import openerp.addons.decimal_precision as dp
-
+from openerp.addons.metro.utils import set_seq_o2m
 class sale_order(osv.osv):
-
     _inherit="sale.order"
     _name="sale.order"
+    
+    def _order_line_with_configs(self, cr, uid, ids, field_names, args, context=None):
+        res = {}
+        for order in self.browse(cr, uid, ids, context=context):
+            design_line_ids = [line.id for line in order.order_line if line.mto_design_id]
+            res[order.id] = design_line_ids
+        return res
+    
     _columns={
         'checkbox':fields.boolean("Include Payment Information"),
         'payinfo_id':fields.many2one("sale.payinfo",string="Payment Information"),
-        'contact_log_ids': fields.many2many('contact.log', 'oppor_contact_log_rel','oppor_id','log_id',string='Contact Logs', )  
+        'contact_log_ids': fields.many2many('contact.log', 'oppor_contact_log_rel','oppor_id','log_id',string='Contact Logs', ),
+        #used by PDF  
+        'order_line_with_config': fields.function(_order_line_with_configs, type='one2many', relation='sale.order.line', fields_id='order_id', string='Lines with Configuration')
     }
     _defaults={'checkbox':True}
     _order = 'id desc'
@@ -26,6 +35,7 @@ class sale_order(osv.osv):
             return "Quote"
         else:
             return "SalesOrder"
+        
     def print_quotation(self, cr, uid, ids, context=None):
         '''
         This function prints the sales order and mark it as sent, so that we can see more easily the next step of the workflow
@@ -38,7 +48,16 @@ class sale_order(osv.osv):
                  'ids': ids,
                  'form': self.read(cr, uid, ids[0], context=context),
         }
-        return {'type': 'ir.actions.report.xml', 'report_name': 'sale.agreement', 'datas': datas, 'nodestroy': True}        
+        return {'type': 'ir.actions.report.xml', 'report_name': 'sale.agreement', 'datas': datas, 'nodestroy': True}    
+                       
+    def create(self, cr, uid, data, context=None):        
+        set_seq_o2m(cr, uid, data.get('order_line'), context=context)
+        return super(sale_order, self).create(cr, uid, data, context)
+        
+    def write(self, cr, uid, ids, vals, context=None):      
+        set_seq_o2m(cr, uid, vals.get('order_line'), 'sale_order_line', 'order_id', ids[0], context=context)  
+        return super(sale_order, self).write(cr, uid, ids, vals, context=context)
+                    
 sale_order()
 
 class sale_order_line(osv.osv):
@@ -48,7 +67,7 @@ class sale_order_line(osv.osv):
         'serial_ids': fields.many2many('mttl.serials', 'sale_serial_rel','line_id','serials_id',string='Serials',),        
         'price_unit': fields.float('Unit Price', required=True, digits_compute= dp.get_precision('Product Price Sale'), readonly=True, states={'draft': [('readonly', False)]}),
     }
-    
+        
     def copy_data(self, cr, uid, id, default=None, context=None):
         if not default:
             default = {}
@@ -66,8 +85,80 @@ class sale_order_line(osv.osv):
                    'price_unit':config.list_price,
                    'th_weight':config.weight,
                    'name':'%s(%s)'%(config.product_id.name, config.name)}    
-        return {'value':val}        
+        return {'value':val}      
+    
+    def create(self, cr, uid, vals, context=None):
+        new_id = super(sale_order_line, self).create(cr, uid, vals, context)
+        #auto copy the common mto design to a new design
+        line = self.browse(cr, uid, new_id, context=context)
+        if line.mto_design_id and line.mto_design_id.type == 'common':
+            config_obj = self.pool.get('mto.design')
+            name = '%s-%s-%s'%(line.mto_design_id.name, line.order_id.name, line.sequence)
+            config_new_id = config_obj.copy(cr, uid, line.mto_design_id.id, context=context)
+            config_obj.write(cr, uid, config_new_id, {'name':name, 'type':'sale'}, context=context)
+            self.write(cr, uid, line.id, {'mto_design_id': config_new_id}, context=context)
+        return new_id
         
+    def write(self, cr, uid, ids, vals, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        config_old_datas = self.read(cr, uid, ids, ['mto_design_id'], context=context)            
+        resu = super(sale_order_line, self).write(cr, uid, ids, vals, context=context)
+        #deal the mto_design_id     
+        if 'mto_design_id' in vals:
+            lines = self.browse(cr, uid, ids, context)
+            config_olds = {}
+            for config in config_old_datas:
+                config_old_id = config['mto_design_id'] and config['mto_design_id'][0] or None
+                config_olds[config['id']] = config_old_id
+            config_obj = self.pool.get('mto.design')
+            for line in lines:
+                config_old_id = config_olds[line.id]
+                #clear config, #assign new config,  #change config
+                if not line.mto_design_id or not config_old_id or line.mto_design_id.id != config_old_id:
+                    if config_old_id:
+                        #if old config is for sale, then delete it
+                        config_old_type = config_obj.read(cr, uid, config_old_id, ['type'], context=context)                        
+                        if config_old_type['type'] == 'sale':
+                            config_obj.unlink(cr, uid, config_old_id, context=context)
+                    #if new config is common, then do copy
+                    if line.mto_design_id and line.mto_design_id.type == 'common':                        
+                        context['default_type'] = 'sale'
+                        config_new_id = config_obj.copy(cr, uid, line.mto_design_id.id, context=context)
+                        name = '%s-%s-%s'%(line.mto_design_id.name, line.order_id.name, line.sequence)
+                        config_obj.write(cr, uid, config_new_id, {'name':name, 'type':'sale'}, context=context)     
+                        self.write(cr, uid, line.id, {'mto_design_id': config_new_id})
+                
+        return resu
+    
+    def edit_config(self, cr, uid, ids, context=None):
+        if not context.get('config_id'):
+            return False
+        return self.pool.get('mto.design').open_designment(cr, uid, context.get('config_id'), context=context)           
+    
+    def name_get(self, cr, user, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if not len(ids):
+            return []
+        result = []
+        for line in self.browse(cr, user, ids, context=context):
+            result.append((line.id, '%s@%s'%(line.name, line.order_id.name)))
+        return result    
+    
+class mto_design(osv.osv):
+    _inherit = "mto.design"
+    def _so_line_id(self, cr, uid, ids, field_names, args, context=None):
+        res = dict.fromkeys(ids,None)
+        for id in ids:
+            so_ids = self.pool.get('sale.order.line').search(cr, uid, [('mto_design_id','=',id)])
+            if so_ids:
+                res[id] = so_ids[0]
+        return res
+    _columns = {'so_line_id': fields.function(_so_line_id, string='SO Line', type='many2one', relation='sale.order.line', store=True)}
+    
 class account_invoice(osv.osv):
 
     _inherit="account.invoice"
