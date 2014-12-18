@@ -31,6 +31,21 @@ class stock_return_picking(osv.osv_memory):
     _columns = {
         'reason' : fields.text('Return Reason',required=True),
     }
+
+    def default_get(self, cr, uid, fields, context=None):
+        res = super(stock_return_picking, self).default_get(cr, uid, fields, context=context)
+        if context is None:
+            context = {}
+        record_id = context and context.get('active_id', False) or False
+        pick = self.pool.get('stock.picking').browse(cr, uid, record_id, context=context)
+        if pick and 'invoice_state' in fields:
+            #for the picking with invoice or to be invoiced, set the invoice state to to be invoiced
+            if pick.invoice_state in ('2binvoiced', 'invoiced'):
+                res.update({'invoice_state': '2binvoiced'})
+            else:
+                res.update({'invoice_state': 'none'})
+        return res
+    
     def create_returns(self, cr, uid, ids, context=None):
         resu = super(stock_return_picking, self).create_returns(cr, uid, ids, context)
         domain = eval(resu['domain'])
