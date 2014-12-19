@@ -30,6 +30,7 @@ class sale_agreement(rml_parser_ext):
             'time': time, 
             'show_discount':self._show_discount,
             'attr_value': self.attr_value,
+            'has_config': self.has_config,
         })
 
     def _show_discount(self, uid, context=None):
@@ -48,6 +49,12 @@ class sale_agreement(rml_parser_ext):
             attr_value = ','.join([opt.name for opt in attr_value])
         return attr_value
     
+    def has_config(self,so):
+        if not so.order_line_with_config or len(so.order_line_with_config) <= 0:
+            return False
+        else:
+            return True
+        
 report_sxw.report_sxw('report.sale.agreement', 'sale.order', 'addons/metro_sale/report/sale_agreement.rml', parser=sale_agreement, header="external")
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

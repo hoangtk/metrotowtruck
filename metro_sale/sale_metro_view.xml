@@ -10,11 +10,11 @@
             	<!-- <field name="checkbox"/> -->
                 <field name="payinfo_id" domain="[('company_id','=',company_id)]"/>
             </field>
-			<xpath expr="//page[@string='Other Information']" position="before">
+			<!-- <xpath expr="//page[@string='Other Information']" position="before">
 				<page name="contact_log" string="Contacts Log">
 					<field name="contact_log_ids" widget="one2many_list" context="{'op_name':name}"/>
 				</page>
-			</xpath>    
+			</xpath> -->    
 			<xpath expr="//field[@name='order_line']/form//div[@name='discount']" position="after">
 				<label for='mto_design_id'/>
 				<div>
