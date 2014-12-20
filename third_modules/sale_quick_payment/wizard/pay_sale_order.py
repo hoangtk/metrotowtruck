@@ -42,8 +42,22 @@ class pay_sale_order(orm.TransientModel):
             sale_obj = self.pool.get('sale.order')
             order = sale_obj.browse(cr, uid, context['active_id'],
                                     context=context)
+            '''
+            #johnw, 12/19/2014, auto set the journal with same currency of order's pricelist
             if order.payment_method_id:
                 return order.payment_method_id.journal_id.id
+            '''
+            if order.pricelist_id and order.pricelist_id.currency_id:
+                order_currency_id = order.pricelist_id.currency_id.id
+                journal_obj = self.pool.get('account.journal')
+                journal_ids = journal_obj.search(cr, uid, [('type','in',('bank','cash'))], context=context)
+                journal_ret = journal_ids[0]
+                for journal in journal_obj.browse(cr, uid, journal_ids, context=context):
+                    #find first journal having same currency with order's pricelist
+                    if journal.currency and journal.currency.id == order_currency_id:
+                        journal_ret = journal.id
+                        break
+                return journal_ret
         return False
 
     def _get_amount(self, cr, uid, context=None):

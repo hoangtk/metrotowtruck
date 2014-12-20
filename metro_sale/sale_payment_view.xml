@@ -29,19 +29,25 @@
                 <!-- replace the  automation_information tab-->
                 <page name="automation_information" position="replace">
                     <page name="sale_payments" string="Payments">
-	                    <group name="payments" colspan="4">
-	                        <field name="payment_moves" nolabel="1" widget="one2many_list">
-	                            <tree string="Payment Moves" create="false" edit="false" delete="true">
-	                                <field name="name"/>
-	                                <field name="narration" string="Description"/>
-	                                <field name="journal_id" string="Payment Method"/>
-	                                <field name="amount" string="Paid Amount"/>
-	                                <field name="date" string="Date"/>
-	                                <!-- this field is required since the above fields defined the 'states' in the account_move field definition  -->
-	                                <field name="state"/>
-	                            </tree>
-	                        </field> 	                                      
-	                    </group>                        
+                        <field name="payment_moves" widget="one2many_list">
+                            <tree string="Payment Moves" create="false" edit="false" delete="true">
+                                <field name="name"/>
+                                <field name="narration" string="Description"/>
+                                <field name="journal_id" string="Payment Method"/>
+                                <field name="amount" string="Paid Amount"/>
+                                <field name="date" string="Date"/>
+                                <!-- this field is required since the above fields defined the 'states' in the account_move field definition  -->
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                        <field name="payment_ids" string="Payment Detail" readonly="1">
+                            <tree string="Payment">
+                                <field name="date"/>
+                                <field name="credit" string="Amount"/>
+                                <field name="currency_id" string="Currency"/>
+                                <field name="amount_currency" string="Currency Amount"/>
+                            </tree>
+                        </field> 	                   
                     </page>
                 </page>
                	<field name="amount_tax" position="after">

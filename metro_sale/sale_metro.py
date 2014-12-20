@@ -28,7 +28,25 @@ class sale_order(osv.osv):
         vals = super(sale_order, self).default_get(cr, uid, fields, context=context)
         vals['company_id'] = company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
         return vals
+
+    def onchange_partner_id(self, cr, uid, ids, part, context=None):
+        resu = super(sale_order,self).onchange_partner_id(cr, uid, ids, part, context)
+        if not part:
+            return resu
+
+        part = self.pool.get('res.partner').browse(cr, uid, part, context=context)
+        #if the chosen partner is not a company and has a parent company, use the parent to choose the delivery, the 
+        #invoicing addresses and all the fields related to the partner.
+        if part.parent_id and not part.is_company:
+            part = part.parent_id
+            
+        pricelist_obj = self.pool.get('product.pricelist')
+        pricelist_ids = pricelist_obj.search(cr, uid, [('currency_id', '=', part.country_id.currency_id.id)], context=context)
+        if pricelist_ids:
+            resu['value']['pricelist_id'] = pricelist_ids[0]            
         
+        return resu
+            
     def get_report_name(self, cr, uid, id, rpt_name, context=None):
         state = self.pool.get('sale.order').read(cr, uid, id, ['state'],context=context)['state']
         if state == 'draft' or state == 'sent':

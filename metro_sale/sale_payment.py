@@ -20,9 +20,29 @@
 #
 ##############################################################################
 from osv import fields,osv,orm
+import openerp.addons.decimal_precision as dp
 
 class sale_order(osv.osv):
-    _inherit="sale.order"    
+    _inherit="sale.order"
+        
+    def _get_amount(self, cr, uid, ids, fields, args, context=None):
+        res = {}
+        for order in self.browse(cr, uid, ids, context=context):
+            #TODO add support when payment is linked to many order
+            paid_amount = 0
+            for line in order.payment_ids:
+                #Consider the multi currency, johnw, 12/12/2014  
+                #paid_amount += line.credit - line.debit
+                if line.currency_id:
+                    paid_amount += abs(line.amount_currency)
+                else:
+                    paid_amount += line.credit - line.debit
+            res[order.id] = {
+                    'amount_paid': paid_amount, 
+                    'residual': order.amount_total - paid_amount,
+                    }
+        return res
+        
     _columns={
           'state': fields.selection([
             ('draft', 'Draft Quotation'),
@@ -57,7 +77,20 @@ class sale_order(osv.osv):
         'project_id': fields.many2one('account.analytic.account', 'Contract / Analytic', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}, help="The analytic account related to a sales order."),
         'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}),
 #links to account_move        
-        'payment_moves': fields.many2many('account.move', string='Payment Moves', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]})
+        'payment_moves': fields.many2many('account.move', string='Payment Moves', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)], 'agreed': [('readonly', False)]}),
+#redefine the columns in sale_payment_method/sale.py
+        'residual': fields.function(
+            _get_amount,
+            digits_compute=dp.get_precision('Account'),
+            string='Balance',
+            store=False,
+            multi='payment'),
+        'amount_paid': fields.function(
+            _get_amount,
+            digits_compute=dp.get_precision('Account'),
+            string='Amount Paid',
+            store=False,
+            multi='payment'),        
     }
 
     #from the sale_payment_method.sale.py, add the sale_id
@@ -66,7 +99,7 @@ class sale_order(osv.osv):
         resu = super(sale_order,self)._prepare_payment_move(cr,uid,move_name,sale,journal,period,date,description,context)
         resu.update({'sale_ids':[(4, sale.id)]})
         return resu
-    
+        
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
@@ -119,4 +152,4 @@ class pay_sale_order(orm.TransientModel):
                 return False
         return True
     _constraints = [(_check_amount, 'Pay amount only can be between zero and the balance.', ['amount'])]
-        
+            
