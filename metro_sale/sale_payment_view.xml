@@ -29,6 +29,7 @@
                 <!-- replace the  automation_information tab-->
                 <page name="automation_information" position="replace">
                     <page name="sale_payments" string="Payments">
+                        <separator string="Advance Payments"/>                    
                         <field name="payment_moves" widget="one2many_list">
                             <tree string="Payment Moves" create="false" edit="false" delete="true">
                                 <field name="name"/>
@@ -42,12 +43,26 @@
                         </field>
                         <field name="payment_ids" string="Payment Detail" readonly="1">
                             <tree string="Payment">
+                                <field name="name" string="Description"/>
                                 <field name="date"/>
                                 <field name="credit" string="Amount"/>
                                 <field name="currency_id" string="Currency"/>
                                 <field name="amount_currency" string="Currency Amount"/>
                             </tree>
-                        </field> 	                   
+                        </field>
+                        
+                        <separator string="Invoice Payments"/>           
+                        <field name="inv_pay_ids">
+                            <tree string="Invoice Payments">
+                                <field name="name" string="Description"/>
+                                <field name="date" string="Date"/>
+                                <field name="journal_id" string="Payment Method"/>
+                                <field name="credit" string="Amount"/>
+                                <field name="currency_id" string="Currency"/>
+                                <field name="amount_currency" string="Currency Amount"/>
+                            </tree>
+                        </field> 
+                        
                     </page>
                 </page>
                	<field name="amount_tax" position="after">

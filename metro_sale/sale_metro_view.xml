@@ -1,7 +1,7 @@
 <openerp>
     <data>
     
-       <record id="sales_orders_view_form" model="ir.ui.view">
+       <record id="sales_orders_view_form_ext" model="ir.ui.view">
         <field name="name">sales.orders.view.form</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
@@ -18,17 +18,12 @@
 			<xpath expr="//field[@name='order_line']/form//div[@name='discount']" position="after">
 				<label for='mto_design_id'/>
 				<div>
+					<field name="config_changed" invisible="1"/>
 					<field name="mto_design_id" on_change="onchange_config(mto_design_id)" options='{"no_open": True}' domain="[('type','=','common')]" class="oe_inline"/>					
 					<button name="edit_config" string="Edit" context="{'config_id':mto_design_id}" type='object' attrs="{'invisible':[('mto_design_id','=',False)]}" class="oe_inline"/>
 					<!-- <button name="new_config" string="New" context="{'config_id':mto_design_id}" type='object' attrs="{'invisible':[('mto_design_id','=',False)]}" class="oe_inline"/> -->
 				</div>
-			</xpath>       
-			<!-- reason to add  onchange_config to price_unit's onchange is the mto_design_id's onchange will return product_id, 
-			and then will trigger product_id_change(), it will also set the price/weight/name,
-			so we add this, then onchange_config() will call again under this case, the price/weight/name will be set again by onchange_config's result -->
-			<xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
-				<attribute name="on_change">onchange_config(mto_design_id)</attribute>
-			</xpath> 
+			</xpath>   
 			<xpath expr="//field[@name='order_line']/form/field[@name='name']" position="after">
 				<label for="serial_ids"/>
                 <field name="serial_ids"/>
@@ -42,6 +37,17 @@
             </field>
          </field>
        </record>  
+       
+       <record id="sales_orders_view_form_product" model="ir.ui.view">
+			<field name="name">sales.orders.view.form</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="attributes">
+					<attribute name="context">{'config_changed':config_changed}</attribute>
+				</xpath> 
+			</field>
+		</record>
        
         <record id="invoice_view_form" model="ir.ui.view">
         <field name="name">invoice.view.form</field>

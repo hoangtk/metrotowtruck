@@ -11,7 +11,7 @@ class mto_design(osv.osv):
     _columns = {
         'name': fields.char('Configuration#', size=64,required=True,readonly=False),
         'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price Sale'), required=True),
-        'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Stock Weight')),
+        'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Product UoS')),
         'description': fields.text('Description'),
         'multi_images': fields.text("Multi Images"),
         'design_tmpl_id': fields.many2one('attribute.set', 'Template', domain=[('type','=','design')], required=True),

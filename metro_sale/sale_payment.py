@@ -25,24 +25,72 @@ import openerp.addons.decimal_precision as dp
 class sale_order(osv.osv):
     _inherit="sale.order"
         
-    def _get_amount(self, cr, uid, ids, fields, args, context=None):
+    def _get_amount(self, cr, uid, ids, field_names, args, context=None):
+        """ Finds the payment mount and set the paid flag
+        @return: Dictionary of values
+        """
+        if not field_names:
+            field_names = []
+        if context is None:
+            context = {}
         res = {}
+        for id in ids:
+            res[id] = {}.fromkeys(field_names)
+
         for order in self.browse(cr, uid, ids, context=context):
-            #TODO add support when payment is linked to many order
-            paid_amount = 0
-            for line in order.payment_ids:
-                #Consider the multi currency, johnw, 12/12/2014  
-                #paid_amount += line.credit - line.debit
-                if line.currency_id:
-                    paid_amount += abs(line.amount_currency)
-                else:
-                    paid_amount += line.credit - line.debit
+            pre_paid = 0.0
+            inv_paid = 0.0
+            #check the prepaymenys
+            for line in order.payment_ids:    
+                if not line.reconcile_id:
+                    if not line.reconcile_partial_id:
+                        if line.currency_id:
+                            pre_paid += abs(line.amount_residual_currency)
+                        else:
+                            pre_paid += line.amount_residual                        
+                    else:
+                        #if move is partial reconciled, then only the amount_residual is negative then this line is also need more lines to reconcile it
+                        if line.amount_residual > 0:
+                            if line.currency_id:
+                                pre_paid += abs(line.amount_residual_currency)
+                            else:
+                                pre_paid += line.amount_residual
+                
+            #check the invoice paid            
+            for invoice in order.invoice_ids:
+                if invoice.state not in ('draft','cancel'):
+                    if invoice.type == 'in_refund':
+                        inv_paid -= (invoice.amount_total - invoice.residual)
+                    else:                        
+                        inv_paid += (invoice.amount_total - invoice.residual)
+               
             res[order.id] = {
-                    'amount_paid': paid_amount, 
-                    'residual': order.amount_total - paid_amount,
+                    'amount_paid': inv_paid + pre_paid, 
+                    'residual': order.amount_total - inv_paid - pre_paid
                     }
         return res
-        
+
+    def _inv_pay_ids(self, cr, uid, ids, field_names=None, arg=False, context=None):
+        """ Finds the payment list by invoice
+        @return: Dictionary of values
+        """
+        if not field_names:
+            field_names = []
+        if context is None:
+            context = {}
+        res = {}
+        for id in ids:
+            res[id] = {}.fromkeys(field_names)
+
+        for order in self.browse(cr, uid, ids, context=context):
+            #check the invoice paid  
+            inv_pay_ids = []          
+            for invoice in order.invoice_ids:
+                if invoice.state not in ('draft','cancel'):
+                    inv_pay_ids.extend(map(lambda x: x.id, invoice.payment_ids))
+            res[order.id] = inv_pay_ids
+        return res
+            
     _columns={
           'state': fields.selection([
             ('draft', 'Draft Quotation'),
@@ -90,7 +138,9 @@ class sale_order(osv.osv):
             digits_compute=dp.get_precision('Account'),
             string='Amount Paid',
             store=False,
-            multi='payment'),        
+            multi='payment'),
+        #new field include the invoice payment move lines         
+        'inv_pay_ids': fields.function(_inv_pay_ids,relation='account.move.line', type='many2many', string='Invoice Payments'),              
     }
 
     #from the sale_payment_method.sale.py, add the sale_id
