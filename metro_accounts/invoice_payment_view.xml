@@ -18,6 +18,8 @@
                                 <field name="name"/>
                                 <field name="journal_id" string="Payment Method"/>
                                 <field name="credit" string="Paid Amount"/>
+                                <field name="currency_id" string="Currency"/>
+                                <field name="amount_currency" string="Currency Amount"/>
                                 <field name="date" string="Date"/>
                                 <field name="amount_residual"/>
                                 <field name="reconcile_id"/>

@@ -29,9 +29,9 @@
                 <xpath expr="//button[@name='view_picking']" position="replace" >
                 	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}" groups="stock.group_stock_user"/>
                 </xpath>                       
-<!--                 <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
+                <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
-                </xpath>   -->       
+                </xpath>   
                  <xpath expr="//field[@name='payment_term_id']" position="replace" >
                 </xpath> 
                  <xpath expr="//field[@name='shipped']" position="replace" >

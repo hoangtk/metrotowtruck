@@ -28,7 +28,24 @@ class sale_order(osv.osv):
         vals = super(sale_order, self).default_get(cr, uid, fields, context=context)
         vals['company_id'] = company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
         return vals
-        
+
+    def onchange_partner_id(self, cr, uid, ids, part, context=None):
+        resu = super(sale_order,self).onchange_partner_id(cr, uid, ids, part, context)
+        if not part:
+            return resu
+
+        part = self.pool.get('res.partner').browse(cr, uid, part, context=context)
+        #if the chosen partner is not a company and has a parent company, use the parent to choose the delivery, the 
+        #invoicing addresses and all the fields related to the partner.
+        if part.parent_id and not part.is_company:
+            part = part.parent_id
+        if part.country_id and part.country_id.currency_id:
+            pricelist_obj = self.pool.get('product.pricelist')
+            pricelist_ids = pricelist_obj.search(cr, uid, [('currency_id', '=', part.country_id.currency_id.id)], context=context)
+            if pricelist_ids:
+                resu['value']['pricelist_id'] = pricelist_ids[0]  
+        return resu
+            
     def get_report_name(self, cr, uid, id, rpt_name, context=None):
         state = self.pool.get('sale.order').read(cr, uid, id, ['state'],context=context)['state']
         if state == 'draft' or state == 'sent':
@@ -66,6 +83,8 @@ class sale_order_line(osv.osv):
         'mto_design_id': fields.many2one('mto.design', 'Configuration'),
         'serial_ids': fields.many2many('mttl.serials', 'sale_serial_rel','line_id','serials_id',string='Serials',),        
         'price_unit': fields.float('Unit Price', required=True, digits_compute= dp.get_precision('Product Price Sale'), readonly=True, states={'draft': [('readonly', False)]}),
+        #config changing dummy field
+        'config_changed':fields.function(lambda *a,**k:{}, type='boolean',string="Config Changed",),        
     }
         
     def copy_data(self, cr, uid, id, default=None, context=None):
@@ -84,9 +103,29 @@ class sale_order_line(osv.osv):
             val = {'product_id':config.product_id.id,
                    'price_unit':config.list_price,
                    'th_weight':config.weight,
-                   'name':'%s(%s)'%(config.product_id.name, config.name)}    
-        return {'value':val}      
+                   'name':'%s(%s)'%(config.product_id.name, config.name),
+                   'config_changed':True}    
+        return {'value':val}
     
+    def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
+            uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+            lang=False, update_tax=True, date_order=False, packaging=False,
+            fiscal_position=False, flag=False, context=None):
+
+        res=super(sale_order_line, self).product_id_change(cr, uid, ids, pricelist, product, qty,
+            uom, qty_uos, uos, name, partner_id,
+            lang, update_tax, date_order, packaging=packaging, fiscal_position=fiscal_position, flag=flag, context=context)
+        
+        if context.get('config_changed'):
+            #if the product changing is triggered by the config changing, then do not change the price and weight
+            fields_remove = ['price_unit', 'th_weight', 'name']
+            for field in fields_remove:
+                if res['value'].has_key(field):
+                    res['value'].pop(field)
+            res['value']['config_changed'] = False
+        
+        return res
+            
     def create(self, cr, uid, vals, context=None):
         new_id = super(sale_order_line, self).create(cr, uid, vals, context)
         #auto copy the common mto design to a new design

@@ -201,6 +201,7 @@ class sale_order(orm.Model):
     def _prepare_payment_move_line(self, cr, uid, move_name, sale, journal,
                                    period, amount, date, description, context=None):
         """ """
+        amount_original = amount
         partner_obj = self.pool.get('res.partner')
         currency_obj = self.pool.get('res.currency')
         partner = partner_obj._find_accounting_partner(sale.partner_id)
@@ -231,7 +232,27 @@ class sale_order(orm.Model):
             'amount_currency': amount_currency,
             'currency_id': currency_id,
         }
-
+        #johnw, 12/19/2014, add the currency dealing on sale order
+        journal_currency_id = journal.currency and journal.currency.id or company.currency_id.id
+        order_currency_id = sale.pricelist_id.currency_id.id
+        if order_currency_id != company.currency_id.id:
+            if order_currency_id != journal_currency_id:
+                currency_id = order_currency_id
+                amount = currency_obj.compute(cr, uid,
+                                                                journal_currency_id,
+                                                                company.currency_id.id,
+                                                                amount_original,
+                                                                context=context)
+                amount_currency = currency_obj.compute(cr, uid,
+                                                                journal_currency_id,
+                                                                order_currency_id,
+                                                                amount_original,
+                                                                context=context)
+        else:
+            currency_id = False
+            amount_currency = 0.0
+            amount = amount_original
+            
         # payment line (receivable)
         credit_line = {
             'name': description,

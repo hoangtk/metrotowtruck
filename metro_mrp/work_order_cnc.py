@@ -118,7 +118,7 @@ class work_order_cnc(osv.osv):
                     mfg_id_names = ','.join([mfg_id.name for mfg_id in order.sale_product_ids])
                     email_body = '%s %s, MFG IDs:%s'%(order.name,action_name,mfg_id_names)
                     email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
-                    utils.email_send_group(cr, uid, email_from, None,email_subject,email_body, email_group_id, context)        
+                    utils.email_send_group(cr, uid, email_from, None,email_subject,email_body, email_group_id, context=context)        
         
     def action_ready(self, cr, uid, ids, context=None):
         #set the ready state
@@ -216,7 +216,7 @@ class work_order_cnc(osv.osv):
         for order in self.browse(cr, uid, ids, context=context):
             if order.create_uid.email:
                 email_content = 'CNC reminder: %s was rejected'%(order.name)
-                utils.email_send_group(cr, uid, email_from, order.create_uid.email,email_content,email_content, None, context) 
+                utils.email_send_group(cr, uid, email_from, order.create_uid.email,email_content,email_content, context = context) 
         return True
                     
     def action_reject(self, cr, uid, ids, context=None):     

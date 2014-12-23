@@ -57,6 +57,7 @@
     <paraStyle name="P3" fontName="Helvetica" fontSize="6.0" leading="8" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P4" fontName="Helvetica-Bold" fontSize="18.0" leading="22" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P5" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P6" fontName="Helvetica" fontSize="12.0" leading="15" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="14.0" leading="17" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -103,7 +104,7 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="151.0,167.0,107.0,109.0" style="Tableau1">
+    <blockTable colWidths="151.0,168.0,107.0,109.0" style="Tableau1">
       <tr>
         <td>
           <para style="P2">Model: [[o.design_tmpl_id.name]]</para>
@@ -112,10 +113,10 @@
           <para style="P2">Product:[[o.product_id.default_code]],[[o.product_id.name]]</para>
         </td>
         <td>
-          <para style="P2">[[not o.print_price and removeParentNode('para')]]Price: $[[o.list_price]]</para>
+          <para style="P2">[[not o.print_price and removeParentNode('para')]]Price: $[[formatLang(o.list_price , digits=get_digits(dp='Product Price Sale'))]]</para>
         </td>
         <td>
-          <para style="P2">[[not o.print_weight and removeParentNode('para')]]Weight: [[o.weight]]KG</para>
+          <para style="P2">[[not o.print_weight and removeParentNode('para')]]Weight: [[formatLang(o.weight , digits=get_digits(dp='Product UoS'))]]KG</para>
         </td>
       </tr>
     </blockTable>
@@ -137,9 +138,7 @@
             </para>
             <section>
               <para style="P3">[[repeatIn(attr_group.attribute_ids,'attr_loc')]]</para>
-              <para style="terp_default_9">
-                <font face="Helvetica" size="12.0">[[attr_loc.sequence]].[[attr_loc.attribute_id.field_description]]:[[attr_value(o,attr_loc.attribute_id)]]</font>
-              </para>
+              <para style="P6">[[attr_loc.sequence]].[[attr_loc.attribute_id.field_description]]:[[attr_value(o,attr_loc.attribute_id)]]</para>
             </section>
             <para style="P3">
               <font color="white"> </font>
@@ -155,6 +154,9 @@
         </td>
       </tr>
     </blockTable>
+    <para style="terp_default_9">
+      <font color="white"> </font>
+    </para>
     <para style="terp_default_9">
       <font color="white"> </font>
     </para>
