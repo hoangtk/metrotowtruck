@@ -241,6 +241,13 @@ class resource_calendar(osv.osv):
                              })                                
         return vals    
     
+
+class hr_worktime_type(osv.osv):
+    _name = "hr.worktime.type"
+    _columns = {
+        'name':fields.char('Type', size=64, required=True),
+    }
+        
 class resource_calendar_attendance(osv.osv):
     _inherit = "resource.calendar.attendance"
     def _calc_hours(self, cr, uid, ids, field_names, args, context=None):
@@ -260,6 +267,8 @@ class resource_calendar_attendance(osv.osv):
     WorkHours-OTHours = Normal Working Hours
     '''    
     _columns = {                
+        'type_id': fields.many2one('hr.worktime.type', string='Type'),
+        
         'punch_in_start': fields.float('Sign in punching start'),
         'punch_in_late': fields.float('Sign in punching late'),
         'punch_in_stop': fields.float('Sign in punching stop'),

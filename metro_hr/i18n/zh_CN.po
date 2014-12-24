@@ -370,8 +370,8 @@ msgstr "展览名称"
 #. module: metro_hr
 #: model:ir.actions.act_window,name:metro_hr.hr_rpt_attend_emp_day_action
 #: model:ir.ui.menu,name:metro_hr.hr_rpt_attend_emp_day_menu
-msgid "Attendances Report"
-msgstr "考勤报表"
+msgid "Attendances Daily Report"
+msgstr "考勤日报表"
 
 #. module: metro_hr
 #: help:res.company,hr_att_no_in_time:0 help:resource.calendar,no_in_time:0

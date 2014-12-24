@@ -38,6 +38,7 @@
 						    <field name="date_to" domain="[('company_id', '=', company_id)]" 
 						    	class="oe_inline" widget="date" attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>  
                         </div>	        
+                        <field name="attend_day_id"/>
 						<field name="company_id" groups="base.group_multi_company" widget="selection"
 							 attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>   
 						<field name="note"/>
@@ -73,8 +74,8 @@
             </field>
         </record>   
         
-        <record id="view_hr_rpt_attend_tree" model="ir.ui.view">
-            <field name="name">view_hr_rpt_attend_tree</field>
+        <record id="view_hr_rpt_attend_month_tree" model="ir.ui.view">
+            <field name="name">view_hr_rpt_attend_month_tree</field>
             <field name="model">hr.rpt.attend.month</field>
             <field name="arch" type="xml">
                 <tree string="Attendances Monthly Report">
@@ -87,12 +88,29 @@
             </field>
         </record>
                 
+
+        <record id="view_hr_rpt_attend_month_filter" model="ir.ui.view">
+            <field name="name">hr_rpt_attend_month_filter</field>
+            <field name="model">hr.rpt.attend.month</field>
+            <field name="arch" type="xml">
+                <search string="Search Attendances">
+                    <field name="name"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="attend_day_id"/>
+                    <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter name="done_filter" icon="terp-camera_test" string="Done" domain="[('state','=','done')]"/>
+                </search>
+            </field>
+        </record>
+                        
         <record id="hr_rpt_attend_month_action" model="ir.actions.act_window">
             <field name="name">Attendances Monthly Report</field>
             <field name="res_model">hr.rpt.attend.month</field>
             <field name="view_type">form</field>
             <field name="view_mode">form,tree</field>
-            <field name="view_id" ref="view_hr_rpt_attend_tree"/>
+            <field name="view_id" ref="view_hr_rpt_attend_month_tree"/>
+            <field name="search_view_id" ref="view_hr_rpt_attend_month_filter"/>
             <field name="context">{'default_title':'Attendance Monthly Report'}</field>
             <field name="target">current</field>
         </record>  

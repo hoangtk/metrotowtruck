@@ -139,6 +139,8 @@
                     </group>
                     <field name="attendance_ids">
 		                <tree string="Working Time" editable="top">
+		                	<field name="type_id"/>
+		                	
 		                    <field name="name"/>
 		                    <field name="dayofweek"/>
 		                    
