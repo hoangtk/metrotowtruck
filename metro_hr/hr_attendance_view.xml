@@ -207,6 +207,32 @@
         id="menu_view_emp_resource_calendar"
         parent="hr_attendance.menu_hr_attendance" sequence="31"/>  
         
+
+<!-- Employee working time type -->        
+        <record id="view_hr_worktime_type_tree" model="ir.ui.view">
+            <field name="name">view_hr_worktime_type_tree</field>
+            <field name="model">hr.worktime.type</field>
+            <field name="arch" type="xml">
+                <tree string="Working Time" editable="bottom">
+                    <field name="sequence"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>  
+        
+        <record id="action_hr_worktime_type" model="ir.actions.act_window">
+            <field name="name">Working Time Type</field>
+            <field name="res_model">hr.worktime.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_worktime_type_tree"/>
+        </record>
+                
+        <menuitem 
+        action="action_hr_worktime_type" 
+        id="menu_hr_worktime_type"
+        parent="hr_attendance.menu_hr_attendance" sequence="33"/>  
+                
 <!-- Employee add the working time -->
         <record model="ir.ui.view" id="metro_employee_tree_view_attend">
             <field name="name">metro_employee_tree_view_attend</field>

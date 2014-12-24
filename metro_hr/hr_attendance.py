@@ -244,7 +244,9 @@ class resource_calendar(osv.osv):
 
 class hr_worktime_type(osv.osv):
     _name = "hr.worktime.type"
+    _description = "Working time type"
     _columns = {
+        'sequence':fields.integer('Sequence'),
         'name':fields.char('Type', size=64, required=True),
     }
         

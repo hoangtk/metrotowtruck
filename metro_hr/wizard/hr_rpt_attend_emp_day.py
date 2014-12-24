@@ -454,34 +454,35 @@ class hr_rpt_attend_emp_day(osv.osv):
         
         #get the group data        
         for rpt_line in rpt.rpt_lines:
-            key_group = '[%s]%s'%(rpt_line.employee_id.code, rpt_line.employee_id.name)
+            key_group = '[%s]%s'%(rpt_line.emp_id.emp_code, rpt_line.emp_id.name)
             if not groups.get(key_group):
                 #Add the attendance data
-                worktime_types = cale_wt_types.get(rpt_line.employee_id.calendar_id.id)
-                if not worktime_types:
-                    sql = 'select distinct b.id,b,name \
+                worktime_types = cale_wt_types.get(rpt_line.emp_id.calendar_id.id)
+                if rpt_line.emp_id.calendar_id and not worktime_types:
+                    sql = 'select distinct b.id,b.sequence,b.name \
                         from resource_calendar_attendance a \
                         join hr_worktime_type b on a.type_id = b.id \
-                        where a.id=%s \
+                        where a.calendar_id=%s \
                         order by b.sequence'
-                    cr.execute(sql, (rpt_line.employee_id.calendar_id.id,))
-                    worktime_types = cr.fetchall()
-                    cale_wt_types[rpt_line.employee_id.calendar_id.id] = worktime_types
+                    cr.execute(sql, (rpt_line.emp_id.calendar_id.id,))
+                    worktime_types = cr.dictfetchall()
+                    cale_wt_types[rpt_line.emp_id.calendar_id.id] = worktime_types
                 #set the group values
                 group_vals = {'name':key_group,
                                     'date_from': rpt.date_from,
                                     'date_to': rpt.date_to,
-                                    'period_type_a_id':len(worktime_types) >=1 and worktime_types[0][0] or None,
-                                    'period_type_b_id':len(worktime_types) >=2 and worktime_types[1][0] or None,
-                                    'period_type_c_id':len(worktime_types) >=3 and worktime_types[2][0] or None,
+                                    'period_type_a_id':(worktime_types and len(worktime_types) >=1) and worktime_types[0]['id'] or None,
+                                    'period_type_b_id':(worktime_types and len(worktime_types) >=2) and worktime_types[1]['id'] or None,
+                                    'period_type_c_id':(worktime_types and len(worktime_types) >=3) and worktime_types[2]['id'] or None,
                                     'line_ids_dict':{}}
+                groups[key_group] = group_vals
             #append this line
             group_vals = groups.get(key_group)
             #get the group line values in dict
             group_lines = group_vals['line_ids_dict']
             key_group_line = rpt_line.day
             if not group_lines.get(key_group_line):
-                group_lines[key_group_line] = {'day':rpt_line.day,'weekday':rpt_line.p_weekday}
+                group_lines[key_group_line] = {'day':rpt_line.day,'weekday':rpt_line.p_weekday, 'seq':0}
             #add current data
             group_line = group_lines[key_group_line]
             #set the different attendance work time fields by the line data
@@ -490,6 +491,8 @@ class hr_rpt_attend_emp_day(osv.osv):
                 group_line['sign_out_a'] = rpt_line.sign_out
                 group_line['hours_normal_a'] = rpt_line.hours_normal
                 group_line['hours_ot_a'] = rpt_line.hours_ot
+                group_line['seq'] = rpt_line.seq
+                
             if group_vals.get('period_type_b_id') and rpt_line.period_id.type_id.id == group_vals['period_type_b_id']:
                 group_line['sign_in_b'] = rpt_line.sign_in
                 group_line['sign_out_b'] = rpt_line.sign_out
@@ -506,10 +509,18 @@ class hr_rpt_attend_emp_day(osv.osv):
         attend_empday_group_obj = self.pool.get('attend.empday.group')
         for group in groups.values():
             group_lines_list = []
-            for line in group['line_ids_dict'].values:
-                line['hours_normal_total'] = line['hours_normal_a'] + line['hours_normal_b'] + line['hours_normal_c']
-                line['hours_ot_total'] = line['hours_ot_a'] + line['hours_ot_b'] + line['hours_ot_c']
+            work_hours = 0
+            work_hours_ot = 0
+            for line in group['line_ids_dict'].values():
+                line['hours_normal_total'] = line.get('hours_normal_a',0) + line.get('hours_normal_b',0) + line.get('hours_normal_c',0)
+                line['hours_ot_total'] = line.get('hours_ot_a',0) + line.get('hours_ot_b',0) + line.get('hours_ot_c',0)
+                work_hours += line['hours_normal_total']
+                work_hours_ot += line['hours_ot_total']
                 group_lines_list.append((0,0,line))
+            group_lines_list.sort(lambda x, y: cmp(x[2]['seq'], y[2]['seq']))
+            group['line_ids'] = group_lines_list
+            group['days_attend'] = work_hours/8.0
+            group['hours_ot'] = work_hours_ot
             group_ids.append(attend_empday_group_obj.create(cr, uid, group, context=context))
                     
         #print attendances by group
@@ -533,13 +544,15 @@ class attend_empday_group(osv.osv_memory):
         'period_type_a_id': fields.many2one('hr.worktime.type', string='Worktime A'),
         'period_type_b_id': fields.many2one('hr.worktime.type', string='Worktime B'),
         'period_type_c_id': fields.many2one('hr.worktime.type', string='Worktime C'),
-        
+        'days_attend':fields.float('Work Days'),
+        'hours_ot':fields.float('Overtime'), 
     }    
     
 class attend_empday_group_line(osv.osv_memory):
     _name = "attend.empday.group.line"
     _columns = {
         'group_id': fields.many2one('attend.empday.group', string='Group'),
+        'seq': fields.integer('Sequence'),
         'day': fields.char('Day', store=True, size=32),
         'weekday': fields.selection([('0','Monday'),('1','Tuesday'),('2','Wednesday'),('3','Thursday'),('4','Friday'),('5','Saturday'),('6','Sunday')],string='Day of Week'),                                
                 
