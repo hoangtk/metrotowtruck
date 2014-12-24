@@ -55,6 +55,7 @@ set employee Payroll Info in batch
 			                    <field name="type"/>
 			                    <field name="type_calc"/>
 			                    <field name="amount"/>
+			                    <field name="attend_field"/>
 		                       </tree>
 		               	</field>
                 	</div>

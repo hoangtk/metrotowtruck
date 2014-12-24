@@ -42,6 +42,15 @@ class hr_emppay_alwded(osv.osv):
     _name = 'hr.emppay.alwded'
     _description = 'Salary allowance and the deduction'
     _order = 'type, sequence'
+    
+    def _alwded_field_get(self, cr, uid, context=None):
+        mf = self.pool.get('ir.model.fields')
+        ids = mf.search(cr, uid, [('model','=', 'hr.rpt.attend.month.line'), ('ttype','=','float'), '|', ('name','like','alw_%'), ('name','like','ded_%')], context=context)
+        res = []
+        for field in mf.browse(cr, uid, ids, context=context):
+            res.append((field.name, field.field_description))
+        return res
+    
     _columns = {
         'sequence': fields.integer('#', required=True),
         'code':fields.char('Reference', size=64, required=True, select=True),
@@ -50,13 +59,50 @@ class hr_emppay_alwded(osv.osv):
         'type_calc':fields.selection([('fixed','Fixed'),('by_attend','By Attendance')], string='Calculation Type', required=True ),
         'amount':fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         'company_id':fields.many2one('res.company', 'Company', required=True),
+        #fields related to hr_rpt_attend_month_line
+        "attend_field" : fields.selection(_alwded_field_get, "Attend Field", size=32, help="Associated field in the attendance report."),
     }
     
     _defaults={
                'type_calc':'fixed',
                'company_id':lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid,context=context).company_id.id,
                }
-
+    _sql_constraints = [
+        ('code_uniq', 'unique(code, type)', 'Name must be unique per Type!'),
+    ]
+    
+    def write(self, cr, user, ids, vals, context=None):
+        resu = super(hr_emppay_alwded, self).write(cr, user, ids, vals, context=context)
+        '''
+        Auto update the hr.contract.alwded data having same with current old data
+        '''        
+        #check if there are data that need sync to hr contract
+        field_names = ['sequence', 'type', 'type_calc', 'amount', 'attend_field']
+        field_names_deal = []
+        for field_name in field_names:
+            if field_name in vals:
+                field_names_deal.append(field_name)
+        #sync data to contract
+        if field_names_deal:            
+            contract_alwded_obj = self.pool.get('hr.contract.alwded')
+            #field values will be update
+            field_vals_upt = {}            
+            for field_name in field_names_deal:
+                field_vals_upt[field_name] = vals[field_name]
+            #loop to update the data
+            for id in ids:
+                #old field values
+                old_vals = self.read(cr, user, id, field_names_deal, context=context)
+                #only the contract data that same with the alwded's old data will be update, if user changed the contract data, then do not update them automatically 
+                field_names_domain = [('alwded_id', '=', id)]
+                for field_name in field_names_deal:
+                    field_names_domain.append((field_name, '=', old_vals[field_name]))
+                upt_contract_alwded_ids = contract_alwded_obj.search(cr, user, field_names_domain, context=context)
+                #do update
+                if upt_contract_alwded_ids:
+                    contract_alwded_obj.write(cr, user, upt_contract_alwded_ids,  field_vals_upt, context=context)
+        
+        return resu
 
 class hr_contract_alwded(osv.osv):
     """
@@ -65,16 +111,25 @@ class hr_contract_alwded(osv.osv):
     _name = 'hr.contract.alwded'
     _description = 'Contact Salary''s allowance and the deduction'
     _order = 'type, sequence'
+            
+    def _alwded_field_get(self, cr, uid, context=None):
+        mf = self.pool.get('ir.model.fields')
+        ids = mf.search(cr, uid, [('model','=', 'hr.rpt.attend.month.line'), ('ttype','=','float'), '|', ('name','like','alw_%'), ('name','like','ded_%')], context=context)
+        res = []
+        for field in mf.browse(cr, uid, ids, context=context):
+            res.append((field.name, field.field_description))
+        return res
+    
     _columns = {
         'contract_id': fields.many2one('hr.contract',  'Contract', required=True, select=True),
         'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True),
-        'sequence': fields.related('alwded_id', 'sequence', type='integer', string='#', store=True, readonly=True),
-        'type': fields.related('alwded_id', 'type', type='selection', selection=[('alw','Allowance'),('ded','Deduction')],
-                                    string='Type', store=True, readonly=True),
-        'type_calc':fields.related('alwded_id', 'type_calc', type='selection', selection=[('fixed','Fixed'),('by_attend','By Attendance')], 
-                                    string='Calculation Type', store=True, readonly=True),
-        #default is alwded_id.amount, user can change it
-        'amount': fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
+        'sequence': fields.integer('#', required=True),
+        'type':fields.selection([('alw','Allowance'),('ded','Deduction')], string='Type', required=True ),
+        'type_calc':fields.selection([('fixed','Fixed'),('by_attend','By Attendance')], string='Calculation Type', required=True ),
+        'amount':fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
+        #fields related to hr_rpt_attend_month_line
+        "attend_field" : fields.selection(_alwded_field_get, "Attend Field", size=32, help="Associated field in the attendance report."),
+                
     }
     
     _defaults={
@@ -82,7 +137,7 @@ class hr_contract_alwded(osv.osv):
                }
     def onchange_alwded_id(self, cr, uid, ids, alwded_id, context=None):
         alwded = self.pool.get('hr.emppay.alwded').browse(cr, uid, alwded_id, context=context)
-        vals = {'sequence':alwded.sequence, 'type':alwded.type, 'type_calc':alwded.type_calc, 'amount':alwded.amount}
+        vals = {'sequence':alwded.sequence, 'type':alwded.type, 'type_calc':alwded.type_calc, 'amount':alwded.amount, 'attend_field':alwded.attend_field}
         return {'value':vals}
         
 class hr_emppay_si(osv.osv):
@@ -116,6 +171,40 @@ class hr_emppay_si(osv.osv):
                'company_id':lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid,context=context).company_id.id,
                }    
 
+
+    def write(self, cr, user, ids, vals, context=None):
+        resu = super(hr_emppay_si, self).write(cr, user, ids, vals, context=context)
+        '''
+        Auto update the hr.contract.si data having same with current old data
+        '''
+        #check if there are data that need sync to hr contract
+        field_names = ['sequence', 'amount_base', 'rate_company', 'rate_personal']
+        field_names_deal = []
+        for field_name in field_names:
+            if field_name in vals:
+                field_names_deal.append(field_name)
+        #sync data to contract
+        if field_names_deal:            
+            contract_si_obj = self.pool.get('hr.contract.si')
+            #field values will be update
+            field_vals_upt = {}            
+            for field_name in field_names_deal:
+                field_vals_upt[field_name] = vals[field_name]
+            #loop to update the data
+            for id in ids:
+                #old field values
+                old_vals = self.read(cr, user, id, field_names_deal, context=context)
+                #only the contract data that same with the alwded's old data will be update, if user changed the contract data, then do not update them automatically 
+                field_names_domain = [('alwded_id', '=', id)]
+                for field_name in field_names_deal:
+                    field_names_domain.append((field_name, '=', old_vals[field_name]))
+                upt_contract_alwded_ids = contract_si_obj.search(cr, user, field_names_domain, context=context)
+                #do update
+                if upt_contract_alwded_ids:
+                    contract_si_obj.write(cr, user, upt_contract_alwded_ids,  field_vals_upt, context=context)
+        
+        return resu
+    
 class hr_contract_si(osv.osv):
     """
     Contract's Salary Social Insurance
