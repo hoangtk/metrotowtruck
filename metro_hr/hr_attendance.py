@@ -39,7 +39,21 @@ class hr_attendance(osv.osv):
         'cale_period_id' : fields.many2one("resource.calendar.attendance", "Working Period", required=False, select=True),
         #redefined the _day_compute() method, to record the local day on this field
         'day': fields.function(_day_compute, type='char', string='Day', store=True, select=1, size=32),
+        #the fields record the creation and write info
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'write_uid':  fields.many2one('res.users', 'Modifier', readonly=True),
+        'write_date': fields.datetime('Modify Date', readonly=True, select=True),        
     }
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        res = []
+        for data in self.read(cr, uid, ids, ['name', 'employee_id'], context=context):
+            res.append((data['id'],'%s[%s]'%(data['employee_id'][1],data['name']) ))
+        return res
+        
     def copy(self, cr, uid, id, default=None, context=None):
         if not default:
             default = {}
@@ -87,7 +101,6 @@ class hr_attendance(osv.osv):
                 check if there are existing same record or not, if yes, then set the action to invalid
                 invalid standard: same period/action/day/employee, and the log time(name) is earlier than this attendance
                 '''
-                print dt_action.strftime('%Y-%m-%d')
                 same_attend_ids = self.search(cr, uid, [('employee_id','=',attend.employee_id.id), 
                                       ('cale_period_id','=',cale_period_id),
                                       ('action','=',action),

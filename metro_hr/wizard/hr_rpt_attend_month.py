@@ -170,7 +170,10 @@ class hr_rpt_attend_month(osv.osv):
     
     def create(self, cr, uid, vals, context=None):
         if 'name' not in vals or not vals['name']:
-            date_from = datetime.strptime(vals['date_to'], DEFAULT_SERVER_DATETIME_FORMAT)
+            date_from = vals['date_from']
+            if date_from and len(date_from) == 10:
+                date_from = vals['date_from'] + ' 00:00:00'
+            date_from = datetime.strptime(date_from, DEFAULT_SERVER_DATETIME_FORMAT)
             name = '%s-%s'%(date_from.year, date_from.month)
             vals['name'] = name
         self._convert_save_dates(cr, uid, vals, context)
@@ -331,6 +334,13 @@ class hr_rpt_attend_month_line(osv.osv):
         'days_attend2': fields.float('Days Attended2'),
         'hours_ot2_nonwe': fields.float('Hours OT2 Non Weekend'),
         'hours_ot2_we': fields.float('Hours OT2 Weekend'),
+        
+        'note': fields.char('Notes', size=64 ),
+        'alw_house': fields.float('House'),
+        'alw_other': fields.float('Other Allowance'),
+        'ded_meal': fields.float('Meal'),
+        'ded_utilities': fields.float('Utilities'),
+        'ded_other': fields.float('Other Deduction'),
     }
 
 hr_rpt_attend_month_line()
