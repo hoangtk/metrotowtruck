@@ -230,6 +230,20 @@ class hr_rpt_attend_emp_day(osv.osv):
             rpt_line_obj.create(cr ,uid, rpt_line, context=context)  
         #update GUI elements
         self.write(cr, uid, rpt.id, {'show_search':False,'show_result':True,'save_pdf':True},context=context)
+        #go to the attendances line view page
+        form_view = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_hr', 'view_hr_rpt_attend_emp_day_line_tree')
+        form_view_id = form_view and form_view[1] or False
+        return {
+            'name': _('Attendances Daily Report Line'),
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'view_id': [form_view_id],
+            'res_model': 'hr.rpt.attend.emp.day.line',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'domain': [('rpt_id','=',ids[0])],
+        }
+                
         return True
         
     def run_attend_emp_day(self, cr, uid, ids, context=None):
@@ -435,10 +449,9 @@ class hr_rpt_attend_emp_day(osv.osv):
         }
         return {'type': 'ir.actions.report.xml', 'report_name': rptxml_name, 'datas': datas, 'nodestroy': True}   
     
-    def print_empday_group(self, cr, uid, ids, context=None):
+    def print_empday_group(self, cr, uid, ids, context=None, rpt_line_ids = None):
         if context is None:
             context = {}
-        rpt = self.browse(cr, uid, ids[0], context=context)
         '''
         store the groups in dict: {key:{
         val1,val2,...,
@@ -452,8 +465,19 @@ class hr_rpt_attend_emp_day(osv.osv):
         #store the calendar worktime types in dict:{calendar_id:type_list}
         cale_wt_types = {}
         
-        #get the group data        
-        for rpt_line in rpt.rpt_lines:
+        #get the group data       
+        rptlines = []
+        if not rpt_line_ids:            
+            #call from self
+            rpt = self.browse(cr, uid, ids[0], context=context)
+            rptlines = rpt.rpt_lines
+        else:
+            #this parameter will be called from hr_rpt_attend_emp_day_line.print_empday_line_group()
+            rptlines = self.pool.get('hr.rpt.attend.emp.day.line').browse(cr, uid, rpt_line_ids, context=context)
+            rpt = rptlines[0].rpt_id
+            ids = [rpt.id]
+            
+        for rpt_line in rptlines:
             key_group = '[%s]%s'%(rpt_line.emp_id.emp_code, rpt_line.emp_id.name)
             if not groups.get(key_group):
                 #Add the attendance data
@@ -526,11 +550,15 @@ class hr_rpt_attend_emp_day(osv.osv):
         #print attendances by group
         if not group_ids:
             return {'type': 'ir.actions.act_window_close'}     
-        datas = {
-                 'model': 'attend.empday.group',
-                 'ids': group_ids,
-        }
-        return {'type': 'ir.actions.report.xml', 'report_name': 'attend.empday.group', 'datas': datas, 'nodestroy': True}    
+        #return report action
+        datas = {'model': 'attend.empday.group','ids': group_ids,}
+        context.update({'active_model':'attend.empday.group', 'active_ids':group_ids})
+        rpt_action = {'type': 'ir.actions.report.xml', 
+                      'report_name': 'attend.empday.group', 
+                      'datas': datas, 
+                      'nodestroy': True,
+                      'context':context}
+        return rpt_action
     
 hr_rpt_attend_emp_day()
 
@@ -548,6 +576,9 @@ class attend_empday_group(osv.osv_memory):
         'hours_ot':fields.float('Overtime'), 
     }    
     
+    def get_report_name(self, cr, uid, id, rpt_name, context=None):
+        return "Attendance Employee Daily Report"
+        
 class attend_empday_group_line(osv.osv_memory):
     _name = "attend.empday.group.line"
     _columns = {
@@ -581,7 +612,7 @@ class hr_rpt_attend_emp_day_line(osv.osv):
     _description = "HR Attendance Employee Daily Report Lines"
     _columns = {                        
         'rpt_id': fields.many2one('hr.rpt.attend.emp.day', 'Report', select=True, required=True, ondelete='cascade'),
-        'seq': fields.integer('Sequence',),
+        'seq': fields.integer('Sequence',group_operator='None'),
         'emp_id': fields.many2one('hr.employee', 'Employee',),
         'emp_code': fields.related('emp_id','emp_code',string='Code', type='char'),
         'emp_name': fields.related('emp_id','name',string='Name', type='char'),
@@ -596,8 +627,8 @@ class hr_rpt_attend_emp_day_line(osv.osv):
         'p_hours_normal': fields.related('period_id','hours_work_normal',type='float',string='Normal'),
         'p_hour_ot': fields.related('period_id','hours_work_ot',type='float',string='OT'),
         
-        'sign_in':fields.float('Sign In'),
-        'sign_out':fields.float('Sign Out'),
+        'sign_in':fields.float('Sign In',group_operator='None'),
+        'sign_out':fields.float('Sign Out',group_operator='None'),
         #the hours that working normal in fact
         'hours_normal':fields.float('Work Normal'),
         #the hours that working OT in fact
@@ -609,12 +640,28 @@ class hr_rpt_attend_emp_day_line(osv.osv):
         'hours_normal2':fields.float('Work Normal2'),
         #the hours that working OT2 in fact
         'hours_ot2':fields.float('Work OT2'),
+        'state': fields.related('rpt_id','state',type='selection',selection=[
+            ('draft', 'Draft'),
+            ('confirmed', 'Confirmed'),
+            ('cancel', 'Cancel'),
+        ], string = 'Status', readonly=True),        
+    
     }
-
+    #called by server action "action_server_hr_empday_line_pdf", to print the employee daily attendance
+    def print_empday_line_group(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        if not ids:
+            return False
+        return self.pool.get('hr.rpt.attend.emp.day').print_empday_group(cr, uid, [], context=context, rpt_line_ids = ids)
+    
 hr_rpt_attend_emp_day_line()
 
 from openerp.report import report_sxw
 from openerp.addons.metro.rml import rml_parser_ext
+
+rml_parser_ext
+
 report_sxw.report_sxw('report.hr.rpt.attend.emp.day', 'hr.rpt.attend.emp.day', 'addons/metro_hr/wizard/hr_rpt_attend_emp_day.rml', parser=rml_parser_ext, header='internal')
 report_sxw.report_sxw('report.attend.empday.group','attend.empday.group','addons/metro_hr/wizard/hr_rpt_attend_emp_day_group.rml',parser=rml_parser_ext, header='internal')            
 
