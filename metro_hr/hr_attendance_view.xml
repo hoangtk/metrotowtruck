@@ -30,17 +30,17 @@
             <field name="model">hr.attendance</field>
             <field name="inherit_id" ref="hr_attendance.view_attendance_who"/>
             <field name="arch" type="xml">
-                <field name="day" position="attributes">
-                	<attribute name="invisible">0</attribute>
-                </field>
                 <field name="action" position="after">
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/>
-                </field>
-                <field name="day" position="after">
                 	<field name="notes"/>
                 	<field name="clock_id" readonly="1"/>
                 	<field name="clock_log_id" readonly="1"/>
+                </field>
+                <field name="day" position="replace">
+                </field>
+                <field name="name" position="before">
+                	<field name="day"/>
                 </field>
             </field>
         </record> 
@@ -52,17 +52,35 @@
             <field name="arch" type="xml">
             	<xpath expr="//sheet" position="before">
             		<header>
-            			<button name="calc_action" string="Recalculate Action" type="object"/>
+            			<button name="calc_action" string="Recalculate Action" type="object" groups="hr.group_user"/>
             		</header>
             	</xpath>
-                <field name="action_desc" position="after">
-                	<field name="calendar_id"/>
-                	<field name="cale_period_id"/>
-                	<field name="day"/>
-                	<field name="notes"/>
-                	<field name="clock_id" readonly="1"/>
-                	<field name="clock_log_id" readonly="1"/>
-                </field>
+            	<xpath expr="//sheet" position="replace">
+                    <sheet>
+	                    <group col="4">
+	                        <field name="employee_id"/>
+	                        <field name="name"/>
+	                        <field name="action"/>
+	                        <field name="action_desc"/>      
+	                    </group>                 
+	                        
+	                    <group col="4">
+		                	<field name="calendar_id"/>
+		                	<field name="cale_period_id"/>
+		                	<field name="day"/>
+		                	<field name="notes"/>
+		                	<field name="clock_id" readonly="1"/>
+		                	<field name="clock_log_id" readonly="1"/>
+	                    </group>                 
+	                        
+	                    <group col="4">		                	
+		                	<field name="create_uid"/>
+		                	<field name="write_uid"/>
+		                	<field name="create_date"/>
+		                	<field name="write_date"/>        
+	                    </group>
+                    </sheet>
+            	</xpath>
             </field>
         </record> 
         
@@ -121,6 +139,8 @@
                     </group>
                     <field name="attendance_ids">
 		                <tree string="Working Time" editable="top">
+		                	<field name="type_id"/>
+		                	
 		                    <field name="name"/>
 		                    <field name="dayofweek"/>
 		                    
@@ -187,6 +207,32 @@
         id="menu_view_emp_resource_calendar"
         parent="hr_attendance.menu_hr_attendance" sequence="31"/>  
         
+
+<!-- Employee working time type -->        
+        <record id="view_hr_worktime_type_tree" model="ir.ui.view">
+            <field name="name">view_hr_worktime_type_tree</field>
+            <field name="model">hr.worktime.type</field>
+            <field name="arch" type="xml">
+                <tree string="Working Time" editable="bottom">
+                    <field name="sequence"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>  
+        
+        <record id="action_hr_worktime_type" model="ir.actions.act_window">
+            <field name="name">Working Time Type</field>
+            <field name="res_model">hr.worktime.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_worktime_type_tree"/>
+        </record>
+                
+        <menuitem 
+        action="action_hr_worktime_type" 
+        id="menu_hr_worktime_type"
+        parent="hr_attendance.menu_hr_attendance" sequence="33"/>  
+                
 <!-- Employee add the working time -->
         <record model="ir.ui.view" id="metro_employee_tree_view_attend">
             <field name="name">metro_employee_tree_view_attend</field>
@@ -246,6 +292,19 @@
                 </xpath>
             </field>
         </record>
-                
+<!-- make the attendance main menu to visible to employee, do not depend the group "base.group_hr_attendance"-->
+	<menuitem id="hr.menu_hr_attendance" name="Attendances" parent="hr.menu_hr_root" sequence="10" groups="base.group_user"/>
+
+<!-- make one new menu for employee to view self attendances -->	
+	<record id="attendance_my_action" model="ir.actions.act_window">
+	    <field name="name">My Attendances</field>
+	    <field name="res_model">hr.attendance</field>
+	    <field name="view_type">form</field>
+	    <field name="view_mode">tree,form</field>
+        <field name="context">{"search_default_today_valid":1}</field>
+	    <field name="domain">[('employee_id.user_id','=',uid)]</field>
+	    <field name="search_view_id" ref="view_hr_attendance_filter_ext" />
+	</record>	
+	<menuitem action="attendance_my_action" id="menu_hr_attendance_my" parent="hr.menu_hr_attendance"/>                
     </data>
 </openerp>

@@ -58,12 +58,13 @@ class hr_rpt_attend_month(osv.osv):
             ('cancel', 'Cancel'),
         ], 'Status', select=True, readonly=True, track_visibility='onchange', 
             help='* When the report is created the status is \'Draft\'.\
-            \n* If the payslip is confirmed, the status is \'Waiting Approve\'. \
-            \n* If the payslip is approved then status is set to \'Done\'.\
-            \n* If the payslip is rejected then status is set to \'Rejected\'.\
+            \n* If the report is confirmed, the status is \'Waiting Approve\'. \
+            \n* If the report is approved then status is set to \'Done\'.\
+            \n* If the report is rejected then status is set to \'Rejected\'.\
             \n* When user cancel payslip the status is \'Cancel\'.'),        
     
-        'note': fields.text('Description', readonly=False, states={'done':[('readonly',True)]}),
+        'note': fields.text('Description', readonly=False, states={'done':[('readonly',True)]}),        
+        'attend_day_id': fields.many2one('hr.rpt.attend.emp.day', 'Daily Attendances Report'),
         }
 
     _defaults = {
@@ -170,8 +171,11 @@ class hr_rpt_attend_month(osv.osv):
     
     def create(self, cr, uid, vals, context=None):
         if 'name' not in vals or not vals['name']:
-            date_from = datetime.strptime(vals['date_to'], DEFAULT_SERVER_DATETIME_FORMAT)
-            name = '%s-%s'%(date_from.year, date_from.month)
+            date_to = vals['date_to']
+            if date_to and len(date_to) == 10:
+                date_to = vals['date_to'] + ' 00:00:00'
+            date_to = datetime.strptime(date_to, DEFAULT_SERVER_DATETIME_FORMAT)
+            name = '%s-%s'%(date_to.year, date_to.month)
             vals['name'] = name
         self._convert_save_dates(cr, uid, vals, context)
         id_new = super(hr_rpt_attend_month, self).create(cr, uid, vals, context=context)
@@ -208,11 +212,31 @@ class hr_rpt_attend_month(osv.osv):
         '''
         1.Call hr_rpt_attend_emp_day.run_attend_emp_day() to get all detail data
         '''
-        rpt = self.browse(cr, uid, ids, context=context)[0]
+        rpt_dtl_lines = []
+        rpt = self.browse(cr, uid, ids[0], context=context)
         rpt_dtl_obj = self.pool.get('hr.rpt.attend.emp.day')
-        rpt_dtl_vals = {'date_from':rpt.date_from, 'date_to':rpt.date_to, 'emp_ids':[(4,emp.id) for emp in rpt.emp_ids]}
-        rpt_dtl_id = rpt_dtl_obj.create(cr, uid, rpt_dtl_vals, context=context)
-        rpt_dtl_lines = rpt_dtl_obj.run_attend_emp_day(cr, uid, [rpt_dtl_id], context=context)[1]
+        rpt_dtl_id = None
+        if not rpt.attend_day_id:            
+            rpt_dtl_vals = {'date_from':rpt.date_from, 'date_to':rpt.date_to, 'emp_ids':[(4,emp.id) for emp in rpt.emp_ids]}
+            rpt_dtl_id = rpt_dtl_obj.create(cr, uid, rpt_dtl_vals, context=context)
+            rpt_dtl_lines = rpt_dtl_obj.run_attend_emp_day(cr, uid, [rpt_dtl_id], context=context)[1]
+            rpt_dtl_obj.unlink(cr, uid, [rpt_dtl_id], context=context)
+        else:
+            for rpt_dtl_line in rpt.attend_day_id.rpt_lines:
+                rpt_dtl_lines.append({'seq': rpt_dtl_line.seq,
+                                    'emp_id': rpt_dtl_line.emp_id.id,
+                                    'day': rpt_dtl_line.day,
+                                    'period_id': rpt_dtl_line.period_id.id,
+                                    'sign_in':rpt_dtl_line.sign_in,
+                                    'sign_out':rpt_dtl_line.sign_out,
+                                    'hours_normal':rpt_dtl_line.hours_normal,
+                                    'hours_ot':rpt_dtl_line.hours_ot,
+                                    'is_late':rpt_dtl_line.is_late,
+                                    'is_early':rpt_dtl_line.is_early,
+                                    'is_absent':rpt_dtl_line.is_absent, 
+                                    'hours_normal2':rpt_dtl_line.hours_normal2,
+                                    'hours_ot2':rpt_dtl_line.hours_ot2})
+        
         ''''
         2.Sum data by the detail
         '''
@@ -318,7 +342,7 @@ class hr_rpt_attend_month_line(osv.osv):
         'name': fields.char('Name', size=256, ),
         'data_level': fields.char('Data level code', size=64),
         
-        'rpt_id': fields.many2one('hr.rpt.attend.month', 'Report'),
+        'rpt_id': fields.many2one('hr.rpt.attend.month', 'Report', select=True, required=True, ondelete='cascade'),
         'seq': fields.integer('Sequence',),
         'emp_id': fields.many2one('hr.employee', 'Employee',),
         'emp_code': fields.related('emp_id','emp_code',string='Code', type='char'),
@@ -331,6 +355,13 @@ class hr_rpt_attend_month_line(osv.osv):
         'days_attend2': fields.float('Days Attended2'),
         'hours_ot2_nonwe': fields.float('Hours OT2 Non Weekend'),
         'hours_ot2_we': fields.float('Hours OT2 Weekend'),
+        
+        'note': fields.char('Notes', size=64 ),
+        'alw_house': fields.float('House'),
+        'alw_other': fields.float('Other Allowance'),
+        'ded_meal': fields.float('Meal'),
+        'ded_utilities': fields.float('Utilities'),
+        'ded_other': fields.float('Other Deduction'),
     }
 
 hr_rpt_attend_month_line()

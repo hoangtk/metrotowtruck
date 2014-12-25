@@ -29,6 +29,16 @@ so use this product for employee's product by default -->
             <field name="model">hr.clock</field>
             <field name="function">download_log</field>
             <field name="args">()</field>
-        </record>      
+        </record>
+<!-- Work Hours -->        
+        <record forcecreate="True" id="decimal_work_hours" model="decimal.precision">
+            <field name="name">HR Attend Hours</field>
+            <field name="digits">2</field>
+        </record> 
+<!-- Work Days -->        
+        <record forcecreate="True" id="decimal_work_days" model="decimal.precision">
+            <field name="name">HR Attend Days</field>
+            <field name="digits">2</field>
+        </record>       
     </data>
 </openerp>

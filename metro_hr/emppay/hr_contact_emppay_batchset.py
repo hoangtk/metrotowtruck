@@ -29,7 +29,16 @@ import openerp.addons.decimal_precision as dp
 class hr_set_alwded(osv.osv_memory):
     _name = 'hr.set.alwded'
     _description = 'Contact Salary''s allowance and the deduction'
-    _order = 'type, sequence'
+    _order = 'type, sequence'    
+
+    def _alwded_field_get(self, cr, uid, context=None):
+        mf = self.pool.get('ir.model.fields')
+        ids = mf.search(cr, uid, [('model','=', 'hr.rpt.attend.month.line'), ('ttype','=','float'), '|', ('name','like','alw_%'), ('name','like','ded_%')], context=context)
+        res = []
+        for field in mf.browse(cr, uid, ids, context=context):
+            res.append((field.name, field.field_description))
+        return res
+    
     _columns = {
         'set_id': fields.many2one('hr.contract.emppay.batchset', required=True, select=True, ondelete='cascade'),
         'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True, ondelete='cascade'),
@@ -40,6 +49,8 @@ class hr_set_alwded(osv.osv_memory):
                                     string='Calculation Type', store=True, readonly=True),
         #default is alwded_id.amount, user can change it
         'amount': fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
+        #fields related to hr_rpt_attend_month_line
+        "attend_field" : fields.selection(_alwded_field_get, "Attend Field", size=32, help="Associated field in the attendance report."),
     }
     
     _defaults={
@@ -47,7 +58,7 @@ class hr_set_alwded(osv.osv_memory):
                }
     def onchange_alwded_id(self, cr, uid, ids, alwded_id, context=None):
         alwded = self.pool.get('hr.emppay.alwded').browse(cr, uid, alwded_id, context=context)
-        vals = {'sequence':alwded.sequence, 'type':alwded.type, 'type_calc':alwded.type_calc, 'amount':alwded.amount}
+        vals = {'sequence':alwded.sequence, 'type':alwded.type, 'type_calc':alwded.type_calc, 'amount':alwded.amount, 'attend_field':alwded.attend_field}
         return {'value':vals}
     
 

@@ -154,11 +154,12 @@
   </stylesheet>
   <story>
     <para style="terp_default_8">[[ repeatIn(objects, 'o') ]]</para>
+    <para style="terp_default_8">[[setLang(user.lang)]]</para>
     <para style="terp_default_8">
       <font color="white"> </font>
     </para>
-    <para style="P1">Attendances Report</para>
-    <blockTable colWidths="49.0,488.0" repeatRows="1" style="table_header">
+    <para style="P1">Employee Daily Attendances</para>
+    <blockTable colWidths="88.0,450.0" repeatRows="1" style="table_header">
       <tr>
         <td>
           <para style="P2">Date:</para>
@@ -171,10 +172,10 @@
     <para style="P4">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="27.0,98.0,63.0,56.0,22.0,22.0,42.0,41.0,42.0,39.0,43.0,44.0" style="Table3">
+    <blockTable colWidths="27.0,98.0,57.0,59.0,66.0,32.0,30.0,29.0,31.0,37.0,38.0,34.0" style="Table3">
       <tr>
         <td>
-          <para style="P5">Code</para>
+          <para style="P5">#</para>
         </td>
         <td>
           <para style="P5">Name</para>
@@ -197,10 +198,10 @@
           <para style="P7">Sign Out</para>
         </td>
         <td>
-          <para style="P7">Work Normal</para>
+          <para style="P7">Work </para>
         </td>
         <td>
-          <para style="P7">Work OT</para>
+          <para style="P7">OT</para>
         </td>
         <td>
           <para style="P7">Be Late</para>
@@ -215,7 +216,7 @@
     </blockTable>
     <section>
       <para style="P8">[[ repeatIn(o.rpt_lines,'line') ]]</para>
-      <blockTable colWidths="26.0,98.0,57.0,59.0,66.0,32.0,30.0,29.0,31.0,37.0,38.0,34.0" style="Table1">
+      <blockTable colWidths="26.0,98.0,62.0,60.0,59.0,32.0,30.0,29.0,31.0,37.0,38.0,34.0" style="Table1">
         <tr>
           <td>
             <para style="P9">[[ line.emp_code ]]</para>

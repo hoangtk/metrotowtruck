@@ -27,6 +27,7 @@ class hr_attendance(osv.osv):
             local_time = fields.datetime.context_timestamp(cr, uid, utc_time, context=context)
             res[obj.id] = local_time.strftime('%Y-%m-%d')
         return res    
+    _order = 'day desc, name asc'
     _columns = {
         'action': fields.selection([('sign_in', 'Sign In'), ('sign_out', 'Sign Out'), 
                                     ('sign_in_late', 'Sign In Late'), ('sign_out_early', 'Sign Out Early'), 
@@ -39,7 +40,21 @@ class hr_attendance(osv.osv):
         'cale_period_id' : fields.many2one("resource.calendar.attendance", "Working Period", required=False, select=True),
         #redefined the _day_compute() method, to record the local day on this field
         'day': fields.function(_day_compute, type='char', string='Day', store=True, select=1, size=32),
+        #the fields record the creation and write info
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'write_uid':  fields.many2one('res.users', 'Modifier', readonly=True),
+        'write_date': fields.datetime('Modify Date', readonly=True, select=True),        
     }
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        res = []
+        for data in self.read(cr, uid, ids, ['name', 'employee_id'], context=context):
+            res.append((data['id'],'%s[%s]'%(data['employee_id'][1],data['name']) ))
+        return res
+        
     def copy(self, cr, uid, id, default=None, context=None):
         if not default:
             default = {}
@@ -87,7 +102,6 @@ class hr_attendance(osv.osv):
                 check if there are existing same record or not, if yes, then set the action to invalid
                 invalid standard: same period/action/day/employee, and the log time(name) is earlier than this attendance
                 '''
-                print dt_action.strftime('%Y-%m-%d')
                 same_attend_ids = self.search(cr, uid, [('employee_id','=',attend.employee_id.id), 
                                       ('cale_period_id','=',cale_period_id),
                                       ('action','=',action),
@@ -228,6 +242,15 @@ class resource_calendar(osv.osv):
                              })                                
         return vals    
     
+
+class hr_worktime_type(osv.osv):
+    _name = "hr.worktime.type"
+    _description = "Working time type"
+    _columns = {
+        'sequence':fields.integer('Sequence'),
+        'name':fields.char('Type', size=64, required=True),
+    }
+        
 class resource_calendar_attendance(osv.osv):
     _inherit = "resource.calendar.attendance"
     def _calc_hours(self, cr, uid, ids, field_names, args, context=None):
@@ -247,6 +270,8 @@ class resource_calendar_attendance(osv.osv):
     WorkHours-OTHours = Normal Working Hours
     '''    
     _columns = {                
+        'type_id': fields.many2one('hr.worktime.type', string='Type'),
+        
         'punch_in_start': fields.float('Sign in punching start'),
         'punch_in_late': fields.float('Sign in punching late'),
         'punch_in_stop': fields.float('Sign in punching stop'),
