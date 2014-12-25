@@ -49,7 +49,8 @@ class hr_medical_type(osv.osv):
     
 class hr_employee(osv.osv):
 	_inherit = "hr.employee"
-
+	_order='emp_code'
+    
 	def _get_leave_status(self, cr, uid, ids, name, args, context=None):
 		holidays_obj = self.pool.get('hr.holidays')
 		#fix the time interval query parameter issue

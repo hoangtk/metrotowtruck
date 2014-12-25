@@ -30,17 +30,17 @@
             <field name="model">hr.attendance</field>
             <field name="inherit_id" ref="hr_attendance.view_attendance_who"/>
             <field name="arch" type="xml">
-                <field name="day" position="attributes">
-                	<attribute name="invisible">0</attribute>
-                </field>
                 <field name="action" position="after">
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/>
-                </field>
-                <field name="day" position="after">
                 	<field name="notes"/>
                 	<field name="clock_id" readonly="1"/>
                 	<field name="clock_log_id" readonly="1"/>
+                </field>
+                <field name="day" position="replace">
+                </field>
+                <field name="name" position="before">
+                	<field name="day"/>
                 </field>
             </field>
         </record> 

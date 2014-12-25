@@ -41,8 +41,8 @@
                     <field name="emp_id"/>
                     <field name="rpt_id"/>
 					<group expand="0" string="Group By...">
-					    <filter string="Employee" icon="terp-personal" context="{'group_by':'emp_id'}"/>
-					    <filter string="Day" icon="terp-personal" context="{'group_by':'day'}"/>
+					    <filter name="groupby_emp" string="Employee" icon="terp-personal" context="{'group_by':'emp_id'}"/>
+					    <filter name="groupby_day" string="Day" icon="terp-personal" context="{'group_by':'day'}"/>
 					</group>
                 </search>
             </field>
@@ -56,11 +56,12 @@
             <field name="view_id" ref="view_hr_rpt_attend_emp_day_line_tree"/>
             <field name="search_view_id" ref="view_hr_rpt_attend_emp_day_line_filter"/>
             <field name="domain">[('rpt_id','=',active_id)]</field>
+            <field name="context">{'search_default_groupby_emp':True}</field>
         </record>      
         
 		<!-- print PDF from line -->
         <record id="action_server_hr_empday_line_pdf" model="ir.actions.server">
-            <field name="name">HR Employee Daily Attendance PDF Print</field>
+            <field name="name">Employee Daily Attendance Report</field>
             <field name="condition">True</field>
             <field name="type">ir.actions.server</field>
             <field name="model_id" ref="model_hr_rpt_attend_emp_day_line" />
@@ -89,12 +90,12 @@
                 <field name="type" invisible="1"/>
                 <header>
                 	<button name="run_report" string="Generate Attendance" type="object" states="draft" class="oe_highlight"/>
+                   	<button name="%(act_empday_rpt_2_line)d" string="View Generated Attendances" type="action"/>  	
+                   	<button name="print_empday_group" string="Print" type="object"/>                 
                    	<button name="action_confirm" string="Confirm" states="draft" type="object" class="oe_highlight"/>                   	
                    	<button name="action_cancel" string="Cancel" type="object" states="draft,confirmed"/>                   	
                    	<button name="action_cancel_draft" string="Set to Draft" type="object" states="cancel"/>                   	
                    	<!-- <button name="save_pdf" string="Print" type="object"/> -->
-                   	<button name="print_empday_group" string="Print" type="object"/>         
-                   	<button name="%(act_empday_rpt_2_line)d" string="View Generated Attendances" type="action"/>  	        
                    	
                 	<button name="new_attend_month" string="Generate Monthly Report" type="object" states="confirmed"/>
                 	<field name="id" invisible="1"/>

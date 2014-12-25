@@ -27,6 +27,7 @@ class hr_attendance(osv.osv):
             local_time = fields.datetime.context_timestamp(cr, uid, utc_time, context=context)
             res[obj.id] = local_time.strftime('%Y-%m-%d')
         return res    
+    _order = 'day desc, name asc'
     _columns = {
         'action': fields.selection([('sign_in', 'Sign In'), ('sign_out', 'Sign Out'), 
                                     ('sign_in_late', 'Sign In Late'), ('sign_out_early', 'Sign Out Early'), 

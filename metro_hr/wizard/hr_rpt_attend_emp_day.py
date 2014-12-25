@@ -242,6 +242,7 @@ class hr_rpt_attend_emp_day(osv.osv):
             'type': 'ir.actions.act_window',
             'target': 'current',
             'domain': [('rpt_id','=',ids[0])],
+            'context': {'search_default_groupby_emp':True},
         }
                 
         return True
@@ -266,7 +267,9 @@ class hr_rpt_attend_emp_day(osv.osv):
         emp_ids = [emp.id for emp in rpt.emp_ids]
         if not emp_ids:
             emp_ids = emp_obj.search(cr, uid, [], context=context)
-
+        #sort the employee ids
+        emp_ids.sort()
+        
         '''
         1.Query all data with both in/out by date range, store the result in attends_normal
         '''
@@ -317,7 +320,7 @@ class hr_rpt_attend_emp_day(osv.osv):
                     '''
                     rpt_line = {'seq': seq,
                                     'emp_id': emp.id,
-                                    'day': day,
+                                    'day': day_dt,
                                     'period_id': None,
                                     'sign_in':None,
                                     'sign_out':None,
@@ -339,7 +342,7 @@ class hr_rpt_attend_emp_day(osv.osv):
                     seq += 1
                     rpt_line = {'seq': seq,
                                     'emp_id': emp.id,
-                                    'day': day,
+                                    'day': day_dt,
                                     'period_id': period.id,
                                     'sign_in':None,
                                     'sign_out':None,
@@ -493,6 +496,7 @@ class hr_rpt_attend_emp_day(osv.osv):
                     cale_wt_types[rpt_line.emp_id.calendar_id.id] = worktime_types
                 #set the group values
                 group_vals = {'name':key_group,
+                                    'emp_id': rpt_line.emp_id.id,
                                     'date_from': rpt.date_from,
                                     'date_to': rpt.date_to,
                                     'period_type_a_id':(worktime_types and len(worktime_types) >=1) and worktime_types[0]['id'] or None,
@@ -531,7 +535,9 @@ class hr_rpt_attend_emp_day(osv.osv):
         #sum and create groups data to DB
         group_ids = []
         attend_empday_group_obj = self.pool.get('attend.empday.group')
-        for group in groups.values():
+        group_list  = groups.values()
+        group_list.sort(lambda x, y: cmp(x['name'], y['name']))
+        for group in group_list:
             group_lines_list = []
             work_hours = 0
             work_hours_ot = 0
@@ -566,6 +572,7 @@ class attend_empday_group(osv.osv_memory):
     _name = "attend.empday.group"
     _columns = {
         'name': fields.char('Group', size=64, required=True),
+        'emp_id': fields.many2one('hr.employee', 'Employee',),
         'date_from': fields.datetime("Start Date", required=True),
         'date_to': fields.datetime("End Date", required=True),
         'line_ids': fields.one2many('attend.empday.group.line','group_id',string='Group Lines'),
@@ -610,14 +617,16 @@ class attend_empday_group_line(osv.osv_memory):
 class hr_rpt_attend_emp_day_line(osv.osv):
     _name = "hr.rpt.attend.emp.day.line"
     _description = "HR Attendance Employee Daily Report Lines"
+    _order = 'seq'
     _columns = {                        
         'rpt_id': fields.many2one('hr.rpt.attend.emp.day', 'Report', select=True, required=True, ondelete='cascade'),
         'seq': fields.integer('Sequence',group_operator='None'),
         'emp_id': fields.many2one('hr.employee', 'Employee',),
-        'emp_code': fields.related('emp_id','emp_code',string='Code', type='char'),
+        'emp_code': fields.related('emp_id','emp_code',string='Code', type='char',store=True),
         'emp_name': fields.related('emp_id','name',string='Name', type='char'),
         
-        'day': fields.char('Day', store=True, size=32),
+        #'day': fields.char('Day', store=True, size=32),
+        'day': fields.date("Day", required=True),
         'period_id': fields.many2one('resource.calendar.attendance','Period'),
         'p_weekday': fields.related('period_id','dayofweek',type='selection',
                                     selection=[('0','Monday'),('1','Tuesday'),('2','Wednesday'),('3','Thursday'),('4','Friday'),('5','Saturday'),('6','Sunday')],
@@ -660,9 +669,18 @@ hr_rpt_attend_emp_day_line()
 from openerp.report import report_sxw
 from openerp.addons.metro.rml import rml_parser_ext
 
-rml_parser_ext
 
+class attend_empday_group_print(rml_parser_ext):
+    def __init__(self, cr, uid, name, context):
+        super(attend_empday_group_print, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'weekday': self.weekday,
+        })
+    def weekday(self, weekday):
+        return int(weekday) + 1
+    
 report_sxw.report_sxw('report.hr.rpt.attend.emp.day', 'hr.rpt.attend.emp.day', 'addons/metro_hr/wizard/hr_rpt_attend_emp_day.rml', parser=rml_parser_ext, header='internal')
-report_sxw.report_sxw('report.attend.empday.group','attend.empday.group','addons/metro_hr/wizard/hr_rpt_attend_emp_day_group.rml',parser=rml_parser_ext, header='internal')            
+report_sxw.report_sxw('report.attend.empday.group','attend.empday.group','addons/metro_hr/wizard/hr_rpt_attend_emp_day_group.rml',parser=attend_empday_group_print, header='internal')            
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
