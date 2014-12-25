@@ -1306,6 +1306,7 @@ class BaseModel(object):
                         self._parent_store_compute(cr)
                     cr.commit()
         except Exception, e:
+            traceback.print_exc()
             cr.rollback()
             return -1, {}, 'Line %d : %s' % (position + 1, tools.ustr(e)), ''
 
@@ -2656,6 +2657,9 @@ class BaseModel(object):
             if (f in self._columns and getattr(self._columns[f], '_classic_write'))]
         for f in aggregated_fields:
             group_operator = fget[f].get('group_operator', 'sum')
+            #johnw, if field's group_operator='None' then do not include this field in the aggregated_fields, fix the issue that the int/float fields can not be removed from the aggregated_fields
+            if group_operator == 'None':
+                continue
             if flist:
                 flist += ', '
             qualified_field = '"%s"."%s"' % (self._table, f)
