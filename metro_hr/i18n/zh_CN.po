@@ -167,7 +167,7 @@ msgstr "假期名称"
 #: model:ir.actions.act_window,name:metro_hr.action_hr_worktime_type
 #: model:ir.ui.menu,name:metro_hr.menu_hr_worktime_type
 msgid "Working Time Type"
-msgstr "Working Time Type"
+msgstr "班次类型"
 
 #. module: metro_hr
 #: field:hr.emppay,hours_ot_holiday:0 field:hr.emppay,hours_ot_holiday2:0
