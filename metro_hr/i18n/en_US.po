@@ -1,0 +1,108 @@
+#. module: metro_hr
+#: field:attend.empday.group.line,seq:0
+#: field:hr.department,sequence:0
+#: field:hr.rpt.attend.emp.day.line,seq:0
+#: field:hr.rpt.attend.month.line,seq:0
+#: field:hr.worktime.type,sequence:0
+#: model:ir.model.fields,field_description:metro_hr.field_attend_empday_group_line_seq
+#: model:ir.model.fields,field_description:metro_hr.field_hr_department_sequence
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_emp_day_line_seq
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_seq
+#: model:ir.model.fields,field_description:metro_hr.field_hr_worktime_type_sequence
+msgid "Sequence"
+msgstr "#"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,days_work:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_work
+msgid "Days"
+msgstr "Work Days"
+
+#. module: metro_hr
+#: field:hr.emppay,days_attend:0
+#: field:hr.rpt.attend.month.line,days_attend:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_days_attend
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_attend
+msgid "Days Attended"
+msgstr "Attended Days"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,hours_ot:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_hours_ot
+msgid "Hours OT"
+msgstr "OT Hours"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,days_work2:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_work2
+msgid "Days2"
+msgstr "Work Days by five days"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,days_attend2_real:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_attend2_real
+msgid "Days Attended2 Real"
+msgstr "Attended Days by five days"
+
+#. module: metro_hr
+#: field:hr.emppay,days_attend2:0
+#: field:hr.rpt.attend.month.line,days_attend2:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_days_attend2
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_attend2
+msgid "Days Attended2"
+msgstr "Attended Days by 21.75"
+
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,hours_ot2_nonwe:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_hours_ot2_nonwe
+msgid "Hours OT2 Non Weekend"
+msgstr "Non Weekend OT Hours"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,hours_ot2_we:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_hours_ot2_we
+msgid "Hours OT2 Weekend"
+msgstr "Weekend OT Hours"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,hours_ot_law_holiday:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_hours_ot_law_holiday
+msgid "Hours OT in Law Holiday"
+msgstr "OT Hours in Law Holiday"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,days_work_injury_holiday:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_work_injury_holiday
+msgid "Days of work injury Holiday"
+msgstr "Days of work injury Holiday"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,alw_house:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_alw_house
+msgid "House"
+msgstr "Apartment"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,alw_other:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_alw_other
+msgid "Other Allowance"
+msgstr "Other Allowance"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,ded_meal:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_ded_meal
+msgid "Meal"
+msgstr "Meal"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,ded_utilities:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_ded_utilities
+msgid "Utilities"
+msgstr "Utilities"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.month.line,ded_other:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_ded_other
+msgid "Other Deduction"
+msgstr "Other Deduction"

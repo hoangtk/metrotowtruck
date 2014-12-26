@@ -273,7 +273,8 @@ class hr_contract(osv.osv):
                     'name':item.alwded_id.name,
                     'type':item.type,
                     'type_calc':item.type_calc,
-                    'amount':item.amount}
+                    'amount':item.amount,
+                    'attend_field':item.attend_field}
             if item.type == 'alw':
                 lines_alw.append(line)
             else:
@@ -405,7 +406,7 @@ class hr_rpt_attend_month(osv.osv):
                 continue
             contract_id = contract_ids[0]
             contract = contract_obj.browse(cr, uid, contract_id, context=context)
-            slip_alws, slip_deds = contract_obj.alwded_dict(cr, uid, contract_id, context=context)
+            slip_alws, slip_deds = self.emp_attend_alwded(cr, uid, attend_line, contract=contract, context=context)
             slip_sis = contract_obj.si_dict(cr, uid, contract_id, context=context)
             slip = {'attend_id':attend_line.id,
                     'employee_id': emp_id,
@@ -441,6 +442,48 @@ class hr_rpt_attend_month(osv.osv):
         emppay_sheet['emppay_ids'] = slips
         return emppay_sheet
     
+    def emp_attend_alwded(self, cr, uid, attend_line, contract=None, context=None):
+        lines_alw = []
+        lines_deb = []
+        emp_id = attend_line.emp_id.id
+        #get employee contract
+        if not contract:
+            contract_obj = self.pool.get('hr.contract')        
+            contract_ids = contract_obj.get_contract(cr, uid, emp_id, attend_line.rpt_id.date_from, attend_line.rpt_id.date_to, context=context)
+            if not contract_ids:
+                return lines_alw, lines_deb
+            contract_id = contract_ids[0]
+            contract = contract_obj.browse(cr, uid, contract_id, context=context)
+        #get allowance and deductions from contract
+        for item in contract.alwded_ids:
+            line = {'sequence':item.sequence,
+                    'code':item.alwded_id.code,
+                    'name':item.alwded_id.name,
+                    'type':item.type,
+                    'type_calc':item.type_calc,
+                    'amount':item.amount,
+                    'attend_field':item.attend_field}
+            if item.type_calc == 'by_attend':
+                if attend_line.days_work != 0:
+                    line['amount'] = item['amount']*attend_line.days_attend/attend_line.days_work
+                else:
+                    line['amount'] = 0
+            if item.type == 'alw':
+                lines_alw.append(line)
+            else:
+                lines_deb.append(line)
+        return lines_alw, lines_deb
+    
+    def emp_attend_alwded_by_field(self, cr, uid, attend_line, attend_fields, context=None):
+        field_values = dict.fromkeys(attend_fields, 0)
+        lines_alw, lines_deb = self.emp_attend_alwded(cr, uid, attend_line, context=context)
+        lines_alwded = lines_alw + lines_deb
+        for alwded in lines_alwded:
+            field_name = alwded['attend_field']
+            if field_name and field_name in attend_fields:
+                field_values[field_name] = alwded['amount']
+        return field_values
+                    
 class hr_emppay_sheet(osv.osv):
     _name = 'hr.emppay.sheet'
     _description = 'Payroll'

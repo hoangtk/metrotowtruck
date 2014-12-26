@@ -24,7 +24,9 @@
                    	
                    	<button name="action_cancel_draft" string="Set to Draft" type="object" states="cancel"/>
                    	
-                   	<button name="save_pdf" string="Print" type="object"/>
+                   	<button name="pdf_general" string="Print" type="object"/>
+                   	<button name="pdf_notification" string="Print Notification" type="object"/>
+                   	<button name="pdf_inspection" string="Print Inpsection" type="object"/>
                    	
                    	<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                 </header>          
@@ -56,13 +58,24 @@
 									<field name="days_attend"/>
 									<field name="hours_ot" widget="float_time"/>
 									<field name="days_work2"/>
+									<field name="days_attend2_real"/>
 									<field name="days_attend2"/>
 									<field name="hours_ot2_nonwe" widget="float_time"/>
 									<field name="hours_ot2_we" widget="float_time"/>
+									
+									<field name="hours_ot_law_holiday" widget="float_time"/>
+									<field name="days_work_injury_holiday"/>
+									<field name="alw_house"/>
+									<field name="alw_other"/>
+									<field name="ded_meal"/>
+									<field name="ded_utilities"/>
+									<field name="ded_other"/>     
+									
+									<field name="note"/>           
 							</tree>
 						</field>
                 	</page>
-                	<page name="employee" string="Employees">
+                	<page name="employee" string="Employees" attrs="{'invisible':[('attend_day_id','!=',False)]}">
                 		<field name="emp_ids" attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>
                 	</page>
                 </notebook>

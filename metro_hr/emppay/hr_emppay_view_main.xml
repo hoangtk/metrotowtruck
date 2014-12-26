@@ -437,7 +437,7 @@
             <field name="inherit_id" ref="hr_rpt_attend_month_view"/>
             <field name="arch" type="xml">
             <data>
-                <button name="save_pdf" position="after">
+                <button name="pdf_inspection" position="after">
                 	<button name="new_payroll" string="Generate Payroll" type="object" states="done"/>
                 	<field name="id" invisible="1"/>
                 	<button name="%(action_hr_emppay_sheet)d" string="Payrolls" type="action" states="done"
