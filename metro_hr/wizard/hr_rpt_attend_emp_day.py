@@ -609,7 +609,7 @@ class attend_empday_group(osv.osv_memory):
         'period_type_a_id': fields.many2one('hr.worktime.type', string='Worktime A'),
         'period_type_b_id': fields.many2one('hr.worktime.type', string='Worktime B'),
         'period_type_c_id': fields.many2one('hr.worktime.type', string='Worktime C'),
-        'days_attend':fields.float('Work Days'),
+        'days_attend':fields.float('Attended Days'),
         'hours_ot':fields.float('Overtime'), 
     }    
     

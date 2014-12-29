@@ -65,6 +65,7 @@
 									
 									<field name="hours_ot_law_holiday" widget="float_time"/>
 									<field name="days_work_injury_holiday"/>
+									<field name="alw_hightemp"/>
 									<field name="alw_house"/>
 									<field name="alw_other"/>
 									<field name="ded_meal"/>

@@ -25,6 +25,7 @@ from dateutil import rrule
 from datetime import datetime, timedelta
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.misc import DEFAULT_SERVER_DATE_FORMAT
+from dateutil import relativedelta
 from openerp.addons.metro import utils
 
 from openerp.osv import fields, osv
@@ -82,7 +83,8 @@ class hr_rpt_attend_month(osv.osv):
             vals.update({'date_from':date_from_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
                          
         if 'date_to' in fields:
-            date_to = datetime.strptime(time.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
+            date_to = datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1)
+            date_to = datetime.strptime(date_to.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
             date_to_utc = utils.utc_timestamp(cr, uid, date_to, context)        
             vals.update({'date_to':date_to_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
@@ -378,6 +380,7 @@ class hr_rpt_attend_month_line(osv.osv):
         #工伤假天数, user input manually
         'days_work_injury_holiday': fields.float('Days  of work injury Holiday'),
         #allowance/deduction fields, the hr_emppay_alwded.attend_field can link to them
+        'alw_hightemp': fields.float('High Temperature Allowance'),
         'alw_house': fields.float('House'),
         'alw_other': fields.float('Other Allowance'),
         'ded_meal': fields.float('Meal'),
@@ -388,7 +391,7 @@ class hr_rpt_attend_month_line(osv.osv):
         new_id = super(hr_rpt_attend_month_line, self).create(cr, uid, values, context=context)
         #update allow/deduction fields
         attend_line = self.browse(cr, uid, new_id, context=context)
-        attend_fields = ['alw_house', 'alw_other', 'ded_meal', 'ded_utilities', 'ded_other']
+        attend_fields = ['alw_hightemp', 'alw_house', 'alw_other', 'ded_meal', 'ded_utilities', 'ded_other']
         #call hr_empay.hr_rpt_attend_month.emp_attend_alwded_by_field() to get employee allow/deduction's data
         alwded_data = self.pool.get("hr.rpt.attend.month").emp_attend_alwded_by_field(cr, uid, attend_line, attend_fields, context=context)
         if alwded_data:
