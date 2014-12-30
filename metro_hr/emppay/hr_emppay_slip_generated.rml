@@ -394,7 +394,7 @@
       <para style="P4">
         <font color="white"> </font>
       </para>
-      <blockTable colWidths="20.0,53.0,53.0,193.0,181.0,94.0,84.0,158.0" style="Table4">
+      <blockTable colWidths="20.0,53.0,53.0,193.0,182.0,48.0,46.0,83.0,86.0,36.0,37.0" style="Table4">
         <tr>
           <td>
             <para style="P5">序号</para>
@@ -417,7 +417,22 @@
             </para>
           </td>
           <td>
+            <para style="P5">
+              <font color="white"> </font>
+            </para>
+          </td>
+          <td>
             <para style="P5">扣除(Deduction)</para>
+          </td>
+          <td>
+            <para style="P5">
+              <font color="white"> </font>
+            </para>
+          </td>
+          <td>
+            <para style="P5">
+              <font color="white"> </font>
+            </para>
           </td>
           <td>
             <para style="P5">
@@ -426,7 +441,7 @@
           </td>
         </tr>
       </blockTable>
-      <blockTable colWidths="20.0,53.0,53.0,36.0,41.0,41.0,37.0,38.0,68.0,71.0,42.0,48.0,46.0,44.0,40.0,43.0,43.0,36.0,36.0" style="Table2">
+      <blockTable colWidths="20.0,53.0,53.0,36.0,41.0,38.0,38.0,40.0,68.0,71.0,42.0,48.0,46.0,44.0,40.0,43.0,43.0,36.0,36.0" style="Table2">
         <tr>
           <td>
             <para style="P5">No.</para>
@@ -487,7 +502,7 @@
           </td>
         </tr>
       </blockTable>
-      <blockTable colWidths="20.0,106.0,36.0,41.0,41.0,37.0,38.0,68.0,71.0,42.0,48.0,46.0,44.0,40.0,43.0,43.0,36.0,36.0" style="Table1">    
+      <blockTable colWidths="20.0,106.0,36.0,41.0,41.0,36.0,38.0,68.0,71.0,42.0,48.0,46.0,44.0,40.0,43.0,43.0,36.0,37.0" style="Table1">
         <tr>
           <td>
             <para style="P5">[[ln.idx]]</para>

@@ -28,6 +28,8 @@
                     <field name="date_to"/>
                     <field name="state"/>
                     <field name="attend_month_id"/>
+                    <field name="account_period_id"/>
+                    <field name="company_id"/>
                 </tree>
             </field>
         </record>
@@ -53,11 +55,12 @@
                 		<field name="name" readonly="1"/>
 	                    <label for= 'date_from' string="Period" class="oe_inline"/>
                 		<div>
-	                        <field name="date_from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="date_from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_date(date_from, date_to)"/>
 	                         - 
-	                        <field name="date_to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/>
+	                        <field name="date_to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_date(date_from, date_to)"/>
                 		</div>
                 		<field name="attend_month_id" readonly="1"/>
+						<field name="account_period_id"/>
 						<field name="company_id" groups="base.group_multi_company"/>       
                 	</group>
                 	<notebook>
@@ -156,12 +159,10 @@
             <field name="model">hr.emppay</field>
             <field name="arch" type="xml">
                 <form string="Payslip" version="7.0">
-                <header>                 
-                 	<div invisible="context.get('from_sheet')"> 
-                    	<button name="action_verify" type="object" string="Verify" states="draft" class="oe_highlight" groups="account.group_account_invoice"/>
-                    	<button name="action_pay" type="object" string="Pay" states="verified" class="oe_highlight" groups="account.group_account_invoice"/>
-                    	<button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager"/>
-                    </div>
+                <header>             
+                   	<button name="action_verify" type="object" string="Verify" states="draft" class="oe_highlight" groups="account.group_account_invoice" invisible="context.get('from_sheet')"/>
+                   	<button name="action_pay" type="object" string="Pay" states="verified" class="oe_highlight" groups="account.group_account_invoice" invisible="context.get('from_sheet')"/>
+                   	<button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager" invisible="context.get('from_sheet')"/>
                     <button name="print_slip" type="object" string="Print Slip"/>
                     <field name="state" widget="statusbar"/>
                 </header>
@@ -184,7 +185,8 @@
 	                    </div>	
                         <field name="name"/>
                         <field name="company_id" groups="base.group_multi_company"/>
-                        <field name="emppay_sheet_id" readonly="1"/>                    	
+                        <field name="emppay_sheet_id" readonly="1"/>     
+                        <field name="emppay_year_id"/>
                     </group>
                     <notebook>
                     	<page name="base" string="Payslip">

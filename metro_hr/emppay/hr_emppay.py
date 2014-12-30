@@ -25,6 +25,7 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from dateutil import relativedelta
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 
 from openerp import netsvc
 from openerp.osv import fields, osv
@@ -369,19 +370,19 @@ class hr_rpt_attend_month(osv.osv):
         if isinstance(attend_id, list):
             attend_id = attend_id[0]
         attend = self.browse(cr, uid, attend_id, context=context)
+        date_from = fields.datetime.context_timestamp(cr, uid, datetime.strptime(attend.date_from,DEFAULT_SERVER_DATETIME_FORMAT), context=context)
+        date_to = fields.datetime.context_timestamp(cr, uid, datetime.strptime(attend.date_to,DEFAULT_SERVER_DATETIME_FORMAT), context=context)
         #payroll data
         emppay_sheet = {'attend_month_id':attend.id,
-                            'date_from':attend.date_from, 
-                            'date_to':attend.date_to}
+                            'date_from':date_from, 
+                            'date_to':date_to}
         #payslips
-        date_from = attend.date_from
-        date_to = attend.date_to
         slips = []
         contract_obj = self.pool.get('hr.contract')
         #loop to add slip lines
         for attend_line in attend.rpt_lines:
             emp_id = attend_line.emp_id.id
-            contract_ids = contract_obj.get_emp_contract(cr, uid, emp_id, date_from, date_to, context=context)
+            contract_ids = contract_obj.get_emp_contract(cr, uid, emp_id, attend.date_from, attend.date_to, context=context)
             if not contract_ids:
                 continue
             contract_id = contract_ids[0]
@@ -391,8 +392,8 @@ class hr_rpt_attend_month(osv.osv):
             slip = {'attend_id':attend_line.id,
                     'employee_id': emp_id,
                     'contract_id': contract.id,
-                    'date_from': attend.date_from,
-                    'date_to': attend.date_to,
+                    'date_from': date_from,
+                    'date_to': date_to,
 #                    18:22 wage/wage2 are changed to float already, do not use related fields now
 #                    17:30 wage/wage2 are related fields with store=True, others are changed to store=False
 #                    for the related fields with store=True, we need assign the value when creating by code,
@@ -514,15 +515,35 @@ class hr_emppay_sheet(osv.osv):
         'attend_month_id': fields.many2one('hr.rpt.attend.month', 'Attendance Report'),
         'note': fields.text('Description', readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'account_period_id': fields.many2one('account.period', string='Account Period', states={'draft': [('readonly', False)]}, required=True),
     }
     _defaults = {
-        'state': 'draft',
-        'date_from': lambda *a: time.strftime('%Y-%m-01'),
-        'date_to': lambda *a: str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10],
-        'company_id': lambda self, cr, uid, context: \
-                self.pool.get('res.users').browse(cr, uid, uid,
-                    context=context).company_id.id,
+        'state': 'draft'
     }
+    def _get_period_id(self, cr, uid, dt_val, context=None):
+        account_period_id = None
+        period_ids = self.pool.get('account.period').find(cr,uid,dt_val,context=context)
+        if period_ids:
+            account_period_id = period_ids[0]            
+        return account_period_id
+    
+    def default_get(self, cr, uid, fields_list, context=None):
+        defaults = super(hr_emppay_sheet, self).default_get(cr, uid, fields_list, context=context)
+        if not defaults:
+            defaults = {}
+        date_from = time.strftime('%Y-%m-01'),
+        date_to = str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10],
+        company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
+        account_period_id = self._get_period_id(cr, uid, date_to, context=context)            
+        defaults.update({'date_from': date_from, 'date_to': date_to,'company_id': company_id,'account_period_id':account_period_id})
+        return defaults
+    
+    def onchange_date(self, cr, uid, ids, date_from, date_to, context=None):
+        account_period_id = self._get_period_id(cr, uid, date_to, context=context)            
+        res = {'value':{}}         
+        if account_period_id:
+            res['value'] = {'account_period_id': account_period_id}
+        return res
     
     def create(self, cr, uid, values, context=None):
         if not 'name' in values or values['name'] == '':
@@ -532,7 +553,11 @@ class hr_emppay_sheet(osv.osv):
                 if attendance_name:
                     name += '-' + attendance_name
             values['name'] = name
-        new_id = super(hr_emppay_sheet,self).create(cr, uid, values, context=context)
+        if not 'account_period_id' in values:
+            account_period_id = self._get_period_id(cr, uid, values['date_to'], context=context)            
+            if account_period_id:
+                values['account_period_id'] = account_period_id
+        new_id = super(hr_emppay_sheet,self).create(cr, uid, values, context=context)                
         return new_id
     
     def unlink(self, cr, uid, ids, context=None):
@@ -767,12 +792,22 @@ class hr_emppay(osv.osv):
                                })              
         return res
     
+    def _emp_year_total(self, cr, uid, ids, fields, args, context=None):
+        res = dict.fromkeys(ids, None)
+        emppay_total_obj = self.pool.get('hr.emppay.rpt.emp.year')
+        for emppay in self.browse(cr, uid, ids, context=context):
+            total_ids = emppay_total_obj.search(cr, uid, [('employee_id','=',emppay.employee_id.id), ('fiscalyear_id','=',emppay.emppay_sheet_id.account_period_id.fiscalyear_id.id)])
+            if total_ids:
+                res[emppay.id] = total_ids[0]
+        return res
+    
     _columns = {
         'name': fields.char('Name', size=64, required=False, readonly=True, states={'draft': [('readonly', False)]}),   
         'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'contract_id': fields.many2one('hr.contract', 'Contract', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_from': fields.date('Date From', readonly=True, states={'draft': [('readonly', False)]}, required=True),
         'date_to': fields.date('Date To', readonly=True, states={'draft': [('readonly', False)]}, required=True),        
+        'emppay_year_id': fields.function(_emp_year_total, string='Employee Year Total', type='many2one', relation='hr.emppay.rpt.emp.year', readonly=True),
         
         #Below from employee contract, 数据为只读
         #contract.wage
@@ -904,7 +939,7 @@ class hr_emppay(osv.osv):
         return True
 
     _constraints = [(_check_dates, "Payslip 'Date From' must be before 'Date To'.", ['date_from', 'date_to'])]
-
+    
     def create(self, cr, uid, values, context=None):
         if not 'name' in values or values['name'] == '':
             name = self.pool.get('ir.sequence').get(cr, uid, 'emppay.payslip')
@@ -969,7 +1004,6 @@ class hr_emppay_slip_print(rml_parser_ext):
         ret = ''
         for item in slip.ded_ids:
             ret += '%s: %s; '%(item.name,item.amount)
-#        ret += '%s: %s'%(u'社保(SI)',slip.si_total_personal)
         return ret
     
 report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
