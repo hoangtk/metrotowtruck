@@ -54,7 +54,7 @@ class hr_holidays(osv.osv):
     }
     def unlink(self, cr, uid, ids, context=None):
         for order in self.read(cr, uid, ids, ['state','name'], context=context):
-            if order['state'] not in ('draft','refused'):
+            if order['state'] not in ('draft','refuse'):
                 raise osv.except_osv(_('Error!'),_('%s can not be delete, only "To Submit" or "Refused" request can be delete!')%(order['name'],))
         return super(hr_holidays, self).unlink(cr, uid, ids, context)
     def onchange_employee(self, cr, uid, ids, employee_id):
