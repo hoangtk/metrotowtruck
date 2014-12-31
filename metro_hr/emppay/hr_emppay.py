@@ -590,9 +590,15 @@ class hr_emppay_sheet(osv.osv):
             raise osv.except_osv(_('Invalid Action!'), _('Please set the Attendance Report first.'))
         #add new payslip data and remove the old payslips
         return self.pool.get('hr.rpt.attend.month').add_payroll(cr, uid, order.attend_month_id.id, ids[0], remove_old_slips = True, context=context)        
-
-    '''
-    def print_sheet(self, cr, uid, ids, context=None):
+    
+    def print_sheet_slip(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        order = self.browse(cr, uid, ids[0], context=context)
+        emppay_ids = [emppay.id for emppay in order.emppay_ids]
+        return self.pool.get('hr.emppay').print_slip(cr, uid, emppay_ids, context=context)
+    
+    def print_sheet_slip_sign(self, cr, uid, ids, context=None):
         if context is None: 
             context = {}
         form_data = self.read(cr, uid, ids[0], context=context)
@@ -601,15 +607,7 @@ class hr_emppay_sheet(osv.osv):
                  'ids': [ids[0]],
                  'form': form_data,
         }
-        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.sheet.slip', 'datas': datas, 'nodestroy': True} 
-    '''
-    
-    def print_sheet_slip(self, cr, uid, ids, context=None):
-        if context is None: 
-            context = {}
-        order = self.browse(cr, uid, ids[0], context=context)
-        emppay_ids = [emppay.id for emppay in order.emppay_ids]
-        return self.pool.get('hr.emppay').print_slip(cr, uid, emppay_ids, context=context)
+        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip.sign', 'datas': datas, 'nodestroy': True} 
     
 hr_emppay_sheet()
 
@@ -1007,7 +1005,7 @@ class hr_emppay_slip_print(rml_parser_ext):
         return ret
     
 report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
-
+report_sxw.report_sxw('report.hr.emppay.slip.sign', 'hr.emppay.sheet', 'addons/metro_hr/emppay/hr_emppay_slip_sign.rml', parser=hr_emppay_slip_print, header='internal landscape')
 
 class hr_employee(osv.osv):
     '''

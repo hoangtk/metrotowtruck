@@ -47,6 +47,7 @@
                     <button name="action_draft" type="object" string="Set to Draft" states='verified,paid' groups="account.group_account_manager"/>
                     
                     <button name="print_sheet_slip" type="object" string="Print Slips"/>
+                    <button name="print_sheet_slip_sign" type="object" string="Print Slips for Signature"/>
                     
                     <field name="state" widget="statusbar"/>
                 </header>
