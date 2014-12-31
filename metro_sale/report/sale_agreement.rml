@@ -338,7 +338,7 @@
         <tr>
           <td>
             <para style="terp_default_9">[[ format(line.name) ]]</para>
-            <para style="terp_default_9">[[', '.join(map(lambda x: x.serial, line.serial_ids))]]</para>
+            <para style="terp_default_9">Serial(s):[[', '.join(map(lambda x: x.serial, line.serial_ids))]]</para>
           </td>
           <td>
             <para style="terp_default_Centre_9">[[ ', '.join(map(lambda x: x.name, line.tax_id)) ]]</para>

@@ -127,7 +127,7 @@ class hr_contract_emppay_batchset(osv.osv_memory):
             date_now = time.strftime('%Y-%m-%d')
             contract_ids = []
             for emp_id in emp_ids:
-                emp_contract_ids = contract_obj.get_contract(cr, uid, emp_id, date_now, date_now, context=context)
+                emp_contract_ids = contract_obj.get_emp_contract(cr, uid, emp_id, date_now, date_now, context=context)
                 if emp_contract_ids:
                     contract_ids += [emp_contract_ids[0]]
             vals['contract_ids'] = contract_ids

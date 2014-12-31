@@ -98,9 +98,10 @@
                    	<!-- <button name="save_pdf" string="Print" type="object"/> -->
                    	
                 	<button name="new_attend_month" string="Generate Monthly Report" type="object" states="confirmed"/>
-                	<field name="id" invisible="1"/>
+                	<button name="view_attend_month" string="Monthly Report" type="object" states="confirmed"/>
+                	<!-- <field name="id" invisible="1"/>
                 	<button name="%(hr_rpt_attend_month_action)d" string="Monthly Report" type="action" states="confirmed"
-                		context="{'search_default_attend_day_id': id}"/>
+                		context="{'search_default_attend_day_id': id}"/> -->
                 		
                    	<field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
                 </header> 

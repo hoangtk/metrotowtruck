@@ -122,6 +122,19 @@ class hr_employee(osv.osv):
 		values.update({'emp_code':emp_code})
 		return values
 
+	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+		for arg in args:
+			#add the category improving
+			if arg[0] == 'department_id' and arg[1] == '=' and isinstance(arg[2], (int,long)):
+				idx = args.index(arg)
+				args.remove(arg)
+				args.insert(idx, [arg[0],'child_of',arg[2]])
+							
+		#get the search result		
+		ids = super(hr_employee,self).search(cr, user, args, offset, limit, order, context, count)
+		
+		return ids
+	
 	def get_report_name(self, cr, uid, id, rpt_name, context=None):
 		if rpt_name == 'hr.welcome.checklist':
 			return "Employee Welcome Cheklist"

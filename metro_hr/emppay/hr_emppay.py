@@ -25,6 +25,7 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from dateutil import relativedelta
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 
 from openerp import netsvc
 from openerp.osv import fields, osv
@@ -53,9 +54,9 @@ class hr_emppay_alwded(osv.osv):
     
     _columns = {
         'sequence': fields.integer('#', required=True),
-        'code':fields.char('Reference', size=64, required=True, select=True),
-        'name':fields.char('Name', size=256, required=True, translate=True),
-        'type':fields.selection([('alw','Allowance'),('ded','Deduction')], string='Type', required=True ),
+        'code':fields.char('Code', size=64, required=True, select=True),
+        'name':fields.char('Name', size=256, required=True),
+        'type':fields.selection([('alw','Allowance'),('ded','Deduction'),('alw_inwage','Allowance In Wage')], string='Type', required=True ),
         'type_calc':fields.selection([('fixed','Fixed'),('by_attend','By Attendance')], string='Calculation Type', required=True ),
         'amount':fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         'company_id':fields.many2one('res.company', 'Company', required=True),
@@ -124,7 +125,7 @@ class hr_contract_alwded(osv.osv):
         'contract_id': fields.many2one('hr.contract',  'Contract', required=True, select=True),
         'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True),
         'sequence': fields.integer('#', required=True),
-        'type':fields.selection([('alw','Allowance'),('ded','Deduction')], string='Type', required=True ),
+        'type':fields.selection([('alw','Allowance'),('ded','Deduction'),('alw_inwage','Allowance In Wage')], string='Type', required=True ),
         'type_calc':fields.selection([('fixed','Fixed'),('by_attend','By Attendance')], string='Calculation Type', required=True ),
         'amount':fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         #fields related to hr_rpt_attend_month_line
@@ -157,8 +158,8 @@ class hr_emppay_si(osv.osv):
     
     _columns = {
         'sequence': fields.integer('#', required=True, select=True),
-        'code':fields.char('Reference', size=64, required=True),
-        'name':fields.char('Name', size=256, required=True, translate=True),
+        'code':fields.char('Code', size=64, required=True),
+        'name':fields.char('Name', size=256, required=True),
         'amount_base':fields.float('Base Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         'rate_company':fields.float('Company Rate', digits_compute=dp.get_precision('Payroll'), required=True),
         'rate_personal':fields.float('Personal Rate', digits_compute=dp.get_precision('Payroll'), required=True),
@@ -246,7 +247,7 @@ class hr_contract_si(osv.osv):
 class hr_contract(osv.osv):
     _inherit = 'hr.contract'
     
-    def _amount_emppay(self, cr, uid, ids, field_names, args, context=None):
+    def _amount_si(self, cr, uid, ids, field_names, args, context=None):
         res = dict((id,dict((field_name,None) for field_name in field_names)) for id in ids)
         for contract in self.browse(cr, uid, ids, context=context):
             #for ths SI data
@@ -260,26 +261,7 @@ class hr_contract(osv.osv):
             if 'si_total_personal' in field_names:
                 res[contract.id]['si_total_personal'] = si_total_personal
         return res
-    
-    def alwded_dict(self, cr, uid, contract_id, context=None):
-        lines_alw = []
-        lines_deb = []
-        if not contract_id:
-            return lines_alw, lines_deb
-        contract = self.browse(cr, uid, contract_id, context=context)
-        for item in contract.alwded_ids:
-            line = {'sequence':item.sequence,
-                    'code':item.alwded_id.code,
-                    'name':item.alwded_id.name,
-                    'type':item.type,
-                    'type_calc':item.type_calc,
-                    'amount':item.amount}
-            if item.type == 'alw':
-                lines_alw.append(line)
-            else:
-                lines_deb.append(line)
-        return lines_alw, lines_deb 
-        
+            
     def si_dict(self, cr, uid, contract_id, context=None):
         lines = []
         if not contract_id:
@@ -302,8 +284,8 @@ class hr_contract(osv.osv):
     _columns = {
         'alwded_ids': fields.one2many('hr.contract.alwded', 'contract_id', 'Allowance&Deduction'),
         'si_ids': fields.one2many('hr.contract.si', 'contract_id', 'Social Insurance'),
-        'si_total_company':fields.function(_amount_emppay, string='Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_emppay"),
-        'si_total_personal':fields.function(_amount_emppay, string='Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_emppay"),
+        'si_total_company':fields.function(_amount_si, string='Company Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_si"),
+        'si_total_personal':fields.function(_amount_si, string='Personal Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_si"),
         
         'wage2':fields.float('Wage2', digits_compute=dp.get_precision('Payroll')),
         'pit_base':fields.float('PIT Start Point', digits_compute=dp.get_precision('Payroll')),
@@ -315,7 +297,7 @@ class hr_contract(osv.osv):
         defaults.update({'wage2':user_comp.emppay_wage2, 'pit_base':user_comp.emppay_pit_base})
         return defaults
         
-    def get_contract(self, cr, uid, employee_id, date_from, date_to, context=None):
+    def get_emp_contract(self, cr, uid, employee_id, date_from, date_to, context=None):
         """
         @param employee: browse record of employee
         @param date_from: date field
@@ -388,30 +370,32 @@ class hr_rpt_attend_month(osv.osv):
         if isinstance(attend_id, list):
             attend_id = attend_id[0]
         attend = self.browse(cr, uid, attend_id, context=context)
+        date_from = fields.datetime.context_timestamp(cr, uid, datetime.strptime(attend.date_from,DEFAULT_SERVER_DATETIME_FORMAT), context=context)
+        date_to = fields.datetime.context_timestamp(cr, uid, datetime.strptime(attend.date_to,DEFAULT_SERVER_DATETIME_FORMAT), context=context)
         #payroll data
         emppay_sheet = {'attend_month_id':attend.id,
-                            'date_from':attend.date_from, 
-                            'date_to':attend.date_to}
+                            'date_from':date_from, 
+                            'date_to':date_to}
         #payslips
-        date_from = attend.date_from
-        date_to = attend.date_to
         slips = []
         contract_obj = self.pool.get('hr.contract')
         #loop to add slip lines
         for attend_line in attend.rpt_lines:
             emp_id = attend_line.emp_id.id
-            contract_ids = contract_obj.get_contract(cr, uid, emp_id, date_from, date_to, context=context)
+            contract_ids = contract_obj.get_emp_contract(cr, uid, emp_id, attend.date_from, attend.date_to, context=context)
             if not contract_ids:
                 continue
             contract_id = contract_ids[0]
             contract = contract_obj.browse(cr, uid, contract_id, context=context)
-            slip_alws, slip_deds = contract_obj.alwded_dict(cr, uid, contract_id, context=context)
+            slip_alws, slip_deds, slip_alws_inwage = self.emp_attend_alwded(cr, uid, attend_line, contract=contract, calc_method='base_attend', context=context)
             slip_sis = contract_obj.si_dict(cr, uid, contract_id, context=context)
             slip = {'attend_id':attend_line.id,
                     'employee_id': emp_id,
                     'contract_id': contract.id,
+                    'date_from': date_from,
+                    'date_to': date_to,
 #                    18:22 wage/wage2 are changed to float already, do not use related fields now
-#                    17:30 wage/wage2 are realted fields with store=True
+#                    17:30 wage/wage2 are related fields with store=True, others are changed to store=False
 #                    for the related fields with store=True, we need assign the value when creating by code,
 #                    otherwise if the next code in same DB transaction can not get the data by browse(...),
 #                    On this sample is the hr_emppay._wage_all() method can not get the wage/wage2 data
@@ -419,11 +403,12 @@ class hr_rpt_attend_month(osv.osv):
                     'wage2':contract.wage2,
                     #the allowance, deduction and sodical insurance
                     'alw_ids': [(0,0,item) for item in slip_alws],
+                    'alw_inwage_ids': [(0,0,item) for item in slip_alws_inwage],
                     'ded_ids': [(0,0,item) for item in slip_deds],
                     'si_ids': [(0,0,item) for item in slip_sis],
                     
-                    #Below fields are realted fields without store=True, so no need to assign, no the issue with wage/wage2 above
-                    #Below from attend data, user can change, 数据为只读
+                    #Below fields are related fields without store=False, so no need to assign, no the issue with wage/wage2 above
+                    #Below from attend data, user can not change, 数据为只读
 #                    'days_work': attend_line.days_work,
 #                    'days_attend': attend_line.days_attend,
 #                    'hours_ot': attend_line.hours_ot,
@@ -441,11 +426,84 @@ class hr_rpt_attend_month(osv.osv):
         emppay_sheet['emppay_ids'] = slips
         return emppay_sheet
     
+    def emp_attend_alwded(self, cr, uid, attend_line, contract=None, calc_method='calculate', context=None):
+        '''
+        Get employee allowance/deduction list by attendance and contract
+        @param attend_line: attendance data of hr_rpt_attend_month_line, emp_attend_alwded() will use it to calculate the amount of 'by_attendance' alw/ded
+        @param contract: employee contract instance of  hr.contract
+        @param calc_method: the data getting direction, defaulr is 'to_attend'
+            calculate: calcuate the amount based on alw/ded's 'type_calc' and attended days
+            base_attend: update the amount based on attend_line's alw/ded fields and alw/ded item's  attend_field
+        @return: one list containing three list: lines_alw, lines_ded, lines_alw_inwage
+        '''
+        lines_alw = []
+        lines_deb = []
+        lines_alw_inwage = []
+        emp_id = attend_line.emp_id.id
+        #get employee contract
+        if not contract:
+            contract_obj = self.pool.get('hr.contract')        
+            contract_ids = contract_obj.get_emp_contract(cr, uid, emp_id, attend_line.rpt_id.date_from, attend_line.rpt_id.date_to, context=context)
+            if not contract_ids:
+                return lines_alw, lines_deb, lines_alw_inwage
+            contract_id = contract_ids[0]
+            contract = contract_obj.browse(cr, uid, contract_id, context=context)
+        #get allowance and deductions from contract
+        for item in contract.alwded_ids:
+            line = {'sequence':item.sequence,
+                    'code':item.alwded_id.code,
+                    'name':item.alwded_id.name,
+                    'type':item.type,
+                    'type_calc':item.type_calc,
+                    'amount':item.amount,
+                    'attend_field':item.attend_field}            
+            if not item.attend_field  \
+                or calc_method == 'calculate' \
+                or (calc_method == 'base_attend' and not hasattr(attend_line, item.attend_field)):
+                if item.type_calc == 'by_attend':                
+                    #do the amount calculation by attendance
+                    if attend_line.days_work != 0:
+                        if  item.type == 'alw_inwage':
+                            line['amount'] = item['amount']*attend_line.days_attend2_real/attend_line.days_work2
+                        else:
+                            line['amount'] = item['amount']*attend_line.days_attend/attend_line.days_work
+                    else:
+                        line['amount'] = 0
+                else:
+                    line['amount'] = item.amount
+            else:
+                #calc_method is  'base_attend', and attendance has the field from 'attend_field' value
+                line['amount'] = getattr(attend_line, item.attend_field)
+                
+            if item.type == 'alw':
+                lines_alw.append(line)
+            elif item.type == 'ded':
+                lines_deb.append(line)
+            elif item.type == 'alw_inwage':
+                lines_alw_inwage.append(line)
+        return lines_alw, lines_deb, lines_alw_inwage
+    
+    def emp_attend_alwded_by_field(self, cr, uid, attend_line, attend_fields, context=None):
+        '''
+        Get employee allowance/deduction value by attendance
+        @param attend_line: attendance data of hr_rpt_attend_month_line, emp_attend_alwded() will use it to calculate the amount of 'by_attendance' alw/ded
+        @param attend_fields: a field name list of table  hr_rpt_attend_month_line
+        @return: one dict field values list: {filed_name1:value1, filed_name2:value2...}
+        '''
+        field_values = dict.fromkeys(attend_fields, 0)
+        lines_alw, lines_deb, lines_alw_inwage = self.emp_attend_alwded(cr, uid, attend_line, context=context)
+        lines_alwded = lines_alw + lines_deb + lines_alw_inwage
+        for alwded in lines_alwded:
+            field_name = alwded['attend_field']
+            if field_name and field_name in attend_fields:
+                field_values[field_name] = alwded['amount']
+        return field_values
+                    
 class hr_emppay_sheet(osv.osv):
     _name = 'hr.emppay.sheet'
     _description = 'Payroll'
     _columns = {
-        'name': fields.char('Reference', size=64, required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'name': fields.char('Name', size=64, required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'state': fields.selection([
             ('draft', 'Draft'),
             ('verified', 'Verified'),
@@ -457,15 +515,35 @@ class hr_emppay_sheet(osv.osv):
         'attend_month_id': fields.many2one('hr.rpt.attend.month', 'Attendance Report'),
         'note': fields.text('Description', readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'account_period_id': fields.many2one('account.period', string='Account Period', states={'draft': [('readonly', False)]}, required=True),
     }
     _defaults = {
-        'state': 'draft',
-        'date_from': lambda *a: time.strftime('%Y-%m-01'),
-        'date_to': lambda *a: str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10],
-        'company_id': lambda self, cr, uid, context: \
-                self.pool.get('res.users').browse(cr, uid, uid,
-                    context=context).company_id.id,
+        'state': 'draft'
     }
+    def _get_period_id(self, cr, uid, dt_val, context=None):
+        account_period_id = None
+        period_ids = self.pool.get('account.period').find(cr,uid,dt_val,context=context)
+        if period_ids:
+            account_period_id = period_ids[0]            
+        return account_period_id
+    
+    def default_get(self, cr, uid, fields_list, context=None):
+        defaults = super(hr_emppay_sheet, self).default_get(cr, uid, fields_list, context=context)
+        if not defaults:
+            defaults = {}
+        date_from = time.strftime('%Y-%m-01'),
+        date_to = str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10],
+        company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
+        account_period_id = self._get_period_id(cr, uid, date_to, context=context)            
+        defaults.update({'date_from': date_from, 'date_to': date_to,'company_id': company_id,'account_period_id':account_period_id})
+        return defaults
+    
+    def onchange_date(self, cr, uid, ids, date_from, date_to, context=None):
+        account_period_id = self._get_period_id(cr, uid, date_to, context=context)            
+        res = {'value':{}}         
+        if account_period_id:
+            res['value'] = {'account_period_id': account_period_id}
+        return res
     
     def create(self, cr, uid, values, context=None):
         if not 'name' in values or values['name'] == '':
@@ -475,7 +553,11 @@ class hr_emppay_sheet(osv.osv):
                 if attendance_name:
                     name += '-' + attendance_name
             values['name'] = name
-        new_id = super(hr_emppay_sheet,self).create(cr, uid, values, context=context)
+        if not 'account_period_id' in values:
+            account_period_id = self._get_period_id(cr, uid, values['date_to'], context=context)            
+            if account_period_id:
+                values['account_period_id'] = account_period_id
+        new_id = super(hr_emppay_sheet,self).create(cr, uid, values, context=context)                
         return new_id
     
     def unlink(self, cr, uid, ids, context=None):
@@ -506,28 +588,8 @@ class hr_emppay_sheet(osv.osv):
         order = self.browse(cr,uid,ids[0],context=context)
         if not order.attend_month_id:
             raise osv.except_osv(_('Invalid Action!'), _('Please set the Attendance Report first.'))
-        payroll = self.browse(cr, uid, ids[0], context=context)
-        unlink_slip_ids = [slip.id for slip in payroll.emppay_ids]
-        self.pool.get('hr.emppay').unlink(cr, uid, unlink_slip_ids, context=context)
-        return self.pool.get('hr.rpt.attend.month').add_payroll(cr, uid, order.attend_month_id.id, ids[0], remove_old_slips = False, context=context)        
-    
-#    def add_from_att_record(self, cr, uid, ids, context=None):
-#        return self.write(cr, uid, ids, {'state': 'close'}, context=context)        
-    def _pdf_data(self, cr, uid, ids, form_data, context=None):
-        return {'xmlrpt_name': 'hr.rpt.attend.month'}
-    
-    '''
-    def print_slip(self, cr, uid, ids, context=None):
-        if context is None: 
-            context = {}
-        form_data = self.read(cr, uid, ids[0], context=context)
-        datas = {
-                 'model': self._name,
-                 'ids': [ids[0]],
-                 'form': form_data,
-        }
-        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.sheet.slip', 'datas': datas, 'nodestroy': True} 
-    '''
+        #add new payslip data and remove the old payslips
+        return self.pool.get('hr.rpt.attend.month').add_payroll(cr, uid, order.attend_month_id.id, ids[0], remove_old_slips = True, context=context)        
     
     def print_sheet_slip(self, cr, uid, ids, context=None):
         if context is None: 
@@ -536,7 +598,19 @@ class hr_emppay_sheet(osv.osv):
         emppay_ids = [emppay.id for emppay in order.emppay_ids]
         return self.pool.get('hr.emppay').print_slip(cr, uid, emppay_ids, context=context)
     
+    def print_sheet_slip_sign(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        form_data = self.read(cr, uid, ids[0], context=context)
+        datas = {
+                 'model': self._name,
+                 'ids': [ids[0]],
+                 'form': form_data,
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip.sign', 'datas': datas, 'nodestroy': True} 
+    
 hr_emppay_sheet()
+
 '''
 from openerp.report import report_sxw
 from openerp.addons.metro.rml import rml_parser_ext
@@ -575,9 +649,9 @@ class hr_emppay_ln_alwded(osv.osv):
     _columns = {
         'emppay_id': fields.many2one('hr.emppay', 'Payslip', required=True, select=True, ondelete='cascade'),
         'sequence': fields.integer('#', required=True),
-        'code':fields.char('Reference', size=64, required=True, select=True),
-        'name':fields.char('Name', size=256, required=True, translate=True),
-        'type':fields.selection([('alw','Allowance'),('ded','Deduction')], string='Type', required=True ),
+        'code':fields.char('Code', size=64, required=True, select=True),
+        'name':fields.char('Name', size=256, required=True),
+        'type':fields.selection([('alw','Allowance'),('ded','Deduction'),('alw_inwage','Allowance In Wage')], string='Type', required=True ),
         'type_calc':fields.selection([('fixed','Fixed'),('by_attend','By Attendance')], string='Calculation Type', required=True ),
         'amount':fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
     }
@@ -607,8 +681,8 @@ class hr_emppay_ln_si(osv.osv):
     _columns = {
         'emppay_id': fields.many2one('hr.emppay', 'Payslip', required=True, select=True, ondelete='cascade'),
         'sequence': fields.integer('#', required=True, select=True),
-        'code':fields.char('Reference', size=64, required=True),
-        'name':fields.char('Name', size=256, required=True, translate=True),
+        'code':fields.char('Code', size=64, required=True),
+        'name':fields.char('Name', size=256, required=True),
         'amount_base':fields.float('Base Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         'rate_company':fields.float('Company Rate', digits_compute=dp.get_precision('Payroll'), required=True),
         'rate_personal':fields.float('Personal Rate', digits_compute=dp.get_precision('Payroll'), required=True),
@@ -679,8 +753,12 @@ class hr_emppay(osv.osv):
             wage_ot_holiday2 = wage_hourly2 * slip.hours_ot_holiday2 * 3
             wage_ot_total2 = wage_ot2 + wage_ot_we2 + wage_ot_holiday2
 
-            wage_bonus2 = wage_attend + wage_ot - wage_attend2 - wage_ot2
-            wage_work2 = wage_attend2 + wage_ot2 + wage_bonus2
+            alw_inwage_total = 0.0
+            for alw_inwage in slip.alw_inwage_ids:
+                alw_inwage_total += alw_inwage.amount
+            
+            wage_bonus2 = wage_work - wage_attend2 - wage_ot2 - alw_inwage_total
+            wage_work2 = wage_work
             
             res[slip.id].update({'wage_attend':wage_attend,
                                'wage_ot':wage_ot,
@@ -707,16 +785,27 @@ class hr_emppay(osv.osv):
                                'wage_ot_holiday2':wage_ot_holiday2,
                                'wage_ot_total2':wage_ot_total2,
                                'wage_bonus2':wage_bonus2,  
+                               'alw_inwage_total':alw_inwage_total,  
                                'wage_work2':wage_work2,
                                })              
         return res
     
+    def _emp_year_total(self, cr, uid, ids, fields, args, context=None):
+        res = dict.fromkeys(ids, None)
+        emppay_total_obj = self.pool.get('hr.emppay.rpt.emp.year')
+        for emppay in self.browse(cr, uid, ids, context=context):
+            total_ids = emppay_total_obj.search(cr, uid, [('employee_id','=',emppay.employee_id.id), ('fiscalyear_id','=',emppay.emppay_sheet_id.account_period_id.fiscalyear_id.id)])
+            if total_ids:
+                res[emppay.id] = total_ids[0]
+        return res
+    
     _columns = {
-        'name': fields.char('Reference', size=64, required=False, readonly=True, states={'draft': [('readonly', False)]}),   
+        'name': fields.char('Name', size=64, required=False, readonly=True, states={'draft': [('readonly', False)]}),   
         'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'contract_id': fields.many2one('hr.contract', 'Contract', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_from': fields.date('Date From', readonly=True, states={'draft': [('readonly', False)]}, required=True),
         'date_to': fields.date('Date To', readonly=True, states={'draft': [('readonly', False)]}, required=True),        
+        'emppay_year_id': fields.function(_emp_year_total, string='Employee Year Total', type='many2one', relation='hr.emppay.rpt.emp.year', readonly=True),
         
         #Below from employee contract, 数据为只读
         #contract.wage
@@ -734,16 +823,22 @@ class hr_emppay(osv.osv):
         'hours_ot_holiday': fields.float('Hours OT(Law Holiday)', readonly=True), #0
         #Below from attend data, user can change, 数据为只读, 下面相关字段的显示使用组来限制
         'days_work2': fields.related('attend_id','days_work2',type='float',string='Work Days2',  readonly=True), #attend_line_id.days_work2
+        'days_attend2_real': fields.related('attend_id','days_attend2_real',type='float',string='Days Attended2 Real',  readonly=True),#attend_line_id.days_attend2
+        #days by 21.75
         'days_attend2': fields.related('attend_id','days_attend2',type='float',string='Days Attended2',  readonly=True),#attend_line_id.days_attend2
         'hours_ot2': fields.related('attend_id','hours_ot2_nonwe',type='float',string='Hours OT(Normal)2',  readonly=True),#attend_line_id.hours_ot2_nonwe
         'hours_ot_we2': fields.related('attend_id','hours_ot2_we',type='float',string='Hours OT(Week End)2',  readonly=True),#attend_line_id.hours_ot2_we
         'hours_ot_holiday2': fields.float('Hours OT(Law Holiday)', readonly=True), #0   
         
         #copy from contract_id.alwded_ids
-        'alw_ids': fields.one2many('hr.emppay.ln.alwded', 'emppay_id', 'Allowance', required=False, readonly=True, 
+        'alw_ids': fields.one2many('hr.emppay.ln.alwded', 'emppay_id', string='Allowance', required=False, readonly=True, 
                                    states={'draft': [('readonly', False)]}, domain=[('type','=','alw')]),
-        'ded_ids': fields.one2many('hr.emppay.ln.alwded', 'emppay_id', 'Deduction', required=False, readonly=True, 
+        'ded_ids': fields.one2many('hr.emppay.ln.alwded', 'emppay_id', string='Deduction', required=False, readonly=True, 
                                    states={'draft': [('readonly', False)]}, domain=[('type','=','ded')]),
+        #the allowance including in wage_work2
+        'alw_inwage_ids': fields.one2many('hr.emppay.ln.alwded', 'emppay_id', string='Allowance', required=False, readonly=True, 
+                                   states={'draft': [('readonly', False)]}, domain=[('type','=','alw_inwage')]),
+                
         #copy from contract_id.si_ids
         'si_ids': fields.one2many('hr.emppay.ln.si', 'emppay_id', 'Social Insurance', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         
@@ -774,7 +869,7 @@ class hr_emppay(osv.osv):
                                             digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
         'si_total_company':fields.function(_wage_all, string='SI(Company)', type='float',  store=True,
                                            digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
-        #wage_attend + wage_ot + alw_total - ded_total - si_total_personal
+        #wage_total - ded_total - si_total_personal
         'wage_pay':fields.function(_wage_all, string='Wage(Pay)', type='float',  store=True,
                                      digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
                                      help="Wage(total) - Deduction - SI(Personal)"),
@@ -784,11 +879,11 @@ class hr_emppay(osv.osv):
                                      help="Wage(total) - SI(Personal)"),
         'pit':fields.function(_wage_all, string='PIT', type='float',  store=True,
                               digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
-        #wage_total - PIT
+        #wage_pay - PIT
         'wage_net':fields.function(_wage_all, string='Wage(Net)', type='float',  store=True,
                                    digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
                                      help="Wage(Pay) - PIT"),  
-                       
+        #wages for 2
         'wage_attend2':fields.function(_wage_all, string='Wage(attend)2', type='float', store=True,
                                       digits_compute=dp.get_precision('Payroll'), multi="_wage_all"), 
 
@@ -797,15 +892,21 @@ class hr_emppay(osv.osv):
         'wage_ot_we2':fields.function(_wage_all, string='Wage(OT Weekend)2', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
         'wage_ot_holiday2':fields.function(_wage_all, string='Wage(OT Holiday)2', type='float',  store=True,
-                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),                
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),            
+        #wage_ot2 +  wage_ot_we2 + wage_ot_holiday2
         'wage_ot_total2':fields.function(_wage_all, string='Wage(OT Total)2', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
                                   help="Wage(OT)2 + Wage(OT Weekend)2 + Wage(OT Holiday)2"),
+        #total of the alw_ids_inwage        
+        'alw_inwage_total':fields.function(_wage_all, string='Allowage In Wage', type='float',  store=True,
+                                    digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        #the calculation result: wage_work2 - wage_attend2 - wage_ot_total2 - alw_inwage_total
         'wage_bonus2':fields.function(_wage_all, string='Wage(Bonus)2', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
+        #= wage_work
         'wage_work2':fields.function(_wage_all, string='Wage(Work)2', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
-                                  help="Wage(attend)2 + Wage(OT)2 + Wage(Bonus)2"),                                             
+                                  help="Wage(attend)2 + Wage(OT Total)2 + Wage(Bonus)2"),                                             
                 
         'state': fields.selection([
             ('draft', 'Draft'),
@@ -836,7 +937,7 @@ class hr_emppay(osv.osv):
         return True
 
     _constraints = [(_check_dates, "Payslip 'Date From' must be before 'Date To'.", ['date_from', 'date_to'])]
-
+    
     def create(self, cr, uid, values, context=None):
         if not 'name' in values or values['name'] == '':
             name = self.pool.get('ir.sequence').get(cr, uid, 'emppay.payslip')
@@ -883,9 +984,9 @@ hr_emppay()
 
 from openerp.report import report_sxw
 from openerp.addons.metro.rml import rml_parser_ext
-class emppay_slip_print(rml_parser_ext):
+class hr_emppay_slip_print(rml_parser_ext):
     def __init__(self, cr, uid, name, context):
-        super(emppay_slip_print, self).__init__(cr, uid, name, context=context)
+        super(hr_emppay_slip_print, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time,
             'list_alw':self.list_alw,
@@ -893,18 +994,18 @@ class emppay_slip_print(rml_parser_ext):
         })
     def list_alw(self,slip):
         ret = ''
-        for alw in slip.alw_ids:
+        alws = slip.alw_inwage_ids + slip.alw_ids
+        for alw in alws:
             ret += '%s: %s; '%(alw.name,alw.amount)
         return ret
     def list_ded(self,slip):
         ret = ''
         for item in slip.ded_ids:
             ret += '%s: %s; '%(item.name,item.amount)
-#        ret += '%s: %s'%(u'社保(SI)',slip.si_total_personal)
         return ret
     
-report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=emppay_slip_print, header='internal landscape')
-
+report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
+report_sxw.report_sxw('report.hr.emppay.slip.sign', 'hr.emppay.sheet', 'addons/metro_hr/emppay/hr_emppay_slip_sign.rml', parser=hr_emppay_slip_print, header='internal landscape')
 
 class hr_employee(osv.osv):
     '''

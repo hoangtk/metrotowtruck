@@ -189,7 +189,37 @@ class hr_rpt_attend_emp_day(osv.osv):
             'target': 'current',
             'res_id': rpt_month_id,
         }
-                
+
+    #view monthly report
+    def view_attend_month(self, cr, uid, ids, context=None):
+        rpt_id = ids[0]
+        #read daily report data, create new monthly report based on it.
+        rpt = self.read(cr, uid, rpt_id, ['attend_month_ids'], context=context)
+        rpt_month_ids = rpt['attend_month_ids']
+        if not rpt_month_ids:
+            raise osv.except_osv(_('Error!'),_('No monthly attendance report generated!'))
+        if len(rpt_month_ids) > 1:
+            #got to list page
+            act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_hr', 'hr_rpt_attend_month_action')
+            act_id = act_id and act_id[1] or False            
+            act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+            act_win['context'] = {'search_default_attend_day_id': rpt['id']}
+            return act_win
+        else:
+            #go to form page
+            form_view = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_hr', 'hr_rpt_attend_month_view')
+            form_view_id = form_view and form_view[1] or False
+            return {
+                'name': _('Attendances Monthly Report'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'view_id': [form_view_id],
+                'res_model': 'hr.rpt.attend.month',
+                'type': 'ir.actions.act_window',
+                'target': 'current',
+                'res_id': rpt_month_ids[0],
+            }
+                        
     def _attend_hours(self, hours_valid, period):
         
         if hours_valid+0.5 >= period.hours_work_normal:
@@ -579,7 +609,7 @@ class attend_empday_group(osv.osv_memory):
         'period_type_a_id': fields.many2one('hr.worktime.type', string='Worktime A'),
         'period_type_b_id': fields.many2one('hr.worktime.type', string='Worktime B'),
         'period_type_c_id': fields.many2one('hr.worktime.type', string='Worktime C'),
-        'days_attend':fields.float('Work Days'),
+        'days_attend':fields.float('Attended Days'),
         'hours_ot':fields.float('Overtime'), 
     }    
     

@@ -25,6 +25,7 @@ from dateutil import rrule
 from datetime import datetime, timedelta
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.misc import DEFAULT_SERVER_DATE_FORMAT
+from dateutil import relativedelta
 from openerp.addons.metro import utils
 
 from openerp.osv import fields, osv
@@ -82,7 +83,8 @@ class hr_rpt_attend_month(osv.osv):
             vals.update({'date_from':date_from_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
                          
         if 'date_to' in fields:
-            date_to = datetime.strptime(time.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
+            date_to = datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1)
+            date_to = datetime.strptime(date_to.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
             date_to_utc = utils.utc_timestamp(cr, uid, date_to, context)        
             vals.update({'date_to':date_to_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
@@ -139,7 +141,12 @@ class hr_rpt_attend_month(osv.osv):
         return True
     
     def get_report_name(self, cr, uid, id, rpt_name, context=None):
-        return "Attendance Monthly Report"
+        if rpt_name == 'hr.rpt.attend.month.notification':
+            return "Attendance Monthly Report Notification"
+        elif rpt_name == 'hr.rpt.attend.month.inspection':
+            return "Attendance Monthly Report Inspection"
+        else:
+            return "Attendance Monthly Report"
             
     def name_get(self, cr, uid, ids, context=None):
         if not ids:
@@ -205,7 +212,7 @@ class hr_rpt_attend_month(osv.osv):
         #create new lines
         for rpt_line in rpt_lns:
             rpt_line['rpt_id'] = rpt.id
-            rpt_line_obj.create(cr ,uid, rpt_line, context=context)  
+            rpt_line_obj.create(cr ,uid, rpt_line, context=context)
         return True
     
     def run_attend_month(self, cr, uid, ids, context=None):
@@ -275,6 +282,7 @@ class hr_rpt_attend_month(osv.osv):
             emp_dtl = emp_dtls.get(emp.id,[])
             days_attend = 0.0
             hours_ot = 0.0
+            days_attend2_real = 0.0
             days_attend2 = 0.0
             hours_ot2_nonwe = 0.0
             hours_ot2_we = 0.0
@@ -297,7 +305,9 @@ class hr_rpt_attend_month(osv.osv):
                         hours_ot2_we += dtl_line['hours_ot2']
                     else:
                         hours_ot2_nonwe += dtl_line['hours_ot2']
-            if days_work2 != 0:            
+            if days_work2 != 0:           
+                days_attend2_real =  days_attend2
+                #attend days in 21.75
                 days_attend2 = days_attend2/days_work2*month_attend_days_law
 
             seq += 1
@@ -309,6 +319,7 @@ class hr_rpt_attend_month(osv.osv):
                             'days_attend': days_attend,
                             'hours_ot':hours_ot,
                             'days_work2':days_work2,
+                            'days_attend2_real':days_attend2_real,
                             'days_attend2':days_attend2,
                             'hours_ot2_nonwe':hours_ot2_nonwe,
                             'hours_ot2_we':hours_ot2_we}
@@ -316,21 +327,26 @@ class hr_rpt_attend_month(osv.osv):
         '''========return data to rpt_base.run_report()========='''    
         return self.pool.get('hr.rpt.attend.month.line'), rpt_lns
     
-    def _pdf_data(self, cr, uid, ids, form_data, context=None):
-        return {'xmlrpt_name': 'hr.rpt.attend.month'}
-    
-    def save_pdf(self, cr, uid, ids, context=None):
+    def print_pdf(self, cr, uid, ids, report_name, context=None):
         if context is None: 
             context = {}
         form_data = self.read(cr, uid, ids[0], context=context)
-        rptxml_name = self._pdf_data(cr, uid, ids[0], form_data, context=context)['xmlrpt_name']
         datas = {
                  'model': self._name,
                  'ids': [ids[0]],
                  'form': form_data,
         }
-        return {'type': 'ir.actions.report.xml', 'report_name': rptxml_name, 'datas': datas, 'nodestroy': True}    
-        
+        return {'type': 'ir.actions.report.xml', 'report_name': report_name, 'datas': datas, 'nodestroy': True}    
+            
+    def pdf_general(self, cr, uid, ids, context=None):
+        return self.print_pdf(cr, uid, ids,  'hr.rpt.attend.month.general', context)
+    
+    def pdf_notification(self, cr, uid, ids, context=None):
+        return self.print_pdf(cr, uid, ids,  'hr.rpt.attend.month.notification', context)
+    
+    def pdf_inspection(self, cr, uid, ids, context=None):
+        return self.print_pdf(cr, uid, ids,  'hr.rpt.attend.month.inspection', context)
+                
 hr_rpt_attend_month()
 
 class hr_rpt_attend_month_line(osv.osv):
@@ -352,21 +368,41 @@ class hr_rpt_attend_month_line(osv.osv):
         'days_attend': fields.float('Days Attended'),
         'hours_ot': fields.float('Hours OT'),
         'days_work2': fields.float('Days2'),
+        'days_attend2_real': fields.float('Days Attended2 Real'),
+        #days by 21.75
         'days_attend2': fields.float('Days Attended2'),
         'hours_ot2_nonwe': fields.float('Hours OT2 Non Weekend'),
         'hours_ot2_we': fields.float('Hours OT2 Weekend'),
         
         'note': fields.char('Notes', size=64 ),
+        #法定节假日加班小时, user input manually
+        'hours_ot_law_holiday': fields.float('Hours OT in Law Holiday'),
+        #工伤假天数, user input manually
+        'days_work_injury_holiday': fields.float('Days  of work injury Holiday'),
+        #allowance/deduction fields, the hr_emppay_alwded.attend_field can link to them
+        'alw_hightemp': fields.float('High Temperature Allowance'),
         'alw_house': fields.float('House'),
         'alw_other': fields.float('Other Allowance'),
         'ded_meal': fields.float('Meal'),
         'ded_utilities': fields.float('Utilities'),
         'ded_other': fields.float('Other Deduction'),
     }
+    def create(self, cr, uid, values, context=None):
+        new_id = super(hr_rpt_attend_month_line, self).create(cr, uid, values, context=context)
+        #update allow/deduction fields
+        attend_line = self.browse(cr, uid, new_id, context=context)
+        attend_fields = ['alw_hightemp', 'alw_house', 'alw_other', 'ded_meal', 'ded_utilities', 'ded_other']
+        #call hr_empay.hr_rpt_attend_month.emp_attend_alwded_by_field() to get employee allow/deduction's data
+        alwded_data = self.pool.get("hr.rpt.attend.month").emp_attend_alwded_by_field(cr, uid, attend_line, attend_fields, context=context)
+        if alwded_data:
+            self.write(cr, uid, new_id, alwded_data, context=context)
+        return new_id
 
 hr_rpt_attend_month_line()
 
 from openerp.report import report_sxw
 from openerp.addons.metro.rml import rml_parser_ext
-report_sxw.report_sxw('report.hr.rpt.attend.month', 'hr.rpt.attend.month', 'addons/metro_hr/wizard/hr_rpt_attend_month.rml', parser=rml_parser_ext, header='internal')
+report_sxw.report_sxw('report.hr.rpt.attend.month.general', 'hr.rpt.attend.month', 'addons/metro_hr/wizard/hr_rpt_attend_month_general.rml', parser=rml_parser_ext, header='internal landscape')
+report_sxw.report_sxw('report.hr.rpt.attend.month.notification', 'hr.rpt.attend.month', 'addons/metro_hr/wizard/hr_rpt_attend_month_notification.rml', parser=rml_parser_ext, header='internal')
+report_sxw.report_sxw('report.hr.rpt.attend.month.inspection', 'hr.rpt.attend.month', 'addons/metro_hr/wizard/hr_rpt_attend_month_inspection.rml', parser=rml_parser_ext, header='internal landscape')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
