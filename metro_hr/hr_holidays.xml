@@ -17,7 +17,7 @@
 	                    <button string="Refuse" name="refuse" states="confirm" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver"/>
 	                    	
-	                    <button string="Validate" name="second_validate" states="validate1" type="workflow" 
+	                    <button string="Super Approve" name="second_validate" states="validate1" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver_super" class="oe_highlight"/>
 	                    <button string="Refuse" name="refuse" states="validate1" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver_super"/>
@@ -27,7 +27,7 @@
 						<button string="Refuse" name="refuse" states="validate" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver,metro_hr.group_hr_holiday_approver_super"/>	    
 	                    	                	
-	                    <button string="Reset to New" name="set_to_draft" states="cancel" type="object"/>
+	                    <button string="Reset to New" name="set_to_draft" states="refuse" type="object"/>
 	                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,validate" statusbar_colors='{"confirm":"blue","validate1":"blue","refuse":"red"}'/>
 	                </header>
                 </xpath>
@@ -108,7 +108,7 @@
 	                    <button string="Refuse" name="refuse" states="confirm" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver"/>
 	                    	
-	                    <button string="Validate" name="second_validate" states="validate1" type="workflow" 
+	                    <button string="Super Approve" name="second_validate" states="validate1" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver_super" class="oe_highlight"/>
 	                    <button string="Refuse" name="refuse" states="validate1" type="workflow" 
 	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver_super"/>
@@ -116,11 +116,12 @@
 	                    <!-- For the deletion of the final approved request 
 	                    Super approver or HR manager can cancel it, then can delete it -->
 						<button string="Refuse" name="refuse" states="validate" type="workflow" 
-	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver,metro_hr.group_hr_holiday_approver_super"/>	    
+	                    	groups="base.group_hr_user,metro_hr.group_hr_holiday_approver,metro_hr.group_hr_holiday_approver_super"/>   
 	                    	                	
-	                    <button string="Reset to New" name="set_to_draft" states="cancel" type="object"/>
-	                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,validate" statusbar_colors='{"confirm":"blue","validate1":"blue","refuse":"red"}'/>
+	                    <button string="Reset to New" name="set_to_draft" states="refuse" type="object"/>
 	                    
+	                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,validate" statusbar_colors='{"confirm":"blue","validate1":"blue","refuse":"red"}'/>
+	                    	                    
 	                </header>
                 </xpath>
                 
