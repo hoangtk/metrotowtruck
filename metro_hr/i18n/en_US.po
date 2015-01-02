@@ -13,6 +13,34 @@ msgid "Sequence"
 msgstr "#"
 
 #. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_is_full_ot2
+#: field:resource.calendar.attendance,is_full_ot2:0
+msgid "Full OT2"
+msgstr "Full OT by five days"
+
+#. module: metro_hr
+#: field:resource.calendar.attendance,days_work2:0
+msgid "Work Days2"
+msgstr "Work Days by five days"
+
+#. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_hours_work_ot2
+#: field:resource.calendar.attendance,hours_work_ot2:0
+msgid "Working hours(OT)2"
+msgstr "Working hours(OT) by five days"
+
+#. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_hours_work_normal2
+#: field:resource.calendar.attendance,hours_work_normal2:0
+msgid "Working hours(normal)2"
+msgstr "Working hours(normal) by five days"
+
+#. module: metro_hr
+#: help:resource.calendar.attendance,hours_work_normal2:0
+msgid "[Working hours] - [Working hours(OT)2]"
+msgstr "[Working hours] - [Working hours(OT) by five days]"
+
+#. module: metro_hr
 #: field:hr.rpt.attend.month.line,days_work:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_line_days_work
 msgid "Days"
