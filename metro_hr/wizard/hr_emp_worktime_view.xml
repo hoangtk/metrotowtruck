@@ -13,7 +13,8 @@ set employee work time in batc
             target="new"
             key2="client_action_multi"
             multi="True"
-            id="action_hr_emp_worktime_batch"/>
+            id="action_hr_emp_worktime_batch"
+            groups="base.group_hr_user"/>
            
         <menuitem 
         action="action_hr_emp_worktime_batch" 

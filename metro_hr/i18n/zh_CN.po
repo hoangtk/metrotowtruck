@@ -1100,7 +1100,7 @@ msgid "Payroll"
 msgstr "薪酬"
 
 #. module: metro_hr
-#: model:ir.actions.act_window,name:metro_hr.attendance_my_action
+#: model:ir.actions.act_window,name:metro_hr.action_attendance_my
 #: model:ir.ui.menu,name:metro_hr.menu_hr_attendance_my
 msgid "My Attendances"
 msgstr "我的考勤"
@@ -3246,7 +3246,7 @@ msgstr "姓名标签"
 #: model:ir.ui.menu,name:metro_hr.menu_hr_emp
 #: model:ir.ui.menu,name:metro_hr.menu_hr_emp_root
 msgid "My Human Resources"
-msgstr "My Human Resources"
+msgstr "人力资源"
 
 #. module: metro_hr
 #: field:hr.emppay,wage_work:0
@@ -3801,7 +3801,18 @@ msgstr "今天已打卡"
 #: view:hr.employee:0
 msgid "No Punching today"
 msgstr "今天未打卡"
-                	
+
+#. module: metro_hr
+#: model:ir.ui.menu,name:metro_hr.menu_hr_employee_my
+msgid "Employees"
+msgstr "员工"
+
+#. module: metro_hr
+#: model:ir.actions.act_window,name:metro_hr.action_hr_emppay_my
+#: model:ir.ui.menu,name:metro_hr.menu_hr_emppay_my
+msgid "My Payslips"
+msgstr "我的工资条"
+
 ########################manual########################
 #. module: hr_attendance
 #: view:hr.attendance:0

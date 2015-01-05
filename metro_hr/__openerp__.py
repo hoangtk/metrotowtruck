@@ -36,6 +36,7 @@
     'init_xml': [],
     'update_xml': [
         'wizard/hr_send_checklist.xml',
+        'hr_emp_menu.xml',
         'hr_view.xml',
         'hr_timesheet_view.xml',
         'hr_contract_view.xml',
