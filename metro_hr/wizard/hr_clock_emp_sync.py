@@ -75,11 +75,13 @@ class hr_clock_emp_sync(osv.osv_memory):
         vals = super(hr_clock_emp_sync, self).default_get(cr, uid, fields, context=context)
         if not vals:
             vals = {}
-        #clock id
+        #from clock id
         if context.get('active_model','') == 'hr.clock' and context.get('active_id'):
             clock_id = context.get('active_id')
-            vals['clock_id'] = clock_id
-                                
+            vals['clock_id'] = clock_id        #clock id
+        #from employees selection
+        if context.get('active_model','') == 'hr.employee' and context.get('active_ids'):
+            vals['emp_ids_server'] = context.get('active_ids')
         return vals
     
     def do_exec(self, cr, uid, ids, context=None):
@@ -274,7 +276,19 @@ class hr_clock_emp_sync(osv.osv_memory):
                     emp['emp_pos'] = 'clock_all'
                     emp['order_id'] = order_data.id
                     #write to database
-                    clock_emp_obj.create(cr, uid, emp, context=context)
+                    new_id = clock_emp_obj.create(cr, uid, emp, context=context)
+                    exist_clock_emp_ids.append(new_id)
+            #johnw, 01/02/2015, set the clock employee ids by user selected employees on GUI
+            #setted in default_get() when user do sync from employee screen
+            if order_data.emp_ids_server:
+                clock_emp_codes = clock_emp_obj.read(cr, uid, exist_clock_emp_ids, ['emp_code'], context=context)                
+                erp_emp_codes = [emp.emp_code for emp in order_data.emp_ids_server]
+                sel_clock_emp_ids = []
+                for clock_emp_code in clock_emp_codes:
+                    if clock_emp_code['emp_code'] in erp_emp_codes:
+                        sel_clock_emp_ids.append(clock_emp_code['id'])
+                if sel_clock_emp_ids:
+                    self.write(cr, uid, order_data.id, {'emp_ids_clock':[(6,False,sel_clock_emp_ids)]}, context=context)            
                                             
         if step_new == 'sync' and order_data.sync_direction == 'clock2server':
             #get employees from server
