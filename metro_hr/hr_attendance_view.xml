@@ -305,17 +305,6 @@
                 </xpath>
             </field>
         </record>
-
-<!-- make one new menu for employee to view self attendances -->	
-	<record id="attendance_my_action" model="ir.actions.act_window">
-	    <field name="name">My Attendances</field>
-	    <field name="res_model">hr.attendance</field>
-	    <field name="view_type">form</field>
-	    <field name="view_mode">tree,form</field>
-        <field name="context">{"search_default_today_valid":1}</field>
-	    <field name="domain">[('employee_id.user_id','=',uid)]</field>
-	    <field name="search_view_id" ref="view_hr_attendance_filter_ext" />
-	</record>	
 				                
     </data>
 </openerp>

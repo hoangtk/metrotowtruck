@@ -8,7 +8,8 @@
             target="new"
             key2="client_action_multi"
             multi="True"
-            id="action_hr_clock_emp_sync"/>
+            id="action_hr_clock_emp_sync"
+            groups="base.group_hr_user"/>
            
         <record id="view_hr_clock_emp_sync_form" model="ir.ui.view">
             <field name="name">view_hr_clock_emp_sync_form</field>
