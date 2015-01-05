@@ -13,7 +13,7 @@
                 		domain="[('name','=',current_date), ('action','in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
                 	<separator/>
                 	<filter icon="terp-go-today" string="China Employees" name="china_employees" domain="[('employee_id.country_id.name','in',('China','China ','China-CN'))]"/>
-                	<filter icon="terp-go-today" string="Foreign Employees" name="china_employees" domain="[('employee_id.country_id.name','not in',('China','China ','China-CN'))]"/>
+                	<filter icon="terp-go-today" string="Foreign Employees" name="foreign_employees" domain="[('employee_id.country_id.name','in',('Canada','India','Russian Federation','Ukraine')]"/>
                 </filter>
                 <field name="action" position="after">
                 	<!-- <field name="clock_id"/>
@@ -110,8 +110,8 @@
                 <form string="Working Time" version="7.0">
                     <field name="id" invisible="1"/>
                 	<header>
-                		<button name="%(action_hr_emp_worktime_batch)d" string="Add Employees" type="action"/>
-                		<button name="%(hr.open_view_employee_list_my)d" string="Employees" type="action"
+                		<button name="%(action_hr_emp_worktime_batch)d" string="Set Working Time" type="action"/>
+                		<button name="%(hr.open_view_employee_list_my)d" string="Assigned Employees" type="action"
                 			context="{'default_calendar_id': id, 'search_default_calendar_id': id}"/>
                 	</header>
                     <sheet>
@@ -233,7 +233,7 @@
         id="menu_hr_worktime_type"
         parent="hr_attendance.menu_hr_attendance" sequence="33"/>  
                 
-<!-- Employee add the working time -->
+<!-- Employee add the working time and attendance punching time-->
         <record model="ir.ui.view" id="metro_employee_tree_view_attend">
             <field name="name">metro_employee_tree_view_attend</field>
             <field name="model">hr.employee</field>
@@ -241,6 +241,8 @@
             <field name="arch" type="xml">
                 <field name="emp_card_id" position="after">
                 	<field name="calendar_id" string="Working Time"/>
+                	<field name="last_punch_time"/>
+                	<field name="country_id"/>
                 </field>
             </field>
         </record>     
@@ -251,6 +253,7 @@
             <field name="arch" type="xml">
                 <field name="emp_card_id" position="after">
                 	<field name="calendar_id" string="Working Time"/>
+                	<field name="last_punch_time"/>
                 </field>
             </field>
         </record>    
@@ -261,7 +264,17 @@
             <field name="arch" type="xml">
                 <field name="emp_card_id" position="after">
                 	<field name="calendar_id" string="Working Time"/>
+                	<field name="last_punch_time"/>
+                	<field name="country_id"/>
+                	<filter icon="terp-go-today" string="Punched today" name="punch_today" domain="[('last_punch_time','=',current_date)]" />
+                	<filter icon="terp-go-today" string="No Punching today" name="punch_today" domain="[('last_punch_time','!=',current_date)]" />
+                	<separator/>
+                	<filter icon="terp-go-today" string="China Employees" name="china_employees" domain="[('country_id.name','in',('China','China ','China-CN','中国CN','中国'))]"/>
+                	<filter icon="terp-go-today" string="Foreign Employees" name="foreign_employees" domain="[('country_id.name','in',('Canada','India','Russian Federation','Ukraine'))]"/>
                 </field>
+                <filter string="Job" position="after">
+                	<filter string="Country" icon="terp-gtk-select-all" domain="[]" context="{'group_by':'country_id'}"/>
+                </filter>                        
             </field>
         </record>          
 
@@ -292,8 +305,6 @@
                 </xpath>
             </field>
         </record>
-<!-- make the attendance main menu to visible to employee, do not depend the group "base.group_hr_attendance"-->
-	<menuitem id="hr.menu_hr_attendance" name="Attendances" parent="hr.menu_hr_root" sequence="10" groups="base.group_user"/>
 
 <!-- make one new menu for employee to view self attendances -->	
 	<record id="attendance_my_action" model="ir.actions.act_window">
@@ -305,6 +316,6 @@
 	    <field name="domain">[('employee_id.user_id','=',uid)]</field>
 	    <field name="search_view_id" ref="view_hr_attendance_filter_ext" />
 	</record>	
-	<menuitem action="attendance_my_action" id="menu_hr_attendance_my" parent="hr.menu_hr_attendance"/>                
+				                
     </data>
 </openerp>

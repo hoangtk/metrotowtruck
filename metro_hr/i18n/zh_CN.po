@@ -1373,7 +1373,7 @@ msgstr "Total-W"
 #: view:hr.emppay.sheet:0
 #: field:hr.rpt.attend.emp.day.line,period_id:0
 msgid "Period"
-msgstr "班次"
+msgstr "时间段"
 
 #. module: metro_hr
 #: selection:attend.empday.group.line,weekday:0
@@ -2789,7 +2789,7 @@ msgstr "5天制加班工作时数"
 #: field:hr.attendance,cale_period_id:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_attendance_cale_period_id
 msgid "Working Period"
-msgstr "班次"
+msgstr "时间段"
 
 #. module: metro_hr
 #: view:hr.emppay.sheet:0
@@ -3022,7 +3022,7 @@ msgstr "拒绝"
 #: selection:hr.clock.emp.sync.emp,clock_role:0
 #: selection:hr.employee,clock_role:0
 msgid "Operator"
-msgstr "操作符"
+msgstr "操作员"
 
 #. module: metro_hr
 #: field:hr.holidays,ticket_approve_id2:0
@@ -3353,7 +3353,7 @@ msgstr "组"
 #: selection:hr.clock.emp.sync.emp,clock_role:0
 #: selection:hr.employee,clock_role:0
 msgid "Manager"
-msgstr "经理"
+msgstr "管理员"
 
 #. module: metro_hr
 #: view:hr.clock.emp.sync:0
@@ -3776,6 +3776,32 @@ msgstr "5天制应出勤"
 msgid "实出勤"
 msgstr "实出勤"
 
+#. module: metro_hr
+#: field:hr.employee,last_punch_time:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_last_punch_time
+msgid "Last Punching Time"
+msgstr "最后打卡时间"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "China Employees"
+msgstr "中国员工"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Foreign Employees"
+msgstr "外国员工"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Punched today"
+msgstr "今天已打卡"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "No Punching today"
+msgstr "今天未打卡"
+                	
 ########################manual########################
 #. module: hr_attendance
 #: view:hr.attendance:0
@@ -3799,6 +3825,16 @@ msgstr "考勤"
 #: selection:hr.attendance,action:0
 msgid "Invalid"
 msgstr "无效"
+
+#. module: metro_hr
+#: selection:hr.attendance,action:0
+msgid "Sign In Late"
+msgstr "迟到"
+
+#. module: metro_hr
+#: selection:hr.attendance,action:0
+msgid "Sign Out Early"
+msgstr "早退"
 
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.request_approve_allocation
