@@ -298,35 +298,94 @@ def deal_args_dt(cr, uid, obj,args,dt_fields,context=None):
             fld_operator = arg[1]
             fld_val = arg[2]
             fld = obj._columns.get(fld_name)
-            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
-                '''
-                ['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
-                the user inputed is '2013-12-13 00:00:00', subtract 8 hours, then get this value
-                ''' 
-                time_start = [fld_name,'>=',fld_val]
-                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
-                time_obj += relativedelta(days=1)
-                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
-                new_args.append(time_start)
-                new_args.append(time_end)
-            elif fld._type == 'datetime' and fld_operator == "=" and len(fld_val) == 10:
-                '''
-                ['date','=','2013-12-12] only supply the date part without time
-                ''' 
-                dt_val = datetime.strptime(fld_val + ' 00:00:00', DEFAULT_SERVER_DATETIME_FORMAT)
-                dt_val = utc_timestamp(cr, uid, dt_val, context=context)
-                fld_val = dt_val.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                
-                time_start = [fld_name,'>=',fld_val]
-                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
-                time_obj += relativedelta(days=1)
-                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
-                new_args.append(time_start)
-                new_args.append(time_end)
-            else:
-                new_args.append(arg)
+            if fld._type == 'datetime':
+                if len(fld_val) == 10:
+                    '''
+                    ['date','=','2013-12-12] only supply the date part without time
+                    ''' 
+                    dt_val = datetime.strptime(fld_val + ' 00:00:00', DEFAULT_SERVER_DATETIME_FORMAT)
+                    dt_val = utc_timestamp(cr, uid, dt_val, context=context)
+                    fld_val = dt_val.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                if fld_val.endswith('00:00'):
+                    if fld_operator == "=":
+                        '''
+                        ['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+                        the user inputed is '2013-12-13 00:00:00', subtract 8 hours, then get this value
+                        ''' 
+                        time_start = [fld_name,'>=',fld_val]
+                        time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+                        time_obj += relativedelta(days=1)
+                        time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+                        new_args.append(time_start)
+                        new_args.append(time_end)
+                    elif fld_operator == "!=":
+                        time_start = [fld_name,'<',fld_val]
+                        time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+                        time_obj += relativedelta(days=1)
+                        time_end = [fld_name,'>',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+                        new_args.extend(['|', '|', [fld_name,'=',False], time_start, time_end])                    
+                    else:
+                        new_args.append(arg)
+                else:
+                    new_args.append(arg)
         else:
-            new_args.append(arg)    
+            new_args.append(arg) 
+                    
+            
+#            if fld._type == 'datetime' and fld_operator == "=" and fld_val.endswith('00:00'):
+#                '''
+#                ['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+#                the user inputed is '2013-12-13 00:00:00', subtract 8 hours, then get this value
+#                ''' 
+#                time_start = [fld_name,'>=',fld_val]
+#                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+#                time_obj += relativedelta(days=1)
+#                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+#                new_args.append(time_start)
+#                new_args.append(time_end)
+#            elif fld._type == 'datetime' and fld_operator == "=" and len(fld_val) == 10:
+#                '''
+#                ['date','=','2013-12-12] only supply the date part without time
+#                ''' 
+#                dt_val = datetime.strptime(fld_val + ' 00:00:00', DEFAULT_SERVER_DATETIME_FORMAT)
+#                dt_val = utc_timestamp(cr, uid, dt_val, context=context)
+#                fld_val = dt_val.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+#                
+#                time_start = [fld_name,'>=',fld_val]
+#                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+#                time_obj += relativedelta(days=1)
+#                time_end = [fld_name,'<=',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+#                new_args.append(time_start)
+#                new_args.append(time_end)
+#            elif fld._type == 'datetime' and fld_operator == "!=" and fld_val.endswith('00:00'):
+#                '''
+#                ['date','=','2013-12-12 16:00:00'] the '16' was generated for the timezone
+#                the user inputed is '2013-12-13 00:00:00', subtract 8 hours, then get this value
+#                ''' 
+#                time_start = [fld_name,'<',fld_val]
+#                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+#                time_obj += relativedelta(days=1)
+#                time_end = [fld_name,'>',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+#                new_args.extend(['|', [fld_name,'=',False], '&', time_start, time_end])
+#            elif fld._type == 'datetime' and fld_operator == "!=" and len(fld_val) == 10:
+#                '''
+#                ['date','=','2013-12-12] only supply the date part without time
+#                ''' 
+#                dt_val = datetime.strptime(fld_val + ' 00:00:00', DEFAULT_SERVER_DATETIME_FORMAT)
+#                dt_val = utc_timestamp(cr, uid, dt_val, context=context)
+#                fld_val = dt_val.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+#                
+#                time_start = [fld_name,'<',fld_val]
+#                time_obj = datetime.strptime(fld_val,DEFAULT_SERVER_DATETIME_FORMAT)
+#                time_obj += relativedelta(days=1)
+#                time_end = [fld_name,'>',time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)]
+#                new_args.extend(['|', [fld_name,'=',False], '&', time_start, time_end])
+#            else:
+#                new_args.append(arg)
+#        else:
+#            new_args.append(arg)    
+          
+        
     #TODO: refer fields.datetime.context_timestamp() to deal with the timezone
     #TODO: Improve the code in line#1014@osv/expression.py to handel the timezone for the datatime field:
     '''

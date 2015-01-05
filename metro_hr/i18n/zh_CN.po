@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 7.0-20130413-232416\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-12-31 09:42+0000\n"
-"PO-Revision-Date: 2014-12-31 09:42+0000\n"
+"POT-Creation-Date: 2015-01-02 01:24+0000\n"
+"PO-Revision-Date: 2015-01-02 01:24+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -339,7 +339,7 @@ msgstr "Coporate Phone Number:"
 #: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_is_full_ot2
 #: field:resource.calendar.attendance,is_full_ot2:0
 msgid "Full OT2"
-msgstr "全为加班2"
+msgstr "5天制全为加班"
 
 #. module: metro_hr
 #: field:hr.rpt.attend.month.line,data_level:0
@@ -681,12 +681,6 @@ msgid "Leave Type"
 msgstr "准假类型"
 
 #. module: metro_hr
-#: field:hr.attendance,calendar_id:0
-#: field:hr.emp.worktime,calendar_id:0
-#: view:hr.employee:0
-#: view:hr.worktime.type:0
-#: model:ir.model.fields,field_description:metro_hr.field_hr_attendance_calendar_id
-#: model:ir.model.fields,field_description:metro_hr.field_hr_emp_worktime_calendar_id
 #: view:resource.calendar:0
 msgid "Working Time"
 msgstr "排班"
@@ -719,7 +713,7 @@ msgstr "同步考勤机员工"
 #: model:ir.actions.act_window,name:metro_hr.action_emp_worktime
 #: model:ir.ui.menu,name:metro_hr.menu_view_emp_resource_calendar
 msgid "Working Time"
-msgstr "工作时间"
+msgstr "班次管理"
 
 #. module: metro_hr
 #: field:attend.empday.group,hours_ot:0
@@ -1379,7 +1373,7 @@ msgstr "Total-W"
 #: view:hr.emppay.sheet:0
 #: field:hr.rpt.attend.emp.day.line,period_id:0
 msgid "Period"
-msgstr "班次"
+msgstr "时间段"
 
 #. module: metro_hr
 #: selection:attend.empday.group.line,weekday:0
@@ -2180,9 +2174,13 @@ msgstr "EMP SI"
 #: field:hr.emppay,days_work2:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_days_work2
 #: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_days_work2
-#: field:resource.calendar.attendance,days_work2:0
 msgid "Work Days2"
 msgstr "5天制应出勤"
+
+#. module: metro_hr
+#: field:resource.calendar.attendance,days_work2:0
+msgid "Work Days2"
+msgstr "5天制应出勤天数"
 
 #. module: metro_hr
 #: view:hr.emppay:0
@@ -2204,15 +2202,18 @@ msgstr "[[工作时数] - [加班时数]"
 msgid "序号"
 msgstr "序号"
 
-#. module: metro_hr
 #: field:hr.emppay,days_work:0
 #: field:hr.emppay.rpt.emp.year,days_work:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_days_work
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_rpt_emp_year_days_work
 #: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_days_work
-#: field:resource.calendar.attendance,days_work:0
 msgid "Work Days"
 msgstr "应出勤"
+
+#. module: metro_hr
+#: field:resource.calendar.attendance,days_work:0
+msgid "Work Days"
+msgstr "应出勤天数"
 
 #. module: metro_hr
 #: model:ir.actions.act_window,name:metro_hr.metro_holiday_calendar_action
@@ -2782,13 +2783,13 @@ msgstr "签出开始"
 #: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_hours_work_ot2
 #: field:resource.calendar.attendance,hours_work_ot2:0
 msgid "Working hours(OT)2"
-msgstr "加班工作时数2"
+msgstr "5天制加班工作时数"
 
 #. module: metro_hr
 #: field:hr.attendance,cale_period_id:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_attendance_cale_period_id
 msgid "Working Period"
-msgstr "班次"
+msgstr "时间段"
 
 #. module: metro_hr
 #: view:hr.emppay.sheet:0
@@ -2911,8 +2912,18 @@ msgstr "默认迟到早退偏移时间(分钟)"
 
 #. module: metro_hr
 #: view:resource.calendar:0
-msgid "Add Employees"
-msgstr "增加雇员"
+msgid "Set Working Time"
+msgstr "设置班次"
+
+#. module: metro_hr
+#: field:hr.attendance,calendar_id:0
+#: field:hr.emp.worktime,calendar_id:0
+#: view:hr.employee:0
+#: view:hr.worktime.type:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_attendance_calendar_id
+#: model:ir.model.fields,field_description:metro_hr.field_hr_emp_worktime_calendar_id
+msgid "Working Time"
+msgstr "班次"
 
 #. module: metro_hr
 #: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_punch_out_stop
@@ -2973,7 +2984,7 @@ msgstr "此操作将删除原来的补贴,扣费和社保配置,增加新的"
 #: model:ir.model.fields,field_description:metro_hr.field_resource_calendar_attendance_hours_work_normal2
 #: field:resource.calendar.attendance,hours_work_normal2:0
 msgid "Working hours(normal)2"
-msgstr "正常工作时数2"
+msgstr "5天制正常工作时数"
 
 #. module: metro_hr
 #: view:hr.analytic.timesheet:0
@@ -3011,7 +3022,7 @@ msgstr "拒绝"
 #: selection:hr.clock.emp.sync.emp,clock_role:0
 #: selection:hr.employee,clock_role:0
 msgid "Operator"
-msgstr "操作符"
+msgstr "操作员"
 
 #. module: metro_hr
 #: field:hr.holidays,ticket_approve_id2:0
@@ -3232,6 +3243,12 @@ msgid "Name Tag"
 msgstr "姓名标签"
 
 #. module: metro_hr
+#: model:ir.ui.menu,name:metro_hr.menu_hr_emp
+#: model:ir.ui.menu,name:metro_hr.menu_hr_emp_root
+msgid "My Human Resources"
+msgstr "My Human Resources"
+
+#. module: metro_hr
 #: field:hr.emppay,wage_work:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_wage_work
 msgid "Wage(Work)"
@@ -3336,7 +3353,7 @@ msgstr "组"
 #: selection:hr.clock.emp.sync.emp,clock_role:0
 #: selection:hr.employee,clock_role:0
 msgid "Manager"
-msgstr "经理"
+msgstr "管理员"
 
 #. module: metro_hr
 #: view:hr.clock.emp.sync:0
@@ -3505,9 +3522,13 @@ msgstr "员工编码不能重复"
 #: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_emp_day_emp_ids
 #: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_month_emp_ids
 #: model:ir.model.fields,field_description:metro_hr.field_hr_send_checklist_emp_ids
-#: view:resource.calendar:0
 msgid "Employees"
 msgstr "员工"
+
+#. module: metro_hr
+#: view:resource.calendar:0
+msgid "Assigned Employees"
+msgstr "分配的员工"
 
 #. module: metro_hr
 #: selection:hr.clock.emp.sync.emp,target_state:0
@@ -3517,7 +3538,7 @@ msgstr "已存在并且有差异"
 #. module: metro_hr
 #: help:resource.calendar.attendance,hours_work_normal2:0
 msgid "[Working hours] - [Working hours(OT)2]"
-msgstr "[工作时数] - [加班时数2]"
+msgstr "[工作时数] - [5天制加班时数]"
 
 #. module: metro_hr
 #: report:hr.rpt.attend.month.general:0
@@ -3755,6 +3776,32 @@ msgstr "5天制应出勤"
 msgid "实出勤"
 msgstr "实出勤"
 
+#. module: metro_hr
+#: field:hr.employee,last_punch_time:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_employee_last_punch_time
+msgid "Last Punching Time"
+msgstr "最后打卡时间"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "China Employees"
+msgstr "中国员工"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Foreign Employees"
+msgstr "外国员工"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Punched today"
+msgstr "今天已打卡"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "No Punching today"
+msgstr "今天未打卡"
+                	
 ########################manual########################
 #. module: hr_attendance
 #: view:hr.attendance:0
@@ -3765,15 +3812,29 @@ msgstr "考勤记录"
 
 #. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.open_view_attendance
-#: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance
 #: model:ir.ui.menu,name:hr_attendance.menu_open_view_attendance
 msgid "Attendances"
 msgstr "考勤记录"
+
+#. module: hr_attendance
+#: model:ir.ui.menu,name:hr_attendance.menu_hr_attendance
+msgid "Attendances"
+msgstr "考勤"
 
 #. module: metro_hr
 #: selection:hr.attendance,action:0
 msgid "Invalid"
 msgstr "无效"
+
+#. module: metro_hr
+#: selection:hr.attendance,action:0
+msgid "Sign In Late"
+msgstr "迟到"
+
+#. module: metro_hr
+#: selection:hr.attendance,action:0
+msgid "Sign Out Early"
+msgstr "早退"
 
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.request_approve_allocation
@@ -3836,3 +3897,9 @@ msgstr "请假分析"
 #: model:ir.ui.menu,name:hr_holidays.menu_open_allocation_holidays
 msgid "Allocation Requests"
 msgstr "假期分配"
+
+#. module: metro_hr
+#: field:attend.empday.group,hours_ot:0
+#: model:ir.model.fields,field_description:metro_hr.field_attend_empday_group_hours_ot
+msgid "Overtime"
+msgstr "加班"

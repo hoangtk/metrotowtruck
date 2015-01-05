@@ -18,6 +18,31 @@ from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.addons.metro import utils
 
+import pytz
+
+class hr_employee(osv.osv):
+    _inherit = "hr.employee"
+    _columns = {
+        'last_punch_time': fields.datetime('Last Punching Time', required=True, select=1),
+    }
+    
+    def update_punch_time(self, cr, uid, emp_id, dt_punch, context):
+        if not emp_id or not dt_punch:
+            return
+        dt_punch_current = None
+        dt_current = self.read(cr, uid, emp_id, ['last_punch_time'])
+        if dt_current.get('last_punch_time'):
+            dt_punch_current = datetime.strptime(dt_current.get('last_punch_time'),DEFAULT_SERVER_DATETIME_FORMAT)
+            #convert to the offset aware datetime, since the dt_punch is offset aware, then they can be compared
+            dt_punch_current = pytz.UTC.localize(dt_punch_current)
+        if not dt_punch_current or dt_punch_current < dt_punch:
+            self.write(cr, uid, emp_id, {'last_punch_time': dt_punch}, context=context)
+    
+    def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+        #the day search support
+        new_args = utils.deal_args_dt(cr, user, self, args,['last_punch_time'],context=context)
+        return super(hr_employee,self).search(cr, user, new_args, offset, limit, order, context, count)
+    
 class hr_attendance(osv.osv):
     _inherit = "hr.attendance"
     def _day_compute(self, cr, uid, ids, fieldnames, args, context=None):
@@ -78,6 +103,16 @@ class hr_attendance(osv.osv):
         new_args = utils.deal_args_dt(cr, user, self, args,['name'],context=context)
         return super(hr_attendance,self).search(cr, user, new_args, offset, limit, order, context, count)
     
+    def create(self, cr, uid, vals, context=None):
+        new_id = super(hr_attendance, self).create(cr, uid, vals, context=context)
+        self.pool.get('hr.employee').update_punch_time(cr, uid, vals.get('employee_id'), vals.get('name'), context=context)
+        return new_id
+
+    def write(self, cr, uid, ids, vals, context=None):
+        resu = super(hr_attendance, self).write(cr, uid, ids, vals, context=context)
+        self.pool.get('hr.employee').update_punch_time(cr, uid, vals.get('employee_id'), vals.get('name'), context=context)
+        return resu
+                
     def calc_action(self, cr, uid, ids, context=None):
         upt_vals = {}
         days = self._day_compute(cr, uid, ids, [], [], context=context)
