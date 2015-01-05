@@ -23,7 +23,7 @@ import pytz
 class hr_employee(osv.osv):
     _inherit = "hr.employee"
     _columns = {
-        'last_punch_time': fields.datetime('Last Punching Time', required=True, select=1),
+        'last_punch_time': fields.datetime('Last Punching Time', required=False, select=1,readonly=True),
     }
     
     def update_punch_time(self, cr, uid, emp_id, dt_punch, context):
