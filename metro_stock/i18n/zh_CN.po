@@ -1459,6 +1459,16 @@ msgstr "e.g. PO0032"
 msgid "Product Code"
 msgstr "产品编码"
 
+#. module: metro_stock
+#: model:ir.ui.menu,name:metro_stock.menu_stock_report
+msgid "Reports"
+msgstr "报表"
+
+#. module: metro_stock
+#: model:ir.ui.menu,name:metro_stock.menu_stock_inventory_rpt
+msgid "Inventory Quanlity Report"
+msgstr "出入库报表"
+
 ########################manual########################
 #. module: stock
 #: view:stock.picking:0

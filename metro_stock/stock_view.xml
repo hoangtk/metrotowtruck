@@ -835,6 +835,19 @@
             		<field name="prop_use_value_act_as_invoice"/>
             	</field>
             </field>
-        </record>        
+        </record>
+        
+<!-- Add the monthly report -->
+	<menuitem id="menu_stock_report" name="Reports" parent="stock.menu_stock_root" sequence="5"/>
+	
+    <menuitem
+        id="menu_stock_inventory_rpt"
+        name="Inventory Quanlity Report"
+        action="metro_accounts.rpt_inventory_qty_action"
+        groups="stock.group_stock_user"
+        parent="menu_stock_report"
+        sequence="5"
+       />   
+
     </data>
 </openerp>
