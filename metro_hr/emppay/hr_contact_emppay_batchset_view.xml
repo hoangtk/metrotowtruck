@@ -15,7 +15,7 @@ set employee Payroll Info in batch
             key2="client_action_multi"
             multi="True"
             id="action_hr_employee_emppay_batchset"
-            groups="base.group_hr_user"/>
+            groups="base.group_hr_user,account.group_account_invoice"/>
             
          <act_window name="Set Payroll Info"
             res_model="hr.contract.emppay.batchset"
@@ -25,7 +25,7 @@ set employee Payroll Info in batch
             key2="client_action_multi"
             multi="True"
             id="action_hr_contract_emppay_batchset"
-            groups="base.group_hr_user"/>    
+            groups="base.group_hr_user,account.group_account_invoice"/>    
            
         <menuitem 
         action="action_hr_contract_emppay_batchset" 

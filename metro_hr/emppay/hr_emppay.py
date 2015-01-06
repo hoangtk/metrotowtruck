@@ -502,20 +502,76 @@ class hr_rpt_attend_month(osv.osv):
 class hr_emppay_sheet(osv.osv):
     _name = 'hr.emppay.sheet'
     _description = 'Payroll'
+    _inherit = ['mail.thread']
+    
+    def _wage_all(self, cr, uid, ids, field_names, arg, context=None):
+        res = {}
+        for order in self.browse(cr, uid, ids, context=context):
+            res[order.id] = dict.fromkeys(field_names,0.0)
+            for line in order.emppay_ids:
+                for field_name in field_names:
+                    res[order.id][field_name] += getattr(line,field_name)            
+        return res
+    
+    def _get_sheet(self, cr, uid, ids, context=None):
+        keys = []
+        for line in self.pool.get('hr.emppay').browse(cr, uid, ids, context=context):
+            if line.emppay_sheet_id and line.emppay_sheet_id.id not in keys:
+                keys.append(line.emppay_sheet_id.id)
+        return keys
+        
     _columns = {
         'name': fields.char('Name', size=64, required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'state': fields.selection([
             ('draft', 'Draft'),
             ('verified', 'Verified'),
+            ('approved', 'Approved'),
             ('paid', 'Paid'),
-        ], 'Status', select=True, readonly=True),
+        ], 'Status', select=True, readonly=True, track_visibility='onchange'),
         'date_from': fields.date('Date From', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_to': fields.date('Date To', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'emppay_ids': fields.one2many('hr.emppay', 'emppay_sheet_id', 'Payslips', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'attend_month_id': fields.many2one('hr.rpt.attend.month', 'Attendance Report'),
         'note': fields.text('Description', readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}),
-        'account_period_id': fields.many2one('account.period', string='Account Period', states={'draft': [('readonly', False)]}, required=True),
+        'account_period_id': fields.many2one('account.period', string='Account Period', readonly=True, states={'draft': [('readonly', False)]}, required=True),
+        #total amount
+        'wage_work': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='Work Wage',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),
+        'alw_total': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='Allowance',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),
+        'wage_total': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='Total Wage',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),  
+        'ded_total': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='Deduction',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),  
+        'si_total_personal': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='SI(Personal)',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),  
+        'si_total_company': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='SI(Company)',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),  
+        'wage_pay': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='Wage Should Pay',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),  
+        'pit': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='PIT',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),  
+        'wage_net': fields.function(_wage_all, digits_compute= dp.get_precision('Payroll'), string='Net Wage',
+            store={
+                'hr.emppay': (_get_sheet, None, 10),
+            }, multi="sums", track_visibility='onchange', readonly=1),                              
     }
     _defaults = {
         'state': 'draft'
@@ -572,6 +628,9 @@ class hr_emppay_sheet(osv.osv):
 
     def action_verify(self, cr, uid, ids, context=None):
         return self._set_state(cr, uid, ids, 'verified', context)
+    
+    def action_approve(self, cr, uid, ids, context=None):
+        return self._set_state(cr, uid, ids, 'approved', context)
     
     def action_pay(self, cr, uid, ids, context=None):
         return self._set_state(cr, uid, ids, 'paid', context)
@@ -911,6 +970,7 @@ class hr_emppay(osv.osv):
         'state': fields.selection([
             ('draft', 'Draft'),
             ('verified', 'Verified'),
+            ('approved', 'Approved'),
             ('paid', 'Paid'),
         ], 'Status', select=True, readonly=True,
             help='* When the payslip is created the status is \'Draft\'.\
@@ -957,7 +1017,10 @@ class hr_emppay(osv.osv):
 
     def action_verify(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'verified'}, context=context)
-
+   
+    def action_approve(self, cr, uid, ids, context=None):
+        return self._set_state(cr, uid, ids, 'approved', context)
+    
     def action_pay(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'paid'}, context=context)
 

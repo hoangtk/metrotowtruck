@@ -32,7 +32,7 @@
         
     'author': 'Metro Trucks.',
     'website': 'http://www.metrotowertrucks.com/',
-    'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image", "hr_recruitment", "hr_contract"],
+    'depends': ["metro", "hr", "hr_holidays", "product", "metro_attachment", "hr_timesheet", "multi_image", "hr_recruitment", "hr_contract", "hr_payroll", "hr_payroll_account"],
     'init_xml': [],
     'update_xml': [
         'wizard/hr_send_checklist.xml',
