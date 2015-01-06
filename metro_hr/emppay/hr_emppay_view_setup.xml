@@ -28,11 +28,11 @@
 		                    <field name="attend_field"/>
                         </tree>
                 	</field>
-                	<group col="4">
+                	<separator string="Social Insurance"/>
+                	<!-- <group col="4">
                 		<field name="si_total_company"/>
                 		<field name="si_total_personal"/>
-                	</group>
-                	<separator string="Social Insurance"/>
+                	</group> -->
                 	<field name="si_ids">
                         <tree string="Allowance and Deduction" editable="bottom">
 		                    <field name="si_id" on_change="onchange_si_id(si_id,context)"/>
@@ -119,7 +119,7 @@
             <field name="search_view_id" ref="view_hr_emppay_alwded_search"/>
         </record>
 
-        <menuitem id="menu_hr_emppay_alwded" action="action_hr_emppay_alwded" parent="menu_hr_emppay_configure" sequence="1"/>
+        <menuitem id="menu_hr_emppay_alwded" action="action_hr_emppay_alwded" parent="menu_hr_root_emppay" sequence="11"/>
         
 <!-- Social Insurances -->
         
@@ -178,7 +178,7 @@
             <field name="search_view_id" ref="view_hr_emppay_si_search"/>
         </record>
 
-        <menuitem id="menu_hr_emppay_si" action="action_hr_emppay_si" parent="menu_hr_emppay_configure" sequence="2"/>   
+        <menuitem id="menu_hr_emppay_si" action="action_hr_emppay_si" parent="menu_hr_root_emppay" sequence="12"/>   
                 
     </data>
 </openerp>

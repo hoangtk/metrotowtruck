@@ -1097,7 +1097,7 @@ msgstr "龙驹假期"
 #. module: metro_hr
 #: model:ir.actions.act_window,name:metro_hr.action_hr_emppay_sheet
 msgid "Payroll"
-msgstr "薪酬"
+msgstr "工资表"
 
 #. module: metro_hr
 #: model:ir.actions.act_window,name:metro_hr.action_attendance_my

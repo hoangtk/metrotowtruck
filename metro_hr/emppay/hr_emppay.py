@@ -216,9 +216,9 @@ class hr_contract_si(osv.osv):
         res = dict((id,dict((field_name,None) for field_name in field_names)) for id in ids)
         for si in self.browse(cr, uid, ids, context=context):
             if 'amount_company' in field_names:
-                res[si.id]['amount_company'] = si.amount_base * si.rate_company
+                res[si.id]['amount_company'] = si.amount_base * si.rate_company/100.00
             if 'amount_personal' in field_names:
-                res[si.id]['amount_personal'] = si.amount_base * si.rate_personal
+                res[si.id]['amount_personal'] = si.amount_base * si.rate_personal/100.00
         return res    
     
     _order = 'sequence'
