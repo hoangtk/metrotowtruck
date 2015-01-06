@@ -673,7 +673,7 @@ msgstr "PIT"
 #: field:hr.emppay.sheet,account_period_id:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_sheet_account_period_id
 msgid "Account Period"
-msgstr "Account Period"
+msgstr "会计期间"
 
 #. module: metro_hr
 #: model:ir.model,name:metro_hr.model_hr_holidays_status
@@ -747,7 +747,7 @@ msgstr "基本信息"
 #. module: metro_hr
 #: view:hr.emppay.sheet:0
 msgid "Print Slips for Signature"
-msgstr "Print Slips for Signature"
+msgstr "打印需签字工资条"
 
 #. module: metro_hr
 #: model:ir.model,name:metro_hr.model_hr_emppay_run
@@ -3812,6 +3812,69 @@ msgstr "员工"
 #: model:ir.ui.menu,name:metro_hr.menu_hr_emppay_my
 msgid "My Payslips"
 msgstr "我的工资条"
+
+#. module: metro_hr
+#: view:hr.employee:0
+msgid "Attendances"
+msgstr "考勤记录"
+
+#. module: metro_hr
+#: view:hr.emppay:0
+#: selection:hr.emppay,state:0
+#: selection:hr.emppay.sheet,state:0
+msgid "Approved"
+msgstr "已批准"
+
+#. module: metro_hr
+#: view:hr.emppay:0
+#: view:hr.emppay.sheet:0
+msgid "Approve"
+msgstr "批准"
+                		
+#. module: metro_hr
+#: field:hr.emppay.sheet,wage_work:0
+msgid "Work Wage"
+msgstr "工作工资"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,alw_total:0
+msgid "Allowance"
+msgstr "补贴"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,wage_total:0
+msgid "Total Wage"
+msgstr "总工资"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,ded_total:0
+msgid "Deduction"
+msgstr "扣费"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,si_total_personal:0
+msgid "SI(Personal)"
+msgstr "社保(个人)"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,si_total_company:0
+msgid "SI(Company)"
+msgstr "社保(公司)"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,wage_pay:0
+msgid "Wage Should Pay"
+msgstr "应发工资"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,pit:0
+msgid "PIT"
+msgstr "个人所得税"
+
+#. module: metro_hr
+#: field:hr.emppay.sheet,wage_net:0
+msgid "Net Wage"
+msgstr "实发工资"
 
 ########################manual########################
 #. module: hr_attendance
