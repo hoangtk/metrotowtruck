@@ -358,6 +358,7 @@ class emp_reimburse(osv.osv):
                 'journal_id': journal.id,
                 'period_id': period.id,
                 'date': order.date,
+                'date_biz': order.date,
                 'amount_currency': 0.0,
                 'currency_id': False,
             }
@@ -373,6 +374,7 @@ class emp_reimburse(osv.osv):
                     'journal_id': journal.id,
                     'period_id': period.id,
                     'date': order.date,
+                    'date_biz': order.date,
                     'amount_currency': 0.0,
                     'currency_id': False,
                     'reimburse_reconcile_mvln': line.move_line_id.id,
@@ -395,6 +397,7 @@ class emp_reimburse(osv.osv):
                 'journal_id': journal.id,
                 'period_id': period.id,
                 'date': order.date,
+                'date_biz': order.date,
                 'amount_currency': 0.0,
                 'currency_id': False,
             }
@@ -412,6 +415,7 @@ class emp_reimburse(osv.osv):
                     'journal_id': journal.id,
                     'period_id': period.id,
                     'date': order.date,
+                    'date_biz': order.date,
                     'amount_currency': 0.0,
                     'currency_id': False,
                     'to_reconcile_mvln': line.move_line_id.id,
