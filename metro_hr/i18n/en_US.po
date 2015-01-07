@@ -136,6 +136,30 @@ msgstr "Utilities"
 msgid "Other Deduction"
 msgstr "Other Deduction"
 
+#. module: metro_hr
+#: field:hr.rpt.attend.emp.day.line,hours_normal2:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_emp_day_line_hours_normal2
+msgid "Work Normal2"
+msgstr "Working hours(normal) by five days"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.emp.day.line,hours_ot2:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_emp_day_line_hours_ot2
+msgid "Work OT2"
+msgstr "Working hours(OT) by five days"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.emp.day.line,hours_normal:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_emp_day_line_hours_normal
+msgid "Work Normal"
+msgstr "Working hours(normal)"
+
+#. module: metro_hr
+#: field:hr.rpt.attend.emp.day.line,hours_ot:0
+#: model:ir.model.fields,field_description:metro_hr.field_hr_rpt_attend_emp_day_line_hours_ot
+msgid "Work OT"
+msgstr "Working hours(OT)"
+
 ########################Payroll########################
 #. module: metro_hr
 #: model:ir.ui.menu,name:metro_hr.menu_hr_emppay_configure
@@ -267,7 +291,6 @@ msgstr "Work Wage by five days"
 #: view:hr.emppay:0
 msgid "Attendance2"
 msgstr "Atendance by five days"
-
 
 #. module: metro_hr
 #: view:hr.emppay:0

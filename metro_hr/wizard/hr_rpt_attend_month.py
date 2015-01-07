@@ -346,6 +346,11 @@ class hr_rpt_attend_month(osv.osv):
     
     def pdf_inspection(self, cr, uid, ids, context=None):
         return self.print_pdf(cr, uid, ids,  'hr.rpt.attend.month.inspection', context)
+    
+    def pdf_attend_emp(self, cr, uid, ids, context=None):
+        rpt_day_ids = [self.browse(cr, uid, ids[0], context=context).attend_day_id.id]
+        context['attend_month_id'] = ids[0]
+        return self.pool.get('hr.rpt.attend.emp.day').print_empday_group(cr, uid, rpt_day_ids, context=context)
                 
 hr_rpt_attend_month()
 

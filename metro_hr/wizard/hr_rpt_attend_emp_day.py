@@ -509,8 +509,19 @@ class hr_rpt_attend_emp_day(osv.osv):
             rptlines = self.pool.get('hr.rpt.attend.emp.day.line').browse(cr, uid, rpt_line_ids, context=context)
             rpt = rptlines[0].rpt_id
             ids = [rpt.id]
+        #handle the attend month report parameter
+        attend_month_id = context.get('attend_month_id', None)
+        emp_attend_month_lines = {}
+        if attend_month_id:
+            attend_month_line_obj = self.pool.get('hr.rpt.attend.month.line')
+            attend_month_line_ids = attend_month_line_obj.search(cr, uid, [('rpt_id','=',attend_month_id)],context=context)
+            emp_ids = attend_month_line_obj.read(cr, uid, attend_month_line_ids, ['emp_id'])
+            emp_attend_month_lines = dict((item['emp_id'][0],item['id']) for item in emp_ids)    
             
         for rpt_line in rptlines:
+            #if from attend month report, only print the employees in the attendance report
+            if attend_month_id and not emp_attend_month_lines.get(rpt_line.emp_id.id):
+                continue
             key_group = '[%s]%s'%(rpt_line.emp_id.emp_code, rpt_line.emp_id.name)
             if not groups.get(key_group):
                 #Add the attendance data
@@ -533,6 +544,9 @@ class hr_rpt_attend_emp_day(osv.osv):
                                     'period_type_b_id':(worktime_types and len(worktime_types) >=2) and worktime_types[1]['id'] or None,
                                     'period_type_c_id':(worktime_types and len(worktime_types) >=3) and worktime_types[2]['id'] or None,
                                     'line_ids_dict':{}}
+                #add the attend month line link id
+                if attend_month_id:
+                    group_vals['attend_month_line_id'] = emp_attend_month_lines.get(group_vals['emp_id'])
                 groups[key_group] = group_vals
             #append this line
             group_vals = groups.get(key_group)
@@ -566,7 +580,7 @@ class hr_rpt_attend_emp_day(osv.osv):
         group_ids = []
         attend_empday_group_obj = self.pool.get('attend.empday.group')
         group_list  = groups.values()
-        group_list.sort(lambda x, y: cmp(x['name'], y['name']))
+        group_list.sort(lambda x, y: cmp(x['name'], y['name']))    
         for group in group_list:
             group_lines_list = []
             work_hours = 0
@@ -611,6 +625,7 @@ class attend_empday_group(osv.osv_memory):
         'period_type_c_id': fields.many2one('hr.worktime.type', string='Worktime C'),
         'days_attend':fields.float('Attended Days'),
         'hours_ot':fields.float('Overtime'), 
+        'attend_month_line_id':fields.many2one('hr.rpt.attend.month.line', string='Attend Month Line')
     }    
     
     def get_report_name(self, cr, uid, id, rpt_name, context=None):
@@ -656,7 +671,7 @@ class hr_rpt_attend_emp_day_line(osv.osv):
         'emp_name': fields.related('emp_id','name',string='Name', type='char'),
         
         #'day': fields.char('Day', store=True, size=32),
-        'day': fields.date("Day", required=True),
+        'day': fields.date("Date", required=True),
         'period_id': fields.many2one('resource.calendar.attendance','Period'),
         'p_weekday': fields.related('period_id','dayofweek',type='selection',
                                     selection=[('0','Monday'),('1','Tuesday'),('2','Wednesday'),('3','Thursday'),('4','Friday'),('5','Saturday'),('6','Sunday')],

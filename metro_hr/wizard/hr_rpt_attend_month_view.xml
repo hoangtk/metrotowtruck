@@ -27,6 +27,7 @@
                    	<button name="pdf_general" string="Print" type="object"/>
                    	<button name="pdf_notification" string="Print Notification" type="object"/>
                    	<button name="pdf_inspection" string="Print Inpsection" type="object"/>
+                   	<button name="pdf_attend_emp" string="Print With Attendance by Employee" type="object"/>
                    	
                    	<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
                 </header>          
