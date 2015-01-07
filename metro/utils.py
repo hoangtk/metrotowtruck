@@ -30,6 +30,7 @@ import time
 import pytz
 import logging
 from openerp.tools import resolve_attr 
+import openerp.tools as tools
 
 _logger = logging.getLogger(__name__)
 
@@ -129,6 +130,8 @@ def _email_send_group(cr, uid, email_from, email_to, subject, body, email_to_gro
                 email_ccs.append(email_cc)
             else:
                 email_ccs += email_cc
+        #set all email from from the .conf, johnw, 01/07/2015
+        email_from = tools.config.get('email_from')        
         mail.email_send(email_from, emails, subject, body, email_cc=email_ccs, attachments=attachments)
     #close the new cursor
     new_cr.close()        

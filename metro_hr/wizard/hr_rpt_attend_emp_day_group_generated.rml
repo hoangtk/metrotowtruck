@@ -405,7 +405,7 @@
     </para>
     <section>
       <para style="terp_default_8">[[not o.attend_month_line_id and removeParentNode('section')]]</para>
-      <blockTable colWidths="35.0,34.0,35.0,37.0,35.0,36.0,35.0,38.0,37.0,39.0,39.0,41.0,42.0,42.0,41.0" style="Table2">
+      <blockTable colWidths="34.0,35.0,35.0,37.0,35.0,36.0,35.0,38.0,37.0,39.0,39.0,42.0,41.0,42.0,40.0" style="Table2">
         <tr>
           <td>
             <para style="P11">应出勤</para>
@@ -560,7 +560,7 @@
     <para style="P15">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="59.0,29.0,140.0,138.0,134.0,35.0,30.0" style="Table4">
+    <blockTable colWidths="59.0,29.0,141.0,138.0,134.0,35.0,30.0" style="Table4">
       <tr>
         <td>
           <para style="P16">日期</para>
@@ -590,7 +590,7 @@
         </td>
       </tr>
     </blockTable>
-    <blockTable colWidths="59.0,29.0,35.0,34.0,36.0,35.0,36.0,34.0,36.0,32.0,33.0,33.0,35.0,33.0,35.0,30.0" style="Table5">
+    <blockTable colWidths="59.0,30.0,35.0,34.0,36.0,35.0,36.0,34.0,36.0,32.0,33.0,33.0,35.0,33.0,35.0,30.0" style="Table5">
       <tr>
         <td>
           <para style="P16">Date</para>
@@ -656,6 +656,9 @@
         </td>
       </tr>
     </blockTable>
+    <para style="P9">
+      <font color="white"> </font>
+    </para>
     <section>
       <para style="P10">[[ repeatIn(o.line_ids,'line') ]]</para>
       <blockTable colWidths="59.0,29.0,35.0,34.0,36.0,35.0,36.0,34.0,36.0,32.0,33.0,33.0,35.0,33.0,35.0,30.0" style="Table1">
@@ -710,7 +713,13 @@
           </td>
         </tr>
       </blockTable>
+      <para style="P9">
+        <font color="white"> </font>
+      </para>
     </section>
+    <para style="terp_default_8">
+      <font color="white"> </font>
+    </para>
   </story>
 </document>
 

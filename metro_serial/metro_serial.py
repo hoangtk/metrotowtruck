@@ -119,6 +119,7 @@ class mttl_serials(osv.osv):
     _name = "mttl.serials"
     _description = "Serials"
     _rec_name="serial"
+    _order = "id desc"
     _columns = {
         'serial':fields.char('Serial', size=50, help="Add text here"),
         

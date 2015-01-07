@@ -595,8 +595,10 @@ class hr_emppay_sheet(osv.osv):
         return defaults
     
     def onchange_date(self, cr, uid, ids, date_from, date_to, context=None):
-        account_period_id = self._get_period_id(cr, uid, date_to, context=context)            
         res = {'value':{}}         
+        if not isinstance(date_from,type(' ')) or  not isinstance(date_to,type(' ')):
+            return res
+        account_period_id = self._get_period_id(cr, uid, date_to, context=context)            
         if account_period_id:
             res['value'] = {'account_period_id': account_period_id}
         return res
