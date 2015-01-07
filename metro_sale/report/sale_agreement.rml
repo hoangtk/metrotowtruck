@@ -338,13 +338,13 @@
         <tr>
           <td>
             <para style="terp_default_9">[[ format(line.name) ]]</para>
-            <para style="terp_default_9">Serial(s):[[', '.join(map(lambda x: x.serial, line.serial_ids))]]</para>
+            <para style="terp_default_9">[[not line.serial_ids and removeParentNode('para')]]Serial(s):[[', '.join(map(lambda x: x.serial, line.serial_ids))]]</para>
           </td>
           <td>
             <para style="terp_default_Centre_9">[[ ', '.join(map(lambda x: x.name, line.tax_id)) ]]</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(line.product_uos and line.product_uos_qty or line.product_uom_qty, digits=get_digits(dp='Product UoS')) ]][[ line.product_uos and line.product_uos.name or line.product_uom.name ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(line.product_uos and line.product_uos_qty or line.product_uom_qty, digits=get_digits(dp='Product UoS')) ]] [[ line.product_uos and line.product_uos.name or line.product_uom.name ]]</para>
           </td>
           <td>
             <para style="terp_default_Right_9">[[ formatLang(line.price_unit , digits=get_digits(dp='Product Price Sale'))]]</para>
