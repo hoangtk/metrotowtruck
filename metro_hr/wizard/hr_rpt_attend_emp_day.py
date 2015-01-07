@@ -671,7 +671,7 @@ class hr_rpt_attend_emp_day_line(osv.osv):
         'emp_name': fields.related('emp_id','name',string='Name', type='char'),
         
         #'day': fields.char('Day', store=True, size=32),
-        'day': fields.date("Date", required=True),
+        'day': fields.date("Day", required=True),
         'period_id': fields.many2one('resource.calendar.attendance','Period'),
         'p_weekday': fields.related('period_id','dayofweek',type='selection',
                                     selection=[('0','Monday'),('1','Tuesday'),('2','Wednesday'),('3','Thursday'),('4','Friday'),('5','Saturday'),('6','Sunday')],
