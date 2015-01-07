@@ -49,8 +49,9 @@ class plate_material(osv.osv):
     ]
 
     def update_plate_whole_qty(self, cr, uid, prod_id, change_qty, context=None):
-        if not prod_id:
+        if not prod_id or int(change_qty) == 0:
             return
+        change_qty = int(change_qty)
         #check if this product need to generate whole quantity records
         prod_data = self.pool.get('product.product').browse(cr, uid, prod_id, context=context)
         cate_ids = self.pool.get('ir.config_parameter').get_param(cr, uid, 'stock.plate.wholeqty.category_id', context=context)
@@ -78,6 +79,8 @@ class stock_move(osv.osv):
     def action_done(self, cr, uid, ids, context=None):
         resu = super(stock_move,self).action_done(cr, uid, ids, context=context)
         for move in self.browse(cr, uid, ids, context=context):
+            if move.type != 'in':
+                continue
             #increase the plate material whole quantity
             self.pool.get('plate.material').update_plate_whole_qty(cr, uid, move.product_id.id, move['product_qty'], context=context)
         return resu
