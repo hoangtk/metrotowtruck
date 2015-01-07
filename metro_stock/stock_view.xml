@@ -463,6 +463,12 @@
 <!--             	<xpath expr="//sheet/group" position="after">
                 	<label for="comments"/>         	
             	</xpath> -->
+            	<xpath expr="//field[@name='inventory_line_id']/tree/field[@name='product_uom']" position="before">
+            		<field name="uom_categ_id" invisible="1"/>
+            	</xpath>
+            	<xpath expr="//field[@name='inventory_line_id']/tree/field[@name='product_uom']" position="attributes">
+            		<attribute name="domain">[('category_id','=',uom_categ_id)]</attribute>
+            	</xpath>
             </field>
         </record>
          <record id="metro_view_inventory_filter" model="ir.ui.view">
