@@ -215,7 +215,7 @@ class rpt_account_cn(osv.osv_memory):
 
                 #detail lines
                 if rpt.level == 'detail':
-                    cr.execute('SELECT aml.debit, aml.credit,aml.date_biz as move_date, am.name as move_name, aml.name as move_line_name, \
+                    cr.execute('SELECT aml.debit, aml.credit,am.date as move_date, am.name as move_name, aml.name as move_line_name, \
                             aml.id,aml.move_id \
                             FROM account_move_line aml \
                             JOIN account_move am ON (am.id = aml.move_id) \
