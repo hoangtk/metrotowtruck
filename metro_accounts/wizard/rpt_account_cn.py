@@ -135,7 +135,7 @@ class rpt_account_cn(osv.osv_memory):
         if debit == credit: bal_direct = 'balanced'
         if debit > credit: bal_direct = 'debit'
         if debit < credit: bal_direct = 'credit'
-        balance = account.bal_direct == 'credit' and (credit-debit) or (debit-credit) 
+        balance = account.bal_direct == 'c' and (credit-debit) or (debit-credit) 
         return balance, bal_direct          
         
     def run_account_cn(self, cr, uid, ids, context=None):

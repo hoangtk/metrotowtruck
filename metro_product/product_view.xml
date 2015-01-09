@@ -396,10 +396,16 @@
         <record model="ir.ui.view" id="metro_product_kanban_view">
             <field name="name">Product Kanban</field>
             <field name="model">product.product</field>
-            <field name="inherit_id" ref="product.product_kanban_view"/>
+            <field name="inherit_id" ref="stock.product_kanban_stock_view"/>
             <field name="arch" type="xml">
             	<field name="name" position="after">
             		<field name="cn_name"/>
+            	</field>
+            	<field name="qty_available" position="replace">
+            		<field name="qty_onhand"/>
+            	</field>
+            	<field name="virtual_available" position="replace">
+            		<field name="qty_virtual"/>
             	</field>
             </field>		
 		</record>
