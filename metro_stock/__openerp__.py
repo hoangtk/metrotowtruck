@@ -49,6 +49,7 @@
         'stock_wh_loc.xml',     
         'stock_barcode_view.xml',
         'stock_raw_material_view.xml',
+        'stock_mt_rpt_view.xml',
     ],
     'test': [],
     'demo': [],
