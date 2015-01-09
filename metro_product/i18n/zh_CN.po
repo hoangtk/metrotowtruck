@@ -665,3 +665,8 @@ msgstr "入库"
 #: field:product.product,qty_out:0
 msgid "Outgoing"
 msgstr "出仓"
+
+#. module: stock
+#: view:product.product:0
+msgid "On hand:"
+msgstr "在手:"

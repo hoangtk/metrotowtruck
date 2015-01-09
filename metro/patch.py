@@ -287,6 +287,43 @@ def many2many_get(self, cr, model, ids, name, user=None, offset=0, context=None,
 fields.many2many.get =  many2many_get
 
 '''
+Improve the read of related field, add the 'reference' type handling
+'''
+from openerp import SUPERUSER_ID
+def related_fnct_read(self, obj, cr, uid, ids, field_name, args, context=None):
+    res = {}
+    for record in obj.browse(cr, SUPERUSER_ID, ids, context=context):
+        value = record
+        for field in self.arg:
+            if isinstance(value, list):
+                value = value[0]
+            value = value[field] or False
+            if not value:
+                break
+        res[record.id] = value
+
+    if self._type == 'many2one':
+        # res[id] is a browse_record or False; convert it to (id, name) or False.
+        # Perform name_get as root, as seeing the name of a related object depends on
+        # access right of source document, not target, so user may not have access.
+        value_ids = list(set(value.id for value in res.itervalues() if value))
+        value_name = dict(obj.pool.get(self._obj).name_get(cr, SUPERUSER_ID, value_ids, context=context))
+        res = dict((id, value and (value.id, value_name[value.id])) for id, value in res.iteritems())
+
+    elif self._type in ('one2many', 'many2many'):
+        # res[id] is a list of browse_record or False; convert it to a list of ids
+        res = dict((id, value and map(int, value) or []) for id, value in res.iteritems())
+        
+    #johnw, 01/08/2015, add 'reference' support
+    elif self._type =='reference':
+        # res[id] is a browse_record(browse_record: browse_record(emp.reimburse, 91)) or False; convert it to "obj_name,obj_id" string format
+        res = dict((id, value and '%s,%s'%(value._model._name, value.id)) for id, value in res.iteritems())
+
+    return res
+
+fields.related._fnct_read =  related_fnct_read
+
+'''
 Add the report download file name support
 '''   
 from osv import fields,osv,orm    

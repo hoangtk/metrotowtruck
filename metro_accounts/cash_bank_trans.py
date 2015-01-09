@@ -85,7 +85,7 @@ class cash_bank_trans(osv.osv):
         for obj_type in obj_types:
             name_prefix = sel_types[obj_type['type']]
             if obj_type['type'] == 'o_pay_rec':
-                name_prefix = obj_type['trans_type'] == 'Withdraw' and 'Other Payments' or 'Other Receipts'
+                name_prefix = 'Other Payments' if obj_type['trans_type'] == 'withdraw' else 'Other Receipts'
             #get the different title by various type
             data_name = '%s[%s]'%(_(name_prefix), obj_type['id'])
             ret_names.append((obj_type['id'], data_name))
