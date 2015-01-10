@@ -64,9 +64,13 @@ class mrp_bom(osv.osv):
                 'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
                 #for top bom, define the work cetner and the components relationship
                 'bom_routing_ids': fields.one2many('mrp.bom.routing.operation', 'bom_id', string='Routing BOM Matrix', domain_fnct=_domain_bom_routing),
+#johnw, 01/10/2015, comment the field 'comp_routing_workcenter_ids', it will cause the table 
+#mrp_bom_routing_operation creation without ID
+#there are designment issues on this table, so only use it by "bom_routing_ids" now
+#the code in mrp_view.xml are comment before, do not know the exact reason                
                 #for the component, define the sub components related work center from parent bom's routing definition, 
                 #only show for the bom components(bom_id is not false)
-                'comp_routing_workcenter_ids': fields.many2many('mrp.routing.workcenter','mrp_bom_routing_operation','bom_comp_id','routing_workcenter_id',
+                #'comp_routing_workcenter_ids': fields.many2many('mrp.routing.workcenter','mrp_bom_routing_operation','bom_comp_id','routing_workcenter_id',
                                                                 string='Work Centers', domain=_domain_bom_routing),
                 #08/21/2014, the direct bom id, will be used in manufacture order, the the action_compute()-->_bom_explode() 
                 #1.user set the bom_lines of this bom, then will use bom_lines to explode the products and work centers
