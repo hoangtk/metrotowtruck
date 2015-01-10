@@ -71,7 +71,7 @@ class mrp_bom(osv.osv):
                 #for the component, define the sub components related work center from parent bom's routing definition, 
                 #only show for the bom components(bom_id is not false)
                 #'comp_routing_workcenter_ids': fields.many2many('mrp.routing.workcenter','mrp_bom_routing_operation','bom_comp_id','routing_workcenter_id',
-                                                                string='Work Centers', domain=_domain_bom_routing),
+                #                                                string='Work Centers', domain=_domain_bom_routing),
                 #08/21/2014, the direct bom id, will be used in manufacture order, the the action_compute()-->_bom_explode() 
                 #1.user set the bom_lines of this bom, then will use bom_lines to explode the products and work centers
                 #2.if no bom_lines, then check this field 'direct_bom_id', if there is a bom setted, then use this bom to do _bom_explode
