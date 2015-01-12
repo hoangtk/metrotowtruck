@@ -75,8 +75,16 @@ class sale_order(osv.osv):
         
     def write(self, cr, uid, ids, vals, context=None):                
         set_seq_o2m(cr, uid, vals.get('order_line'), 'sale_order_line', 'order_id', ids[0], context=context)  
-        return super(sale_order, self).write(cr, uid, ids, vals, context=context)
-    
+        resu = super(sale_order, self).write(cr, uid, ids, vals, context=context)
+        if 'state' in vals and vals['state'] == 'agreed':
+            #check serials
+            order_line_obj = self.pool.get('sale.order.line')
+            for order in self.browse(cr, uid, ids, context=context):
+                for order_line in order.order_line:
+                    msg = order_line_obj._check_serial(cr, uid, exclude_soln_id = order_line.id, context=context)
+                    if msg:
+                        raise osv.except_osv(_('Error'),msg)            
+        return resu
     def action_button_confirm(self, cr, uid, ids, context=None):
         #check serials
         order_line_obj = self.pool.get('sale.order.line')
