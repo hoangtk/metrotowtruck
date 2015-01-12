@@ -3,6 +3,8 @@ from osv import fields,osv
 from openerp import netsvc
 import openerp.addons.decimal_precision as dp
 from openerp.addons.metro.utils import set_seq_o2m
+from openerp.tools.translate import _
+
 class sale_order(osv.osv):
     _inherit="sale.order"
     _name="sale.order"
@@ -65,16 +67,25 @@ class sale_order(osv.osv):
                  'ids': ids,
                  'form': self.read(cr, uid, ids[0], context=context),
         }
-        return {'type': 'ir.actions.report.xml', 'report_name': 'sale.agreement', 'datas': datas, 'nodestroy': True}    
-                       
+        return {'type': 'ir.actions.report.xml', 'report_name': 'sale.agreement', 'datas': datas, 'nodestroy': True}            
+                           
     def create(self, cr, uid, data, context=None):        
         set_seq_o2m(cr, uid, data.get('order_line'), context=context)
         return super(sale_order, self).create(cr, uid, data, context)
         
-    def write(self, cr, uid, ids, vals, context=None):      
+    def write(self, cr, uid, ids, vals, context=None):                
         set_seq_o2m(cr, uid, vals.get('order_line'), 'sale_order_line', 'order_id', ids[0], context=context)  
         return super(sale_order, self).write(cr, uid, ids, vals, context=context)
-                    
+    
+    def action_button_confirm(self, cr, uid, ids, context=None):
+        #check serials
+        order_line_obj = self.pool.get('sale.order.line')
+        for order_line in self.browse(cr, uid, ids[0], context=context).order_line:
+            msg = order_line_obj._check_serial(cr, uid, exclude_soln_id = order_line.id, context=context)
+            if msg:
+                raise osv.except_osv(_('Error'),msg)
+        return super(sale_order, self).action_button_confirm(cr, uid, ids, context=context)
+                                    
 sale_order()
 
 class sale_order_line(osv.osv):
@@ -125,9 +136,86 @@ class sale_order_line(osv.osv):
             res['value']['config_changed'] = False
         
         return res
-            
-    def create(self, cr, uid, vals, context=None):
+
+#    def _check_serial(self, cr, uid, exclude_soln_ids, exclude_so_states=None, context=None):
+#        '''
+#        Check the SO serials existance
+#        @param serial_ids: one list of serial ids to check
+#        @exclude_soln_ids: the sale order line ids to exclude
+#        '''
+#        if not exclude_soln_ids:
+#            return False
+#        #get the serial ids to check from the exclude_soln_ids
+#        serial_ids = []
+#        for line in self.read(cr, uid, exclude_soln_ids, ['serial_ids'], context=context):
+#            serial_ids.extend(line['serial_ids'])
+#        if not serial_ids:
+#            #no to check serials found then return
+#            return False
+#            
+#        sql = '''
+#        select d.serial,  c.id as so_id, c.name as so_name, b.id as so_line_id, b.name as so_line_name, e.default_code as prod_code, f.name as prod_name
+#        from sale_serial_rel a
+#        join sale_order_line b on a.line_id = b.id
+#        join sale_order c on b.order_id = c.id
+#        join mttl_serials d on a.serials_id = d.id
+#        left join product_product e on b.product_id = e.id
+#        left join product_template f on e.product_tmpl_id = f.id
+#        where b.id not in %s and d.id in %s
+#        '''
+#        where_params = [tuple(exclude_soln_ids), tuple(serial_ids)]
+#        if exclude_so_states:
+#            sql += " and c.state not in %s"
+#            where_params.append(tuple(exclude_so_states))            
+#        #d.id = ANY(%s)',(ids,)) 
+#        #id IN %s', (tuple(ids),))        
+#        cr.execute(sql, tuple(where_params))
+#        res = cr.dictfetchall()
+#        if not res:
+#            return False
+#        msg = 'Serials on multi orders error:\n\n'
+#        for serial in res:
+#            msg += 'Serial#: %s SaleOrder: %s\n Product: %s\n'%(serial['serial'],serial['so_name'],serial['so_line_name'])
+#        return msg
+
+    def _check_serial(self, cr, uid, exclude_soln_id, exclude_so_states=None, context=None):
+        '''
+        Do not use the original SQL checking reason, is that the delete/update can not affect to DB before transaction commit.
+        Check the SO serials existance
+        @param serial_ids: one list of serial ids to check
+        @exclude_soln_id: the sale order line id to exclude
+        '''
+        if not exclude_soln_id:
+            return False
+        #get the serial ids to check from the exclude_soln_id
+        serial_ids = []
+        exclude_line = self.read(cr, uid, exclude_soln_id, ['serial_ids','name'], context=context)
+        serial_ids.extend(exclude_line['serial_ids'])
+        if not serial_ids:
+            #no to check serials found then return
+            return False
+        #search the serials
+        domain = [('serial_ids','in',serial_ids), ('id', '!=', exclude_soln_id)]
+        if exclude_so_states:
+            domain.append(('order_id.state', 'not in', exclude_so_states))
+        order_line_ids = self.search(cr, uid, domain, context=context)
+        if order_line_ids:
+            msg = 'Duplicated serials assignment on %s\n\nExisting orders:\n'%(exclude_line['name'])
+            for line in self.browse(cr, uid, order_line_ids, context=context):
+                exist_serial_ids = [serial_id.serial for serial_id in line.serial_ids if serial_id.id in serial_ids]
+                exist_serials = ','.join(exist_serial_ids)
+                msg += 'Serial#: %s SaleOrder: %s\n Line: %s\n'%(exist_serials, line.order_id.name, line.name)
+            return msg
+        else:
+            return False
+                    
+    def create(self, cr, uid, vals, context=None):            
         new_id = super(sale_order_line, self).create(cr, uid, vals, context)
+        #check serials
+        if 'serial_ids' in vals:
+            msg = self._check_serial(cr, uid, exclude_soln_id = new_id, exclude_so_states=['draft','sent','cancel'], context=context)
+            if msg:
+                raise osv.except_osv(_('Error'),msg)
         #auto copy the common mto design to a new design
         line = self.browse(cr, uid, new_id, context=context)
         if line.mto_design_id and line.mto_design_id.type == 'common':
@@ -143,6 +231,12 @@ class sale_order_line(osv.osv):
             ids = [ids]
         config_old_datas = self.read(cr, uid, ids, ['mto_design_id'], context=context)            
         resu = super(sale_order_line, self).write(cr, uid, ids, vals, context=context)
+        #check serials
+        if 'serial_ids' in vals:
+            for line_id in ids:
+                msg = self._check_serial(cr, uid, exclude_soln_id = line_id, exclude_so_states=['draft','sent','cancel'], context=context)
+                if msg:
+                    raise osv.except_osv(_('Error'),msg)
         #deal the mto_design_id     
         if 'mto_design_id' in vals:
             lines = self.browse(cr, uid, ids, context)

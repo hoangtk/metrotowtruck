@@ -861,7 +861,7 @@ class mrp_production_workcenter_line(osv.osv):
     but they are one move in fact. 
     '''
     def _move_lines(self, cr, uid, ids, field_name, arg, context=None):
-        res=dict.fromkeys(ids,[])
+        res=dict((id,[]) for id in ids)
         sql = '''
         select b.id, c.consume_move_id
         from mrp_bom_routing_operation a
