@@ -20,7 +20,7 @@
 ##############################################################################
 
 import hr_clock_emp_sync
-import hr_emp_worktime
+import hr_emp_wtgrp_set
 import hr_attend_calc_action
 import hr_rpt_attend_emp_day
 import hr_rpt_attend_month

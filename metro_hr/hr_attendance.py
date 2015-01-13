@@ -19,11 +19,67 @@ from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.addons.metro import utils
 
 import pytz
+'''
+Working time group, handle the working time as a group:
+date_from, date_to, calendar_id, name
+...
+'''
+class hr_wt_grp(osv.osv):
+    _name = "hr.wt.grp"
+    _description="working time group"
+    _columns = {
+        'name' : fields.char('Name', size=32, required=True),
+        'worktime_ids': fields.one2many('hr.wt.grp.line', 'grp_id', 'Working times'),  
+    }
+
+    def _check_wt(self,cr,uid,ids,context=None):
+        date_wts=[]
+        for grp in self.browse(cr, uid, ids):
+            date_wts=[]
+            for wt in grp.worktime_ids:
+                if wt.date_to < wt.date_from:
+                    raise osv.except_osv(_('Error'),_('Date to can not be earlier than from!'))                
+                for period in date_wts:
+                    if (wt.date_from >= period['from'] and wt.date_from <= period['to']) \
+                            or (wt.date_to >= period['from'] and wt.date_to <= period['to']) \
+                            or (wt.date_from <= period['from'] and wt.date_to >= period['to']):
+                        raise osv.except_osv(_('Error'),_('Period duration of %s is conflicted with other periods!'%(wt.name)))
+                date_wts.append({'from':wt.date_from, 'to':wt.date_to})
+        return True
+    
+    def create(self, cr, uid, vals, context=None):
+        new_id = super(hr_wt_grp, self).create(cr, uid, vals, context=context)
+        self._check_wt(cr, uid, [new_id], context=context)
+        return new_id    
+        
+    def write(self, cr, uid, ids, vals, context=None):
+        resu = super(hr_wt_grp, self).write(cr, uid, ids, vals, context=context)
+        self._check_wt(cr, uid, ids, context=context)
+        return resu    
+    
+class hr_wt_grp_line(osv.osv):
+    _name = 'hr.wt.grp.line'
+    _description="working time group line"
+    _columns = {
+        'name' : fields.char('Name', size=32, required=True),
+        'date_from' : fields.date('From Date', required=True),
+        'date_to' : fields.date('To Date', required=True),
+        'calendar_id' : fields.many2one("resource.calendar", "Working Time", required=True),
+        'grp_id': fields.many2one('hr.wt.grp', 'Group', required=True, ondelete='cascade'),
+    }  
+    def onchange_calendar(self, cr, uid, ids, calendar_id, name, context=None):
+        res = {'value':{}}
+        if not calendar_id or (name and name != ''):
+            return res
+        cale_name = self.pool.get('resource.calendar').read(cr, uid, calendar_id, ['name'], context=context)['name']
+        res['value']['name'] = cale_name
+        return res
 
 class hr_employee(osv.osv):
     _inherit = "hr.employee"
     _columns = {
         'last_punch_time': fields.datetime('Last Punching Time', required=False, select=1,readonly=True),
+        'wt_grp_id': fields.many2one('hr.wt.grp', 'Working time group'),  
     }
     
     def update_punch_time(self, cr, uid, emp_id, dt_punch, context):
@@ -42,7 +98,7 @@ class hr_employee(osv.osv):
         #the day search support
         new_args = utils.deal_args_dt(cr, user, self, args,['last_punch_time'],context=context)
         return super(hr_employee,self).search(cr, user, new_args, offset, limit, order, context, count)
-    
+        
 class hr_attendance(osv.osv):
     _inherit = "hr.attendance"
     def _day_compute(self, cr, uid, ids, fieldnames, args, context=None):

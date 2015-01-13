@@ -109,11 +109,6 @@
             <field name="arch" type="xml">
                 <form string="Working Time" version="7.0">
                     <field name="id" invisible="1"/>
-                	<header>
-                		<button name="%(action_hr_emp_worktime_batch)d" string="Set Working Time" type="action"/>
-                		<button name="%(hr.open_view_employee_list_my)d" string="Assigned Employees" type="action"
-                			context="{'default_calendar_id': id, 'search_default_calendar_id': id}"/>
-                	</header>
                     <sheet>
                     <group col="4">
                         <field name="name"/>
@@ -208,6 +203,58 @@
         parent="hr_attendance.menu_hr_attendance" sequence="31"/>  
         
 
+<!-- Employee working time group -->         
+        <record id="view_hr_wt_grp_tree" model="ir.ui.view">
+            <field name="name">view_hr_wt_grp_tree</field>
+            <field name="model">hr.wt.grp</field>
+            <field name="arch" type="xml">
+                <tree string="Working Time Group">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>  
+        <record id="view_hr_wt_grp_form" model="ir.ui.view">
+            <field name="name">view_hr_wt_grp_form</field>
+            <field name="model">hr.wt.grp</field>
+            <field name="arch" type="xml">
+                <form string="Working Time Group" version="7.0">
+                    <field name="id" invisible="1"/>
+                	<header>
+                		<button name="%(action_hr_emp_wtgrp_set_batch)d" string="Set Working Time Group" type="action"/>
+                		<button name="%(hr.open_view_employee_list_my)d" string="Assigned Employees" type="action"
+                			context="{'default_wt_grp_id': id, 'search_default_wt_grp_id': id}"/>                		
+                	</header>
+                    <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+               		<separator string="Working Time"/>
+               		<field name="worktime_ids" nolabel="1">
+               			<tree string="Work times" editable="bottom">
+               				<field name="date_from"/>
+               				<field name="date_to"/>
+               				<field name="calendar_id" on_change="onchange_calendar(calendar_id, name)"/>
+               				<field name="name"/>
+               			</tree>
+               		</field>
+                    </sheet>
+                </form>
+            </field>
+        </record>  
+        
+        <record id="action_hr_wt_grp" model="ir.actions.act_window">
+            <field name="name">Working Time Group</field>
+            <field name="res_model">hr.wt.grp</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hr_wt_grp_tree"/>
+        </record>
+                
+        <menuitem 
+        action="action_hr_wt_grp" 
+        id="menu_hr_wt_grp"
+        parent="hr_attendance.menu_hr_attendance" sequence="32"/>
+        
 <!-- Employee working time type -->        
         <record id="view_hr_worktime_type_tree" model="ir.ui.view">
             <field name="name">view_hr_worktime_type_tree</field>
@@ -231,7 +278,7 @@
         <menuitem 
         action="action_hr_worktime_type" 
         id="menu_hr_worktime_type"
-        parent="hr_attendance.menu_hr_attendance" sequence="33"/>  
+        parent="hr_attendance.menu_hr_attendance" sequence="34"/>  
                 
 <!-- Employee add the working time and attendance punching time-->
         <record model="ir.ui.view" id="metro_employee_tree_view_attend">
@@ -240,7 +287,7 @@
             <field name="inherit_id" ref="metro_employee_tree_view"/>
             <field name="arch" type="xml">
                 <field name="emp_card_id" position="after">
-                	<field name="calendar_id" string="Working Time"/>
+                	<field name="wt_grp_id" string="Working time group"/>
                 	<field name="last_punch_time"/>
                 	<field name="country_id"/>
                 </field>
@@ -252,9 +299,9 @@
             <field name="inherit_id" ref="metro_employee_form_view"/>
             <field name="arch" type="xml">
                 <field name="emp_card_id" position="after">
-                	<field name="calendar_id" string="Working Time"/>
+                	<field name="wt_grp_id"/>
                 	<field name="last_punch_time"/>
-                </field>
+                </field>    
             </field>
         </record>    
         <record model="ir.ui.view" id="metro_view_employee_filter_attend">
@@ -263,7 +310,7 @@
             <field name="inherit_id" ref="metro_view_employee_filter"/>
             <field name="arch" type="xml">
                 <field name="emp_card_id" position="after">
-                	<field name="calendar_id" string="Working Time"/>
+                	<field name="wt_grp_id" string="Working Time Group"/>
                 	<field name="last_punch_time"/>
                 	<field name="country_id"/>
                 	<filter icon="terp-go-today" string="Punched today" name="punch_today" domain="[('last_punch_time','=',current_date)]" />

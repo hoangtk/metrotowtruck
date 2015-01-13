@@ -22,29 +22,29 @@
 from openerp.osv import osv,fields
 from openerp.tools.translate import _
 
-class hr_emp_worktime(osv.osv_memory):
-    _name = 'hr.emp.worktime'
-    _description = 'Set Employee Working Time'
+class hr_emp_wtgrp_set(osv.osv_memory):
+    _name = 'hr.emp.wtgrp.set'
+    _description = 'Set Employee Working Time Group'
     _columns = {
-        'calendar_id' : fields.many2one('resource.calendar','Working Time', required=True),
+        'wt_grp_id': fields.many2one('hr.wt.grp', 'Working time group'),  
         'emp_ids' : fields.many2many('hr.employee', string='Employees', required=True),
     }
                         
     def default_get(self, cr, uid, fields, context=None):
-        vals = super(hr_emp_worktime, self).default_get(cr, uid, fields, context=context)
+        vals = super(hr_emp_wtgrp_set, self).default_get(cr, uid, fields, context=context)
         if not vals:
             vals = {}
-        #calendar id
-        if context.get('active_model','') == 'resource.calendar' and context.get('active_id'):
-            vals['calendar_id'] = context.get('active_id')
+        #worktime group id
+        if context.get('active_model','') == 'hr.wt.grp' and context.get('active_id'):
+            vals['wt_grp_id'] = context.get('active_id')
         #employees
         if context.get('active_model','') == 'hr.employee' and context.get('active_ids'):
             vals['emp_ids'] = context.get('active_ids')
                                 
         return vals
     
-    def set_worktime(self, cr, uid, ids, context=None):
-        order_data = self.read(cr, uid, ids[0], ['emp_ids','calendar_id'], context=context)
-        self.pool.get('hr.employee').write(cr, uid, order_data['emp_ids'],{'calendar_id':order_data['calendar_id'][0]},context=context)
+    def set_data(self, cr, uid, ids, context=None):
+        order_data = self.read(cr, uid, ids[0], ['emp_ids','wt_grp_id'], context=context)
+        self.pool.get('hr.employee').write(cr, uid, order_data['emp_ids'],{'wt_grp_id':order_data['wt_grp_id'][0]},context=context)
         return True
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
