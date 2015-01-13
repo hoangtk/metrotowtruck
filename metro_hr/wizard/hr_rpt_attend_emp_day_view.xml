@@ -6,7 +6,7 @@
             <field name="name">view_hr_rpt_attend_emp_day_line_tree</field>
             <field name="model">hr.rpt.attend.emp.day.line</field>
             <field name="arch" type="xml">
-					<tree editable="bottom" string="Attendances Daily Report Line" create="0" delete="0">
+					<tree editable="bottom" string="Attendances Daily Report Line" create="0" delete="1">
 						<field name="rpt_id" readonly="1" invisible="1"/>
 						<field name="state" invisible="1"/>
 						<field name="seq" readonly="1"/>
@@ -56,10 +56,11 @@
             <field name="view_id" ref="view_hr_rpt_attend_emp_day_line_tree"/>
             <field name="search_view_id" ref="view_hr_rpt_attend_emp_day_line_filter"/>
             <field name="domain">[('rpt_id','=',active_id)]</field>
-            <field name="context">{'search_default_groupby_emp':True}</field>
+            <!-- <field name="context">{'search_default_groupby_emp':True}</field> -->
+            <field name="context">{}</field>
         </record>      
         
-		<!-- print PDF from line -->
+<!-- print PDF from line -->
         <record id="action_server_hr_empday_line_pdf" model="ir.actions.server">
             <field name="name">Employee Daily Attendance Report</field>
             <field name="condition">True</field>
@@ -79,8 +80,33 @@
             <field name="model">hr.rpt.attend.emp.day.line</field>
             <!-- <field name="key2">client_action_multi</field> -->
             <field name="key2">client_print_multi</field>
-        </record>        
-            
+        </record>                            
+           
+<!-- generate daily report wizard by employee -->
+        <record id="view_rpt_attend_emp_day_wizard" model="ir.ui.view">
+            <field name="name">view_rpt_attend_emp_day_wizard</field>
+            <field name="model">hr.rpt.attend.emp.day.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Generate Daily Attendance" version="7.0">
+                	<separator string='Select employees to generate daily attendance'/>
+                	<field name="emp_ids"/>
+                <footer>
+		            <button name="set_data" string="Generate" type="object" class="oe_highlight"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+                </form>
+            </field>
+        </record>
+        
+         <act_window name="Generate Daily Attendance"
+            res_model="hr.rpt.attend.emp.day.wizard"
+            src_model="hr.rpt.attend.emp.day"
+            view_mode="form"
+            target="new"
+            id="action_rpt_attend_emp_day_wizard"
+            groups="base.group_hr_user"/>           
+    
 <!-- Attendances Daily Report -->
         <record id="view_hr_rpt_attend_emp_day_form" model="ir.ui.view">
             <field name="name">HR Attendance Employee Daily Report</field>
@@ -89,7 +115,7 @@
             <form string="Report" version="7.0">
                 <field name="type" invisible="1"/>
                 <header>
-                	<button name="run_report" string="Generate Attendance" type="object" states="draft" class="oe_highlight"/>
+                	<button name="%(action_rpt_attend_emp_day_wizard)d" string="Generate Daily Attendance" type="action" states="draft" class="oe_highlight"/>
                    	<button name="%(act_empday_rpt_2_line)d" string="View Generated Attendances" type="action"/>  	
                    	<button name="print_empday_group" string="Print" type="object"/>                 
                    	<button name="action_confirm" string="Confirm" states="draft" type="object" class="oe_highlight"/>                   	
@@ -130,7 +156,7 @@
                 </group>     
 
                 <notebook>
-                	<page name="employee" string="Employees">
+                	<page name="employee" string="Selected Employees">
                 		<field name="emp_ids" attrs="{'readonly':[('state','!=','draft')]}"/>
                 	</page>
                 	<page name="data" string="Attendance" invisible="1">
@@ -161,7 +187,7 @@
 							</tree>
 						</field>
                 	</page>
-                	<page name="attend_month" string="Monthly Report">
+                	<page name="attend_month" string="Monthly Report" invisible="1">
                 		<field name="attend_month_ids"/>
                 	</page>
                 </notebook>
@@ -214,6 +240,6 @@
             groups="base.group_hr_manager"
             parent="hr_attendance.menu_hr_attendance"
             sequence="28"
-           />                
+           />                        
     </data>
 </openerp>

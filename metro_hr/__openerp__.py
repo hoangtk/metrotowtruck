@@ -42,7 +42,7 @@
         'hr_contract_view.xml',
         'metro_calendar_view.xml',
         'wizard/hr_clock_emp_sync_view.xml',
-        'wizard/hr_emp_worktime_view.xml',
+        'wizard/hr_emp_wtgrp_set_view.xml',
         'wizard/hr_attend_calc_action_view.xml',
         'wizard/hr_rpt_attend_emp_day_view.xml',
         'wizard/hr_rpt_attend_month_view.xml',

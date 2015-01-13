@@ -77,7 +77,7 @@
 							</tree>
 						</field>
                 	</page>
-                	<page name="employee" string="Employees" attrs="{'invisible':[('attend_day_id','!=',False)]}">
+                	<page name="employee" string="Selected Employees" attrs="{'invisible':[('attend_day_id','!=',False)]}">
                 		<field name="emp_ids" attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>
                 	</page>
 					<page string="Messages">

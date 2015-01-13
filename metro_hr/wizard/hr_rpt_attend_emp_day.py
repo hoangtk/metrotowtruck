@@ -40,13 +40,13 @@ class hr_rpt_attend_emp_day(osv.osv):
         'name': fields.char('Report Name', size=16, required=False),
         'title': fields.char('Report Title', required=False),
         'type': fields.char('Report Type', size=16, required=True),
-        'company_id': fields.many2one('res.company','Company',required=True),  
+        'company_id': fields.many2one('res.company','Company',required=True),
         
         #report data lines
         'rpt_lines': fields.one2many('hr.rpt.attend.emp.day.line', 'rpt_id', string='Report Line'),
         'date_from': fields.datetime("Start Date", required=True),
         'date_to': fields.datetime("End Date", required=True),
-        'emp_ids': fields.many2many('hr.employee', string='Employees'),
+        'emp_ids': fields.many2many('hr.employee', string='Selected Employees'),
         
         'state': fields.selection([
             ('draft', 'Draft'),
@@ -68,6 +68,7 @@ class hr_rpt_attend_emp_day(osv.osv):
         if not default:
             default = {}
         default['attend_month_ids'] = None
+        default['rpt_lines'] = None
         return super(hr_rpt_attend_emp_day, self).copy(cr, uid, id, default, context)
         
     def default_get(self, cr, uid, fields, context=None):
@@ -134,8 +135,28 @@ class hr_rpt_attend_emp_day(osv.osv):
         return id_new
     
     def write(self, cr, uid, ids, vals, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
         self._convert_save_dates(cr, uid, vals, context)
+        old_emp_ids = []
+        if 'emp_ids' in vals:
+            old_emp_ids = self.read(cr, uid, ids[0], ['emp_ids'],context=context)['emp_ids']
         resu = super(hr_rpt_attend_emp_day, self).write(cr, uid, ids, vals, context=context)
+        new_emp_ids = self.read(cr, uid, ids[0], ['emp_ids'],context=context)['emp_ids']
+        if old_emp_ids: 
+            del_emp_ids = []
+            if new_emp_ids:
+                for emp_id in old_emp_ids:
+                    if not emp_id in new_emp_ids:
+                        del_emp_ids.append(emp_id)
+            else:
+                del_emp_ids = old_emp_ids
+            #unlink report line of deleted employees 
+            if del_emp_ids:
+                rpt_line_obj = self.pool.get('hr.rpt.attend.emp.day.line')
+                unlink_line_ids = rpt_line_obj.search(cr, uid, [('rpt_id','=',ids[0]),('emp_id','in',del_emp_ids)])
+                rpt_line_obj.unlink(cr, uid, unlink_line_ids, context=context)
+            
         return resu
     
     def unlink(self, cr, uid, ids, context=None):
@@ -242,17 +263,19 @@ class hr_rpt_attend_emp_day(osv.osv):
             hours_ot2 = period.hours_work_ot2
             
         return hours_normal, hours_ot, hours_normal2, hours_ot2
-    
-
-    def run_report(self, cr, uid, ids, context=None):
+        
+    def run_report(self, cr, uid, ids, context=None, emp_ids=None):
         rpt = self.browse(cr, uid, ids, context=context)[0]
         if not rpt.emp_ids:
             raise osv.except_osv(_('Warning!'),_('Please select employees to get attendance!'))
         rpt_method = getattr(self, 'run_%s'%(rpt.type,))
         #get report data
-        rpt_line_obj,  rpt_lns = rpt_method(cr, uid, ids, context)
+        rpt_line_obj,  rpt_lns = rpt_method(cr, uid, ids, context, emp_ids=emp_ids)        
         #remove the old lines
-        unlink_ids = rpt_line_obj.search(cr, uid, [('rpt_id','=',rpt.id)], context=context)
+        unlink_domain = [('rpt_id','=',rpt.id)]
+        if emp_ids:
+            unlink_domain.append(('emp_id','in',emp_ids))
+        unlink_ids = rpt_line_obj.search(cr, uid, unlink_domain, context=context)
         rpt_line_obj.unlink(cr ,uid, unlink_ids, context=context)
         #create new lines
         for rpt_line in rpt_lns:
@@ -272,12 +295,12 @@ class hr_rpt_attend_emp_day(osv.osv):
             'type': 'ir.actions.act_window',
             'target': 'current',
             'domain': [('rpt_id','=',ids[0])],
-            'context': {'search_default_groupby_emp':True},
+            #'context': {'search_default_groupby_emp':True},
         }
                 
         return True
         
-    def run_attend_emp_day(self, cr, uid, ids, context=None):
+    def run_attend_emp_day(self, cr, uid, ids, context=None, emp_ids=None):
         '''
         1.Query all data with both in/out by date range, store the result in attends_normal
         2.Loop on by days and employees
@@ -294,9 +317,10 @@ class hr_rpt_attend_emp_day(osv.osv):
         #context for the query
         c = context.copy()
         #get the employees
-        emp_ids = [emp.id for emp in rpt.emp_ids]
         if not emp_ids:
-            emp_ids = emp_obj.search(cr, uid, [], context=context)
+            emp_ids = [emp.id for emp in rpt.emp_ids]
+            if not emp_ids:
+                emp_ids = emp_obj.search(cr, uid, [], context=context)
         #sort the employee ids
         emp_ids.sort()
         
@@ -339,11 +363,12 @@ class hr_rpt_attend_emp_day(osv.osv):
         days = rrule.rrule(rrule.DAILY, dtstart=date_from_local,until=date_to_local)
         emps = emp_obj.browse(cr, uid, emp_ids, context)
         seq = 0
-        for emp in emps:            
+        for emp in emps:
             for day_dt in days:
+                emp_cale = emp_obj.get_wt(cr, uid, emp.id, day_dt, context=context)
                 day = day_dt.strftime('%Y-%m-%d')
                 #if there is no working time defined to employee then continue to next employee directly
-                if not emp.calendar_id or not emp.calendar_id.attendance_ids:
+                if not emp_cale or not emp_cale.attendance_ids:
                     seq += 1
                     '''
                     init a new empty line by employee/day without period info
@@ -363,7 +388,7 @@ class hr_rpt_attend_emp_day(osv.osv):
                                     'hours_ot2':None,}
                     rpt_lns.append(rpt_line)
                     continue
-                for period in emp.calendar_id.attendance_ids:
+                for period in emp_cale.attendance_ids:
                     if day_dt.isoweekday() != (int(period.dayofweek) + 1):
                         continue
                     '''
@@ -424,11 +449,11 @@ class hr_rpt_attend_emp_day(osv.osv):
                         #Only have sign in record
                         if attend.action in ('sign_in','sign_in_late'):
                             hour_in = attend_time.hour + attend_time.minute/60.0
-                            if emp.calendar_id.no_out_option == 'early':
+                            if emp_cale.no_out_option == 'early':
                                 #treat as leave early
                                 if not period.is_full_ot:
                                     is_early = True
-                                hours_valid = period.hour_to - hour_in -  period.hours_non_work - emp.calendar_id.no_out_time/60.0
+                                hours_valid = period.hour_to - hour_in -  period.hours_non_work - emp_cale.no_out_time/60.0
                             else:
                                 #treat as absent
                                 if not period.is_full_ot:
@@ -437,11 +462,11 @@ class hr_rpt_attend_emp_day(osv.osv):
                         #Only have sign out record
                         if attend.action in ('sign_out','sign_out_early'):
                             hour_out = attend_time.hour + attend_time.minute/60.0
-                            if emp.calendar_id.no_in_option == 'late':
+                            if emp_cale.no_in_option == 'late':
                                 #treat as leave early
                                 if not period.is_full_ot:
                                     is_late = True
-                                hours_valid = hour_out - period.hour_from - period.hours_non_work - emp.calendar_id.no_in_time/60.0
+                                hours_valid = hour_out - period.hour_from - period.hours_non_work - emp_cale.no_in_time/60.0
                             else:
                                 #treat as absent
                                 if not period.is_full_ot:
@@ -525,16 +550,17 @@ class hr_rpt_attend_emp_day(osv.osv):
             key_group = '[%s]%s'%(rpt_line.emp_id.emp_code, rpt_line.emp_id.name)
             if not groups.get(key_group):
                 #Add the attendance data
-                worktime_types = cale_wt_types.get(rpt_line.emp_id.calendar_id.id)
-                if rpt_line.emp_id.calendar_id and not worktime_types:
+                cale_id = rpt_line.period_id.calendar_id.id
+                worktime_types = cale_wt_types.get(cale_id)
+                if not worktime_types and cale_id:
                     sql = 'select distinct b.id,b.sequence,b.name \
                         from resource_calendar_attendance a \
                         join hr_worktime_type b on a.type_id = b.id \
                         where a.calendar_id=%s \
                         order by b.sequence'
-                    cr.execute(sql, (rpt_line.emp_id.calendar_id.id,))
+                    cr.execute(sql, (cale_id,))
                     worktime_types = cr.dictfetchall()
-                    cale_wt_types[rpt_line.emp_id.calendar_id.id] = worktime_types
+                    cale_wt_types[cale_id] = worktime_types
                 #set the group values
                 group_vals = {'name':key_group,
                                     'emp_id': rpt_line.emp_id.id,
@@ -727,5 +753,39 @@ class attend_empday_group_print(rml_parser_ext):
     
 report_sxw.report_sxw('report.hr.rpt.attend.emp.day', 'hr.rpt.attend.emp.day', 'addons/metro_hr/wizard/hr_rpt_attend_emp_day.rml', parser=rml_parser_ext, header='internal')
 report_sxw.report_sxw('report.attend.empday.group','attend.empday.group','addons/metro_hr/wizard/hr_rpt_attend_emp_day_group.rml',parser=attend_empday_group_print, header='internal')            
-
+'''
+Geneate daily attendance wizard, called by button named "run_report_wizard" on the form view
+'''
+class hr_rpt_attend_emp_day_wizard(osv.osv_memory):
+    _name = 'hr.rpt.attend.emp.day.wizard'
+    _description = 'Generate daily attendances'
+    _columns = {
+        'emp_ids' : fields.many2many('hr.employee', string='Selected Employees', required=True),
+    }
+                        
+    def default_get(self, cr, uid, fields, context=None):
+        vals = super(hr_rpt_attend_emp_day_wizard, self).default_get(cr, uid, fields, context=context)
+        if not vals:
+            vals = {}
+        #employees
+        if context.get('active_model','') == 'hr.rpt.attend.emp.day' and context.get('active_id'):
+            emp_ids = self.pool.get('hr.rpt.attend.emp.day').read(cr, uid, context.get('active_id'), ['emp_ids'])['emp_ids']
+            vals['emp_ids'] = emp_ids
+                                
+        return vals
+    
+    def set_data(self, cr, uid, ids, context=None):
+        emp_ids = self.read(cr, uid, ids[0], ['emp_ids'], context=context)['emp_ids']
+        if not emp_ids:
+            raise osv.except_osv(_('Error'), _('Please select employees!'))
+        
+        emp_day_obj = self.pool.get('hr.rpt.attend.emp.day')
+        emp_day_id = context.get('active_id')
+        #add new emp_ids
+        old_emp_ids = emp_day_obj.read(cr, uid, emp_day_id, ['emp_ids'], context=context)['emp_ids']
+        new_emp_ids = [(4,emp_id) for emp_id in emp_ids if emp_id not in old_emp_ids]
+        if new_emp_ids:
+            emp_day_obj.write(cr, uid, emp_day_id, {'emp_ids':new_emp_ids}, context=context)
+        #generate data for  the selected employees        
+        return emp_day_obj.run_report(cr, uid, [emp_day_id], context=context, emp_ids=emp_ids)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

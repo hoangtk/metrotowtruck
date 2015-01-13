@@ -49,7 +49,7 @@ class hr_rpt_attend_month(osv.osv):
         'rpt_lines': fields.one2many('hr.rpt.attend.month.line', 'rpt_id', string='Report Line'),
         'date_from': fields.datetime("Start Date", required=True),
         'date_to': fields.datetime("End Date", required=True),
-        'emp_ids': fields.many2many('hr.employee', string='Employees'),
+        'emp_ids': fields.many2many('hr.employee', string='Selected Employees'),
         
         'state': fields.selection([
             ('draft', 'Draft'),

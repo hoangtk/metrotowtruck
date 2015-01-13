@@ -16,16 +16,95 @@ import openerp.addons.decimal_precision as dp
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools.misc import DEFAULT_SERVER_DATE_FORMAT
 from openerp.addons.metro import utils
 
 import pytz
+'''
+Working time group, handle the working time as a group:
+date_from, date_to, calendar_id, name
+...
+'''
+class hr_wt_grp(osv.osv):
+    _name = "hr.wt.grp"
+    _description="working time group"
+    _columns = {
+        'name' : fields.char('Name', size=32, required=True),
+        'worktime_ids': fields.one2many('hr.wt.grp.line', 'grp_id', 'Working times'),  
+    }
+
+    def _check_wt(self,cr,uid,ids,context=None):
+        date_wts=[]
+        for grp in self.browse(cr, uid, ids):
+            date_wts=[]
+            for wt in grp.worktime_ids:
+                if wt.date_to < wt.date_from:
+                    raise osv.except_osv(_('Error'),_('Date to can not be earlier than from!'))                
+                for period in date_wts:
+                    if (wt.date_from >= period['from'] and wt.date_from <= period['to']) \
+                            or (wt.date_to >= period['from'] and wt.date_to <= period['to']) \
+                            or (wt.date_from <= period['from'] and wt.date_to >= period['to']):
+                        raise osv.except_osv(_('Error'),_('Period duration of %s is conflicted with other periods!'%(wt.name)))
+                date_wts.append({'from':wt.date_from, 'to':wt.date_to})
+        return True
+    
+    def create(self, cr, uid, vals, context=None):
+        new_id = super(hr_wt_grp, self).create(cr, uid, vals, context=context)
+        self._check_wt(cr, uid, [new_id], context=context)
+        return new_id    
+        
+    def write(self, cr, uid, ids, vals, context=None):
+        resu = super(hr_wt_grp, self).write(cr, uid, ids, vals, context=context)
+        self._check_wt(cr, uid, ids, context=context)
+        return resu    
+    
+class hr_wt_grp_line(osv.osv):
+    _name = 'hr.wt.grp.line'
+    _description="working time group line"
+    _columns = {
+        'name' : fields.char('Name', size=32, required=True),
+        'date_from' : fields.date('From Date', required=True),
+        'date_to' : fields.date('To Date', required=True),
+        'calendar_id' : fields.many2one("resource.calendar", "Working Time", required=True),
+        'grp_id': fields.many2one('hr.wt.grp', 'Group', required=True, ondelete='cascade'),
+    }  
+    def onchange_calendar(self, cr, uid, ids, calendar_id, name, context=None):
+        res = {'value':{}}
+        if not calendar_id or (name and name != ''):
+            return res
+        cale_name = self.pool.get('resource.calendar').read(cr, uid, calendar_id, ['name'], context=context)['name']
+        res['value']['name'] = cale_name
+        return res
 
 class hr_employee(osv.osv):
     _inherit = "hr.employee"
     _columns = {
         'last_punch_time': fields.datetime('Last Punching Time', required=False, select=1,readonly=True),
+        'wt_grp_id': fields.many2one('hr.wt.grp', 'Working time group'),  
     }
-    
+    def get_wt(self, cr, uid, emp_id, dt_para=None, context=None):
+        '''
+        @param dt_para: time with timezone, can be local or UTC tz, but the real time should be in local, that is the employee punching time 
+        '''
+        emp = self.browse(cr, uid, emp_id, context=context)
+        if not emp.wt_grp_id or not emp.wt_grp_id.worktime_ids:
+            return None
+        if not dt_para:
+            dt_para = datetime.now()
+            #Assume above returns UTC time, convert it to time with local TZ
+            dt_para = fields.datetime.context_timestamp(cr, uid, dt_para, context=context) 
+        wt_found = None
+        for wt in emp.wt_grp_id.worktime_ids:            
+            wt_from =  datetime.strptime(wt.date_from + ' 00:00:00',DEFAULT_SERVER_DATETIME_FORMAT)
+            wt_to  = datetime.strptime(wt.date_to + ' 23:59:59', DEFAULT_SERVER_DATETIME_FORMAT)
+            #above from/to shoule be treated as same as user's local time, so need convert them from local to UTC
+            wt_from = utils.utc_timestamp(cr, uid, wt_from, context=context)
+            wt_to = utils.utc_timestamp(cr, uid, wt_to, context=context)
+            #the dt_para with local TZ can be compare with the from/to with UTC TZ 
+            if dt_para >= wt_from and dt_para <= wt_to:
+                wt_found = wt.calendar_id
+                break
+        return wt_found
     def update_punch_time(self, cr, uid, emp_id, dt_punch, context):
         if not emp_id or not dt_punch:
             return
@@ -42,7 +121,7 @@ class hr_employee(osv.osv):
         #the day search support
         new_args = utils.deal_args_dt(cr, user, self, args,['last_punch_time'],context=context)
         return super(hr_employee,self).search(cr, user, new_args, offset, limit, order, context, count)
-    
+        
 class hr_attendance(osv.osv):
     _inherit = "hr.attendance"
     def _day_compute(self, cr, uid, ids, fieldnames, args, context=None):
@@ -116,11 +195,13 @@ class hr_attendance(osv.osv):
     def calc_action(self, cr, uid, ids, context=None):
         upt_vals = {}
         days = self._day_compute(cr, uid, ids, [], [], context=context)
+        emp_obj = self.pool.get('hr.employee')
         for attend in self.browse(cr, uid, ids, context=context):
             #get the calendar id
             calendar_id = attend.calendar_id
             if not calendar_id:
-                calendar_id = attend.employee_id.calendar_id
+                dt_para = fields.datetime.context_timestamp(cr, uid, datetime.strptime(attend.name,DEFAULT_SERVER_DATETIME_FORMAT), context=context)
+                calendar_id = emp_obj.get_wt(cr, uid,  attend.employee_id.id, dt_para, context=context)
             if not calendar_id:
                 continue
             dt_action = datetime.strptime(attend.name,DEFAULT_SERVER_DATETIME_FORMAT)
@@ -159,7 +240,7 @@ class hr_attendance(osv.osv):
     def action_by_emp_cale_time(self, cr, uid, emp_id, cale_id, dt_action, context=None):
         actions = ['invalid',None]
         if emp_id:
-            calendar_id = self.pool.get('hr.employee').read(cr, uid, emp_id, ['calendar_id'], context=context)['calendar_id']
+            calendar_id = self.pool.get('hr.employee').get_wt(cr, uid,  emp_id, context=context)
             actions = self.action_by_cale_time(cr, uid, calendar_id, dt_action, context)
         return actions
     
