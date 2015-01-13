@@ -295,7 +295,7 @@ class hr_rpt_attend_emp_day(osv.osv):
             'type': 'ir.actions.act_window',
             'target': 'current',
             'domain': [('rpt_id','=',ids[0])],
-            'context': {'search_default_groupby_emp':True},
+            #'context': {'search_default_groupby_emp':True},
         }
                 
         return True

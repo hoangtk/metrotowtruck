@@ -43,7 +43,7 @@ class hr_set_alwded(osv.osv_memory):
         'set_id': fields.many2one('hr.contract.emppay.batchset', required=True, select=True, ondelete='cascade'),
         'alwded_id': fields.many2one('hr.emppay.alwded', 'Allowance/Deduction', required=True, ondelete='cascade'),
         'sequence': fields.related('alwded_id', 'sequence', type='integer', string='#', store=True, readonly=True),
-        'type': fields.related('alwded_id', 'type', type='selection', selection=[('alw','Allowance'),('ded','Deduction')],
+        'type': fields.related('alwded_id', 'type', type='selection', selection=[('alw','Allowance'),('ded','Deduction'),('alw_inwage','Allowance In Wage')],
                                     string='Type', store=True, readonly=True),
         'type_calc':fields.related('alwded_id', 'type_calc', type='selection', selection=[('fixed','Fixed'),('by_attend','By Attendance')], 
                                     string='Calculation Type', store=True, readonly=True),

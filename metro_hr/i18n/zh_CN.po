@@ -2545,6 +2545,7 @@ msgstr "onchange_employee_id(employee_id,context)"
 #: view:hr.emppay:0
 #: selection:hr.emppay.alwded,type:0
 #: selection:hr.emppay.ln.alwded,type:0
+#：selection:hr.set.alwded,type:0
 msgid "Allowance In Wage"
 msgstr "工资内补贴"
 
