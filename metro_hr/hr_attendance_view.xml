@@ -233,7 +233,7 @@
                			<tree string="Work times" editable="bottom">
                				<field name="date_from"/>
                				<field name="date_to"/>
-               				<field name="calendar_id" on_change="onchange_calendar(calendar_id, name)"/>
+               				<field name="calendar_id" on_change="onchange_calendar(calendar_id, name)" context="{'form_view_ref':'metro_hr.view_emp_worktime_form'}"/>
                				<field name="name"/>
                			</tree>
                		</field>

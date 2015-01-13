@@ -48,22 +48,17 @@ class hr_clock(osv.osv):
             action = 'action'
             '''
             #move to download_log() to calculate all new attendance together, to improve the performance.
-            calendar_id = None
-            if employee.calendar_id:
-                calendar_id = employee.calendar_id.id
-                #find the time point by the calendar_id and attendance log time
-                action = attendence_obj.action_by_cale_time(cr, uid, employee.calendar_id, data['time'], context=context)
             '''
-            calendar_id = employee.calendar_id and employee.calendar_id.id or None
             #convert to UTC time
-            data['time'] = utils.utc_timestamp(cr, uid, data['time'], context)
+            data['time'] = utils.utc_timestamp(cr, uid, data['time'], context)            
+            calendar_id = emp_obj.get_wt(cr, uid, emp_id, data['time'], context=context)
             vals = {'name':data['time'],
                     'employee_id': emp_id,
                     'action': action,  
                     'clock_log_id':md5, 
                     'notes':data['notes'],
                     'clock_id':data['clock_id'],
-                    'calendar_id': calendar_id}
+                    'calendar_id': calendar_id and calendar_id.id or None}
             return attendence_obj.create(cr, uid, vals, context=context)
         else:
             return 0

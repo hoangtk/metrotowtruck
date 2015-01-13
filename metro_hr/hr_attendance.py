@@ -16,6 +16,7 @@ import openerp.addons.decimal_precision as dp
 
 from openerp.osv import fields, osv
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools.misc import DEFAULT_SERVER_DATE_FORMAT
 from openerp.addons.metro import utils
 
 import pytz
@@ -81,7 +82,29 @@ class hr_employee(osv.osv):
         'last_punch_time': fields.datetime('Last Punching Time', required=False, select=1,readonly=True),
         'wt_grp_id': fields.many2one('hr.wt.grp', 'Working time group'),  
     }
-    
+    def get_wt(self, cr, uid, emp_id, dt_para=None, context=None):
+        '''
+        @param dt_para: time with timezone, can be local or UTC tz, but the real time should be in local, that is the employee punching time 
+        '''
+        emp = self.browse(cr, uid, emp_id, context=context)
+        if not emp.wt_grp_id or not emp.wt_grp_id.worktime_ids:
+            return None
+        if not dt_para:
+            dt_para = datetime.now()
+            #Assume above returns UTC time, convert it to time with local TZ
+            dt_para = fields.datetime.context_timestamp(cr, uid, dt_para, context=context) 
+        wt_found = None
+        for wt in emp.wt_grp_id.worktime_ids:            
+            wt_from =  datetime.strptime(wt.date_from + ' 00:00:00',DEFAULT_SERVER_DATETIME_FORMAT)
+            wt_to  = datetime.strptime(wt.date_to + ' 23:59:59', DEFAULT_SERVER_DATETIME_FORMAT)
+            #above from/to shoule be treated as same as user's local time, so need convert them from local to UTC
+            wt_from = utils.utc_timestamp(cr, uid, wt_from, context=context)
+            wt_to = utils.utc_timestamp(cr, uid, wt_to, context=context)
+            #the dt_para with local TZ can be compare with the from/to with UTC TZ 
+            if dt_para >= wt_from and dt_para <= wt_to:
+                wt_found = wt.calendar_id
+                break
+        return wt_found
     def update_punch_time(self, cr, uid, emp_id, dt_punch, context):
         if not emp_id or not dt_punch:
             return
@@ -172,11 +195,13 @@ class hr_attendance(osv.osv):
     def calc_action(self, cr, uid, ids, context=None):
         upt_vals = {}
         days = self._day_compute(cr, uid, ids, [], [], context=context)
+        emp_obj = self.pool.get('hr.employee')
         for attend in self.browse(cr, uid, ids, context=context):
             #get the calendar id
             calendar_id = attend.calendar_id
             if not calendar_id:
-                calendar_id = attend.employee_id.calendar_id
+                dt_para = fields.datetime.context_timestamp(cr, uid, datetime.strptime(attend.name,DEFAULT_SERVER_DATETIME_FORMAT), context=context)
+                calendar_id = emp_obj.get_wt(cr, uid,  attend.employee_id.id, dt_para, context=context)
             if not calendar_id:
                 continue
             dt_action = datetime.strptime(attend.name,DEFAULT_SERVER_DATETIME_FORMAT)
@@ -215,7 +240,7 @@ class hr_attendance(osv.osv):
     def action_by_emp_cale_time(self, cr, uid, emp_id, cale_id, dt_action, context=None):
         actions = ['invalid',None]
         if emp_id:
-            calendar_id = self.pool.get('hr.employee').read(cr, uid, emp_id, ['calendar_id'], context=context)['calendar_id']
+            calendar_id = self.pool.get('hr.employee').get_wt(cr, uid,  emp_id, context=context)
             actions = self.action_by_cale_time(cr, uid, calendar_id, dt_action, context)
         return actions
     
