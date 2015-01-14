@@ -114,6 +114,11 @@ class hr_employee(osv.osv):
             dt_punch_current = datetime.strptime(dt_current.get('last_punch_time'),DEFAULT_SERVER_DATETIME_FORMAT)
             #convert to the offset aware datetime, since the dt_punch is offset aware, then they can be compared
             dt_punch_current = pytz.UTC.localize(dt_punch_current)
+        if isinstance(dt_punch, type(u' ')):
+            dt_punch = datetime.strptime(dt_punch,DEFAULT_SERVER_DATETIME_FORMAT)
+            #convert to the offset aware datetime
+            dt_punch = pytz.UTC.localize(dt_punch)
+            
         if not dt_punch_current or dt_punch_current < dt_punch:
             self.write(cr, uid, emp_id, {'last_punch_time': dt_punch}, context=context)
     
@@ -206,7 +211,13 @@ class hr_attendance(osv.osv):
 
     def write(self, cr, uid, ids, vals, context=None):
         resu = super(hr_attendance, self).write(cr, uid, ids, vals, context=context)
-        self.pool.get('hr.employee').update_punch_time(cr, uid, vals.get('employee_id'), vals.get('name'), context=context)
+        emp_obj = self.pool.get('hr.employee')
+        if vals.get('name'):
+            if not vals.get('employee_id'):
+                for attend in self.read(cr, uid, ids, ['employee_id', 'name'], context=context):
+                    emp_obj.update_punch_time(cr, uid, attend['employee_id'][0], vals['name'], context=context)
+            else:
+                emp_obj.update_punch_time(cr, uid, vals['employee_id'], vals['name'], context=context)
         return resu
                 
     def calc_action(self, cr, uid, ids, context=None):
@@ -430,6 +441,17 @@ class resource_calendar_attendance(osv.osv):
         'days_work2': fields.float('Work Days2', digits_compute=dp.get_precision('Product Unit of Measure')),        
         }   
     _defaults={'days_work':1, 'days_work2':1}
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        res = []
+        for data in self.read(cr, uid, ids, ['name', 'calendar_id'], context=context):
+            if context.get('name_with_calendar'):
+                res.append((data['id'],'%s of %s'%(data['name'], data['calendar_id'][1]) ))
+            else:
+                res.append((data['id'], data['name']))
+        return res    
     
 class res_company(osv.osv):
     _inherit = "res.company"

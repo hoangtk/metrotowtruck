@@ -43,7 +43,7 @@
                     <field name="name"/>
                     <field name="action"/>
                 	<field name="calendar_id"/>
-                	<field name="cale_period_id"/>
+                	<field name="cale_period_id" context="{'name_with_calendar':1}"/>
                 	<field name="notes"/>
                 	<field name="clock_id" readonly="1"/>
                 	<field name="clock_log_id" readonly="1"/>
