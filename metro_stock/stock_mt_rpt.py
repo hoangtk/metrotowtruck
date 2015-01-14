@@ -83,6 +83,7 @@ class stock_mt_rpt(osv.osv):
             if arg[0] == 'date_to':
                 arg[0] = 'mr_date_order'
                 arg[1] = '<='
+                #for the end date, need add one day to use as the end day
                 time_obj = datetime.strptime(arg[2],DEFAULT_SERVER_DATETIME_FORMAT)
                 time_obj += relativedelta(days=1)                                
                 arg[2] = time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)

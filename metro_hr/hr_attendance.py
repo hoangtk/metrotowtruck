@@ -114,6 +114,11 @@ class hr_employee(osv.osv):
             dt_punch_current = datetime.strptime(dt_current.get('last_punch_time'),DEFAULT_SERVER_DATETIME_FORMAT)
             #convert to the offset aware datetime, since the dt_punch is offset aware, then they can be compared
             dt_punch_current = pytz.UTC.localize(dt_punch_current)
+        if isinstance(dt_punch, type(u' ')):
+            dt_punch = datetime.strptime(dt_punch,DEFAULT_SERVER_DATETIME_FORMAT)
+            #convert to the offset aware datetime
+            dt_punch = pytz.UTC.localize(dt_punch)
+            
         if not dt_punch_current or dt_punch_current < dt_punch:
             self.write(cr, uid, emp_id, {'last_punch_time': dt_punch}, context=context)
     
@@ -149,6 +154,9 @@ class hr_attendance(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'write_uid':  fields.many2one('res.users', 'Modifier', readonly=True),
         'write_date': fields.datetime('Modify Date', readonly=True, select=True),        
+        #the fields only for search usage
+        'date_search_from':fields.function(lambda *a,**k:{}, type='datetime',string="From Date",),
+        'date_search_to':fields.function(lambda *a,**k:{}, type='datetime',string="To Date",),
     }
 
     def name_get(self, cr, uid, ids, context=None):
@@ -156,7 +164,9 @@ class hr_attendance(osv.osv):
             return []
         res = []
         for data in self.read(cr, uid, ids, ['name', 'employee_id'], context=context):
-            res.append((data['id'],'%s[%s]'%(data['employee_id'][1],data['name']) ))
+            #convert date to local data
+            name_local = utils.dtstr_utc2local(cr, uid, data['name'])
+            res.append((data['id'],'%s[%s]'%(data['employee_id'][1],name_local) ))
         return res
         
     def copy(self, cr, uid, id, default=None, context=None):
@@ -180,6 +190,18 @@ class hr_attendance(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #the day search support
         new_args = utils.deal_args_dt(cr, user, self, args,['name'],context=context)
+        #the date_start/end parameter
+        for arg in new_args:
+            if arg[0] == 'date_search_from':
+                arg[0] = 'name'
+                arg[1] = '>='
+            if arg[0] == 'date_search_to':
+                arg[0] = 'name'
+                arg[1] = '<='
+                #for the end date, need add one day to use as the end day
+                time_obj = datetime.strptime(arg[2],DEFAULT_SERVER_DATETIME_FORMAT)
+                time_obj += relativedelta(days=1)                                
+                arg[2] = time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         return super(hr_attendance,self).search(cr, user, new_args, offset, limit, order, context, count)
     
     def create(self, cr, uid, vals, context=None):
@@ -189,7 +211,13 @@ class hr_attendance(osv.osv):
 
     def write(self, cr, uid, ids, vals, context=None):
         resu = super(hr_attendance, self).write(cr, uid, ids, vals, context=context)
-        self.pool.get('hr.employee').update_punch_time(cr, uid, vals.get('employee_id'), vals.get('name'), context=context)
+        emp_obj = self.pool.get('hr.employee')
+        if vals.get('name'):
+            if not vals.get('employee_id'):
+                for attend in self.read(cr, uid, ids, ['employee_id', 'name'], context=context):
+                    emp_obj.update_punch_time(cr, uid, attend['employee_id'][0], vals['name'], context=context)
+            else:
+                emp_obj.update_punch_time(cr, uid, vals['employee_id'], vals['name'], context=context)
         return resu
                 
     def calc_action(self, cr, uid, ids, context=None):
@@ -413,6 +441,17 @@ class resource_calendar_attendance(osv.osv):
         'days_work2': fields.float('Work Days2', digits_compute=dp.get_precision('Product Unit of Measure')),        
         }   
     _defaults={'days_work':1, 'days_work2':1}
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        res = []
+        for data in self.read(cr, uid, ids, ['name', 'calendar_id'], context=context):
+            if context.get('name_with_calendar'):
+                res.append((data['id'],'%s of %s'%(data['name'], data['calendar_id'][1]) ))
+            else:
+                res.append((data['id'], data['name']))
+        return res    
     
 class res_company(osv.osv):
     _inherit = "res.company"

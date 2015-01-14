@@ -31,9 +31,36 @@ import pytz
 import logging
 from openerp.tools import resolve_attr 
 import openerp.tools as tools
+from openerp.osv import fields
 
 _logger = logging.getLogger(__name__)
 
+def dtstr_utc2local(cr, uid, dt_str, context=None):
+    '''
+    @param dt_str: UTC datetime string  of DEFAULT_SERVER_DATETIME_FORMAT format
+    @return: Local(context['tz']) datetime string of DEFAULT_SERVER_DATETIME_FORMAT format
+    '''
+    dt_obj = datetime.strptime(dt_str, DEFAULT_SERVER_DATETIME_FORMAT)
+    dt_obj = context_timestamp(cr, uid, dt_obj, context) 
+    return datetime.strftime(dt_obj, DEFAULT_SERVER_DATETIME_FORMAT)
+
+def dtstr_local2utc(cr, uid, dt_str, context=None):
+    '''
+    @param dt_str: Local(context['tz']) datetime string  of DEFAULT_SERVER_DATETIME_FORMAT format
+    @return: UTC datetime string of DEFAULT_SERVER_DATETIME_FORMAT format
+    '''
+    dt_obj = datetime.strptime(dt_str, DEFAULT_SERVER_DATETIME_FORMAT)
+    dt_obj = utc_timestamp(cr, uid, dt_obj, context) 
+    return datetime.strftime(dt_obj, DEFAULT_SERVER_DATETIME_FORMAT)
+
+def context_timestamp(cr, uid, timestamp, context=None):
+    '''
+    Convert utc timestamp to timestamp at TZ
+    @param timestamp: UTC time
+    @return: local time at TZ 
+    '''
+    return fields.datetime.context_timestamp(cr, uid, timestamp, context=context)    
+                            
 def utc_timestamp(cr, uid, timestamp, context=None):
     """Returns the given timestamp converted to the client's timezone.
        This method is *not* meant for use as a _defaults initializer,
