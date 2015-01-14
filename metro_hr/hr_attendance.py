@@ -159,7 +159,9 @@ class hr_attendance(osv.osv):
             return []
         res = []
         for data in self.read(cr, uid, ids, ['name', 'employee_id'], context=context):
-            res.append((data['id'],'%s[%s]'%(data['employee_id'][1],data['name']) ))
+            #convert date to local data
+            name_local = utils.dtstr_utc2local(cr, uid, data['name'])
+            res.append((data['id'],'%s[%s]'%(data['employee_id'][1],name_local) ))
         return res
         
     def copy(self, cr, uid, id, default=None, context=None):
