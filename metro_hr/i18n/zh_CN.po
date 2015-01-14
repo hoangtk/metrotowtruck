@@ -795,12 +795,6 @@ msgid "Sync Clock Employee"
 msgstr "同步考勤机员工"
 
 #. module: metro_hr
-#: model:ir.actions.act_window,name:metro_hr.action_emp_worktime
-#: model:ir.ui.menu,name:metro_hr.menu_view_emp_resource_calendar
-msgid "Working Time"
-msgstr "工作时间"
-
-#. module: metro_hr
 #: view:hr.rpt.attend.emp.day:0
 #: view:hr.rpt.attend.emp.day.wizard:0
 #: model:ir.actions.act_window,name:metro_hr.action_rpt_attend_emp_day_wizard
@@ -3226,7 +3220,7 @@ msgstr "考勤机员工"
 #. module: metro_hr
 #: view:hr.attendance:0
 msgid "Valid"
-msgstr "验证"
+msgstr "有效"
 
 #. module: metro_hr
 #: field:hr.employee,web_chat_no:0
@@ -4040,6 +4034,18 @@ msgstr "5天制应出勤"
 msgid "实出勤"
 msgstr "实出勤"
 
+#. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_hr_attendance_date_search_from
+#: field:hr.attendance,date_search_from:0
+msgid "From Date"
+msgstr "开始日期"
+
+#. module: metro_hr
+#: model:ir.model.fields,field_description:metro_hr.field_hr_attendance_date_search_to
+#: field:hr.attendance,date_search_to:0
+msgid "To Date"
+msgstr "结束日期"
+
 ########################manual########################
 #. module: hr_attendance
 #: view:hr.attendance:0
@@ -4141,4 +4147,9 @@ msgstr "假期分配"
 #: model:ir.model.fields,field_description:metro_hr.field_attend_empday_group_hours_ot
 msgid "Overtime"
 msgstr "加班"
+
+#. module: metro_hr
+#: model:ir.ui.menu,name:metro_hr.menu_view_emp_resource_calendar
+msgid "Working Time"
+msgstr "班次管理"
 

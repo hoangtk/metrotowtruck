@@ -149,6 +149,9 @@ class hr_attendance(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'write_uid':  fields.many2one('res.users', 'Modifier', readonly=True),
         'write_date': fields.datetime('Modify Date', readonly=True, select=True),        
+        #the fields only for search usage
+        'date_search_from':fields.function(lambda *a,**k:{}, type='datetime',string="From Date",),
+        'date_search_to':fields.function(lambda *a,**k:{}, type='datetime',string="To Date",),
     }
 
     def name_get(self, cr, uid, ids, context=None):
@@ -180,6 +183,18 @@ class hr_attendance(osv.osv):
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
         #the day search support
         new_args = utils.deal_args_dt(cr, user, self, args,['name'],context=context)
+        #the date_start/end parameter
+        for arg in new_args:
+            if arg[0] == 'date_search_from':
+                arg[0] = 'name'
+                arg[1] = '>='
+            if arg[0] == 'date_search_to':
+                arg[0] = 'name'
+                arg[1] = '<='
+                #for the end date, need add one day to use as the end day
+                time_obj = datetime.strptime(arg[2],DEFAULT_SERVER_DATETIME_FORMAT)
+                time_obj += relativedelta(days=1)                                
+                arg[2] = time_obj.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         return super(hr_attendance,self).search(cr, user, new_args, offset, limit, order, context, count)
     
     def create(self, cr, uid, vals, context=None):

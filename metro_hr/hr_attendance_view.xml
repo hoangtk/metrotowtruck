@@ -8,17 +8,23 @@
             <field name="arch" type="xml">
             	<!-- remove 'today' filter, user can query by day directly, the current today filter have issues since the UTC time-->
                 <filter name="today" position="replace">
+                	<separator/>
                 	<filter icon="terp-go-today" string="Today" name="today" domain="[('name','=',current_date)]" />
+                	<separator/>
                 	<filter icon="terp-go-today" string="Today's Valid" name="today_valid" 
                 		domain="[('name','=',current_date), ('action','in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
                 	<separator/>
                 	<filter icon="terp-go-today" string="China Employees" name="china_employees" domain="[('employee_id.country_id.name','in',('China','China ','China-CN'))]"/>
                 	<filter icon="terp-go-today" string="Foreign Employees" name="foreign_employees" domain="[('employee_id.country_id.name','in',('Canada','India','Russian Federation','Ukraine')]"/>
+                	
+                    <field name="date_search_from"/>
+                    <field name="date_search_to"/>
                 </filter>
                 <field name="action" position="after">
                 	<!-- <field name="clock_id"/>
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/> -->
+                	<separator/>
                 	<filter icon="terp-personal" string="Valid" name="valid" domain="[('action','in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
                 	<filter icon="terp-personal" string="Invalid" name="invalid" domain="[('action','not in',('sign_in','sign_in_late','sign_out','sign_out_early'))]" />
                 </field>
@@ -26,22 +32,27 @@
         </record>
         
         <record model="ir.ui.view" id="view_hr_attendance_tree_ext">
-            <field name="name">view_hr_attendance_filter_ext</field>
+            <field name="name">view_hr_attendance_tree_ext</field>
             <field name="model">hr.attendance</field>
             <field name="inherit_id" ref="hr_attendance.view_attendance_who"/>
             <field name="arch" type="xml">
-                <field name="action" position="after">
+                <tree string="Employee attendances" position="replace">
+                <tree string="Employee attendances" editable="top">
+                    <field name="employee_id"/>
+                	<field name="day"/>
+                    <field name="name"/>
+                    <field name="action"/>
                 	<field name="calendar_id"/>
                 	<field name="cale_period_id"/>
                 	<field name="notes"/>
                 	<field name="clock_id" readonly="1"/>
                 	<field name="clock_log_id" readonly="1"/>
-                </field>
-                <field name="day" position="replace">
-                </field>
-                <field name="name" position="before">
-                	<field name="day"/>
-                </field>
+                	<field name="create_uid"/>
+                	<field name="write_uid"/>
+                	<field name="create_date"/>
+                	<field name="write_date"/>  
+                </tree>   
+                </tree>
             </field>
         </record> 
         
@@ -50,25 +61,23 @@
             <field name="model">hr.attendance</field>
             <field name="inherit_id" ref="hr_attendance.view_attendance_form"/>
             <field name="arch" type="xml">
-            	<xpath expr="//sheet" position="before">
-            		<header>
-            			<button name="calc_action" string="Recalculate Action" type="object" groups="hr.group_user"/>
-            		</header>
-            	</xpath>
             	<xpath expr="//sheet" position="replace">
+            		<header>
+            			<button name="calc_action" string="Recalculate Action" type="object" groups="base.group_hr_user"/>
+            		</header>
                     <sheet>
 	                    <group col="4">
 	                        <field name="employee_id"/>
+		                	<field name="day"/>
 	                        <field name="name"/>
 	                        <field name="action"/>
-	                        <field name="action_desc"/>      
 	                    </group>                 
 	                        
 	                    <group col="4">
 		                	<field name="calendar_id"/>
 		                	<field name="cale_period_id"/>
-		                	<field name="day"/>
 		                	<field name="notes"/>
+	                        <field name="action_desc"/>      
 		                	<field name="clock_id" readonly="1"/>
 		                	<field name="clock_log_id" readonly="1"/>
 	                    </group>                 
