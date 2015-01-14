@@ -4046,6 +4046,12 @@ msgstr "开始日期"
 msgid "To Date"
 msgstr "结束日期"
 
+#. module: metro_hr
+#: model:ir.actions.act_window,name:metro_hr.action_audittrail_log_tree_attendance
+#: model:ir.ui.menu,name:metro_hr.menu_audittrail_log_tree_attendance
+msgid "Attendance Changing Log"
+msgstr "考勤修改日志"
+
 ########################manual########################
 #. module: hr_attendance
 #: view:hr.attendance:0
@@ -4149,7 +4155,7 @@ msgid "Overtime"
 msgstr "加班"
 
 #. module: metro_hr
+#: model:ir.actions.act_window,name:metro_hr.action_emp_worktime
 #: model:ir.ui.menu,name:metro_hr.menu_view_emp_resource_calendar
 msgid "Working Time"
 msgstr "班次管理"
-

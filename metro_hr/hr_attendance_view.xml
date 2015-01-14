@@ -97,6 +97,20 @@
             <field name="name">Attendances</field>
             <field name="context">{"search_default_today_valid":1}</field>
         </record>
+        
+<!-- Attendance changing log -->
+        <record model="ir.actions.act_window" id="action_audittrail_log_tree_attendance">
+            <field name="name">Attendance Changing Log</field>
+            <field name="res_model">audittrail.log</field>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="audittrail.view_audittrail_log_search"/>
+            <field name="domain">[('object_id.model','=','hr.attendance')]</field>
+        </record>
+                
+        <menuitem 
+        action="action_audittrail_log_tree_attendance" 
+        id="menu_audittrail_log_tree_attendance"
+        parent="hr_attendance.menu_hr_attendance" sequence="35"/>  
                 
 <!-- Employee working time calendar -->        
         <record id="view_emp_worktime_tree" model="ir.ui.view">
