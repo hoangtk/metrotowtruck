@@ -76,6 +76,10 @@
 							<field name="date"/>
 							<field name="am_name"/>
 							<field name="notes"/>
+		                    <field name="aml_id" invisible="1"/>
+		                    <button name="open_move" string="View Account Move" type="object" icon="gtk-justify-fill" attrs="{'invisible':[('aml_id','=',False)]}"/>
+		                    <field name="aml_source_id"/>
+		                    <button name="open_source" string="View Source Order" type="object" icon="gtk-justify-fill" attrs="{'invisible':['|',('aml_id','=',False),('aml_source_id','=',False)]}"/>
 							<field name="counter_account" invisible="1"/>
 							<field name="debit"/>
 							<field name="credit"/>

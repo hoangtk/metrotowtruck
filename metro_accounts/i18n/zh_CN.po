@@ -1774,6 +1774,38 @@ msgstr "产品"
 msgid "位"
 msgstr "位"
 
+#. module: metro_accounts
+#: model:ir.actions.act_window,name:metro_accounts.rpt_account_cn_detail_money_action
+#: model:ir.ui.menu,name:metro_accounts.rpt_account_cn_detail_money_menu
+#: report:rpt.account.cn:0
+msgid "Liquidity Detail"
+msgstr "资金流动明细"
+
+#. module: metro_accounts
+#: field:rpt.account.cn.line,aml_account_id:0
+msgid "Account"
+msgstr "科目"
+
+#. module: metro_accounts
+#: field:rpt.account.cn.line,aml_partner_id:0
+msgid "Partner"
+msgstr "合作伙伴"
+
+#. module: metro_accounts
+#: field:rpt.account.cn.line,aml_source_id:0
+msgid "Source"
+msgstr "来源"
+
+#. module: metro_accounts
+#: view:rpt.account.cn:0
+msgid "View Account Move"
+msgstr "查看会计凭证"
+
+#. module: metro_accounts
+#: view:rpt.account.cn:0
+msgid "View Source Order"
+msgstr "查看源单据"
+
 ########################manual########################
 #. module: account_voucher
 #: model:ir.actions.act_window,name:account_voucher.action_vendor_payment
@@ -1994,6 +2026,12 @@ msgid "ERM[%s]"
 msgstr "报销[%s]"
 
 ###i18n for the report title, defined in the action by 'default_title':%title% in xml, did the i18n in rpt_base.default_get()###
+#. module: metro_account
+#: code:addons/metro_accounts/rpt_base.py:63
+#, python-format
+msgid "Liquidity Detail"
+msgstr "资金流动明细"
+
 #. module: metro_account
 #: code:addons/metro_accounts/rpt_base.py:63
 #, python-format
