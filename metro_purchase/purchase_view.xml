@@ -29,9 +29,9 @@
                 <xpath expr="//button[@name='view_picking']" position="replace" >
                 	<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': [('state','!=', 'approved')]}" groups="stock.group_stock_user"/>
                 </xpath>                       
-                <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
+                <!-- <xpath expr="//tree[@string='Purchase Order Lines']" position="attributes" >
             		<attribute name="editable"></attribute>
-                </xpath>   
+                </xpath>  -->  
                  <xpath expr="//field[@name='payment_term_id']" position="replace" >
                 </xpath> 
                  <xpath expr="//field[@name='shipped']" position="replace" >
@@ -153,7 +153,7 @@
                 </field>
                 <button name="view_invoice" position="replace">
                 	<!-- <button name="view_invoice" string="Receive Invoice" type="object" attrs="{'invisible': ['|', ('invoice_method','=','picking'), '|', ('state','!=', 'approved'), ('invoiced','=',True) ]}" class="oe_highlight"/> -->
-                	<button name="%(act_pur_invoice)d" string="Receive Invoice" type="action" groups="account.group_account_invoice" attrs="{'invisible': [('state','!=','approved')]}"/>
+                	<button name="%(act_pur_invoice)d" string="Receive Invoice" type="action" groups="account.group_account_invoice" attrs="{'invisible': ['|',('state','!=','approved'),('invoice_method','=','picking')]}"/>
                 </button>
 				<xpath expr="//tree/field[@name='price_subtotal']" position="replace">
 					<field name="price_subtotal_withtax"/>
