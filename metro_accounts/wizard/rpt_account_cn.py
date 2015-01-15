@@ -56,6 +56,7 @@ class rpt_account_cn(osv.osv_memory):
         return self.pool.get('account.account').search(cr, uid ,[('company_id','=',company_id),'|',('type','=','liquidity'),('type','=','payable')])
         
     _defaults = {
+        'name': 'Account Report',
         'type': 'account_cn',     
         'filter': 'filter_period',        
         'target_move': 'posted',
@@ -68,12 +69,12 @@ class rpt_account_cn(osv.osv_memory):
         account_ids = []
         if context.get('default_account_type',False):
             account_types = context.get('default_account_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types)],context=context)
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types),('type','!=','view')],context=context)
             if account_ids_inc:
                 account_ids += account_ids_inc
         if context.get('default_account_user_type',False):
             account_types = context.get('default_account_user_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_types)],context=context)
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_types),('type','!=','view')],context=context)
             if account_ids_inc:
                 account_ids += account_ids_inc
         if account_ids:
@@ -330,6 +331,10 @@ class rpt_account_cn_line(osv.osv_memory):
         
         #for detail
         'aml_id': fields.many2one('account.move.line', 'Move Line', ),
+        'aml_account_id': fields.related('aml_id', 'account_id', string='Account',type='many2one',relation='account.account'),
+        'aml_partner_id': fields.related('aml_id', 'partner_id', string='Partner',type='many2one',relation='res.partner'),
+        'aml_source_id': fields.related('aml_id', 'source_id', string='Source',type='reference'),
+        
         'date': fields.date('Move Date', ),
         'am_name': fields.char('Move Name', size=64, ),
         'counter_account': fields.char('Counter Account', size=64, ),
@@ -348,7 +353,52 @@ class rpt_account_cn_line(osv.osv_memory):
         #Show counterpart account flag for detail report level   
         'show_counter': fields.related('rpt_id','show_counter',type='boolean', string="Show counterpart", required=False),
         }
+    
+    def open_move(self, cr, uid, ids, context=None):
+        res_id = None
+        if isinstance(ids, list):
+            res_id = ids[0]
+        else:
+            res_id = ids
+        aml_id = self.browse(cr, uid, res_id, context=context).aml_id
+        if not aml_id:
+            return False
+        move_id = aml_id.move_id.id
+        #got to accountve move form
 
+        form_view = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'view_move_form')
+        form_view_id = form_view and form_view[1] or False
+        return {
+            'name': _('Account Move'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'view_id': [form_view_id],
+            'res_model': 'account.move',
+            'type': 'ir.actions.act_window',
+            'res_id': move_id,
+        }
+    
+    def open_source(self, cr, uid, ids, context=None):
+        res_id = None
+        if isinstance(ids, list):
+            res_id = ids[0]
+        else:
+            res_id = ids
+        aml_id = self.browse(cr, uid, res_id, context=context).aml_id
+        if not aml_id or not aml_id.source_id:
+            return False
+        res_model = aml_id.source_id._model._name
+        res_id = aml_id.source_id.id
+        #got to source model's form
+        return {
+            'name': _('Source Detail'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': res_model,
+            'type': 'ir.actions.act_window',
+            'res_id': res_id,
+        }
+                
 rpt_account_cn_line()
 
 from openerp.report import report_sxw

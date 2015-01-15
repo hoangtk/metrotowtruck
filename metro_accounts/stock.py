@@ -30,8 +30,17 @@ class stock_picking(osv.osv):
     _inherit = "stock.picking"
     def action_done(self, cr, uid, ids, context=None):
         resu = super(stock_picking,self).action_done(cr, uid, ids, context=context)
-        for picking_id in ids:
-            self.merge_pick_moves(cr, uid, picking_id, context)
+        actmv_obj = self.pool.get('account.move')
+        inv_model={'out':'stock.picking.out', 'in':'stock.picking.in', 'internal':'stock.picking', 'mr':'material.request', 'mrr':'material.request'}
+        for pick in self.browse(cr, uid, ids, context=context):
+            #merge stock valuation account moves
+            self.merge_pick_moves(cr, uid, pick, context)
+            #update account move's source_id
+            if pick.account_move_ids:
+                actmv_ids = [mv.id for mv in pick.account_move_ids]
+                source_id = '%s,%s'%(inv_model.get(pick.type),pick.id)
+                actmv_obj.write(cr, uid, actmv_ids, {'source_id':source_id})
+            
         return resu
     
     #merge the account moves of one picking,since the account move are generated one by one per stock move
@@ -62,8 +71,10 @@ class stock_picking(osv.osv):
         property_stock_account_output_categ, product.category
         property_stock_account_input_categ, product.category
         '''
-        
-        pick = self.browse(cr, uid, picking_id,context=context)
+        if isinstance(picking_id, (int, long)):
+            pick = self.browse(cr, uid, picking_id,context=context)
+        else:
+            pick = picking_id
         #only do the merging when there more than one stocking moves to this picking
         if not pick.account_move_ids or len(pick.account_move_ids) <= 1:
             '''

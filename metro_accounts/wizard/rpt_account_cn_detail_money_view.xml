@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <record id="rpt_account_cn_detail_predefine_view" model="ir.ui.view">
+        <record id="rpt_account_cn_detail_money_view" model="ir.ui.view">
             <field name="name">Accounting Entry Detail Predefine</field>
             <field name="model">rpt.account.cn</field>
             <field name="arch" type="xml">
@@ -50,7 +50,7 @@
 							<field name="show_counter" invisible="1"/>
 		                </group>
 		                <group colspan="4">
-							<field name="account_ids" domain="[('company_id', '=', company_id)]" widget="many2many_tags"/>
+							<field name="account_ids" domain="[('company_id', '=', company_id),('user_type.code','in',('cash','bank'))]" widget="many2many_tags"/>
 		                </group> 	                
 	                </group>
                 </group>
@@ -61,15 +61,17 @@
 						colors="blue:data_level=='period_sum';green:data_level in('init_bal','year_sum');"
 						fonts="bold:data_level in ('init_bal','period_sum','year_sum')">
 							<field name="data_level" invisible="1"/>
-							<!-- <field name="seq"/> -->
-							<field name="code"/>
-							<field name="name"/>
+							<field name="seq"/>
+							<!-- <field name="code"/>
+							<field name="name"/> -->
 							<field name="period_id"/>
-							<field name="date"/>
-							<field name="am_name"/>
+							<field name="date"/>							
+							<!-- <field name="am_name"/> -->
+							<field name="aml_account_id"/>
 							<field name="notes"/>
 		                    <field name="aml_id" invisible="1"/>
 		                    <button name="open_move" string="View Account Move" type="object" icon="gtk-justify-fill" attrs="{'invisible':[('aml_id','=',False)]}"/>
+		                    <field name="aml_partner_id"/>
 		                    <field name="aml_source_id"/>
 		                    <button name="open_source" string="View Source Order" type="object" icon="gtk-justify-fill" attrs="{'invisible':['|',('aml_id','=',False),('aml_source_id','=',False)]}"/>
 							<field name="counter_account" invisible="1"/>
@@ -83,41 +85,22 @@
             </field>
         </record>   
         
-        <record id="rpt_account_cn_detail_predefine_cash_action" model="ir.actions.act_window">
-            <field name="name">Cash Account Detail</field>
+        <record id="rpt_account_cn_detail_money_action" model="ir.actions.act_window">
+            <field name="name">Liquidity Detail</field>
             <field name="res_model">rpt.account.cn</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="rpt_account_cn_detail_predefine_view"/>
-            <field name="context">{'default_level':'detail','default_title':'Cash Account Detail','default_account_user_type':'cash'}</field>
+            <field name="view_id" ref="rpt_account_cn_detail_money_view"/>
+            <field name="context">{'default_level':'detail','default_title':'Liquidity Detail','default_target_move':'all','default_account_user_type':'cash,bank'}</field>
             <field name="target">inline</field>
-        </record>
-               
-        <record id="rpt_account_cn_detail_predefine_bank_action" model="ir.actions.act_window">
-            <field name="name">Bank Account Detail</field>
-            <field name="res_model">rpt.account.cn</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="rpt_account_cn_detail_predefine_view"/>
-            <field name="context">{'default_level':'detail','default_title':'Bank Account Detail','default_account_user_type':'bank'}</field>
-            <field name="target">inline</field>
-        </record>
-        
+        </record>        
            
         <menuitem
-            id="rpt_account_cn_detail_cash_menu"
-            action="rpt_account_cn_detail_predefine_cash_action"
+            id="rpt_account_cn_detail_money_menu"
+            action="rpt_account_cn_detail_money_action"
             groups="account.group_account_manager,account.group_account_user"
             parent="menu_rpt_account_cn"
-            sequence="3"
-           />   
-           
-        <menuitem
-            id="rpt_account_cn_detail_bank_menu"
-            action="rpt_account_cn_detail_predefine_bank_action"
-            groups="account.group_account_manager,account.group_account_user"
-            parent="menu_rpt_account_cn"
-            sequence="4"
-           />           
+            sequence="2"
+           />              
     </data>
 </openerp>
