@@ -318,11 +318,35 @@ class purchase_order(osv.osv):
         for (id, name) in self.name_get(cr, uid, ids):
             wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_reject', cr)
         return True
+    '''
+    Change the picking/invoice "cancel" to "unlink"
+    '''
     def action_cancel(self, cr, uid, ids, context=None):
-        resu = super(purchase_order,self).action_cancel(cr,uid,ids,context)
-        lines = self._get_lines(cr,uid,ids,context=context)
-        self.pool.get('purchase.order.line').write(cr, uid, lines, {'state': 'cancel'},context)
-        return resu
+        for purchase in self.browse(cr, uid, ids, context=context):
+            del_pick_ids = []
+            for pick in purchase.picking_ids:
+                if pick.state == 'done':
+                    raise osv.except_osv(
+                        _('Unable to cancel this purchase order.'),
+                        _('First cancel all receptions related to this purchase order.'))
+                if pick.state not in ('cancel','done'):
+                    del_pick_ids.append(pick.id)
+            if del_pick_ids:
+                self.pool.get('stock.picking').unlink(cr, uid, del_pick_ids, context=context)
+                
+            del_inv_ids = []
+            for inv in purchase.invoice_ids:
+                if inv and inv.state not in ('cancel','draft'):
+                    raise osv.except_osv(
+                        _('Unable to cancel this purchase order.'),
+                        _('You must first cancel all receptions related to this purchase order.'))
+                if inv.state == 'draft':
+                    del_inv_ids.append(inv.id)
+            if del_inv_ids:
+                self.pool.get('account.invoice').unlink(cr, uid, del_inv_ids, context=context)
+        self.write(cr,uid,ids,{'state':'cancel'})
+        return True
+                    
     def button_cancel_except(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
         for purchase in self.browse(cr, uid, ids, context=context):
