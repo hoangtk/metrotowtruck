@@ -314,8 +314,9 @@ class rpt_account_cn(osv.osv_memory):
         rpt_name = 'rpt.account.cn.gl'
         if form_data['level'] == 'detail':
             rpt_name = 'rpt.account.cn.detail'
-        return {'xmlrpt_name': rpt_name}
-    
+            if form_data['name'] == 'actrpt_dtl_money':
+                rpt_name = 'rpt.account.cn.detail.money'
+        return {'xmlrpt_name': rpt_name}    
     
     
 rpt_account_cn()
@@ -404,4 +405,5 @@ rpt_account_cn_line()
 from openerp.report import report_sxw
 report_sxw.report_sxw('report.rpt.account.cn.gl', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_gl.rml', parser=report_sxw.rml_parse, header='internal landscape')
 report_sxw.report_sxw('report.rpt.account.cn.detail', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_detail.rml', parser=report_sxw.rml_parse, header='internal landscape')
+report_sxw.report_sxw('report.rpt.account.cn.detail.money', 'rpt.account.cn', 'addons/metro_accounts/report/rpt_account_cn_detail_money.rml', parser=report_sxw.rml_parse, header='internal landscape')
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

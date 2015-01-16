@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
     <data>
+<!-- customer payment -->    
         <record id="invoice_payment_form" model="ir.ui.view">
             <field name="name">invoice.payment.form</field>
             <field name="model">account.invoice</field>
@@ -50,7 +51,19 @@
             	</xpath>
             </field>
         </record>        
+		<!-- can cancel when invoice is paid, from account_cancel_view.xml in account_cancel module -->
+        <record id="invoice_customer_form_cancel_ext" model="ir.ui.view">
+            <field name="name">invoice_customer_form_cancel_ext</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account_cancel.invoice_form_cancel_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='invoice_cancel']" position="replace">
+                    <button name="invoice_cancel" states="draft,proforma2,sale,open,paid" string="Cancel Invoice" groups="account.group_account_invoice"/>
+                </xpath>
+            </field>
+        </record>        
         
+<!-- supplier payment -->        
         <record id="invoice_supplier_payment_form" model="ir.ui.view">
             <field name="name">invoice.supplier.payment.form</field>
             <field name="model">account.invoice</field>
@@ -94,7 +107,18 @@
             		attrs="{'invisible': [('state','!=','open')]}" groups="account.group_account_invoice"/>
             	</xpath>
             </field>
-        </record>   
-         
+        </record>
+		<!-- can cancel when invoice is paid, from account_cancel_view.xml in account_cancel module -->
+        <record id="invoice_supplier_form_cancel_ext" model="ir.ui.view">
+            <field name="name">invoice_supplier_form_cancel_ext</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account_cancel.invoice_supplier_cancel_form_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='invoice_cancel']" position="replace">
+                    <button name="invoice_cancel" states="draft,proforma2,sale,open,paid" string="Cancel Invoice" groups="account.group_account_invoice"/>
+                </xpath>
+            </field>
+        </record>        
+        
     </data>
 </openerp>

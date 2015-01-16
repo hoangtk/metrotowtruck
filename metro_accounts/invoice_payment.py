@@ -2,6 +2,8 @@
 import time
 from openerp.report import report_sxw
 from openerp.osv import fields, osv
+from openerp.tools.translate import _
+
 
 class account_invoice(osv.osv):
     _inherit = "account.invoice"
@@ -72,6 +74,61 @@ class account_invoice(osv.osv):
     }
     _defaults={'auto_reconcile_sale_pay':True,'auto_reconcile_purchase_pay':True}
     
+    def action_cancel(self, cr, uid, ids, context=None):
+        '''
+        remove the account move that did the reconcile the prepayment
+        1.unreconcile the auto reconcile move
+        2.delete auto reconcile account move
+        '''
+        if context is None:
+            context = {}
+        account_move_obj = self.pool.get('account.move')
+        account_move_line_obj = self.pool.get('account.move.line')
+        invoices = self.read(cr, uid, ids, ['move_id', 'payment_ids', 'sale_payment_ids', 'auto_reconcile_sale_pay', 'purchase_payment_ids', 'auto_reconcile_purchase_pay'])
+        
+        #+++++++++check and cancel the prepayments auto reconcilation++++++++++
+        def _check_prepayments(inv, pay_ids_field, auto_reconcile_flag_field):
+            if not inv.get(pay_ids_field):
+                return
+            pay_ids = account_move_line_obj.browse(cr, uid, inv[pay_ids_field])
+            del_move_ids = []
+            unreconcile_mv_ln_ids = []
+            for move_line in pay_ids:
+                if (move_line.reconcile_id and move_line.reconcile_id.line_id) \
+                    or (move_line.reconcile_partial_id and move_line.reconcile_partial_id.line_partial_ids):
+                    if not inv.get(auto_reconcile_flag_field):
+                        raise osv.except_osv(_('Error!'), _('You cannot cancel an invoice which is partially reconciled with the prepayments. You need to unreconcile related prepayment entries first.'))
+                    else:
+                        if move_line.reconcile_id and move_line.reconcile_id.line_id:
+                            for move_line_reconcile in move_line.reconcile_id.line_id:
+                                if move_line_reconcile.id != move_line.id and move_line_reconcile.move_id.id not in del_move_ids:
+                                    #add the generated auto reconcile move id to delete
+                                    del_move_ids.append(move_line_reconcile.move_id.id)
+                                    
+                        if move_line.reconcile_partial_id and move_line.reconcile_id.line_partial_ids:
+                            for move_line_reconcile in move_line.reconcile_id.line_partial_ids:
+                                if move_line_reconcile.id != move_line.id and move_line_reconcile.move_id.id not in del_move_ids:
+                                    #add the generated auto reconcile move id to delete
+                                    del_move_ids.append(move_line_reconcile.move_id.id)
+                        unreconcile_mv_ln_ids.append(move_line.id)
+            #do unreconcile
+            for move in account_move_obj.browse(cr, uid, del_move_ids, context=context):
+                for mvln in move.line_id:
+                    if mvln.reconcile_id and mvln.id not in unreconcile_mv_ln_ids:
+                        unreconcile_mv_ln_ids.append(mvln.id)
+            account_move_line_obj._remove_move_reconcile(cr, uid, unreconcile_mv_ln_ids, context=context)
+            #do deletion
+            if del_move_ids:
+                account_move_obj.unlink(cr, uid, del_move_ids, context=context)
+                                    
+        for i in invoices:
+            if i['payment_ids']:
+                raise osv.except_osv(_('Error!'), _('You cannot cancel an invoice which is paid using payment order. You need to unreconcile related payment order first.'))
+            _check_prepayments(i, 'sale_payment_ids', 'auto_reconcile_sale_pay')
+            _check_prepayments(i, 'purchase_payment_ids', 'auto_reconcile_purchase_pay')
+        
+        return super(account_invoice, self).action_cancel(cr, uid, ids, context=context)
+        
     def invoice_validate(self, cr, uid, ids, context=None):
         res = super(account_invoice,self).invoice_validate(cr, uid, ids, context)
         #auto reconcile the invoices
@@ -189,9 +246,10 @@ class account_invoice(osv.osv):
         move_vals = {'name': move_name,
                 'journal_id': journal.id,
                 'date': date,
-                'ref': inv.name,
+                'ref': inv.origin or inv.name,
                 'period_id': period.id,
                 'narration':move_description,
+                'source_id':'account.invoice,%s'%(inv.id,)
                 }
         move_id = move_obj.create(cr, uid, move_vals, context=context)        
         #########get the move lines##########

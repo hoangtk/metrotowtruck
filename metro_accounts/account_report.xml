@@ -7,6 +7,9 @@
         <report auto="False" id="report_rpt_account_cn_detail" model="rpt.account.cn" header="True"
                 name="rpt.account.cn.detail" rml="metro_accounts/report/rpt_account_cn_detail.rml"
                 usage="default" string="Accounting Entry Detail"/>
+        <report auto="False" id="report_rpt_account_cn_detail_money" model="rpt.account.cn" header="True"
+                name="rpt.account.cn.detail.money" rml="metro_accounts/report/rpt_account_cn_detail_money.rml"
+                usage="default" string="Accounting Entry Detail Money"/>
                 
         <report auto="False" id="report_rpt_inventory_qty" model="rpt.inventory" header="True"
                 name="rpt.inventory.qty" rml="metro_accounts/report/rpt_inventory_qty.rml"

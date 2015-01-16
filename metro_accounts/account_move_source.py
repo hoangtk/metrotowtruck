@@ -37,7 +37,9 @@ class account_move_line(osv.osv):
 '''
 Entry move source:
 采购预付款:purchase.order
+采购预付款-自动核销:account.invoice
 销售预收款:sale.order
+销售预收款-自动核销:account.invoice
 凭据:account.invoice: 是否需要链接凭据的相关单据?
 付款单:account.voucher: 是否需要链接voucher的相关单据?
 出纳-存取款,银行转账,其他收款,其他付款: cash.bank.trans
@@ -69,7 +71,12 @@ class sale_order(osv.osv):
         res = super(sale_order,self)._prepare_payment_move(cr,uid,move_name,sale,journal,period,date,description,context)
         res['source_id'] = '%s,%s'%('sale.order',sale.id)
         return res
-    
+
+'''
+采购预付款-自动核销:account.invoice/销售预收款-自动核销:account.invoice
+参考metro_accounts.invoice_payment.py.account_invoice.add_inv_prepay_reconcile_move()
+'''
+        
 '''
 凭据
 Add source_id for invoice validation
