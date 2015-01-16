@@ -77,7 +77,7 @@
 							<field name="counter_account" invisible="1"/>
 							<field name="debit"/>
 							<field name="credit"/>
-							<field name="bal_direct"/>
+							<!-- <field name="bal_direct"/> -->
 							<field name="balance"/>
 					</tree>
 				</field>		
@@ -91,7 +91,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="rpt_account_cn_detail_money_view"/>
-            <field name="context">{'default_level':'detail','default_title':'Liquidity Detail','default_target_move':'all','default_account_user_type':'cash,bank'}</field>
+            <field name="context">{'default_level':'detail','default_name':'actrpt_dtl_money','default_title':'Liquidity Detail','default_target_move':'all','default_account_user_type':'cash,bank'}</field>
             <field name="target">inline</field>
         </record>        
            
