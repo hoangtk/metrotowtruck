@@ -24,6 +24,7 @@ from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import tools
 from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp import SUPERUSER_ID
 
   
 class stock_picking(osv.osv):
@@ -39,7 +40,7 @@ class stock_picking(osv.osv):
             if pick.account_move_ids:
                 actmv_ids = [mv.id for mv in pick.account_move_ids]
                 source_id = '%s,%s'%(inv_model.get(pick.type),pick.id)
-                actmv_obj.write(cr, uid, actmv_ids, {'source_id':source_id})
+                actmv_obj.write(cr, SUPERUSER_ID, actmv_ids, {'source_id':source_id})
             
         return resu
     
