@@ -10,7 +10,7 @@
                 <field name="type" invisible="1"/>
                 <field name="title" invisible="1"/>
                 <header>
-                   	<button name="run_report" string="Generate Attendance" type="object" states="draft,rejected" class="oe_highlight"/>
+                   	<button name="run_report" string="Generate Attendance" type="object" states="draft,rejected" class="oe_highlight" confirm="Are you sure to continue to generate attendance report?"/>
                    	
                    	<button name="confirm" string="Confirm" states="draft,rejected" class="oe_highlight"/>
                    	

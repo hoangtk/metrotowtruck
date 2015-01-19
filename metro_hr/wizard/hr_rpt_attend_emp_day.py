@@ -37,7 +37,7 @@ class hr_rpt_attend_emp_day(osv.osv):
     _name = "hr.rpt.attend.emp.day"
     _description = "HR Attendance Employee Daily Report"
     _columns = {
-        'name': fields.char('Report Name', size=16, required=False),
+        'name': fields.char('Report Name', size=32, required=False),
         'title': fields.char('Report Title', required=False),
         'type': fields.char('Report Type', size=16, required=True),
         'company_id': fields.many2one('res.company','Company',required=True),

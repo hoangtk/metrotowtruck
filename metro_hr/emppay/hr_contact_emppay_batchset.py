@@ -100,11 +100,34 @@ class hr_set_si(osv.osv_memory):
 class hr_contract_emppay_batchset(osv.osv_memory):
     _name = 'hr.contract.emppay.batchset'
     _description = 'Set Contract Payroll in batch'
+    _OTPAY_SEL = [('wage', 'Wage'),('wage2', 'Basic Wage'),('fixed', 'Fixed Amount')]
     _columns = {
         'wage2_set':fields.boolean('Set Wage2'),
         'wage2':fields.float('Wage2', digits_compute=dp.get_precision('Payroll')),
         'pit_base_set':fields.boolean('Set PIT Start Point'),
         'pit_base':fields.float('PIT Start Point', digits_compute=dp.get_precision('Payroll')),
+        'wage_currency_set':fields.boolean('Set Wage Currency'),
+        'wage_currency_id': fields.many2one('res.currency', 'Wage Currency'),
+        #####################
+        'ot_pay_set':fields.boolean('Set OT Pay Options'),
+        'ot_pay_normal':fields.selection(_OTPAY_SEL,'Normal OT Pay'),
+        'ot_pay_normal_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+                
+        'ot_pay_weekend':fields.selection(_OTPAY_SEL,'Weekend OT Pay'),
+        'ot_pay_weekend_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_holiday':fields.selection(_OTPAY_SEL,'Holiday OT Pay'),
+        'ot_pay_holiday_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_normal2':fields.selection(_OTPAY_SEL,'Normal OT Pay by five days'),
+        'ot_pay_normal2_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_weekend2':fields.selection(_OTPAY_SEL,'Weekend OT Pay by five days'),
+        'ot_pay_weekend2_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_holiday2':fields.selection(_OTPAY_SEL,'Holiday OT Pay by five days'),
+        'ot_pay_holiday2_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        #####################
                         
         'alwded_ids_set':fields.boolean('Set Allowance&Deduction'),
         'alwded_ids': fields.one2many('hr.set.alwded', 'set_id', 'Allowance&Deduction'),
@@ -113,8 +136,35 @@ class hr_contract_emppay_batchset(osv.osv_memory):
         
         'contract_ids': fields.many2many('hr.contract', string='Contracts'),
     }
-    
-    _defaults={'wage2_set':False, 'pit_base_set':False, 'alwded_ids_set':True, 'si_ids_set':True}
+    def _get_currency(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        cur = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id
+        return cur and cur.id or False
+        
+    _defaults={
+        'wage2_set':False, 
+        'pit_base_set':False,
+        'wage_currency_set':False, 
+        'ot_pay_set':False,
+        'alwded_ids_set':True, 
+        'si_ids_set':True,
+        'wage_currency_id': _get_currency,
+        
+        'ot_pay_normal': 'wage',
+        'ot_pay_normal_multi': 1,
+        'ot_pay_weekend': 'wage',
+        'ot_pay_weekend_multi': 2,
+        'ot_pay_holiday': 'wage',
+        'ot_pay_holiday_multi': 3,
+        
+        'ot_pay_normal2': 'wage2',
+        'ot_pay_normal2_multi': 1,
+        'ot_pay_weekend2': 'wage2',
+        'ot_pay_weekend2_multi': 2,
+        'ot_pay_holiday2': 'wage2',
+        'ot_pay_holiday2_multi': 3,               
+        }
                         
     def default_get(self, cr, uid, fields, context=None):
         vals = super(hr_contract_emppay_batchset, self).default_get(cr, uid, fields, context=context)
@@ -151,6 +201,22 @@ class hr_contract_emppay_batchset(osv.osv_memory):
                 field_names.append('wage2') 
             if order.pit_base_set:
                 field_names.append('pit_base')
+            if order.wage_currency_set:
+                field_names.append('wage_currency_id')
+            if order.ot_pay_set:
+                field_names.append('ot_pay_normal')
+                field_names.append('ot_pay_normal_multi')
+                field_names.append('ot_pay_weekend')
+                field_names.append('ot_pay_weekend_multi')
+                field_names.append('ot_pay_holiday')
+                field_names.append('ot_pay_holiday_multi')
+                field_names.append('ot_pay_normal2')
+                field_names.append('ot_pay_normal2_multi')
+                field_names.append('ot_pay_weekend2')
+                field_names.append('ot_pay_weekend2_multi')
+                field_names.append('ot_pay_holiday2')
+                field_names.append('ot_pay_holiday2_multi')
+                
             if order.alwded_ids_set:
                 field_names.append('alwded_ids')
             if order.si_ids_set:
@@ -174,6 +240,9 @@ class hr_contract_emppay_batchset(osv.osv_memory):
                             si['si_id'] = si['si_id'][0]
                             si_ids.append((0,0,si))
                         data_write['si_ids'] = si_ids
+                    elif field_name == 'wage_currency_id':
+                        if order[field_name]:
+                            data_write[field_name] = order[field_name].id
                     else:
                         data_write[field_name] = order[field_name]
                         
