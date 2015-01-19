@@ -49,6 +49,52 @@ set employee Payroll Info in batch
 	                    <field name="pit_base" attrs="{'invisible':[('pit_base_set','=',False)]}"/>
                 	</div>
                 	<div>
+                		<field name="wage_currency_set" class="oe_inline"/><label for="wage_currency_set"/>
+	                    <field name="wage_currency_id" attrs="{'invisible':[('wage_currency_set','=',False)]}"/>
+                	</div>
+                	<div>
+                		<field name="ot_pay_set" class="oe_inline"/><label for="ot_pay_set"/>
+	                    <group name="ot_pay_options" attrs="{'invisible':[('ot_pay_set','=',False)]}">
+	                    	<label for="ot_pay_normal"/>
+		                    <div>                    	
+		                    	<field name="ot_pay_normal" class="oe_inline"/>
+		                    	<label string="*" attrs="{'invisible':[('ot_pay_normal','=','fixed')]}"/>
+		                    	<field name="ot_pay_normal_multi" class="oe_inline"/>
+		                    </div>
+<!-- 		                    <label for="ot_pay_weekend"/>
+		                    <div>                    	
+		                    	<field name="ot_pay_weekend" class="oe_inline"/>
+		                    	<label string="*" attrs="{'invisible':[('ot_pay_weekend','=','fixed')]}"/>
+		                    	<field name="ot_pay_weekend_multi" class="oe_inline"/>
+		                    </div>
+		                    <label for="ot_pay_holiday"/>
+		                    <div>                    	
+		                    	<field name="ot_pay_holiday" class="oe_inline"/>
+		                    	<label string="*" attrs="{'invisible':[('ot_pay_holiday','=','fixed')]}"/>
+		                    	<field name="ot_pay_holiday_multi" class="oe_inline"/>
+		                    </div> -->
+		                    
+		                    <label for="ot_pay_normal2"/>
+		                    <div>                    	
+		                    	<field name="ot_pay_normal2" class="oe_inline"/>
+		                    	<label string="*" attrs="{'invisible':[('ot_pay_normal2','=','fixed')]}"/>
+		                    	<field name="ot_pay_normal2_multi" class="oe_inline"/>
+		                    </div>
+		                    <label for="ot_pay_weekend2"/>
+		                    <div>                    	
+		                    	<field name="ot_pay_weekend2" class="oe_inline"/>
+		                    	<label string="*" attrs="{'invisible':[('ot_pay_weekend2','=','fixed')]}"/>
+		                    	<field name="ot_pay_weekend2_multi" class="oe_inline"/>
+		                    </div>
+<!-- 		                    <label for="ot_pay_holiday2"/>
+		                    <div>                    	
+		                    	<field name="ot_pay_holiday2" class="oe_inline"/>
+		                    	<label string="*" attrs="{'invisible':[('ot_pay_holiday2','=','fixed')]}"/>
+		                    	<field name="ot_pay_holiday2_multi" class="oe_inline"/>
+		                    </div>	 -->
+		            	</group>                    
+                	</div>
+                	<div>
 	                	<field name="alwded_ids_set" class="oe_inline"/><label for="alwded_ids_set"/>
 		               	<field name="alwded_ids" attrs="{'invisible':[('alwded_ids_set','=',False)]}">
 		                       <tree string="Allowance and Deduction" editable="bottom">

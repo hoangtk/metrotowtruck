@@ -65,6 +65,7 @@ class rpt_account_partner(osv.osv_memory):
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(rpt_account_partner,self).default_get(cr, uid, fields_list, context)
         account_ids = []
+        company_id = self.pool.get('res.company')._company_default_get(cr, uid, 'account.rptcn', context=context)
         #handle the "default_partner_type" parameter, set the default account_ids
         default_partner_type = context and context.get('default_partner_type', False) or False
         if default_partner_type:            
@@ -74,7 +75,7 @@ class rpt_account_partner(osv.osv_memory):
             if default_partner_type == 'supplier':
                 account_types = ['payable']
             if account_types:
-                account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types)],context=context)
+                account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types),('company_id','=',company_id)],context=context)
                 if account_ids_inc:
                     account_ids += account_ids_inc
         if account_ids:
@@ -143,6 +144,34 @@ class rpt_account_partner(osv.osv_memory):
         balance = partner_type == 'supplier' and (credit-debit) or (debit-credit) 
         return balance, bal_direct          
         
+    def onchange_company_id(self, cr, uid, ids, company_id, current_account_ids, rpt_name, context):
+        val = {}
+        resu = {'value':val}
+        if not company_id:
+            return resu
+        account_ids = []
+        #filter currenet account ids using company_id
+        current_account_ids = current_account_ids and current_account_ids[0][2] or None        
+        if current_account_ids:
+            domain = [('id','in',current_account_ids),('company_id','=',company_id)]
+            account_ids = self.pool.get('account.account').search(cr, uid, domain,context=context)       
+            
+        #refresh the accounting list
+        default_partner_type = context and context.get('default_partner_type', False) or False
+        if not account_ids and default_partner_type:            
+            account_types = []
+            if default_partner_type == 'customer':
+                account_types = ['receivable']
+            if default_partner_type == 'supplier':
+                account_types = ['payable']
+            if account_types:
+                account_ids = self.pool.get('account.account').search(cr, uid, [('type','in',account_types),('company_id','=',company_id)],context=context)    
+        val['account_ids'] = [[6, False, account_ids]]
+        #refresh the periods
+        period_from, period_to = self.get_default_periods(cr, uid, company_id, context=context)
+        val.update({'period_from':period_from, 'period_to':period_to})
+        return resu
+            
     def run_account_partner(self, cr, uid, ids, context=None):
         if context is None: context = {}         
         rpt = self.browse(cr, uid, ids, context=context)[0]

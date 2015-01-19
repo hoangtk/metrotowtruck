@@ -24,7 +24,7 @@
                 </group>                
                 <group name="options" attrs="{'invisible':[('show_search','!=',True)]}">
 	                <group colspan="4" name="options_common">
-						<field name="company_id" groups="base.group_multi_company" widget="selection"/>			
+						<field name="company_id" groups="base.group_multi_company" widget="selection" on_change="onchange_company_id(company_id,account_ids,name,context)"/>			
 	                </group>
 	                <!-- 2.Report options -->
 	                <group colspan="4" name="options_rpt">
@@ -89,7 +89,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="rpt_account_cn_detail_predefine_view"/>
-            <field name="context">{'default_level':'detail','default_title':'Cash Account Detail','default_account_user_type':'cash'}</field>
+            <field name="context">{'default_level':'detail','default_name':'actrpt_dtl_cash','default_title':'Cash Account Detail','default_account_user_type':'cash'}</field>
             <field name="target">inline</field>
         </record>
                
@@ -99,7 +99,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="rpt_account_cn_detail_predefine_view"/>
-            <field name="context">{'default_level':'detail','default_title':'Bank Account Detail','default_account_user_type':'bank'}</field>
+            <field name="context">{'default_level':'detail','default_name':'actrpt_dtl_bank','default_title':'Bank Account Detail','default_account_user_type':'bank'}</field>
             <field name="target">inline</field>
         </record>
         

@@ -40,7 +40,7 @@ class hr_rpt_attend_month(osv.osv):
     _description = "HR Attendance monthly report"
     _inherit = ['mail.thread']
     _columns = {
-        'name': fields.char('Report Name', size=16, required=False),
+        'name': fields.char('Report Name', size=32, required=False),
         'title': fields.char('Report Title', required=False),
         'type': fields.char('Report Type', size=16, required=True),
         'company_id': fields.many2one('res.company','Company',required=True),  

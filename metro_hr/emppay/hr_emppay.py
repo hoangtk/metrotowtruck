@@ -281,6 +281,22 @@ class hr_contract(osv.osv):
             lines.append(line)
         return lines 
         
+    _OTPAY_SEL = [('wage', 'Wage'),('wage2', 'Basic Wage'),('fixed', 'Fixed Amount')]
+    
+
+    '''
+        加班小时工资设置:
+        正常加班小时工资: 默认-按实际工资(正常工资/应出勤天数/8), 倍数1
+        周末加班小时工资: 默认-按实际工资(正常工资/应出勤天数/8), 倍数1
+        节假日加班小时工资: 默认-按实际工资(正常工资/应出勤天数/8), 倍数1
+        5天制正常加班小时工资: 默认-按基本工资(基本工资/应出勤天数/8), 倍数1
+        5天制周末加班小时工资: 默认-按基本工资(基本工资/应出勤天数/8), 倍数2
+        5天制节假日加班小时工资: 默认-按基本工资(基本工资/应出勤天数/8), 倍数3
+        可设置选项:
+        按实际工资(正常工资/应出勤天数/8), 倍数
+        按基本工资(基本工资/应出勤天数/8), 倍数
+        按固定金额,金额
+    '''    
     _columns = {
         'alwded_ids': fields.one2many('hr.contract.alwded', 'contract_id', 'Allowance&Deduction'),
         'si_ids': fields.one2many('hr.contract.si', 'contract_id', 'Social Insurance'),
@@ -288,9 +304,57 @@ class hr_contract(osv.osv):
         'si_total_personal':fields.function(_amount_si, string='Personal Amount', type='float', digits_compute=dp.get_precision('Payroll'), multi="_amount_si"),
         
         'wage2':fields.float('Wage2', digits_compute=dp.get_precision('Payroll')),
+        'have_pit':fields.boolean('Have PIT'),
         'pit_base':fields.float('PIT Start Point', digits_compute=dp.get_precision('Payroll')),
-
+        
+        #Wage currency
+        'wage_currency_id': fields.many2one('res.currency', 'Wage Currency'),
+        #OT pay setting
+        'ot_pay_normal':fields.selection(_OTPAY_SEL,'Normal OT Pay'),
+        'ot_pay_normal_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+                
+        'ot_pay_weekend':fields.selection(_OTPAY_SEL,'Weekend OT Pay'),
+        'ot_pay_weekend_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_holiday':fields.selection(_OTPAY_SEL,'Holiday OT Pay'),
+        'ot_pay_holiday_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_normal2':fields.selection(_OTPAY_SEL,'Normal OT Pay by five days'),
+        'ot_pay_normal2_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_weekend2':fields.selection(_OTPAY_SEL,'Weekend OT Pay by five days'),
+        'ot_pay_weekend2_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
+        
+        'ot_pay_holiday2':fields.selection(_OTPAY_SEL,'Holiday OT Pay by five days'),
+        'ot_pay_holiday2_multi':fields.float('Multiple', digits_compute=dp.get_precision('Payroll')),
     }
+
+    def _get_currency(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        cur = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id
+        return cur and cur.id or False
+        
+    _defaults={
+        'have_pit':True,
+        
+        'wage_currency_id': _get_currency,
+        'ot_pay_normal': 'wage',
+        'ot_pay_normal_multi': 1,
+        'ot_pay_weekend': 'wage',
+        'ot_pay_weekend_multi': 2,
+        'ot_pay_holiday': 'wage',
+        'ot_pay_holiday_multi': 3,
+        
+        'ot_pay_normal2': 'wage2',
+        'ot_pay_normal2_multi': 1,
+        'ot_pay_weekend2': 'wage2',
+        'ot_pay_weekend2_multi': 2,
+        'ot_pay_holiday2': 'wage2',
+        'ot_pay_holiday2_multi': 3,               
+        }
+        
+            
     def default_get(self, cr, uid, fields_list, context=None):
         defaults = super(hr_contract, self).default_get(cr, uid, fields_list, context=context)
         user_comp = self.pool.get('res.users').browse(cr, uid, uid,context=context).company_id
@@ -320,8 +384,10 @@ class res_company(osv.osv):
     _columns = {
         'emppay_wage2':fields.float('Wage2', digits_compute=dp.get_precision('Payroll')),
         'emppay_pit_base':fields.float('PIT Start Point', digits_compute=dp.get_precision('Payroll')),
+        'emppay_pit_formula':fields.char('PIT Formula', size=128),
     }
-    _defaults={'emppay_pit_base':3500}
+    _defaults={'emppay_pit_base':3500,
+                    'emppay_pit_formula':'[(0.03, 0), (0.1, 105), (0.2, 555), (0.25, 1005), (0.3, 2755), (0.35, 5505), (0.45, 13505)]'}
 
 class hr_rpt_attend_month(osv.osv):
     _inherit = 'hr.rpt.attend.month'
@@ -389,6 +455,14 @@ class hr_rpt_attend_month(osv.osv):
             contract = contract_obj.browse(cr, uid, contract_id, context=context)
             slip_alws, slip_deds, slip_alws_inwage = self.emp_attend_alwded(cr, uid, attend_line, contract=contract, calc_method='base_attend', context=context)
             slip_sis = contract_obj.si_dict(cr, uid, contract_id, context=context)
+            wage = contract.wage
+            wage2 = contract.wage2
+            if contract.wage_currency_id and contract.wage_currency_id.id != contract.employee_id.company_id.currency_id.id:
+                curr_obj = self.pool.get('res.currency')
+                curr_from_id = contract.wage_currency_id.id
+                curr_to_id = contract.employee_id.company_id.currency_id.id
+                wage = curr_obj.compute(cr, uid, curr_from_id, curr_to_id, wage, context=context)
+                wage2 = curr_obj.compute(cr, uid, curr_from_id, curr_to_id, wage2, context=context)
             slip = {'attend_id':attend_line.id,
                     'employee_id': emp_id,
                     'contract_id': contract.id,
@@ -399,8 +473,8 @@ class hr_rpt_attend_month(osv.osv):
 #                    for the related fields with store=True, we need assign the value when creating by code,
 #                    otherwise if the next code in same DB transaction can not get the data by browse(...),
 #                    On this sample is the hr_emppay._wage_all() method can not get the wage/wage2 data
-                    'wage':contract.wage,
-                    'wage2':contract.wage2,
+                    'wage':wage,
+                    'wage2':wage2,
                     #the allowance, deduction and sodical insurance
                     'alw_ids': [(0,0,item) for item in slip_alws],
                     'alw_inwage_ids': [(0,0,item) for item in slip_alws_inwage],
@@ -758,18 +832,58 @@ class hr_emppay(osv.osv):
     _name = 'hr.emppay'
     _description = 'Pay Slip'
 
+    def _ot_pay_info(self, cr, uid, contract, wage_days, wage2_days=None,  wage=None, wage2=None, context=None):
+        if not contract or not wage_days or wage_days <= 0 or (wage2_days and wage2_days <=0):
+            return False
+        if isinstance(contract,(int,long)):
+            contract = self.pool.get('hr.contract').browse(cr, uid, contract, context=context)
+        if not wage:
+            wage = contract.wage
+        if not wage2:
+            wage2 = contract.wage2
+        if not wage2_days:
+            wage2_days = wage_days
+            
+        curr_convert = False
+        if contract.wage_currency_id and contract.wage_currency_id.id != contract.employee_id.company_id.currency_id.id:
+            curr_convert = True
+            curr_obj = self.pool.get('res.currency')
+            curr_from_id = contract.wage_currency_id.id
+            curr_to_id = contract.employee_id.company_id.currency_id.id
+                
+        fld_list = [{'opt':'ot_pay_normal','multi':'ot_pay_normal_multi'},{'opt':'ot_pay_weekend','multi':'ot_pay_weekend_multi'},{'opt':'ot_pay_holiday','multi':'ot_pay_holiday_multi'},
+                    {'opt':'ot_pay_normal2','multi':'ot_pay_normal2_multi'},{'opt':'ot_pay_weekend2','multi':'ot_pay_weekend2_multi'},{'opt':'ot_pay_holiday2','multi':'ot_pay_holiday2_multi'}]
+        ot_pays = {}
+        for fld in fld_list:
+            ot_pay_rate = 0.0
+            fld_opt = fld['opt']
+            fld_multi = fld['multi']
+            ot_pay_opt = getattr(contract, fld_opt)
+            if ot_pay_opt == 'wage':
+                ot_pay_rate = (wage/wage_days/8.0)*getattr(contract,fld_multi) 
+            if ot_pay_opt == 'wage2':
+                ot_pay_rate = (wage2/wage2_days/8.0)*getattr(contract,fld_multi)
+            if ot_pay_opt == 'fixed':
+                ot_pay_rate = getattr(contract,fld_multi)
+            if curr_convert:
+                ot_pay_rate = curr_obj.compute(cr, uid, curr_from_id, curr_to_id, ot_pay_rate, context=context)
+            ot_pays[fld_opt] = ot_pay_rate
+                
+        
+        return ot_pays                            
+            
     def _wage_all(self, cr, uid, ids, field_names, args, context=None):
         res = dict((id,dict((field_name,None) for field_name in field_names)) for id in ids)
         for slip in self.browse(cr, uid, ids, context=context):
             wage_attend = 0.0
             wage_ot = 0.0
+            month_attend_days_law = slip.company_id.month_attend_days_law
+            ot_pays = self._ot_pay_info(cr, uid, slip.contract_id, slip.days_work, month_attend_days_law, wage=slip.wage, wage2=slip.wage2,context=context)
             if slip.days_work and slip.days_work != 0:
                 wage_attend = slip.wage*slip.days_attend/slip.days_work
-                
-                wage_hourly = slip.wage/slip.days_work/8.0
-                wage_ot = wage_hourly * slip.hours_ot
-                wage_ot_we = wage_hourly * slip.hours_ot_we * 2
-                wage_ot_holiday = wage_hourly * slip.hours_ot_holiday * 3
+                wage_ot = ot_pays['ot_pay_normal'] * slip.hours_ot
+                wage_ot_we = ot_pays['ot_pay_weekend'] * slip.hours_ot_we
+                wage_ot_holiday = ot_pays['ot_pay_holiday'] * slip.hours_ot_holiday
                 wage_ot_total = wage_ot + wage_ot_we + wage_ot_holiday
                 
                 wage_work = wage_attend + wage_ot_total
@@ -792,11 +906,14 @@ class hr_emppay(osv.osv):
             wage_pay = wage_total - ded_total - si_total_personal
             wage_tax = wage_total - si_total_personal
             
-            pit = max([
-                        (wage_tax - slip.contract_id.pit_base)*rate[0]-rate[1] 
-                        for rate in [(0.03, 0), (0.1, 105), (0.2, 555), (0.25, 1005), (0.3, 2755), (0.35, 5505), (0.45, 13505)]
-                        ])
-            pit = max([pit,0])
+            pit = 0.0
+            if slip.contract_id.have_pit:
+                pit_formula = slip.company_id.emppay_pit_formula
+                if not pit_formula:
+                    pit_formula = "[(0.03, 0), (0.1, 105), (0.2, 555), (0.25, 1005), (0.3, 2755), (0.35, 5505), (0.45, 13505)]"
+                pit_rates = eval(pit_formula)
+                pit = max([(wage_tax - slip.contract_id.pit_base)*rate[0]-rate[1]  for rate in pit_rates])
+                pit = max([pit,0])  
             
             wage_net = wage_pay - pit
                         
@@ -804,14 +921,11 @@ class hr_emppay(osv.osv):
             The reason use 'month_attend_days_law' is that the days_attends is based on the month_attend_days_law
             see below code in hr_rpt_attend_month:
                 days_attend2 = days_attend2/days_work2*month_attend_days_law
-            '''
-            month_attend_days_law = slip.company_id.month_attend_days_law                            
+            '''                                        
             wage_attend2 = slip.wage2*slip.days_attend2/month_attend_days_law
-            
-            wage_hourly2 = slip.wage2/month_attend_days_law/8.0
-            wage_ot2 = wage_hourly2 * slip.hours_ot2
-            wage_ot_we2 = wage_hourly2 * slip.hours_ot_we2 * 2
-            wage_ot_holiday2 = wage_hourly2 * slip.hours_ot_holiday2 * 3
+            wage_ot2 = ot_pays['ot_pay_normal2'] * slip.hours_ot2
+            wage_ot_we2 = ot_pays['ot_pay_weekend2'] * slip.hours_ot_we2
+            wage_ot_holiday2 = ot_pays['ot_pay_holiday2'] * slip.hours_ot_holiday2
             wage_ot_total2 = wage_ot2 + wage_ot_we2 + wage_ot_holiday2
 
             alw_inwage_total = 0.0

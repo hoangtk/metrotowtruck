@@ -65,16 +65,17 @@ class rpt_account_cn(osv.osv_memory):
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(rpt_account_cn,self).default_get(cr, uid, fields_list, context)
+        company_id = self.pool.get('res.company')._company_default_get(cr, uid, 'account.rptcn', context=context)
         #handle the "default_account_type" and "default_account_user_type" parameter
         account_ids = []
         if context.get('default_account_type',False):
             account_types = context.get('default_account_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types),('type','!=','view')],context=context)
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('type','in',account_types),('type','!=','view'),('company_id','=',company_id)],context=context)
             if account_ids_inc:
                 account_ids += account_ids_inc
         if context.get('default_account_user_type',False):
             account_types = context.get('default_account_user_type').split(',')
-            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_types),('type','!=','view')],context=context)
+            account_ids_inc = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_types),('type','!=','view'),('company_id','=',company_id)],context=context)
             if account_ids_inc:
                 account_ids += account_ids_inc
         if account_ids:
@@ -83,7 +84,7 @@ class rpt_account_cn(osv.osv_memory):
         
     def _check_periods(self, cr, uid, ids, context=None):
         for wiz in self.browse(cr, uid, ids, context=context):
-            if wiz.period_from and wiz.period_from.company_id.id != wiz.period_to.company_id.id:
+            if wiz.period_from and (wiz.period_from.company_id.id != wiz.period_to.company_id.id or wiz.period_from.company_id.id != wiz.company_id.id) :
                 return False
         return True
 
@@ -138,6 +139,35 @@ class rpt_account_cn(osv.osv_memory):
         if debit < credit: bal_direct = 'credit'
         balance = account.bal_direct == 'c' and (credit-debit) or (debit-credit) 
         return balance, bal_direct          
+        
+    def onchange_company_id(self, cr, uid, ids, company_id, current_account_ids, rpt_name, context):
+        val = {}
+        resu = {'value':val}
+        if not company_id or not rpt_name:
+            return resu
+        account_ids = []
+        #filter currenet account ids using company_id
+        current_account_ids = current_account_ids and current_account_ids[0][2] or None        
+        if current_account_ids:
+            domain = [('id','in',current_account_ids),('company_id','=',company_id)]
+            account_ids = self.pool.get('account.account').search(cr, uid, domain,context=context)       
+        #refresh the accounting list
+        account_user_types = None
+        if rpt_name == 'actrpt_dtl_money':
+            account_user_types = 'cash,bank'
+        if rpt_name == 'actrpt_dtl_cash':
+            account_user_types = 'cash'
+        if rpt_name == 'actrpt_dtl_bank':
+            account_user_types = 'bank'
+        if account_user_types:
+            account_user_types = account_user_types.split(',')                
+            if not account_ids:
+                account_ids = self.pool.get('account.account').search(cr, uid, [('user_type.code','in',account_user_types),('type','!=','view'),('company_id','=',company_id)],context=context)            
+        val['account_ids'] = [[6, False, account_ids]]
+        #refresh the periods
+        period_resu = self.onchange_filter(cr, uid, ids, 'filter_period', company_id, context=context)
+        val.update(period_resu['value'])
+        return resu
         
     def run_account_cn(self, cr, uid, ids, context=None):
         if context is None: context = {}         

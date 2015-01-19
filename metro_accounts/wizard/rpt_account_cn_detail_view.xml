@@ -24,7 +24,7 @@
                 </group>                
                 <group name="options" attrs="{'invisible':[('show_search','!=',True)]}">
 	                <group colspan="4" name="options_common">
-						<field name="company_id" groups="base.group_multi_company" widget="selection"/>			
+						<field name="company_id" groups="base.group_multi_company" widget="selection" on_change="onchange_company_id(company_id,account_ids,name,context)"/>			
 	                </group>
 	                <!-- 2.Report options -->
 	                <group colspan="4" name="options_rpt">
