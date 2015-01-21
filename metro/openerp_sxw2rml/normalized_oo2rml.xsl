@@ -655,6 +655,25 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:when>
+    <!-- johnw, 01/21/2015, add Indian font support -->
+    <!-- begin -->
+    <xsl:when test="contains($fontName,'Latha')">
+      <xsl:choose>
+        <xsl:when test="($fontWeight='bold') and ($fontStyle='italic')">
+          <xsl:text>Latha-BoldOblique</xsl:text>
+        </xsl:when>
+        <xsl:when test="($fontWeight='bold') and not ($fontStyle='italic')">
+          <xsl:text>Latha-Bold</xsl:text>
+        </xsl:when>
+        <xsl:when test="not($fontWeight='bold') and ($fontStyle='italic')">
+          <xsl:text>Latha-Oblique</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>Latha</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:when>
+    <!-- end -->
     <xsl:otherwise>
       <xsl:choose>
         <xsl:when test="($fontWeight='bold') and ($fontStyle='italic')">
