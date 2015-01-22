@@ -23,4 +23,5 @@
 import hr_emppay
 import hr_contact_emppay_batchset
 import hr_emppay_rpt_emp_year
+import hr_emppay_currency
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
