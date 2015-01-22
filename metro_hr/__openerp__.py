@@ -57,6 +57,7 @@
         'emppay/ir.model.access.csv',
         'emppay/hr_contact_emppay_batchset_view.xml',
         'emppay/hr_emppay_report.xml',
+        'emppay/hr_emppay_currency_view.xml',
         'security/ir.model.access.csv',
         'hr_report.xml',
     ],

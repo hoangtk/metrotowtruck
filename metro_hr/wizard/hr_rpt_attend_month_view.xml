@@ -33,7 +33,7 @@
                 </header>          
                 <group name="options">
 	                <group col="4" name="options">
-	                	<field name="name" attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>
+	                	<field name="name"/>
                         <label for="date_from" string="Dates"/>
                         <div>
 						    <field name="date_from" domain="[('company_id', '=', company_id)]" 
@@ -41,7 +41,7 @@
 						    <field name="date_to" domain="[('company_id', '=', company_id)]" 
 						    	class="oe_inline" widget="date" attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>  
                         </div>	        
-                        <field name="attend_day_id"/>
+                        <field name="attend_day_id" attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>
 						<field name="company_id" groups="base.group_multi_company" widget="selection"
 							 attrs="{'readonly':[('state','not in',('draft','rejected'))]}"/>   
 						<field name="note"/>

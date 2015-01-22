@@ -43,6 +43,7 @@
        
 #       "res_config_view.xml",
        "res_company_view.xml",
+       "hr_view.xml"
         ],
     'demo': [],
     'test': [],

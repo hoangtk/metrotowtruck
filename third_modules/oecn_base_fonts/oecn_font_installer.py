@@ -69,7 +69,8 @@ class oecn_base_fonts_map(osv.osv_memory):
                 ('DejaVuSans', 'DejaVuSans'),
                 ('Times', 'Times'),
                 ('Times-Roman', 'Times-Roman'),
-                ('Courier', 'Courier')]
+                ('Courier', 'Courier'),
+                ('Latha', 'Latha')]
 
     _columns = {
         'pdf_font': fields.selection(_pdf_fonts_get, 'Original Fonts', 
@@ -90,6 +91,7 @@ class oecn_base_fonts_map(osv.osv_memory):
             
 oecn_base_fonts_map()
 
+print cfonts.CustomTTFonts
 
 class oecn_font_installer(osv.osv_memory):
     _name = 'oecn.font.installer'

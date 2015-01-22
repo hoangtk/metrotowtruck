@@ -50,12 +50,14 @@
                     
                     <button name="print_sheet_slip" type="object" string="Print Slips"/>
                     <button name="print_sheet_slip_sign" type="object" string="Print Slips for Signature"/>
+                    <button name="print_sheet_slip_india" type="object" string="Print India Slips"/>
+                    <button name="print_sheet_slip_sign_india" type="object" string="Print India Slips for Signature"/>
                     
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
                 	<group col="4">
-                		<field name="name" readonly="1"/>
+                		<field name="name"/>
 	                    <label for= 'date_from' string="Period" class="oe_inline"/>
                 		<div>
 	                        <field name="date_from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" on_change="onchange_date(date_from, date_to)"/>
@@ -73,7 +75,9 @@
                 		<field name="ded_total"/>
                 		<field name="si_total_personal"/>
                 		<field name="si_total_company"/>
+                		<field name="money_borrow_deduction"/>
                 		<field name="wage_pay"/>
+                		            
                 		<field name="pit"/>
                 		<field name="wage_net"/>
                 	</group>
@@ -142,6 +146,8 @@
                 	<field name="ded_total" sum="Total"/>
                 	<field name="si_total_personal" sum="Total"/>
 				    <field name="si_total_company" sum="Total"/>
+				    <field name="money_borrow_original" sum="Total"/>
+                	<field name="money_borrow_deduction" sum="Total"/>
                 	<field name="wage_pay" sum="Total"/>
 	               	<!-- wage_attend + wage_ot_total + alw_total - si_total_personal -->
 	               	<field name="wage_tax"/>
@@ -184,6 +190,7 @@
                    	<button name="action_pay" type="object" string="Pay" states="approved" class="oe_highlight" groups="account.group_account_invoice" invisible="context.get('from_sheet')"/>
                    	<button name="action_draft" type="object" string="Set to Draft" states='verified,approved,paid' groups="account.group_account_manager" invisible="context.get('from_sheet')"/>
                     <button name="print_slip" type="object" string="Print Slip"/>
+                    <button name="print_slip_india" type="object" string="Print India Slip"/>
                     <field name="state" widget="statusbar" invisible="context.get('from_sheet')"/>
                 </header>
                 <sheet>
@@ -205,6 +212,7 @@
 	                    </div>	
                         <field name="name"/>
                         <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="company_currency_id" invisible="1"/>
                         <field name="emppay_sheet_id" readonly="1"/>     
                         <field name="emppay_year_id"/>
                     </group>
@@ -230,12 +238,24 @@
 		                    	</group>
 		                    </group>
 		                    <group name="alwded_and_wage">
-		                    	<group name='alwded' string="Allowance and Deduction">
-				                	<field name="alw_total"/>
-				                	<field name="ded_total"/>
-				                	<field name="si_total_personal"/>
-				                	<field name="si_total_company"/>
+		                    	<group>
+			                    	<group name='alwded' string="Allowance, Deduction and Borrow Monecy">
+					                	<field name="alw_total"/>
+					                	<field name="ded_total"/>
+					                	<field name="si_total_personal"/>
+					                	<field name="si_total_company"/>
+				                		<field name="money_borrow_original" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+				                		<field name="money_borrow_deduction" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
+				                		<field name="money_borrow_residual" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>        
+			                    	</group>
+			                    	<!-- <group name='money_borrow' string="Borrow Monecy">
+				                		<field name="money_borrowed"/>
+				                		<field name="money_returned"/>
+				                		<field name="money_borrow_deduction"/>
+			                    	</group> -->
 		                    	</group>
+		                    	
+                		
 		                    	<group name='wage_sum' string="Wage Summary">
 				                	<!-- wage_attend + wage_ot_total + alw_total -->
 				                	<field name="wage_total"/>

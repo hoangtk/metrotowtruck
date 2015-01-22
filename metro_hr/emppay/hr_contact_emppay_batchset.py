@@ -51,6 +51,7 @@ class hr_set_alwded(osv.osv_memory):
         'amount': fields.float('Amount', digits_compute=dp.get_precision('Payroll'), required=True),
         #fields related to hr_rpt_attend_month_line
         "attend_field" : fields.selection(_alwded_field_get, "Attend Field", size=32, help="Associated field in the attendance report."),
+        'currency_id':fields.many2one('res.currency','Currency'),
     }
     
     _defaults={
@@ -230,6 +231,7 @@ class hr_contract_emppay_batchset(osv.osv_memory):
                         alwded_ids = []
                         for alwded in alwded_dicts:
                             alwded['alwded_id'] = alwded['alwded_id'][0]
+                            alwded['currency_id'] = alwded['currency_id'] and alwded['currency_id'][0] or None
                             alwded_ids.append((0,0,alwded))
                         data_write['alwded_ids'] = alwded_ids
                     elif field_name == 'si_ids':
