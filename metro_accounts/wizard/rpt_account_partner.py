@@ -365,9 +365,10 @@ class rpt_account_partner(osv.osv_memory):
                     continue
                 
                 rpt_lns_row.append(rpt_ln)
+                seq += 1            
                 
-                rpt_lns += rpt_lns_row
-                seq += 1              
+            rpt_lns += rpt_lns_row
+              
         #update the reconcile and residual data
         if rpt.level == 'detail':
             mvln_ids = [ln['aml_id'] for ln in rpt_lns if ln.get('aml_id',False)]
@@ -404,6 +405,8 @@ class rpt_account_partner_line(osv.osv_memory):
         
         #for detail
         'aml_id': fields.many2one('account.move.line', 'Move Line', ),
+        'aml_source_id': fields.related('aml_id', 'source_id', string='Source',type='reference'),
+        
         'account_id': fields.many2one('account.account','Account'),
         'date': fields.date('Move Date', ),
         'am_name': fields.char('Move Name', size=64, ),
@@ -427,6 +430,51 @@ class rpt_account_partner_line(osv.osv_memory):
         'show_counter': fields.related('rpt_id','show_counter',type='boolean', string="Show counterpart", required=False),
         }
 
+    def open_move(self, cr, uid, ids, context=None):
+        res_id = None
+        if isinstance(ids, list):
+            res_id = ids[0]
+        else:
+            res_id = ids
+        aml_id = self.browse(cr, uid, res_id, context=context).aml_id
+        if not aml_id:
+            return False
+        move_id = aml_id.move_id.id
+        #got to accountve move form
+
+        form_view = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'view_move_form')
+        form_view_id = form_view and form_view[1] or False
+        return {
+            'name': _('Account Move'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'view_id': [form_view_id],
+            'res_model': 'account.move',
+            'type': 'ir.actions.act_window',
+            'res_id': move_id,
+        }
+    
+    def open_source(self, cr, uid, ids, context=None):
+        res_id = None
+        if isinstance(ids, list):
+            res_id = ids[0]
+        else:
+            res_id = ids
+        aml_id = self.browse(cr, uid, res_id, context=context).aml_id
+        if not aml_id or not aml_id.source_id:
+            return False
+        res_model = aml_id.source_id._model._name
+        res_id = aml_id.source_id.id
+        #got to source model's form
+        return {
+            'name': _('Source Detail'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': res_model,
+            'type': 'ir.actions.act_window',
+            'res_id': res_id,
+        }
+        
 rpt_account_partner_line()
 
 from openerp.report import report_sxw

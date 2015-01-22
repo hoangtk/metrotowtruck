@@ -15,7 +15,7 @@
 								<field name="money_residual"/>
 							</group>
 							<separator string="Journal detail"/>
-							<field name="money_borrow_mvln_ids"/>
+							<field name="money_borrow_mvln_ids" readonly="1"/>
 						</page>
 				</page>
 			</field>
