@@ -201,7 +201,7 @@ class hr_rpt_attend_month(osv.osv):
     
     def run_report(self, cr, uid, ids, context=None):
         rpt = self.browse(cr, uid, ids, context=context)[0]
-        if not rpt.emp_ids:
+        if not rpt.attend_day_id and not rpt.emp_ids:
             raise osv.except_osv(_('Warning!'),_('Please select employees to get attendance!'))
         rpt_method = getattr(self, 'run_%s'%(rpt.type,))
         #get report data
@@ -272,8 +272,10 @@ class hr_rpt_attend_month(osv.osv):
         seq = 0
         work_periods = {}
         #report data line
-        rpt_lns = []        
+        rpt_lns = []
         emp_ids = rpt.emp_ids
+        if rpt.attend_day_id:
+            emp_ids = rpt.attend_day_id.emp_ids
         if not emp_ids:
             emp_obj = self.pool.get('hr.employee')
             emp_ids = emp_obj.search(cr, uid, [], context=context) 
