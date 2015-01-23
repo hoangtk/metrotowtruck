@@ -9,7 +9,7 @@ session.web.ViewManagerAction.include({
     },
     on_click_help_link: function(e) {
         e.preventDefault();
-        window.open('/?db=metro_develop&ts=1394851475571#id=1&view_type=form&model=document.page&menu_id=534&action=689');
+        window.open('/?ts=1394867466091#id=1&view_type=form&model=document.page&menu_id=530&action=650');
     },
 });
 
