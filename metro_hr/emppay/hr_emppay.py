@@ -952,8 +952,8 @@ class hr_emppay(osv.osv):
             for alw_inwage in slip.alw_inwage_ids:
                 alw_inwage_total += alw_inwage.amount
             
-            wage_bonus2 = wage_work - wage_attend2 - wage_ot2 - alw_inwage_total
-            wage_work2 = wage_work
+            wage_work2 = wage_work - wage_ot_total2 - alw_inwage_total
+            wage_bonus2 = wage_work2 - wage_attend2
             
             res[slip.id].update({'wage_attend':wage_attend,
                                'wage_ot':wage_ot,
@@ -1222,12 +1222,14 @@ class hr_emppay_slip_print(rml_parser_ext):
         ret = ''
         alws = slip.alw_inwage_ids + slip.alw_ids
         for alw in alws:
-            ret += '%s: %s; '%(alw.name,alw.amount)
+            if alw.amount !=0:
+                ret += '%s: %s; '%(alw.name,alw.amount)
         return ret
     def list_ded(self,slip):
         ret = ''
         for item in slip.ded_ids:
-            ret += '%s: %s; '%(item.name,item.amount)
+            if item.amount !=0:
+                ret += '%s: %s; '%(item.name,item.amount)
         return ret
     
 report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
