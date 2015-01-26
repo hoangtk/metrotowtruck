@@ -589,6 +589,9 @@ class stock_inventory_line(osv.osv):
         if not product_id:
             return res        
         product = self.pool.get('product.product').browse(cr, uid, product_id)
+        if res['value'].get('product_uom') and res['value']['product_uom'] != product.uom_id.id:
+            #if user changed product, then need to change to new product's uom, this is an issue in addons/stock.py
+            res['value']['product_uom'] = product.uom_id.id
         res['value']['uom_categ_id'] = product.uom_id.category_id.id
         return res
 

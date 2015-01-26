@@ -459,14 +459,14 @@
       <blockTable colWidths="73.0,449.0,69.0,244.0" repeatRows="1" style="Table6">
         <tr>
           <td>
-            <para style="P12">补助/Allowances</para>
+            <para style="P12">补贴/Allowances</para>
             <para style="P12"><font face="Latha" size="7.0">மானியம்</font>:</para>
           </td>
           <td>
             <para style="P13">[[list_alw(ln)]]</para>
           </td>
           <td>
-            <para style="P14">费用/Deductions</para>
+            <para style="P14">扣费/Deductions</para>
             <para style="P15">
               <font face="Latha">துப்பறியும்:</font>
             </para>
