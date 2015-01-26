@@ -952,8 +952,9 @@ class hr_emppay(osv.osv):
             for alw_inwage in slip.alw_inwage_ids:
                 alw_inwage_total += alw_inwage.amount
             
-            wage_work2 = wage_work - wage_ot_total2 - alw_inwage_total
-            wage_bonus2 = wage_work2 - wage_attend2
+            wage_work2 = wage_work
+            wage_work2_subtotal = wage_work2 - wage_ot_total2
+            wage_bonus2 = wage_work2_subtotal - alw_inwage_total - wage_attend2                       
             
             res[slip.id].update({'wage_attend':wage_attend,
                                'wage_ot':wage_ot,
@@ -983,7 +984,8 @@ class hr_emppay(osv.osv):
                                'wage_ot_holiday2':wage_ot_holiday2,
                                'wage_ot_total2':wage_ot_total2,
                                'wage_bonus2':wage_bonus2,  
-                               'alw_inwage_total':alw_inwage_total,  
+                               'alw_inwage_total':alw_inwage_total, 
+                               'wage_work2_subtotal':wage_work2_subtotal,
                                'wage_work2':wage_work2,
                                })              
         return res
@@ -1110,14 +1112,16 @@ class hr_emppay(osv.osv):
         #total of the alw_ids_inwage        
         'alw_inwage_total':fields.function(_wage_all, string='Allowage In Wage', type='float',  store=True,
                                     digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
-        #the calculation result: wage_work2 - wage_attend2 - wage_ot_total2 - alw_inwage_total
+        #wage_work2 - wage_ot_total2
+        'wage_work2_subtotal':fields.function(_wage_all, string='Wage2 Subtotal', type='float',  store=True,
+                                  digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),                
+        #wage_work2_subtotal - wage_attend2 - alw_inwage_total
         'wage_bonus2':fields.function(_wage_all, string='Wage(Bonus)2', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
-        #= wage_work
+        #=wage_work
         'wage_work2':fields.function(_wage_all, string='Wage(Work)2', type='float',  store=True,
                                   digits_compute=dp.get_precision('Payroll'), multi="_wage_all",
-                                  help="Wage(attend)2 + Wage(OT Total)2 + Wage(Bonus)2"),                                             
-                
+                                  help="Wage(attend)2 + Wage(OT Total)2 + Wage(Bonus)2"),                                               
         'state': fields.selection([
             ('draft', 'Draft'),
             ('verified', 'Verified'),
@@ -1220,7 +1224,7 @@ class hr_emppay_slip_print(rml_parser_ext):
         })
     def list_alw(self,slip):
         ret = ''
-        alws = slip.alw_inwage_ids + slip.alw_ids
+        alws = slip.alw_ids
         for alw in alws:
             if alw.amount !=0:
                 ret += '%s: %s; '%(alw.name,alw.amount)
@@ -1229,7 +1233,7 @@ class hr_emppay_slip_print(rml_parser_ext):
         ret = ''
         for item in slip.ded_ids:
             if item.amount !=0:
-                ret += '%s: %s; '%(item.name,item.amount)
+                ret += '%s: %s; '%(item.name,item.amount)                                    
         return ret
     
 report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
