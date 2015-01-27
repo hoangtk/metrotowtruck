@@ -60,6 +60,8 @@
         'emppay/hr_emppay_currency_view.xml',
         'security/ir.model.access.csv',
         'hr_report.xml',
+        'dimission/hr_dimission_view.xml',
+        'dimission/ir.model.access.csv',
     ],
     'demo_xml': [],
     'test': [],
