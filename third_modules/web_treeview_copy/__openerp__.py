@@ -28,14 +28,9 @@ Add Copy Buttons TO TreeView
     'author': 'wangbuke@gmail.com',
     'website': 'http://buke.github.io',
     'depends': ['web'],
-    'js': [
-        'static/src/js/*.js'
-    ],
-    'css': [
-    ],
-    'qweb' : [
-        'static/src/xml/*.xml',
-    ],
+    'js': ['static/src/js/*.js'],
+    'css': ['static/src/css/*.css'],
+    'qweb' : ['static/src/xml/*.xml',],
     'installable': True,
     'images': [],
 }
