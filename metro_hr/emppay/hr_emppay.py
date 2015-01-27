@@ -915,7 +915,8 @@ class hr_emppay(osv.osv):
             wage_total = wage_attend + wage_ot + alw_total             
             #johnw, 01/21/2015, add money_borrow_deduction       
             money_borrow_original = slip.employee_id.money_residual
-            money_borrow_deduction = slip.money_borrow_deduction
+            #default to deduct the borrow money fully
+            money_borrow_deduction = money_borrow_original
             money_borrow_residual = money_borrow_original - money_borrow_deduction
             #money_borrow_deduction is in local currency            
             if money_borrow_deduction !=0 and slip.currency_id and slip.currency_id.id != slip.company_id.currency_id.id:
