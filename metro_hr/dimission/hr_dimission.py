@@ -175,10 +175,10 @@ class hr_dimission(osv.osv):
             raise osv.except_osv(_('Error!'),_('Borrowed residual must be zero for done!'))
         for item in order.approve_ids:
             if item.done_required and item.state_approve != 'approved':
-                raise osv.except_osv(_('Error!'),_('%s is not approved, can not finish the dimission!'%(item.name,)))
+                raise osv.except_osv(_('Error!'),_('%s is not approved, can not finish the dimission!')%(item.name,))
         for item in order.transfer_ids:
             if item.done_required and item.state_transfer != 'done':
-                raise osv.except_osv(_('Error!'),_('%s is not done, can not finish the dimission!'%(item.name,)))            
+                raise osv.except_osv(_('Error!'),_('%s is not done, can not finish the dimission!')%(item.name,))            
         '''
         update related data
         '''

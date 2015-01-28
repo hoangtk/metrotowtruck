@@ -2346,7 +2346,7 @@ msgstr "增加需要通知的人"
 msgid "Work OT"
 msgstr "加班工作"
 
-#. module: metro_hr
+
 #: view:hr.dimission:0
 #: field:hr.dimission.item,dimission_id:0
 #: model:ir.actions.act_window,name:metro_hr.action_hr_dimission
@@ -2354,7 +2354,6 @@ msgstr "加班工作"
 #: model:ir.model.fields,field_description:metro_hr.field_hr_dimission_item_dimission_id
 #: model:ir.model.fields,field_description:metro_hr.field_ir_attachment_hr_admission_id
 #: model:ir.ui.menu,name:metro_hr.menu_hr_dimission
-#: model:ir.ui.menu,name:metro_hr.menu_hr_root_dimission
 #: view:res.company:0
 msgid "Dimission"
 msgstr "离职单"
@@ -4693,6 +4692,11 @@ msgstr "实出勤"
 
 ########################manual########################
 #. module: metro_hr
+#: model:ir.ui.menu,name:metro_hr.menu_hr_root_dimission
+msgid "Dimission"
+msgstr "离职"
+
+#. module: metro_hr
 #: report:hr.emppay.slip:0
 #: report:hr.rpt.attend.month.general:0
 #: report:hr.rpt.attend.month.inspection:0
@@ -4806,3 +4810,26 @@ msgstr "加班"
 msgid "Working Time"
 msgstr "班次管理"
 
+#. module: metro_hr
+#: code:addons/metro_hr/dimission/hr_dimission.py:173
+#, python-format
+msgid "Payslip is required for done!"
+msgstr "工资条必须设置才能完成离职!"
+
+#. module: metro_hr
+#: code:addons/metro_hr/dimission/hr_dimission.py:175
+#, python-format
+msgid "Borrowed residual must be zero for done!"
+msgstr "有借款余额不能离职!"
+
+#. module: metro_hr
+#: code:addons/metro_hr/dimission/hr_dimission.py:178
+#, python-format
+msgid "%s is not approved, can not finish the dimission!"
+msgstr "%s 审批项目未通过, 不能完成离职!"
+
+#. module: metro_hr
+#: code:addons/metro_hr/dimission/hr_dimission.py:181
+#, python-format
+msgid "%s is not approved, can not finish the dimission!"
+msgstr "%s 没有交接完毕, 不能完成离职!"
