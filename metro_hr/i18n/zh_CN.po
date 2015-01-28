@@ -1267,8 +1267,8 @@ msgstr "加班时数"
 
 #. module: metro_hr
 #: view:hr.emppay:0
-msgid "Allowance, Deduction and Borrow Monecy"
-msgstr "Allowance, Deduction and Borrow Monecy"
+msgid "Allowance, Deduction and Borrow Money"
+msgstr "补贴,扣费和借款"
 
 #. module: metro_hr
 #: field:hr.emppay,date_from:0
@@ -2229,7 +2229,7 @@ msgstr "借款扣除"
 #: field:hr.emppay,wage_total_local:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_wage_total_local
 msgid "Total Wage Local"
-msgstr "Total Wage Local"
+msgstr "总工资(本币)"
 
 #. module: metro_hr
 #: field:hr.emppay.rpt.emp.year,wage_ot_total2:0
@@ -2363,7 +2363,7 @@ msgstr "离职单"
 #: field:hr.emppay.ln.alwded,amount_local:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_ln_alwded_amount_local
 msgid "Amount Local"
-msgstr "Amount Local"
+msgstr "金额(本币)"
 
 #. module: metro_hr
 #: field:hr.rpt.attend.emp.day.line,p_hour_ot:0
@@ -3109,7 +3109,7 @@ msgstr "端口"
 #: field:hr.emppay,alw_total_local:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_alw_total_local
 msgid "Allowance Local"
-msgstr "Allowance Local"
+msgstr "补贴(本币)"
 
 #. module: metro_hr
 #: view:hr.contract.emppay.batchset:0
@@ -4589,7 +4589,7 @@ msgstr "日期"
 #: field:hr.emppay,ded_total_local:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_emppay_ded_total_local
 msgid "Deduction Local"
-msgstr "扣除(本币)"
+msgstr "扣费(本币)"
 
 #. module: metro_hr
 #: model:ir.model.fields,field_description:metro_hr.field_res_company_hr_att_no_in_option

@@ -239,7 +239,7 @@
 		                    </group>
 		                    <group name="alwded_and_wage">
 		                    	<group>
-			                    	<group name='alwded' string="Allowance, Deduction and Borrow Monecy">
+			                    	<group name='alwded' string="Allowance, Deduction and Borrow Money">
 					                	<field name="alw_total"/>
 					                	<field name="ded_total"/>
 					                	<field name="si_total_personal"/>
