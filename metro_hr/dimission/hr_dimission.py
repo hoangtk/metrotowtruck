@@ -105,30 +105,37 @@ class hr_dimission(osv.osv):
             defaults = {}
         
         company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id
+        item_tmpl_obj = self.pool.get('hr.dimission.item.template')
         #dimission approve items
         approve_ids = []
-        if company_id.approve_ids:
-            for item in company_id.approve_ids:
-                approve_ids.append({'template_id':item.id,
-                                                'type':item.type,
-                                                'sequence':item.sequence,
-                                                'name':item.name,
-                                                'note':item.note,
-                                                'department_id':item.department_id.id,
-                                                'done_required':item.done_required,
-                                                })
+        approve_items = company_id.approve_ids
+        if not approve_items:
+            item_ids = item_tmpl_obj.search(cr, uid, [('type','=','approve')], context=context)
+            approve_items = item_tmpl_obj.browse(cr, uid, item_ids, context=context)
+        for item in approve_items:
+            approve_ids.append({'template_id':item.id,
+                                            'type':item.type,
+                                            'sequence':item.sequence,
+                                            'name':item.name,
+                                            'note':item.note,
+                                            'department_id':item.department_id.id,
+                                            'done_required':item.done_required,
+                                            })
         #dimission transfer items
         transfer_ids = []
-        if company_id.transfer_ids:
-            for item in company_id.transfer_ids:
-                transfer_ids.append({'template_id':item.id,
-                                                'type':item.type,
-                                                'sequence':item.sequence,
-                                                'name':item.name,
-                                                'note':item.note,
-                                                'department_id':item.department_id.id,
-                                                'done_required':item.done_required,
-                                                })
+        transfer_items = company_id.transfer_ids
+        if not transfer_items:
+            item_ids = item_tmpl_obj.search(cr, uid, [('type','=','transfer')], context=context)
+            transfer_items = item_tmpl_obj.browse(cr, uid, item_ids, context=context)
+        for item in transfer_items:
+            transfer_ids.append({'template_id':item.id,
+                                            'type':item.type,
+                                            'sequence':item.sequence,
+                                            'name':item.name,
+                                            'note':item.note,
+                                            'department_id':item.department_id.id,
+                                            'done_required':item.done_required,
+                                            })
             
         defaults.update({'company_id':company_id.id, 'approve_ids':approve_ids, 'transfer_ids':transfer_ids})
         return defaults
