@@ -91,8 +91,6 @@ class oecn_base_fonts_map(osv.osv_memory):
             
 oecn_base_fonts_map()
 
-print cfonts.CustomTTFonts
-
 class oecn_font_installer(osv.osv_memory):
     _name = 'oecn.font.installer'
     _inherit = 'res.config.installer'

@@ -239,7 +239,7 @@
 		                    </group>
 		                    <group name="alwded_and_wage">
 		                    	<group>
-			                    	<group name='alwded' string="Allowance, Deduction and Borrow Monecy">
+			                    	<group name='alwded' string="Allowance, Deduction and Borrow Money">
 					                	<field name="alw_total"/>
 					                	<field name="ded_total"/>
 					                	<field name="si_total_personal"/>
@@ -354,7 +354,7 @@
             <field name="model">hr.emppay</field>
             <field name="arch" type="xml">
                 <search string="Search Payslip">
-                    <field name="name" string="Payslips" filter_domain="['|',('name','ilike',self),('number','ilike',self)]"/>
+                    <field name="name" string="Payslips" filter_domain="['|','|',('name','ilike',self),('employee_id.name','ilike',self),('employee_id.emp_code','ilike',self)]"/>
                     <field name="date_from"/>
                     <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Slip"/>
                     <filter icon="terp-camera_test" string="Verified" domain="[('state','=','verified')]" help="Verified Slip"/>

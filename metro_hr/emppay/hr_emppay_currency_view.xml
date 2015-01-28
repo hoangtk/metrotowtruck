@@ -63,13 +63,13 @@
             	</xpath>
             	<xpath expr="//field[@name='ded_ids']/tree/field[@name='amount']" position="after">
             		<field name="currency_id"/>
-            		<field name="amount_local"/>
+            		<field name="amount_local" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
             	</xpath>
             	<field name="alw_total" position="after">
-            		<field name="alw_total_local" attrs="{'invisible':[('show_local','!=',True)]}"/>
+            		<field name="alw_total_local" attrs="{'invisible':[('show_local','!=',True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
             	</field>
             	<field name="ded_total" position="after">
-            		<field name="ded_total_local" attrs="{'invisible':[('show_local','!=',True)]}"/>
+            		<field name="ded_total_local" attrs="{'invisible':[('show_local','!=',True)]}" widget="monetary" options="{'currency_field': 'company_currency_id'}"/>
             	</field>
             </field>
         </record>          

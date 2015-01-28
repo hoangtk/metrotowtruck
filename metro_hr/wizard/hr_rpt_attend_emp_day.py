@@ -23,6 +23,7 @@ import time
 from lxml import etree
 from dateutil import rrule
 from datetime import datetime, timedelta
+from dateutil import relativedelta
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.misc import DEFAULT_SERVER_DATE_FORMAT
 from openerp.addons.metro import utils
@@ -80,12 +81,13 @@ class hr_rpt_attend_emp_day(osv.osv):
             vals.update({'date_from':date_from_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
                          
         if 'date_to' in fields:
-            date_to = datetime.strptime(time.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
+            date_to = datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1)
+            date_to = datetime.strptime(date_to.strftime('%Y-%m-%d 23:59:59'), '%Y-%m-%d %H:%M:%S')        
             date_to_utc = utils.utc_timestamp(cr, uid, date_to, context)        
             vals.update({'date_to':date_to_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
-        
+                    
         return vals
-                
+
     def _check_dates(self, cr, uid, ids, context=None):
         for wiz in self.browse(cr, uid, ids, context=context):
             if wiz.date_from and wiz.date_to and wiz.date_from > wiz.date_to:

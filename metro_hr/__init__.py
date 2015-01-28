@@ -29,3 +29,4 @@ import hr_holidays
 import wizard
 import emppay
 import report
+import dimission
