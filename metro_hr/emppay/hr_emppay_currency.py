@@ -100,6 +100,26 @@ class hr_emppay(osv.osv):
         'ded_total_local':fields.function(_wage_all, string='Deduction Local', type='float',  store=True,
                                    digits_compute=dp.get_precision('Payroll'), multi="_wage_all"),
     }
+    
+    def recompute(self, cr, uid, ids, context=None):
+        alwded_obj = self.pool.get('hr.emppay.ln.alwded')
+        curr_obj = self.pool.get('res.currency')   
+        for slip in self.browse(cr, uid, ids, context=context):
+            if slip.currency_id and slip.currency_id.id != slip.company_id.currency_id.id:
+                curr_slip_id = slip.currency_id.id
+                curr_local_id = slip.company_id.currency_id.id                
+                #recompute the allowance and deductions by the currency rate
+                #allowance: from amount to amount local
+                for alw in slip.alw_ids:
+                    if alw.currency_id and alw.currency_id.id == curr_slip_id:
+                        amount_local = curr_obj.compute(cr, uid, curr_slip_id, curr_local_id, alw.amount, context=context)
+                        alwded_obj.write(cr, uid,alw.id,{'amount_local':amount_local})
+                #deduction: from amount local to amount
+                for ded in slip.ded_ids:
+                    if ded.currency_id and ded.currency_id.id == curr_slip_id:
+                        amount = curr_obj.compute(cr, uid, curr_local_id, curr_slip_id, ded.amount_local, context=context)
+                        alwded_obj.write(cr, uid,ded.id,{'amount':amount})
+        return super(hr_emppay, self).recompute(cr, uid, ids, context=context)   
                 
 hr_emppay()
 
@@ -140,7 +160,7 @@ class hr_emppay_ln_alwded(osv.osv):
             new_amt = amount_local * float(context.get('currency_rate'))
             new_amt = float('%.2f' %new_amt)
             resu['value'].update({'amount':new_amt})
-        return resu
+        return resu     
     
 class hr_emppay_sheet(osv.osv):
     _inherit = 'hr.emppay.sheet'
