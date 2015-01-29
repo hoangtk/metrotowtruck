@@ -52,6 +52,7 @@
                     <button name="print_sheet_slip_sign" type="object" string="Print Slips for Signature"/>
                     <button name="print_sheet_slip_india" type="object" string="Print India Slips"/>
                     <button name="print_sheet_slip_sign_india" type="object" string="Print India Slips for Signature"/>
+                    <button name="recompute" type="object" string="Recompute"/>
                     
                     <field name="state" widget="statusbar"/>
                 </header>
@@ -75,7 +76,7 @@
                 		<field name="ded_total"/>
                 		<field name="si_total_personal"/>
                 		<field name="si_total_company"/>
-                		<field name="money_borrow_deduction"/>
+                		<!-- <field name="money_borrow_deduction"/> -->
                 		<field name="wage_pay"/>
                 		            
                 		<field name="pit"/>
@@ -191,6 +192,7 @@
                    	<button name="action_draft" type="object" string="Set to Draft" states='verified,approved,paid' groups="account.group_account_manager" invisible="context.get('from_sheet')"/>
                     <button name="print_slip" type="object" string="Print Slip"/>
                     <button name="print_slip_india" type="object" string="Print India Slip"/>
+                    <button name="recompute" type="object" string="Recompute"/>
                     <field name="state" widget="statusbar" invisible="context.get('from_sheet')"/>
                 </header>
                 <sheet>
@@ -354,13 +356,13 @@
             <field name="model">hr.emppay</field>
             <field name="arch" type="xml">
                 <search string="Search Payslip">
-                    <field name="name" string="Payslips" filter_domain="['|','|',('name','ilike',self),('employee_id.name','ilike',self),('employee_id.emp_code','ilike',self)]"/>
+                    <field name="name" string="Payslips" filter_domain="['|','|',('name','ilike',self),('employee_id.name','ilike',self),('employee_id.emp_code','ilike',self)]"  context="{'active_test':False}"/>
                     <field name="date_from"/>
                     <filter icon="terp-document-new" string="Draft" domain="[('state','=','draft')]" help="Draft Slip"/>
                     <filter icon="terp-camera_test" string="Verified" domain="[('state','=','verified')]" help="Verified Slip"/>
                     <filter icon="terp-camera_test" string="Paid" domain="[('state','=','paid')]" help="Paid Slip"/>
                     <field name="employee_id"/>
-                    <field name="emppay_sheet_id"/>
+                    <field name="emppay_sheet_id"  domain="['|',('active','=',True),('active','=',False)]"/>
                     <group expand="0" string="Group By...">
                         <filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}"/>
                         <filter string="Payroll" name="emppay_sheet_id" icon="terp-folder-orange" context="{'group_by':'emppay_sheet_id'}"/>

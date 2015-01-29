@@ -191,6 +191,7 @@ msgstr "实发工资"
 #. module: metro_hr
 #: field:hr.contract.alwded,currency_id:0
 #: field:hr.emppay,currency_id:0
+#: field:hr.emppay.sheet,currency_id:0
 #: field:hr.emppay.ln.alwded,currency_id:0
 #: field:hr.set.alwded,currency_id:0
 msgid "Currency"
@@ -1067,7 +1068,7 @@ msgstr "Summary"
 #: field:hr.send.checklist,partner_ids:0
 #: model:ir.model.fields,field_description:metro_hr.field_hr_send_checklist_partner_ids
 msgid "Contacts"
-msgstr "合同"
+msgstr "接收人"
 
 #. module: metro_hr
 #: report:hr.emppay.slip:0
@@ -2715,7 +2716,7 @@ msgstr "工资币种"
 #: model:ir.ui.menu,name:metro_hr.menu_hr_emp
 #: model:ir.ui.menu,name:metro_hr.menu_hr_emp_root
 msgid "My Human Resources"
-msgstr "人力资源"
+msgstr "我的HR"
 
 #. module: metro_hr
 #: view:hr.rpt.attend.emp.day:0
@@ -4689,6 +4690,27 @@ msgstr "5天制应出勤"
 #: report:hr.rpt.attend.month.notification:0
 msgid "实出勤"
 msgstr "实出勤"
+
+#. module: metro_hr
+#: field:hr.employee,major:0
+msgid "Major"
+msgstr "专业"
+
+#. module: metro_hr
+#: field:hr.employee,height:0
+msgid "Height"
+msgstr "身高"
+
+#. module: metro_hr
+#: field:hr.employee,weight:0
+msgid "Weight(kg)"
+msgstr "体重"
+
+#. module: metro_hr
+#: view:hr.emppay:0
+#: view:hr.emppay.sheet:0
+msgid "Recompute"
+msgstr "重算"
 
 ########################manual########################
 #. module: metro_hr

@@ -49,10 +49,13 @@
 		            	<field name="web_chat_no"/>
 					</field>
 					<xpath expr="//group[@string='Birth']" position="after">
-	                    <group string="Others" colspan="4">
-		                    <group>
-		                        <field name="degree_id"/>
-		                    </group>
+	                    <group>
+	                    	<field name="height"/>
+	                    	<field name="weight"/>
+	                    </group>
+	                    <group>
+	                    	<field name="degree_id"/>
+	                    	<field name="major"/>
 	                    </group>
 					</xpath>
                     <field name="mobile_phone" position="after">

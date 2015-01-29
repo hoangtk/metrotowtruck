@@ -683,7 +683,14 @@ class hr_emppay_sheet(osv.osv):
                 values['account_period_id'] = account_period_id
         new_id = super(hr_emppay_sheet,self).create(cr, uid, values, context=context)                
         return new_id
-    
+        
+    def recompute(self, cr, uid, ids, context=None):
+        for sheet in self.browse(cr, uid, ids, context=context):
+            slip_ids = [slip.id for slip in sheet.emppay_ids]
+            #emppay_sheet_id updating will trigger the wage recalucation
+            self.pool.get('hr.emppay').write(cr, uid, slip_ids, {'emppay_sheet_id':sheet.id}, context=context)
+        return True
+        
     def unlink(self, cr, uid, ids, context=None):
         for rpt in self.read(cr, uid, ids, ['state'], context=context):
             if rpt['state'] not in ('draft'):
@@ -915,15 +922,14 @@ class hr_emppay(osv.osv):
             wage_total = wage_attend + wage_ot + alw_total             
             #johnw, 01/21/2015, add money_borrow_deduction       
             money_borrow_original = slip.employee_id.money_residual
-            #default to deduct the borrow money fully
-            money_borrow_deduction = money_borrow_original
-            money_borrow_residual = money_borrow_original - money_borrow_deduction
-            #money_borrow_deduction is in local currency            
+            money_borrow_deduction = slip.money_borrow_deduction
+            money_borrow_residual = money_borrow_original - money_borrow_deduction            
+            #money_borrow_deduction is in local currency, need convert it to foreign currency and do calculation later
             if money_borrow_deduction !=0 and slip.currency_id and slip.currency_id.id != slip.company_id.currency_id.id:
                 curr_from_id = slip.company_id.currency_id.id
                 curr_to_id = slip.currency_id.id
-                money_borrow_deduction = self.pool.get('res.currency').compute(cr, uid, curr_from_id, curr_to_id, money_borrow_deduction, context=context)
-                
+                money_borrow_deduction = self.pool.get('res.currency').compute(cr, uid, curr_from_id, curr_to_id, money_borrow_deduction, context=context)            
+            
             wage_pay = wage_total - ded_total - si_total_personal - money_borrow_deduction
             wage_tax = wage_total - si_total_personal
             
@@ -969,7 +975,6 @@ class hr_emppay(osv.osv):
                                'si_total_personal':si_total_personal,                               
                                'si_total_company':si_total_company,
                                'money_borrow_original':money_borrow_original,
-                               'money_borrow_deduction':money_borrow_deduction,
                                'money_borrow_residual':money_borrow_residual,
             
                                'wage_pay':wage_pay,
@@ -1159,6 +1164,12 @@ class hr_emppay(osv.osv):
         if not 'name' in values or values['name'] == '':
             name = self.pool.get('ir.sequence').get(cr, uid, 'emppay.payslip')
             values['name'] = name
+        #default deduct all of the employee's borrow money residual
+        if not values.get('money_borrow_deduction') and values.get('employee_id'):
+            money_borrow_deduction = self.pool.get('hr.employee').read(cr, uid, values['employee_id'], ['money_residual'], context=context)['money_residual']
+            #default to deduct the borrow money fully
+            values['money_borrow_deduction'] = money_borrow_deduction
+                        
         return super(hr_emppay,self).create(cr, uid, values, context=context)
         
     def copy(self, cr, uid, id, default=None, context=None):
@@ -1210,7 +1221,13 @@ class hr_emppay(osv.osv):
                  'form': form_data,
         }
         return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip.india', 'datas': datas, 'nodestroy': True}     
-        
+    
+    def recompute(self, cr, uid, ids, context=None):
+        for slip in self.browse(cr, uid, ids, context=context):
+            #emppay_sheet_id updating will trigger the wage recalucation
+            self.write(cr, uid, slip.id, {'emppay_sheet_id':slip.emppay_sheet_id.id}, context=context)
+        return True
+            
 hr_emppay()
 
 from openerp.report import report_sxw
