@@ -685,10 +685,10 @@ class hr_emppay_sheet(osv.osv):
         return new_id
         
     def recompute(self, cr, uid, ids, context=None):
+        slip_ids = []
         for sheet in self.browse(cr, uid, ids, context=context):
-            slip_ids = [slip.id for slip in sheet.emppay_ids]
-            #emppay_sheet_id updating will trigger the wage recalucation
-            self.pool.get('hr.emppay').write(cr, uid, slip_ids, {'emppay_sheet_id':sheet.id}, context=context)
+            slip_ids += [slip.id for slip in sheet.emppay_ids]
+        self.pool.get('hr.emppay').recompute(cr, uid, slip_ids, context=context)
         return True
         
     def unlink(self, cr, uid, ids, context=None):
@@ -1223,8 +1223,8 @@ class hr_emppay(osv.osv):
         return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip.india', 'datas': datas, 'nodestroy': True}     
     
     def recompute(self, cr, uid, ids, context=None):
-        for slip in self.browse(cr, uid, ids, context=context):
-            #emppay_sheet_id updating will trigger the wage recalucation
+        for slip in self.browse(cr, uid, ids, context=context):            
+            #emppay_sheet_id updating will trigger the wage recalucation function
             self.write(cr, uid, slip.id, {'emppay_sheet_id':slip.emppay_sheet_id.id}, context=context)
         return True
             
