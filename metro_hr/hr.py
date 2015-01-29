@@ -103,6 +103,9 @@ class hr_employee(osv.osv):
         'known_allergies': fields.text("Known Allergies"),
         'recruit_source_id': fields.many2one('hr.recruitment.source', 'Recruitment Source'),
         'degree_id': fields.many2one('hr.recruitment.degree', 'Degree'),
+        'major': fields.char('Major', size=16),
+        'height': fields.char('Height(cm)', size=8),
+        'weight': fields.char('Weight(kg)', size=8),
         #added per marc's request
         'date_orient_session': fields.date('Orientation Session Date'),
         'web_chat_no': fields.char('QQ#',size=16),
