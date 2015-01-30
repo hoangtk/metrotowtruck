@@ -390,6 +390,13 @@ class hr_rpt_attend_month(osv.osv):
             default = {}
         default['emppay_sheet_ids'] = None
         return super(hr_rpt_attend_month, self).copy(cr, uid, id, default, context)
+    
+    def wkf_done(self, cr, uid, ids, context=None):        
+        resu = super(hr_rpt_attend_month,self).wkf_done(cr, uid, ids, context=context)
+        for attend_id in ids:
+            self.new_payroll(cr, uid, attend_id, context=None)
+        return resu
+        
     def wkf_cancel(self, cr, uid, ids, context=None):
         for rpt in self.browse(cr, uid, ids, context=context):
             if rpt.emppay_sheet_ids:
@@ -397,7 +404,37 @@ class hr_rpt_attend_month(osv.osv):
                     if emppay_sheet.state != 'cancel':
                         raise osv.except_osv(_('Error!'),_('There are related payrolls, please cancel or delete them first!'))
         return super(hr_rpt_attend_month, self).wkf_cancel(cr, uid, ids, context=context)
-        
+    
+    #view monthly report
+    def view_payroll(self, cr, uid, ids, context=None):
+        rpt_id = ids[0]
+        #read daily report data, create new monthly report based on it.
+        rpt = self.read(cr, uid, rpt_id, ['emppay_sheet_ids'], context=context)
+        payroll_ids = rpt['emppay_sheet_ids']
+        if not payroll_ids:
+            raise osv.except_osv(_('Error!'),_('No payroll generated!'))
+        if len(payroll_ids) > 1:
+            #got to list page
+            act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_hr', 'action_hr_emppay_sheet')
+            act_id = act_id and act_id[1] or False            
+            act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+            act_win['context'] = {'search_default_attend_month_id': rpt['id']}
+            return act_win
+        else:
+            #go to form page
+            form_view = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_hr', 'hr_emppay_sheet_form')
+            form_view_id = form_view and form_view[1] or False
+            return {
+                'name': _('Payroll'),
+                'view_type': 'form',
+                'view_mode': 'form',
+                'view_id': [form_view_id],
+                'res_model': 'hr.emppay.sheet',
+                'type': 'ir.actions.act_window',
+                'target': 'current',
+                'res_id': payroll_ids[0],
+            }
+                    
     #generate a new payroll
     def new_payroll(self, cr, uid, attend_id, context=None):
         payroll_data = self._payroll_data(cr, uid, attend_id, context=context)

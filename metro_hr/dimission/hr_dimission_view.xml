@@ -97,8 +97,25 @@
               		<field name="dimmission_reason"/>
               		<label for="advice_to_company"/>
               		<field name="advice_to_company"/>                	
-                	<group col="4">                		            
-                		<field name="payslip_id" widget="many2many_tags" domain="[('employee_id','=',employee_id)]"/>
+                	<group col="4">
+                		<label for="attrpt_ids"/>
+                		<div>
+                			<field name="attrpt_ids" widget="many2many_tags" class="oe_inline"/>
+		            		<button name="print_attendance" type="object" help="Print Attendance Detail" icon="gtk-print"/>
+                		</div>
+                		
+                		<label for="hr_clock_ids"/>
+                		<div>
+                			<field name="hr_clock_ids" widget="many2many_tags" class="oe_inline"/>
+		            		<button name="remove_from_clock" type="object" help="Remove from HR Clocks" icon="gtk-clear" groups="base.group_hr_user" confirm="Are you sure to remove this employee on the HR clocks?"/>
+                		</div>
+                		
+                		<label for="payslip_id"/>
+                		<div>
+                			<field name="payslip_id" widget="many2many_tags" domain="[('employee_id','=',employee_id)]" class="oe_inline"/>
+		            		<button name="print_payslip" type="object" help="Print Slips" icon="gtk-print"/>
+                		</div>
+
                 		<field name="borrow_money_residual"/>
                 		<field name="company_id" groups="base.group_multi_company"/>
                 	</group>

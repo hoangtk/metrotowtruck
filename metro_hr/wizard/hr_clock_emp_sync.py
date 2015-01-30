@@ -138,18 +138,33 @@ class hr_clock_emp_sync(osv.osv_memory):
     def clock_emps_delete(self, cr, uid, order_data, context=None):
         if not order_data:
             return False
-        #update data to clock
-        clock = clock_util.clock_obj()
-        clock_util.clock_connect(clock, order_data.clock_id.ip, order_data.clock_id.port)
-        for emp_sync in order_data.emp_ids_sync:
-            #delete all clock user data, including base info, finger print, password
-            clock_util.clock_user_delete(clock, emp_sync.emp_code)
-        #disconnect clock
-        clock.RefreshData(1)
-        clock_util.clock_disconnect(clock)
-                
+        self.clock_emps_delete_exec(cr, uid, [order_data.clock_id], order_data.emp_ids_sync, context=context)
         return True
         
+    def clock_emps_delete_exec(self, cr, uid, clock_ids, emp_ids, context=None):
+        '''
+        Accept the clock_ids and emp_ids parameter to delete on hr clock machine
+        @param clock_ids: the list that contains the clock id of int/long or browse_record
+        @param emp_ids: the list that contains employee id of int/long or browse_record that will be delte, the   
+        '''
+        if not clock_ids or not emp_ids:
+            return False
+        for clock_id in clock_ids:
+            if isinstance(clock_id, (int,long)):
+                clock_id = self.pool.get('hr.clock').browse(cr, uid, clock_id, context=context)
+            #update data to clock
+            clock = clock_util.clock_obj()
+            clock_util.clock_connect(clock, clock_id.ip, clock_id.port)
+            for emp_id in emp_ids:
+                if isinstance(emp_id,(int,long)):
+                    emp_id = self.pool.get('hr.employee').browse(cr, uid, emp_id, context=context)
+                #delete all clock user data, including base info, finger print, password
+                clock_util.clock_user_delete(clock, emp_id.emp_code)
+            #disconnect clock
+            clock.RefreshData(1)
+            clock_util.clock_disconnect(clock)
+        return True
+            
     def server_emps_set(self, cr, uid, order_data, context=None):
         if not order_data:
             return False

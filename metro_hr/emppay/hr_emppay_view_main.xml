@@ -395,16 +395,18 @@
             <field name="arch" type="xml">
             <data>
                 <button name="pdf_inspection" position="after">
-                	<button name="new_payroll" string="Generate Payroll" type="object" states="done"/>
+                	<field name='emppay_sheet_ids' invisible="1"/>
+                	<!-- the domain ant states attrbiute will generate one domain with 'and', so if we want they are 'or', then  need remove the 'states' attribute and add it to the domain-->
+                	<!-- <button name="new_payroll" string="Generate Payroll" type="object" states="done" attrs="{'invisible':[('emppay_shee_ids','!=',None)]}"/> -->
+                	<button name="new_payroll" string="Generate Payroll" type="object" attrs="{'invisible':['|',('state','!=','done'), ('emppay_sheet_ids','not_empty',0)]}"/>                	
                 	<field name="id" invisible="1"/>
-                	<button name="%(action_hr_emppay_sheet)d" string="Payrolls" type="action" states="done"
-                		context="{'search_default_attend_month_id': id}"/>
+                	<button name="view_payroll" string="Payrolls" type="object" attrs="{'invisible':['|',('state','!=','done'), ('emppay_sheet_ids','is_empty',0)]}"/>
                 </button>
-                <page name="employee" position="after">
+<!--                 <page name="employee" position="after">
                 	<page name="payroll" string="Payrolls">
                 		<field name="emppay_sheet_ids"/>
                 	</page>
-                </page>
+                </page> -->
             </data>
             </field>
         </record>                
