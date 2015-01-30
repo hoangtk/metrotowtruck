@@ -98,6 +98,18 @@ openerp.product_x_attributes = function(instance) {
                     if (!_.isArray(field_value)) field_value = [field_value];
                     stack.push(!_(field_value).contains(val));
                     break;
+                case 'is_empty':
+                    if (field.field.type === 'many2many'|| field.field.type === 'one2many'){
+                        field_value = field.get("value");
+                        stack.push(!_.isArray(field_value) || field_value.length == 0);
+                        break;
+                    }
+                case 'not_empty':
+                    if (field.field.type === 'many2many'|| field.field.type === 'one2many'){
+                        field_value = field.get("value");
+                        stack.push(_.isArray(field_value) && field_value.length > 0);
+                        break;
+                    }
 
                 default:
                     console.warn(

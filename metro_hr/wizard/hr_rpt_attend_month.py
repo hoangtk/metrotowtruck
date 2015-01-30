@@ -111,6 +111,10 @@ class hr_rpt_attend_month(osv.osv):
         self.write(cr, uid, ids, {'state':'confirmed'}, context=context)
         return True
     
+    def wkf_done(self, cr, uid, ids, context=None):        
+        self.write(cr, uid, ids, {'state':'done'}, context=context)
+        return True
+    
     def wkf_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'cancel'}, context=context)
         return True
@@ -349,10 +353,14 @@ class hr_rpt_attend_month(osv.osv):
     def pdf_inspection(self, cr, uid, ids, context=None):
         return self.print_pdf(cr, uid, ids,  'hr.rpt.attend.month.inspection', context)
     
-    def pdf_attend_emp(self, cr, uid, ids, context=None):
-        rpt_day_ids = [self.browse(cr, uid, ids[0], context=context).attend_day_id.id]
-        context['attend_month_id'] = ids[0]
-        return self.pool.get('hr.rpt.attend.emp.day').print_empday_group(cr, uid, rpt_day_ids, context=context)
+    def pdf_attend_emp(self, cr, uid, ids, context=None, emp_ids=None):
+        rpt_day_months = {}
+        rpt_day_ids = []
+        for rpt in self.browse(cr, uid, ids, context=context):
+            rpt_day_months[rpt.attend_day_id.id] = rpt.id
+            rpt_day_ids.append(rpt.attend_day_id.id)
+        context['rpt_day_months'] = rpt_day_months
+        return self.pool.get('hr.rpt.attend.emp.day').print_empday_group(cr, uid, rpt_day_ids, context=context, rpt_emp_ids=emp_ids)
                 
 hr_rpt_attend_month()
 

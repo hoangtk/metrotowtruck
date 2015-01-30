@@ -509,7 +509,27 @@ class hr_rpt_attend_emp_day(osv.osv):
         }
         return {'type': 'ir.actions.report.xml', 'report_name': rptxml_name, 'datas': datas, 'nodestroy': True}   
     
-    def print_empday_group(self, cr, uid, ids, context=None, rpt_line_ids = None):
+    def print_empday_group(self, cr, uid, ids, context=None, rpt_line_ids = None, rpt_emp_ids = None):
+        group_ids = []
+        #parametr from hr_rpt_attend_month.pdf_attend_emp(), structure:{rpt_day_id:rpt_month_id,...}
+        rpt_day_months = context.get("rpt_day_months",{})
+        for rpt_day_id in ids:
+            context['attend_month_id'] = rpt_day_months.get(rpt_day_id)
+            group_ids.extend(self.gen_empday_group(cr, uid, rpt_day_id, context=context, rpt_line_ids=rpt_line_ids, rpt_emp_ids=rpt_emp_ids))
+        #print attendances by group
+        if not group_ids:
+            return {'type': 'ir.actions.act_window_close'}     
+        #return report action
+        datas = {'model': 'attend.empday.group','ids': group_ids,}
+        context.update({'active_model':'attend.empday.group', 'active_ids':group_ids})
+        rpt_action = {'type': 'ir.actions.report.xml', 
+                      'report_name': 'attend.empday.group', 
+                      'datas': datas, 
+                      'nodestroy': True,
+                      'context':context}
+        return rpt_action
+    
+    def gen_empday_group(self, cr, uid, rpt_day_id, context=None, rpt_line_ids = None, rpt_emp_ids = None):
         if context is None:
             context = {}
         '''
@@ -529,21 +549,33 @@ class hr_rpt_attend_emp_day(osv.osv):
         rptlines = []
         if not rpt_line_ids:            
             #call from self
-            rpt = self.browse(cr, uid, ids[0], context=context)
+            rpt = self.browse(cr, uid, rpt_day_id, context=context)
             rptlines = rpt.rpt_lines
         else:
             #this parameter will be called from hr_rpt_attend_emp_day_line.print_empday_line_group()
             rptlines = self.pool.get('hr.rpt.attend.emp.day.line').browse(cr, uid, rpt_line_ids, context=context)
             rpt = rptlines[0].rpt_id
-            ids = [rpt.id]
-        #handle the attend month report parameter
+        #handle the attend month report parameter, from hr_rpt_attend_month.pdf_attend_emp()
         attend_month_id = context.get('attend_month_id', None)
         emp_attend_month_lines = {}
         if attend_month_id:
             attend_month_line_obj = self.pool.get('hr.rpt.attend.month.line')
             attend_month_line_ids = attend_month_line_obj.search(cr, uid, [('rpt_id','=',attend_month_id)],context=context)
             emp_ids = attend_month_line_obj.read(cr, uid, attend_month_line_ids, ['emp_id'])
-            emp_attend_month_lines = dict((item['emp_id'][0],item['id']) for item in emp_ids)    
+            emp_attend_month_lines = dict((item['emp_id'][0],item['id']) for item in emp_ids)
+        #johnw, 01/30, add employee ids support
+        if rpt_emp_ids:
+            new_rptlines = []
+            for rpt_line in rptlines:
+                if rpt_line.emp_id.id in rpt_emp_ids:
+                    new_rptlines.append(rpt_line)
+            rptlines = new_rptlines
+            
+            new_emp_attend_month_lines = {}
+            for emp_id, month_line_id in emp_attend_month_lines.items():
+                if emp_id in rpt_emp_ids:
+                    new_emp_attend_month_lines[emp_id] = month_line_id
+            emp_attend_month_lines = new_emp_attend_month_lines
             
         for rpt_line in rptlines:
             #if from attend month report, only print the employees in the attendance report
@@ -625,18 +657,8 @@ class hr_rpt_attend_emp_day(osv.osv):
             group['hours_ot'] = work_hours_ot
             group_ids.append(attend_empday_group_obj.create(cr, uid, group, context=context))
                     
-        #print attendances by group
-        if not group_ids:
-            return {'type': 'ir.actions.act_window_close'}     
-        #return report action
-        datas = {'model': 'attend.empday.group','ids': group_ids,}
-        context.update({'active_model':'attend.empday.group', 'active_ids':group_ids})
-        rpt_action = {'type': 'ir.actions.report.xml', 
-                      'report_name': 'attend.empday.group', 
-                      'datas': datas, 
-                      'nodestroy': True,
-                      'context':context}
-        return rpt_action
+        #return group_ids
+        return group_ids    
     
 hr_rpt_attend_emp_day()
 

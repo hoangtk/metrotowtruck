@@ -25,6 +25,7 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from dateutil import relativedelta
+import traceback
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 
 from openerp import netsvc
@@ -65,7 +66,26 @@ class hr_dimission(osv.osv):
     _description = 'Employee Dimission'
     _order = 'id desc'
     _rec_name = 'employee_id'
-    
+    def _emp_clocks(self, cr, uid, ids, field_names, args, context=None):
+        '''
+        Get the clocks that the employee is on
+        '''
+        resu = dict.fromkeys(ids,None)
+        clock_sync_obj = self.pool.get("hr.clock.emp.sync")
+        clock_ids = self.pool.get("hr.clock").search(cr, uid, [], context=context)
+        clock_ids_exist = []
+        try:
+            for order in self.browse(cr, uid, ids, context=context):
+                emp_code = order.employee_id.emp_code
+                for clock_id in clock_ids:
+                    emps_clock = clock_sync_obj.clock_emps_get(cr, uid, clock_id, [emp_code], context=context)
+                    if emps_clock:
+                        clock_ids_exist.append(clock_id)
+                resu[order.id] = clock_ids_exist
+        except Exception,e:
+            traceback.print_exc()
+            pass 
+        return resu
     _columns = {
         'employee_id': fields.many2one('hr.employee',  'Employee', required=True, select=True),
         'department_id':fields.related('employee_id','department_id', type='many2one', relation='hr.department', string='Department', store=True),
@@ -84,6 +104,8 @@ class hr_dimission(osv.osv):
         'transfer_ids': fields.one2many('hr.dimission.item', 'dimission_id', 'Transfers', domain=[('type','=','transfer')]),
         
         'payslip_id': fields.many2many('hr.emppay', string='Payslip'),
+        'attrpt_ids': fields.many2many('hr.rpt.attend.month', string='Attendance Reports'),
+        'hr_clock_ids': fields.function(_emp_clocks, string='HR Clocks', type='many2many', relation='hr.clock', readonly=True),
         'attachment_lines': fields.one2many('ir.attachment', 'hr_admission_id','Attachment'),    
         'company_id':fields.many2one('res.company', 'Company', required=True),   
                                                      
@@ -226,6 +248,27 @@ class hr_dimission(osv.osv):
             'res_id': order.employee_id.id,
         }
         
+    def print_attendance(self, cr, uid, ids, context=None):
+        order = self.browse(cr, uid, ids[0], context=context)
+        if not order.attrpt_ids:
+            return True
+        #call attend month report to get the PDF
+        return self.pool.get('hr.rpt.attend.month').pdf_attend_emp(cr, uid, [att.id for att in order.attrpt_ids], context=context, emp_ids=[order.employee_id.id])
+        
+    def print_payslip(self, cr, uid, ids, context=None):
+        order = self.read(cr, uid, ids[0], ['payslip_id'], context=context)
+        if not order['payslip_id']:
+            return True
+        #call attend month report to get the PDF
+        return self.pool.get('hr.emppay').print_slip(cr, uid, order['payslip_id'], context=None)
+
+    def remove_from_clock(self, cr, uid, ids, context=None):
+        order = self.browse(cr, uid, ids[0], context=context)
+        if not order.hr_clock_ids:
+            return True
+        #call attend month report to get the PDF
+        return self.pool.get('hr.clock.emp.sync').clock_emps_delete_exec(cr, uid, order.hr_clock_ids, [order.employee_id], context=None)          
+
     def action_cancel(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)    
 

@@ -63,7 +63,7 @@
            			<attribute name="on_change">onchange_amount(currency_id, amount, context)</attribute>
            		</xpath>
             	<xpath expr="//field[@name='alw_ids']/tree/field[@name='amount']" position="after">
-            		<field name="currency_id"/>
+            		<field name="currency_id" invisible="1"/>
             		<field name="amount_local" on_change="onchange_amount_local(currency_id, amount_local, context)"/>
             	</xpath>
             	
@@ -74,7 +74,7 @@
            			<attribute name="on_change">onchange_amount(currency_id, amount, context)</attribute>
            		</xpath>
             	<xpath expr="//field[@name='alw_inwage_ids']/tree/field[@name='amount']" position="after">
-            		<field name="currency_id"/>
+            		<field name="currency_id" invisible="1"/>
             		<field name="amount_local" on_change="onchange_amount_local(currency_id, amount_local, context)"/>
             	</xpath>
             	
@@ -85,7 +85,7 @@
            			<attribute name="on_change">onchange_amount(currency_id, amount, context)</attribute>
            		</xpath>
             	<xpath expr="//field[@name='ded_ids']/tree/field[@name='amount']" position="after">
-            		<field name="currency_id"/>
+            		<field name="currency_id" invisible="1"/>
             		<field name="amount_local"  on_change="onchange_amount_local(currency_id, amount_local, context)"/>
             	</xpath>
             	
