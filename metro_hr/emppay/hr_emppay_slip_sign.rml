@@ -307,7 +307,7 @@
     <paraStyle name="P10" fontName="Helvetica" fontSize="6.0" leading="8" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P11" fontName="Helvetica" fontSize="6.0" leading="8" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P12" fontName="Helvetica" fontSize="6.0" leading="8" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
-    <paraStyle name="P13" fontName="Helvetica" fontSize="4.0" leading="5"/>
+    <paraStyle name="P13" fontName="Helvetica-Bold" fontSize="11.0" leading="14" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="12.0" leading="15" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -610,6 +610,13 @@
         </tr>
       </blockTable>
     </section>
+    <para style="P13">
+    	<font color="white"> </font>
+    </para>
+    <para style="P13">
+    	<font color="white"> </font>
+    </para>
+    <para style="P13">会计：<font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font>审核：<font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font>出纳：<font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font>制表：</para>
   </story>
 </document>
 

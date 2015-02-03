@@ -191,6 +191,7 @@
                    	<button name="action_pay" type="object" string="Pay" states="approved" class="oe_highlight" groups="account.group_account_invoice" invisible="context.get('from_sheet')"/>
                    	<button name="action_draft" type="object" string="Set to Draft" states='verified,approved,paid' groups="account.group_account_manager" invisible="context.get('from_sheet')"/>
                     <button name="print_slip" type="object" string="Print Slip"/>
+                    <button name="print_slip_dimission" type="object" string="Print Slip for Dimission"/>
                     <button name="print_slip_india" type="object" string="Print India Slip"/>
                     <button name="recompute" type="object" string="Recompute" states="draft"/>
                     <field name="state" widget="statusbar" invisible="context.get('from_sheet')"/>
