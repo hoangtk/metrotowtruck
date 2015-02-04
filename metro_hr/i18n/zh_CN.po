@@ -4712,6 +4712,16 @@ msgstr "体重"
 msgid "Recompute"
 msgstr "重算"
 
+#. module: metro_hr
+#: view:hr.emppay:0
+msgid "Print Slip for Dimission"
+msgstr "打印l离职工资条"
+
+#. module: metro_hr
+#: model:ir.actions.report.xml,name:metro_hr.report_hr_emppay_slip_dimission
+msgid "Payslip for Dimission"
+msgstr "离职工资条"
+
 ########################manual########################
 #. module: metro_hr
 #: model:ir.ui.menu,name:metro_hr.menu_hr_root_dimission
