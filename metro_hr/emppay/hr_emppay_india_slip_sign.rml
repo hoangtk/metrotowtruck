@@ -243,6 +243,7 @@
     <paraStyle name="P15" fontName="Helvetica" fontSize="7.0" leading="9" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="P16" fontName="Helvetica" fontSize="2.0" leading="3"/>
     <paraStyle name="P17" fontName="Helvetica" fontSize="4.0" leading="5"/>
+    <paraStyle name="P18" fontName="Helvetica-Bold" fontSize="11.0" leading="14" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="12.0" leading="15" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -502,6 +503,13 @@
         </tr>
       </blockTable>
     </section>
+    <para style="P18">
+    	<font color="white"> </font>
+    </para>
+    <para style="P18">
+    	<font color="white"> </font>
+    </para>
+    <para style="P18">会计：<font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font>审核：<font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font>出纳：<font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font><font color="white"> .........</font>制表：</para>    
   </story>
 </document>
 

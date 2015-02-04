@@ -1237,6 +1237,7 @@ class hr_emppay(osv.osv):
             if payslip.state not in  ['draft']:
                 raise osv.except_osv(_('Warning!'),_('You cannot delete a payslip which is not draft!'))
         return super(hr_emppay, self).unlink(cr, uid, ids, context)
+    
     def print_slip(self, cr, uid, ids, context=None):
         if context is None: 
             context = {}
@@ -1247,7 +1248,18 @@ class hr_emppay(osv.osv):
                  'form': form_data,
         }
         return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip', 'datas': datas, 'nodestroy': True} 
-    
+
+    def print_slip_dimission(self, cr, uid, ids, context=None):
+        if context is None: 
+            context = {}
+        form_data = self.read(cr, uid, ids, context=context)
+        datas = {
+                 'model': 'hr.emppay',
+                 'ids': ids,
+                 'form': form_data,
+        }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'hr.emppay.slip.dimission', 'datas': datas, 'nodestroy': True} 
+        
     def print_slip_india(self, cr, uid, ids, context=None):
         if context is None: 
             context = {}
@@ -1292,6 +1304,7 @@ class hr_emppay_slip_print(rml_parser_ext):
         return ret
     
 report_sxw.report_sxw('report.hr.emppay.slip', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
+report_sxw.report_sxw('report.hr.emppay.slip.dimission', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_slip_dimission.rml', parser=hr_emppay_slip_print, header='internal landscape')
 report_sxw.report_sxw('report.hr.emppay.slip.sign', 'hr.emppay.sheet', 'addons/metro_hr/emppay/hr_emppay_slip_sign.rml', parser=hr_emppay_slip_print, header='internal landscape')
 report_sxw.report_sxw('report.hr.emppay.slip.india', 'hr.emppay', 'addons/metro_hr/emppay/hr_emppay_india_slip.rml', parser=hr_emppay_slip_print, header='internal landscape')
 report_sxw.report_sxw('report.hr.emppay.slip.sign.india', 'hr.emppay.sheet', 'addons/metro_hr/emppay/hr_emppay_india_slip_sign.rml', parser=hr_emppay_slip_print, header='internal landscape')
