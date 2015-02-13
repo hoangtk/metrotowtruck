@@ -292,10 +292,8 @@
                         filter_domain="['|','|','|','|',('serial_number','ilike',self),('serial','ilike',self),('partner_id.name','ilike',self),('model','ilike',self),('model.code','ilike',self)]"/>
                     <field name="serial_number" string="Serial Number" 
                         filter_domain="['|',('serial_number','ilike',self),('serial','ilike',self)]"/>
-                    <field name="partner_id" string="Customer" 
-                        filter_domain="['|',('partner_id.name','ilike',self)]"/>
-                    <field name="model" string="Model" 
-                        filter_domain="['|',('model','ilike',self),('model.code','ilike',self)]"/>
+                    <field name="partner_id" string="Customer"/>
+                    <field name="model" string="Model"/>
                 </search>
             </field>
         </record>
