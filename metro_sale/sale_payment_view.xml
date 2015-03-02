@@ -146,6 +146,10 @@
             	<field name="date" position="attributes">
             		<attribute name="widget">date</attribute>
             	</field>
+            	<field name="date" position="after">
+                    <field name="attachment_name" invisible="1"/>
+                   <field name="attachment" filename="attachment_name"/>
+            	</field>
 				<xpath expr="//footer" position="replace">
                     <footer>
                         <button string="Pay" name="pay_sale_order" type="object" class="oe_highlight"/>
