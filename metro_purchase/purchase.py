@@ -893,7 +893,17 @@ class purchase_order_line(osv.osv):
             if vals.has_key('price_unit') and not po_line.can_change_price:
                 raise osv.except_osv(_('Error!'),
                                      _('The price of %s can not be change since there are related existing paid invoices.')%(po_line.product_id.name))     
-        
+
+        #add the procut_uom set by product's purchase uom
+        if 'product_id' in vals and 'product_uom' not in vals:
+            prod = self.pool.get('product.product').browse(cr, uid, vals['product_id'], context=context)
+            product_uom = None
+            if prod.uom_po_id:
+                product_uom = prod.uom_po_id.id
+            else:
+                product_uom = prod.uom_id.id
+            vals.update({'product_uom':product_uom})            
+                    
         resu = super(purchase_order_line,self).write(cr, uid, ids, vals, context=context)
         #only when orders confirmed, then record the quantity&price changing log
         if po_line.order_id.state != 'draft':
@@ -1124,8 +1134,8 @@ def metro_po_line_onchange_product_id(self, cr, uid, ids, pricelist_id, product_
         uom_id = product_uom_po_id
 
     if product.uom_id.category_id.id != product_uom.browse(cr, uid, uom_id, context=context).category_id.id:
-        if self._check_product_uom_group(cr, uid, context=context):
-            res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
+#        if self._check_product_uom_group(cr, uid, context=context):
+#            res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
         uom_id = product_uom_po_id
 
     res['value'].update({'product_uom': uom_id})
