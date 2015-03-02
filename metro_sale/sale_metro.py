@@ -42,10 +42,21 @@ class sale_order(osv.osv):
         if part.parent_id and not part.is_company:
             part = part.parent_id
         if part.country_id and part.country_id.currency_id:
+            #the SO's pricelist logic: if Canada then is CAD price list, otherwise is USD pricelist
             pricelist_obj = self.pool.get('product.pricelist')
-            pricelist_ids = pricelist_obj.search(cr, uid, [('currency_id', '=', part.country_id.currency_id.id)], context=context)
+            #get the company id
+            company_id = None
+            if ids:
+                company_id = self.browse(cr, uid, ids[0], context=context).company_id.id
+            else:
+                company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
+            pricelist_ids = pricelist_obj.search(cr, uid, [('type', '=', 'sale'), ('currency_id', '=', part.country_id.currency_id.id), ('company_id', '=', company_id)], context=context)
             if pricelist_ids:
-                resu['value']['pricelist_id'] = pricelist_ids[0]  
+                resu['value']['pricelist_id'] = pricelist_ids[0]
+            else:
+                pricelist_ids = pricelist_obj.search(cr, uid, [('type', '=', 'sale'), ('currency_id', '=', part.country_id.currency_id.id)], context=context)
+                if pricelist_ids:
+                    resu['value']['pricelist_id'] = pricelist_ids[0]                  
         return resu
             
     def get_report_name(self, cr, uid, id, rpt_name, context=None):

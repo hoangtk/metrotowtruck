@@ -159,7 +159,7 @@
 					<field name="price_subtotal_withtax"/>
 				</xpath>           
                  <xpath expr="//button[@name='action_cancel']" position="before" >
-                 	<button name="button_update_uom" states="draft,rejected" string="Update UOM" type="object"/>
+                 	<button name="button_update_uom" states="draft,rejected,changing" string="Update UOM" type="object"/>
                 </xpath>     
                 <xpath expr="//tree/field[@name='price_unit']" position="after">
                 	<field name="product_uom_base_qty"/>

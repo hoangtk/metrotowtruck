@@ -142,13 +142,29 @@ class sale_order(osv.osv):
         #new field include the invoice payment move lines         
         'inv_pay_ids': fields.function(_inv_pay_ids,relation='account.move.line', type='many2many', string='Invoice Payments'),              
     }
-
+        
     #from the sale_payment_method.sale.py, add the sale_id
     def _prepare_payment_move(self, cr, uid, move_name, sale, journal,
                               period, date, description, context=None):
         resu = super(sale_order,self)._prepare_payment_move(cr,uid,move_name,sale,journal,period,date,description,context)
         resu.update({'sale_ids':[(4, sale.id)]})
         return resu
+    
+    #johnw, 03/02/2015, add the prepayment attachment dealing
+    def _add_payment(self, cr, uid, sale, journal, amount, date, description=None, context=None):
+        new_mvid = super(sale_order,self)._add_payment(cr,uid, sale, journal, amount, date, description,context=context)        
+        if context.get('pay_attachment_name'):
+            self.pool.get('ir.attachment').create(
+                cr, uid, {'name':  context.get('pay_attachment_name'),
+                          'datas_fname':  context.get('pay_attachment_name'),
+                          'res_id': new_mvid,
+                          'res_model': 'account.move',
+                          'type': 'binary',
+                          'datas': context.get('pay_attachment'),
+                          'description': 'From Customer Advance Payment',
+                          'account_move_id':new_mvid})
+                                
+        return new_mvid        
         
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
@@ -182,6 +198,8 @@ class pay_sale_order(orm.TransientModel):
     _inherit = 'pay.sale.order'       
     _columns = {
         'amount_max': fields.float('Max Amount'),
+        'attachment': fields.binary('Attachment'),
+        'attachment_name': fields.char('Attachment File Name'),
     }
     def _get_amount(self, cr, uid, context=None):
         if context is None:
@@ -195,6 +213,7 @@ class pay_sale_order(orm.TransientModel):
     _defaults = {
         'amount': 0,
         'amount_max':_get_amount,
+        'description':u'Customer Advance Payment'
     }    
     def _check_amount(self, cr, uid, ids, context=None):
         for pay in self.browse(cr, uid, ids, context=context):
@@ -202,4 +221,12 @@ class pay_sale_order(orm.TransientModel):
                 return False
         return True
     _constraints = [(_check_amount, 'Pay amount only can be between zero and the balance.', ['amount'])]
+    
+    def pay_sale_order(self, cr, uid, ids, context=None):
+        """ Pay the sale order """
+        wizard = self.browse(cr, uid, ids[0], context=context)
+        if wizard.attachment_name:
+            context['pay_attachment'] = wizard.attachment
+            context['pay_attachment_name'] = wizard.attachment_name
+        return super(pay_sale_order, self).pay_sale_order(cr, uid, ids, context=context)
             

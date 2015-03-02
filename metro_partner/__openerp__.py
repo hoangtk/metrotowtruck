@@ -4,13 +4,6 @@
     'category': 'Metro',
     'description': """
     
-        Metro Product Extension:  
-        
-        Updates the Product module to create automatic part numbers, adds a Chinese name field and a details tab.
-        
-        (Ported to OpenERP v 7.0 by PY Solutions.)
-        
-        07/09/2013 - Added Inquiry Tab - By PY Solutions
         
         """,
         
@@ -18,7 +11,7 @@
     'author': 'PY Solutions',
     'maintainer': 'PY Solutions',
     'website': 'http://www.pysolutions.com',
-    'depends': ["metro", "base"],
+    'depends': ["metro", "base", "sale", "purchase"],
     'init_xml': [],
     'update_xml': [
 	'security/ir.model.access.csv',

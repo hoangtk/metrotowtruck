@@ -165,7 +165,9 @@ class sale_order(orm.Model):
                                                      date, description, context=context)
 
         move_vals['line_id'] = [(0, 0, line) for line in move_lines]
-        move_obj.create(cr, uid, move_vals, context=context)
+        #move_obj.create(cr, uid, move_vals, context=context)
+        #johnw, 03/02/2015, return the created account move id
+        return move_obj.create(cr, uid, move_vals, context=context)
 
     def _get_payment_move_name(self, cr, uid, journal, period, context=None):
         if context is None:
@@ -236,6 +238,7 @@ class sale_order(orm.Model):
         journal_currency_id = journal.currency and journal.currency.id or company.currency_id.id
         order_currency_id = sale.pricelist_id.currency_id.id
         if order_currency_id != company.currency_id.id:
+            #if order currency is same as the journal currency, then use the "currency_id/amount/amount_currency" calculated above on  the "payment line (bank / cash)" step
             if order_currency_id != journal_currency_id:
                 currency_id = order_currency_id
                 amount = currency_obj.compute(cr, uid,
@@ -251,7 +254,6 @@ class sale_order(orm.Model):
         else:
             currency_id = False
             amount_currency = 0.0
-            amount = amount_original
             
         # payment line (receivable)
         credit_line = {
