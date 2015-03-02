@@ -50,11 +50,11 @@ class sale_order(osv.osv):
                 company_id = self.browse(cr, uid, ids[0], context=context).company_id.id
             else:
                 company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
-            pricelist_ids = pricelist_obj.search(cr, uid, [('currency_id', '=', part.country_id.currency_id.id), ('company_id', '=', company_id)], context=context)
+            pricelist_ids = pricelist_obj.search(cr, uid, [('type', '=', 'sale'), ('currency_id', '=', part.country_id.currency_id.id), ('company_id', '=', company_id)], context=context)
             if pricelist_ids:
                 resu['value']['pricelist_id'] = pricelist_ids[0]
             else:
-                pricelist_ids = pricelist_obj.search(cr, uid, [('currency_id', '=', part.country_id.currency_id.id)], context=context)
+                pricelist_ids = pricelist_obj.search(cr, uid, [('type', '=', 'sale'), ('currency_id', '=', part.country_id.currency_id.id)], context=context)
                 if pricelist_ids:
                     resu['value']['pricelist_id'] = pricelist_ids[0]                  
         return resu
