@@ -39,6 +39,7 @@
         'ship/shipment_view.xml',
         'mto/mto_design_view.xml',
         'project/project_view.xml',
+        'account/account_view.xml',
     ],
     'installable': True,
     'active': False,
