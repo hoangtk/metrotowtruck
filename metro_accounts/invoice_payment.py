@@ -226,12 +226,13 @@ class account_invoice(osv.osv):
         move_line_obj = self.pool.get('account.move.line')
         period_obj = self.pool.get('account.period')
         currency_obj = self.pool.get('res.currency')
-        
+        #the amount of the invoice's currency
         amount = inv.residual
         if amount < 0:
             return
         journal = inv.journal_id
         company = journal.company_id
+        invoice_currency_id = inv.currency_id and inv.currency_id.id or None
         #########get the move##########
         date = fields.datetime.now()
         period_id = period_obj.find(cr, uid, dt=date, context=context)[0]
@@ -272,74 +273,106 @@ class account_invoice(osv.osv):
         move_line_vals = {}
         move_line_reconciles=[]
         #the payment reconcile lines
-        for pay_mv_ln in move_line_obj.browse(cr,uid,pay_move_line_ids,context=context):
-            can_reconcile, amount_pay = self.move_reconcile_info(cr,uid,pay_mv_ln,context)
-            if can_reconcile:
+        rec_cnt = 1
+        first_pay_currency_id = None
+        pay_currency_id = None
+        for pay_mv_ln in move_line_obj.browse(cr,uid,pay_move_line_ids,context=context):            
+            can_reconcile, amount_pay,pay_currency_id, amount_pay_currency = self.move_reconcile_info(cr,uid,pay_mv_ln,context)
+            amount_pay_original = amount_pay
+            if can_reconcile:          
+                currency_id = False
+                amount_currency = 0.0
+                if rec_cnt == 1:
+                    first_pay_currency_id = pay_currency_id
+                if first_pay_currency_id != invoice_currency_id and invoice_currency_id != company.currency_id.id:
+                    raise osv.except_osv(_('Error'),'Invoice and advance payment have different currency when do auto reconcile, please do reconcile manually!')
+                if rec_cnt > 1 and first_pay_currency_id != pay_currency_id:
+                    raise osv.except_osv(_('Error'),'Found mixed move lines with different currency when do auto reconcile, please do reconcile manually!')
+                if pay_currency_id:
+                    amount_pay = amount_pay_currency
+                    currency_id = pay_currency_id
+                    amount_currency = amount_pay_currency
+                    
                 #set the payment reconcile amount
                 #get the amount need to reconcine
                 amount_need_allocate = amount - amount_pay_total
                 if amount_need_allocate < amount_pay:
+                    amount_pay_original = amount_need_allocate/amount_pay*amount_pay_original
+                    if pay_currency_id:
+                        amount_currency = amount_need_allocate/amount_pay*amount_currency
                     amount_pay = amount_need_allocate
+                     
                 #get the currency info
-                currency_id = False
-                amount_currency = 0.0
-                if journal.currency and journal.currency.id != company.currency_id.id:
+                if not currency_id and journal.currency and journal.currency.id != company.currency_id.id:
                     currency_id = journal.currency.id
-                    amount_currency, amount_pay = (amount_pay,
+                    amount_currency, amount_pay_original = (amount_pay_original,
                                                currency_obj.compute(cr, uid,
                                                                     currency_id,
                                                                     company.currency_id.id,
-                                                                    amount_pay,
+                                                                    amount_pay_original,
                                                                     context=context))
                 move_line_vals = \
                     {'name': move_line_name,
-                    'debit': pay_debit_prefix*amount_pay,
-                    'credit': pay_credit_prefix*amount_pay,
+                    'debit': pay_debit_prefix*amount_pay_original,
+                    'credit': pay_credit_prefix*amount_pay_original,
                     'account_id': pay_mv_ln.account_id.id,
                     'journal_id': inv.journal_id.id,
                     'period_id': period.id,
                     'partner_id': inv.partner_id.id,
                     'date': date,
-                    'amount_currency': amount_currency,
+                    'amount_currency': journal.type != 'sale' and -amount_currency or amount_currency,
                     'currency_id': currency_id,
                     'move_id':move_id,
                      }
                 move_line_id = move_line_obj.create(cr,uid,move_line_vals,context=context)
-                move_line_reconciles.append([pay_mv_ln.id,move_line_id])
+                move_line_reconciles.append([pay_mv_ln.id,move_line_id])                
                 amount_pay_total += amount_pay
+                rec_cnt += 1
                 if amount - amount_pay_total <=0:
                     break
 
         #the invoice reconcile lines
         amount_inv_total = 0.0
         for inv_mv_ln in move_line_obj.browse(cr,uid,inv_move_line_ids,context=context):
-            can_reconcile, amount_inv = self.move_reconcile_info(cr,uid,inv_mv_ln,context)
+            can_reconcile, amount_inv,inv_currency_id, amount_inv_currency = self.move_reconcile_info(cr,uid,inv_mv_ln,context)
+            amount_inv_original = amount_inv
             if can_reconcile:
-                #get the amount need to reconcine
-                amount_need_allocate = amount_pay_total - amount_inv_total
-                if amount_need_allocate < amount_inv:
-                    amount_inv = amount_need_allocate
-                #get the currency info
                 currency_id = False
                 amount_currency = 0.0
+                if first_pay_currency_id != invoice_currency_id and invoice_currency_id != company.currency_id.id:
+                    raise osv.except_osv(_('Error'),'Found mixed move lines with different currency when do auto reconcile, please do reconcile manually!')
+                #get the amount need to reconcine
+                amount_need_allocate = amount_pay_total - amount_inv_total
+                if first_pay_currency_id:
+                    amount_inv = amount_inv_currency
+                    currency_id = first_pay_currency_id
+                    amount_currency = amount_inv_currency
+                    
+                if amount_need_allocate < amount_inv:
+                    amount_inv_original = amount_need_allocate/amount_inv*amount_inv_original
+                    if first_pay_currency_id:
+                        amount_currency = amount_need_allocate/amount_inv*amount_currency
+                        
+                    amount_inv = amount_need_allocate
+                #get the currency info
                 if journal.currency and journal.currency.id != company.currency_id.id:
                     currency_id = journal.currency.id
-                    amount_currency, amount_inv = (amount_inv,
+                    amount_currency, amount_inv_original = (amount_inv_original,
                                                currency_obj.compute(cr, uid,
                                                                     currency_id,
                                                                     company.currency_id.id,
-                                                                    amount_inv,
+                                                                    amount_inv_original,
                                                                     context=context))
                 move_line_vals = \
                     {'name': move_line_name,
-                    'debit': inv_debit_prefix*amount_inv,
-                    'credit': inv_credit_prefix*amount_inv,
+                    'debit': inv_debit_prefix*amount_inv_original,
+                    'credit': inv_credit_prefix*amount_inv_original,
                     'account_id': inv_mv_ln.account_id.id,
                     'journal_id': inv.journal_id.id,
                     'period_id': period.id,
                     'partner_id': inv.partner_id.id,
                     'date': date,
-                    'amount_currency': amount_currency,
+                    'amount_currency': journal.type == 'sale' and -amount_currency or amount_currency,
                     'currency_id': currency_id,
                     'move_id':move_id,
                      }
@@ -348,8 +381,44 @@ class account_invoice(osv.osv):
                 
                 amount_inv_total += amount_inv
                 if amount_pay_total - amount_inv_total <=0:
-                    break   
-
+                    break
+        #Add the exchange currency gap to let the move line's state to be 'Balanced'
+        if first_pay_currency_id:
+            exchange_gap = 0.0
+            for move_ln in move_obj.browse(cr,uid,move_id,context=context).line_id:
+                if move_ln.state == 'valid':
+                    continue
+                exchange_gap += (move_ln.debit - move_ln.credit)
+            if exchange_gap != 0.0:          
+                currency_id = False
+                amount_currency = 0.0
+                debit_prefix = 0
+                credit_prefix = 0
+                gap_account_id = None
+                if exchange_gap > 0:
+                    #record on credit                    
+                    credit_prefix = 1
+                    gap_account_id = company.income_currency_exchange_account_id
+                else:
+                    #record on debit
+                    debit_prefix = -1
+                    gap_account_id = company.expense_currency_exchange_account_id
+                    
+                if not gap_account_id:
+                    raise osv.except_osv(_('Error'),'Error when do auto reconcile, there are exchange difference, please config the Gain/Loss Exchange rate account!')
+                #create the exchange currency difference line
+                move_line_vals = {'name': move_line_name + ' currency exchange gap',
+                    'debit': debit_prefix*exchange_gap,
+                    'credit': credit_prefix*exchange_gap,
+                    'account_id': gap_account_id.id,
+                    'partner_id': inv.partner_id.id,
+                    'date': date,
+                    'amount_currency': amount_currency,
+                    'currency_id': currency_id,
+                    'move_id':move_id,
+                     }
+                move_line_id = move_line_obj.create(cr,uid,move_line_vals,context=context)         
+        
         for reconciles in move_line_reconciles:
             move_line_obj.reconcile_partial(cr, uid, reconciles, writeoff_acc_id=inv.account_id.id, writeoff_period_id=inv.period_id.id, writeoff_journal_id=inv.journal_id.id)
 
@@ -378,6 +447,8 @@ class account_invoice(osv.osv):
     def move_reconcile_info(self,cr,uid,act_mv_ln,context=None):
         can_reconcile = False
         amount = 0.0
+        currency_id = None
+        amount_currency = 0.0
         if not act_mv_ln.reconcile_id:
             if not act_mv_ln.reconcile_partial_id:
                 can_reconcile = True
@@ -387,6 +458,9 @@ class account_invoice(osv.osv):
                 if act_mv_ln.amount_residual > 0:
                     can_reconcile = True
                     amount = act_mv_ln.amount_residual      
-        return can_reconcile, amount
+            if can_reconcile and act_mv_ln.currency_id:
+                currency_id = act_mv_ln.currency_id.id
+                amount_currency = act_mv_ln.amount_residual_currency
+        return can_reconcile, amount, currency_id, amount_currency
     
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
