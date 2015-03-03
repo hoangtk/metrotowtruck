@@ -226,7 +226,7 @@ class account_invoice(osv.osv):
         move_line_obj = self.pool.get('account.move.line')
         period_obj = self.pool.get('account.period')
         currency_obj = self.pool.get('res.currency')
-        
+        #the amount of the invoice's currency
         amount = inv.residual
         if amount < 0:
             return
@@ -382,7 +382,7 @@ class account_invoice(osv.osv):
                 amount_inv_total += amount_inv
                 if amount_pay_total - amount_inv_total <=0:
                     break
-        
+        #Add the exchange currency gap to let the move line's state to be 'Balanced'
         if first_pay_currency_id:
             exchange_gap = 0.0
             for move_ln in move_obj.browse(cr,uid,move_id,context=context).line_id:
