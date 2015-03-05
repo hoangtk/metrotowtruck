@@ -168,6 +168,8 @@ class hr_clock_emp_sync(osv.osv_memory):
     def server_emps_set(self, cr, uid, order_data, context=None):
         if not order_data:
             return False
+        if context is None:
+            context = {}
         #store the password and finger print to update
         emps_fp_pwd = []
         if order_data.sync_opt_pwd or order_data.sync_opt_fp:
@@ -181,7 +183,9 @@ class hr_clock_emp_sync(osv.osv_memory):
         emp_obj = self.pool.get('hr.employee')        
         #get the emp id and code dict
         emp_codes = [emp.emp_code for emp in order_data.emp_ids_sync]
-        emp_ids = emp_obj.search(cr, uid, [('emp_code','in',emp_codes)],context=context)
+        ctx_emp = context.copy()
+        ctx_emp['active_test'] = False
+        emp_ids = emp_obj.search(cr, uid, [('emp_code','in',emp_codes)],context=ctx_emp)
         emps = emp_obj.read(cr, uid, emp_ids, ['emp_code'], context=context)
         emp_code_ids = {}
         for emp in emps:
@@ -190,9 +194,11 @@ class hr_clock_emp_sync(osv.osv_memory):
         #update data to server   
         emp_ids = []         
         for emp_sync in order_data.emp_ids_sync:
-            emp_vals = {'name':emp_sync.emp_name, 
+            emp_vals = {}
+            if order_data.sync_opt_base:
+                emp_vals.update({'name':emp_sync.emp_name, 
                             'emp_card_id':emp_sync.emp_card_id,
-                            'clock_role':emp_sync.clock_role}
+                            'clock_role':emp_sync.clock_role})
             if order_data.sync_opt_pwd:
                 clock_pwd = emps_fp_pwd[emp_sync.emp_code]['clock_pwd']
                 emp_vals['clock_pwd'] = clock_pwd
@@ -206,6 +212,10 @@ class hr_clock_emp_sync(osv.osv_memory):
             if emp_id:
                 emp_obj.write(cr, uid, emp_id, emp_vals, context=context)
             else:
+                if not order_data.sync_opt_base:
+                    emp_vals.update({'name':emp_sync.emp_name, 
+                                'emp_card_id':emp_sync.emp_card_id,
+                                'clock_role':emp_sync.clock_role})
                 emp_vals['emp_code'] = emp_sync.emp_code
                 emp_id = emp_obj.create(cr, uid, emp_vals, context=context)
             emp_ids.append(emp_id)
@@ -217,6 +227,8 @@ class hr_clock_emp_sync(osv.osv_memory):
     def step_next(self, cr, uid, ids, action, context=None):
         return self.step_change(cr, uid, ids, 'next', context)            
     def step_change(self, cr, uid, ids, action, context=None):
+        if context is None:
+            context = {}
         order_data = self.browse(cr, uid, ids[0], context=context)
         new_vals = {}
         #steps definition
@@ -309,7 +321,9 @@ class hr_clock_emp_sync(osv.osv_memory):
             #get employees from server
             emp_codes = [emp.emp_code for emp in  order_data.emp_ids_clock]
             emp_obj = self.pool.get('hr.employee')
-            emp_ids = emp_obj.search(cr, uid, [('emp_code','in',emp_codes)],context=context)
+            ctx_emp = context.copy()
+            ctx_emp['active_test'] = False
+            emp_ids = emp_obj.search(cr, uid, [('emp_code','in',emp_codes)],context=ctx_emp)
             emps = emp_obj.browse(cr, uid, emp_ids, context=context)
             emps_server = [{'emp_code':emp.emp_code,'emp_name':emp.name,'emp_card_id':emp.emp_card_id,'clock_role':emp.clock_role} \
                            for emp in  emps]

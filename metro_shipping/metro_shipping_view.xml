@@ -109,7 +109,7 @@
 			                    <label for="tracking_link"/>			                    
 			                    <div>
 			                    	<field name="tracking_link" widget="url" class="oe_edit_only" placeholder="e.g http://www.google.com" attrs="{'readonly':[('tracking_mark','=',True)]}"/>
-			                    	<button name="go_track" string="View" type="object"/>
+			                    	<button name="go_track" string="View" type="object" attrs="{'invisible':['|',('tracking_link','=','false'),('tracking_link','=',False)]}"/>
 			                    </div>
 		                    </group>
 		                    <group>
