@@ -184,7 +184,7 @@ class pur_req_po(osv.osv_memory):
                                       'req_line_id':line.id, 
                                       'req_reason':line.req_reason,
                                     })
-                    if partner_id == None:
+                    if partner_id == None and line.product_id.seller_id.active:
                         partner_id = line.product_id.seller_id.id    									
                     
             res.update({'line_ids': line_data,'partner_id':partner_id})

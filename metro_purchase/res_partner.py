@@ -28,20 +28,6 @@ from openerp.osv import fields, osv
 class res_partner(osv.osv):
     _inherit = 'res.partner'
 
-    def _get_main_product_supplier(self, cr, uid, product, context=None):
-        """Determines the main (best) product supplier for ``product``,
-        returning the corresponding ``supplierinfo`` record, or False
-        if none were found. The default strategy is to select the
-        supplier with the highest priority (i.e. smallest sequence).
-
-        :param browse_record product: product to supply
-        :rtype: product.supplierinfo browse_record or False
-        """
-        sellers = [(seller_info.sequence, seller_info)
-                       for seller_info in product.seller_ids or []
-                       if seller_info and isinstance(seller_info.sequence, (int, long))]
-        return sellers and sellers[0][1] or False
-
     def _calc_bank(self, cr, uid, ids, fields, arg, context=None):
         result = dict((id, 
                        dict((field,None) for field in fields)
