@@ -159,6 +159,7 @@ class product_product(osv.osv):
 			for id in ids:
 				res[id][f] = stock.get(id, 0.0)
 		return res		
+	
 	_columns = {
 		'attribute_line' : fields.one2many('product.attribute.line', 'product_id','Attributes'),
 		'cn_name': fields.char(string=u'Chinese Name', size=128, track_visibility='onchange'),
@@ -532,3 +533,21 @@ class product_template(osv.osv):
 		'sale_ok':False,
 		'state':'draft'        
     }
+	
+from openerp.addons.product.product import product_product as product_product_super	
+def _get_main_product_supplier_fix(self, cr, uid, product, context=None):
+	"""Determines the main (best) product supplier for ``product``,
+	returning the corresponding ``supplierinfo`` record, or False
+	if none were found. The default strategy is to select the
+	supplier with the highest priority (i.e. smallest sequence).
+
+	:param browse_record product: product to supply
+	:rtype: product.supplierinfo browse_record or False
+	"""
+	#johnw, 03/05/2015, Add the active restriction when getting the main product's supplier
+	sellers = [(seller_info.sequence, seller_info)
+				   for seller_info in product.seller_ids or []
+				   if seller_info and isinstance(seller_info.sequence, (int, long)) and seller_info.name.active]
+	return sellers and sellers[0][1] or False	
+
+product_product_super._get_main_product_supplier = _get_main_product_supplier_fix
