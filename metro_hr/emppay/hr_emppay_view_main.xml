@@ -124,6 +124,7 @@
                 	<field name="employee_id"/>
                 	<field name="date_from" invisible="context.get('from_sheet')"/>
                 	<field name="date_to" invisible="context.get('from_sheet')"/>
+                	<field name="emp_took"/>
                 	
                 	<field name="attend_id" invisible="1"/>
                 	
@@ -193,6 +194,7 @@
                     <button name="print_slip" type="object" string="Print Slip"/>
                     <button name="print_slip_dimission" type="object" string="Print Slip for Dimission"/>
                     <button name="print_slip_india" type="object" string="Print India Slip"/>
+                    <button name="emp_take" string="Take Slip" type="object" groups="account.group_account_invoice"/>
                     <button name="recompute" type="object" string="Recompute" states="draft"/>
                     <field name="state" widget="statusbar" invisible="context.get('from_sheet')"/>
                 </header>
@@ -204,7 +206,7 @@
                 			<label for="contract_id" class="oe_inline"/>
 	                        <field name="contract_id" 
 		                        domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" 
-		                        context="{'default_employee_id': employee_id}" class="oe_inline"/>
+		                        context="{'default_employee_id': employee_id}" class="oe_inline"/>                        	
                 		</h1>
                 	</div>
                     <group col="4" invisible="context.get('from_sheet')">
@@ -221,6 +223,8 @@
                     </group>
                     <notebook>
                     	<page name="base" string="Payslip">
+                    		<label for="emp_took"/>
+                    		<field name="emp_took"/>
 		                    <group name="attend_wage">
 			                	<field name="attend_id" invisible="1"/>
 		                    	<group name="attend" string="Attendance">
@@ -364,6 +368,10 @@
                     <filter icon="terp-camera_test" string="Paid" domain="[('state','=','paid')]" help="Paid Slip"/>
                     <field name="employee_id"  domain="['|',('active','=',True),('active','=',False)]"/>
                     <field name="emppay_sheet_id"/>
+                    <separator/>
+                    <filter icon="terp-document-new" string="Untook" domain="[('emp_took','=',False)]"/>
+                    <filter icon="terp-document-new" string="Took" domain="[('emp_took','=',True)]"/>
+                    
                     <group expand="0" string="Group By...">
                         <filter string="Employees" icon="terp-personal" name="employee_id" context="{'group_by':'employee_id'}"/>
                         <filter string="Payroll" name="emppay_sheet_id" icon="terp-folder-orange" context="{'group_by':'emppay_sheet_id'}"/>
@@ -411,7 +419,29 @@
             </data>
             </field>
         </record>                
-                
+
+<!-- Add 'Take Slip' to payslip list page -->
+        <record id="action_server_hr_emppay_take" model="ir.actions.server">
+            <field name="name">Take Slip</field>
+            <field name="condition">True</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_hr_emppay" />
+            <field name="state">code</field>
+            <!-- the 'action' will be get actions_servre.run() to return to calling client -->
+            <field name="code">action=self.emp_take(cr, uid, context.get('active_ids', []), context=context)</field>
+        </record>
+
+        <record model="ir.values" id="action_hr_emppay_take">
+            <field name="name">action_hr_emppay_take</field>
+            <field name="action_id" ref="action_server_hr_emppay_take" />
+            <field name="value" eval="'ir.actions.server,' + str(ref('action_server_hr_emppay_take'))" />
+            <field name="key">action</field>
+            <field name="model_id" ref="model_hr_emppay" />
+            <field name="model">hr.emppay</field>
+            <!-- <field name="key2">client_action_multi</field> -->
+            <field name="key2">client_action_multi</field>
+        </record>    
+                        
     </data>
 </openerp>
 

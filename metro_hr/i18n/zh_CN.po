@@ -4722,6 +4722,32 @@ msgstr "打印l离职工资条"
 msgid "Payslip for Dimission"
 msgstr "离职工资条"
 
+#. module: metro_hr
+#: field:hr.emppay,emp_took:0
+msgid "Slip Took"
+msgstr "已领"
+
+#. module: metro_hr
+#: field:hr.emppay,emp_took:0
+msgid "Slip Took"
+msgstr "已领"
+
+#. module: metro_hr
+#: view:hr.emppay:0
+#: model:ir.actions.server,name:metro_hr.action_server_hr_emppay_take
+msgid "Take Slip"
+msgstr "领取工资条"
+
+#. module: metro_hr
+#: view:hr.emppay:0
+msgid "Untook"
+msgstr "未领取"
+
+#. module: metro_hr
+#: view:hr.emppay:0
+msgid "Took"
+msgstr "已领取"
+
 ########################manual########################
 #. module: metro_hr
 #: model:ir.ui.menu,name:metro_hr.menu_hr_root_dimission
