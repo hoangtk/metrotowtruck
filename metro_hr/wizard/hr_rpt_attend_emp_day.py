@@ -513,9 +513,12 @@ class hr_rpt_attend_emp_day(osv.osv):
         group_ids = []
         #parametr from hr_rpt_attend_month.pdf_attend_emp(), structure:{rpt_day_id:rpt_month_id,...}
         rpt_day_months = context.get("rpt_day_months",{})
-        for rpt_day_id in ids:
-            context['attend_month_id'] = rpt_day_months.get(rpt_day_id)
-            group_ids.extend(self.gen_empday_group(cr, uid, rpt_day_id, context=context, rpt_line_ids=rpt_line_ids, rpt_emp_ids=rpt_emp_ids))
+        if not rpt_line_ids:
+            for rpt_day_id in ids:
+                context['attend_month_id'] = rpt_day_months.get(rpt_day_id)
+                group_ids.extend(self.gen_empday_group(cr, uid, rpt_day_id, context=context, rpt_line_ids=rpt_line_ids, rpt_emp_ids=rpt_emp_ids))
+        else:
+            group_ids.extend(self.gen_empday_group(cr, uid, ids, context=context, rpt_line_ids=rpt_line_ids, rpt_emp_ids=rpt_emp_ids))
         #print attendances by group
         if not group_ids:
             return {'type': 'ir.actions.act_window_close'}     

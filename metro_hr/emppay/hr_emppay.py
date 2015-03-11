@@ -1178,6 +1178,7 @@ class hr_emppay(osv.osv):
         'company_currency_id': fields.related('company_id','currency_id',string='Company Currency', type='many2one', relation='res.currency', readonly=True),
         'note': fields.text('Description', readonly=True, states={'draft':[('readonly',False)]}),
         'emppay_sheet_id': fields.many2one('hr.emppay.sheet', 'Payroll', readonly=True, states={'draft': [('readonly', False)]}, ondelete='cascade'),
+        'emp_took': fields.boolean('Slip Took')
         
     }
     _defaults = {
@@ -1276,6 +1277,9 @@ class hr_emppay(osv.osv):
             #emppay_sheet_id updating will trigger the wage recalucation function
             self.write(cr, uid, slip.id, {'emppay_sheet_id':slip.emppay_sheet_id.id}, context=context)
         return True
+            
+    def emp_take(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'emp_took':True}, context=context)
             
 hr_emppay()
 
