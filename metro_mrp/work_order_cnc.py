@@ -390,6 +390,8 @@ class work_order_cnc_line(osv.osv):
         'cnc_file': fields.function(_get_file, fnct_inv=_set_file, string="CNC Txt", type="binary", multi="_get_file",),
         'drawing_file': fields.function(_get_file, fnct_inv=_set_file, string="Drawing PDF", type="binary", multi="_get_file",),
         'doc_file': fields.function(_get_file, fnct_inv=_set_file, string="Doc", type="binary", multi="_get_file",),
+        'cnc_create_date': fields.date('CNC File Create '),
+        'drawing_create_date': fields.date('Drawing PDF Create '),
         #connection with the mrp order's components
         'wo_comp_ids': fields.many2many('mrp.wo.comp', string="Part List", readonly=False),
     }

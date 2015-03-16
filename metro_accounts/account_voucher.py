@@ -6,7 +6,10 @@ from openerp.osv import fields, osv
 class account_voucher(osv.osv):
     _inherit = "account.voucher"
     _columns={
-              'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),              
+              'receipt_number': fields.char('Receipt Number', size=64, help="The reference of this invoice as provided by the partner."),
+              #make the memo editable at any state        
+              #'name':fields.char('Memo', size=256, readonly=True, states={'draft':[('readonly',False)]}),
+              'name':fields.char('Memo', size=256, readonly=False),
     }
     def action_move_line_create(self, cr, uid, ids, context=None):
         resu = super(account_voucher,self).action_move_line_create(cr, uid, ids, context=context)

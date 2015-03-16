@@ -44,6 +44,7 @@
                 	<field name="is_sent_supplier"/>
                     <!-- <field name="invoiced_rate" readonly="1"/> -->
                 	<field name="invoiced"/>
+                	<field name="ap_checked"/>
                 	<field name="receipt_number"/>
                 	<field name="create_uid"/>
                 	<!-- <field name="paid_done"/> -->
@@ -260,6 +261,7 @@
                 </xpath>
                 <field name="state" position="before">
                 	<field name="is_sent_supplier"/>
+                	<field name="ap_checked"/>
                 	<field name="invoiced"/>
                 	<field name="receipt_number"/>
                 	<field name="shipped"/>

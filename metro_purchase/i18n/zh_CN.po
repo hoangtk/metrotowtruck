@@ -640,6 +640,13 @@ msgid "Sent to Supplier"
 msgstr "已发送"
 
 #. module: metro_purchase
+#: model:ir.model.fields,field_description:metro_purchase.field_purchase_order_ap_checked
+#: view:purchase.order:0
+#: field:purchase.order,ap_checked:0
+msgid "Payable Checked"
+msgstr "已对账"
+
+#. module: metro_purchase
 #: field:change.log.po.line,po_id:0
 #: model:ir.model.fields,field_description:metro_purchase.field_change_log_po_line_po_id
 msgid "PO"

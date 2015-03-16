@@ -98,7 +98,7 @@ class purchase_order(osv.osv):
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'inform_type': fields.char('Informer Type', size=10, readonly=True, select=True),
-        'is_sent_supplier': fields.boolean('Sent to Supplier', select=True),
+        'is_sent_supplier': fields.boolean('Sent to Supplier', select=True, states={'done':[('readonly',True)]}),
         'taxes_id': fields.many2many('account.tax', 'po_tax', 'po_id', 'tax_id', 'Taxes', states={'confirmed':[('readonly',True)],'approved':[('readonly',True)],'done':[('readonly',True)]}),
         'invoiced': fields.function(purchase.purchase_order._invoiced, string='Invoice Received', type='boolean', help="It indicates that an invoice is open"),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced', type='float'),
@@ -111,6 +111,8 @@ class purchase_order(osv.osv):
         #partner bank info
         'bank_name': fields.related('partner_id', 'bank_name', type='char', string='Bank Name'),
         'bank_account': fields.related('partner_id', 'bank_account', type='char', string='Bank Account Name'),
+        #if accountant have checked the amount payable with supplier
+        'ap_checked': fields.boolean('Payable Checked', states={'done':[('readonly',True)]}),
     }
     _defaults = {
         'is_sent_supplier': False,
