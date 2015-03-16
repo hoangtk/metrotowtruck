@@ -4736,7 +4736,7 @@ msgstr "已领"
 #: view:hr.emppay:0
 #: model:ir.actions.server,name:metro_hr.action_server_hr_emppay_take
 msgid "Take Slip"
-msgstr "领取工资条"
+msgstr "领取工资"
 
 #. module: metro_hr
 #: view:hr.emppay:0

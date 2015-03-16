@@ -53,7 +53,9 @@
 	                    <tree string="Work Items"> -->
 	                        <field name="file_name"/>
 		                    <field name="cnc_file_name"/> 
+		                    <field name="cnc_create_date"/> 
 		                    <field name="drawing_file_name"/> 
+		                    <field name="drawing_create_date"/>         
 	                        <field name="plate_height"/>
 	                        <field name="plate_length"/>
 	                        <field name="plate_width" />
@@ -81,8 +83,10 @@
 		                            <field name="percent_usage" />
 				                    <field name="cnc_file_name" invisible="1"/> 
 			                        <field name="cnc_file" filename="cnc_file_name"/>
+		                    		<field name="cnc_create_date"/>		                    		       
 				                    <field name="drawing_file_name" invisible="1"/> 
 			                        <field name="drawing_file" filename="drawing_file_name"/>
+			                        <field name="drawing_create_date"/>
 				                    <field name="doc_file_name" invisible="1"/> 
 			                        <field name="doc_file" filename="doc_file_name"/>
 	                            </group>
