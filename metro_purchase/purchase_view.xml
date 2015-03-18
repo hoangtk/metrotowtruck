@@ -144,7 +144,7 @@
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
                 </field>
                 <field name="taxes_id" position="attributes">
-                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
+                	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected','changing','changing_rejected'))]}</attribute>
                 </field>    
                 <field name="has_freight" position="attributes">
                 	<attribute name="attrs">{'readonly':[('state','not in',('draft','sent','rejected'))]}</attribute>
