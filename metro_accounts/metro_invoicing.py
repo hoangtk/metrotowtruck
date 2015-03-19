@@ -8,7 +8,19 @@ class account_invoice(report_sxw.rml_parse):
         super(account_invoice, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time,
+            'serials': self.serials,
         })
+    
+    def serials(self,inv_line):
+        serial_ids = []
+        for so_ln in inv_line.sale_lines:
+            serial_ids += so_ln.serial_ids
+        if not serial_ids:
+            return False
+        else:
+            val =  ', '.join(map(lambda x: x.serial, serial_ids))
+            return val
+        
 report_sxw.report_sxw(
     'report.account.invoice.metro',
     'account.invoice',
