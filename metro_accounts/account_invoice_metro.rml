@@ -165,8 +165,8 @@
       <blockValign value="TOP"/>
       <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
       <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,2" stop="1,2"/>
-      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,2" stop="2,2"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,3" stop="1,3"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,3" stop="2,3"/>
     </blockTableStyle>
     <blockTableStyle id="Table9">
       <blockAlignment value="LEFT"/>
@@ -249,9 +249,10 @@
     <blockTable colWidths="297.0,233.0" style="Table_Partner_Address">
       <tr>
         <td>
-          <para style="terp_default_8">
-            <font color="white"> </font>
-          </para>
+          <para style="terp_default_8">[[o.company_id.name]]</para>
+          <para style="terp_default_8">[[display_address(o.company_id.partner_id) or '']]</para>
+          <para style="terp_default_8">Phone: [[o.company_id.partner_id.phone or '']]</para>
+          <para style="terp_default_8">Mail: [[o.company_id.partner_id.email or '']]</para>
         </td>
         <td>
           <para style="terp_default_8">[[ (o.partner_id and o.partner_id.title and o.partner_id.title.name) or '' ]] [[ (o.partner_id and o.partner_id.name) or '' ]]</para>
@@ -310,13 +311,13 @@
     <para style="terp_default_8">
       <font color="white"> </font>
     </para>
-    <blockTable colWidths="185.0,70.0,80.0,60.0,50.0,85.0" style="Table7">
+    <blockTable colWidths="203.0,94.0,57.0,70.0,43.0,69.0" style="Table7">
       <tr>
         <td>
           <para style="terp_tblheader_General">Description</para>
         </td>
         <td>
-          <para style="terp_tblheader_General_Centre">Taxes</para>
+          <para style="terp_tblheader_General_Centre">Tax</para>
         </td>
         <td>
           <para style="terp_tblheader_General_Right">Quantity</para>
@@ -334,19 +335,20 @@
     </blockTable>
     <section>
       <para style="terp_default_2">[[ repeatIn(o.invoice_line,'l') ]]</para>
-      <blockTable colWidths="185.0,70.0,80.0,60.0,50.0,85.0" style="Table8">
+      <blockTable colWidths="203.0,94.0,57.0,70.0,43.0,69.0" style="Table8">
         <tr>
           <td>
             <para style="terp_default_9">[[ format(l.name) ]]</para>
+            <para style="terp_default_9">[[not serials(l) and removeParentNode('para')]]Serial(s):[[serials(l)]]</para>
           </td>
           <td>
             <para style="terp_default_Centre_9">[[ ', '.join([ lt.name or '' for lt in l.invoice_line_tax_id ]) ]]</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(l.quantity)]] [[ (l.uos_id and l.uos_id.name) or '' ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(l.quantity, digits=get_digits(dp='Product UoS')) ]] [[ (l.uos_id and l.uos_id.name) or '' ]]</para>
           </td>
           <td>
-            <para style="terp_default_Right_9">[[ formatLang(l.price_unit) ]]</para>
+            <para style="terp_default_Right_9">[[ formatLang(l.price_unit , digits=get_digits(dp='Product Price Sale')) ]]</para>
           </td>
           <td>
             <para style="terp_default_Centre_9">[[ formatLang(l.discount, dp='Account') ]] </para>
@@ -357,7 +359,7 @@
         </tr>
       </blockTable>
     </section>
-    <blockTable colWidths="385.0,60.0,85.0" style="Table10">
+    <blockTable colWidths="370.0,75.0,85.0" style="Table10">
       <tr>
         <td>
           <para style="terp_default_8">
@@ -370,7 +372,7 @@
         <td>
           <para style="terp_default_Right_9">[[ formatLang(o.amount_untaxed, digits=get_digits(dp='Account'), currency_obj=o.currency_id) ]]</para>
         </td>
-      </tr>
+      </tr>   
       <tr>
         <td>
           <para style="terp_default_8">
@@ -391,6 +393,19 @@
           </para>
         </td>
         <td>
+          <para style="terp_default_9">Total Paid:</para>
+        </td>
+        <td>
+          <para style="terp_default_Right_9">[[ formatLang(o.amount_total-o.residual, dp='Account', currency_obj=o.currency_id) ]]</para>
+        </td>
+      </tr>   
+      <tr>
+        <td>
+          <para style="terp_default_8">
+            <font color="white"> </font>
+          </para>
+        </td>
+        <td>
           <para style="terp_tblheader_Details">Total:</para>
         </td>
         <td>
@@ -404,7 +419,7 @@
           </para>
         </td>
         <td>
-          <para style="terp_default_9">Balance</para>
+          <para style="terp_tblheader_Details">Balance Due:</para>
         </td>
         <td>
           <para style="terp_default_Right_9">[[ formatLang(o.residual, dp='Account', currency_obj=o.currency_id) or '-']]</para>

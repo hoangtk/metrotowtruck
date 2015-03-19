@@ -30,3 +30,8 @@ class account_invoice(osv.osv):
             move_obj.button_cancel(cr, uid, move_ids, context)
         return resu
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+class account_invoice_line(osv.osv):
+    _inherit = "account.invoice.line"
+    _columns = {
+        'sale_lines': fields.many2many('sale.order.line', 'sale_order_line_invoice_rel', 'invoice_id', 'order_line_id', 'Sale Order Lines', readonly=True),}
