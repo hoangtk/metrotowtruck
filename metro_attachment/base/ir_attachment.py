@@ -73,6 +73,9 @@ class ir_attachment(osv.osv):
         if vals.get('project_issue_id'):
             vals['res_id'] = vals['project_issue_id']
             vals['res_model'] = 'project.issue'  
+        if vals.get('shipment_id'):
+            vals['res_id'] = vals['shipment_id']
+            vals['res_model'] = 'shipment.shipment'  
         if vals.get('mto_design_id'):
             vals['res_id'] = vals['mto_design_id']
             vals['res_model'] = 'mto.design'
