@@ -106,6 +106,7 @@ class shipment_shipment(osv.osv):
     
     _name = "shipment.shipment"
     _rec_name = 'container_no'
+    _order = 'id desc'
     
     def _get_tracking_link(self, cr, uid, ids, name, args, context=None):
         res = {}

@@ -33,23 +33,23 @@
         <record model="ir.actions.act_window" id="base.action_partner_form">
             <field name="name">Customers</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="domain">[('customer','=',1)]</field>
-            <field name="context">{'default_customer':1,"search_default_type_company":1,"default_is_company":1}</field>
+            <field name="domain">[('customer','=',True)]</field>
+            <field name="context">{'default_customer':True,"search_default_type_company":True,"default_is_company":True}</field>
         </record>
 <!-- menu account | Customer | Customers -->        
         <record model="ir.actions.act_window" id="base.action_partner_customer_form">
             <field name="name">Customers</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="domain">[('customer','=',1)]</field>
-            <field name="context">{'default_customer':1, "search_default_type_company":1,"default_is_company":1}</field>
+            <field name="domain">[('customer','=',True)]</field>
+            <field name="context">{'default_customer':True, "search_default_type_company":True,"default_is_company":True}</field>
         </record>  
 <!-- menu account | Supplier | Suppliers --> 
 <!-- menu purchase | purchase | Suppliers -->             
         <record model="ir.actions.act_window" id="base.action_partner_supplier_form">
             <field name="name">Suppliers</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="domain">[('supplier','=',1)]</field>
-            <field name="context">{'default_customer': 0,'default_supplier': 1,"search_default_type_company":1,"default_is_company":1}</field>
+            <field name="domain">[('supplier','=',True)]</field>
+            <field name="context">{'default_customer': 0,'default_supplier': True,"search_default_type_company":True,"default_is_company":True}</field>
         </record>   
 
 <!-- only show companyies and customer in sales order's customer field -->          
@@ -60,7 +60,7 @@
             <field name="arch" type="xml">  
                 <field name="partner_id" position="attributes">
                     <attribute name="domain">[('customer','=',True),('is_company','=',True)]</attribute>
-                    <attribute name="context">{'default_customer':1,"default_is_company":1}</attribute>
+                    <attribute name="context">{'default_customer':True,"default_is_company":True}</attribute>
                 </field>
             </field>
         </record>   
@@ -72,7 +72,7 @@
             <field name="arch" type="xml">  
                 <field name="partner_id" position="attributes">
                     <attribute name="domain">[('supplier','=',True),('is_company','=',True)]</attribute>
-                    <attribute name="context">{'default_customer': 0,'default_supplier': 1,"default_is_company":1}</attribute>
+                    <attribute name="context">{'default_customer': 0,'default_supplier': True,"default_is_company":True}</attribute>
                 </field>
             </field>
         </record>           

@@ -478,6 +478,7 @@ class hr_rpt_attend_month(osv.osv):
             emp_id = attend_line.emp_id.id
             contract_ids = contract_obj.get_emp_contract(cr, uid, emp_id, attend.date_from, attend.date_to, context=context)
             if not contract_ids:
+                raise osv.except_osv(_('Error!'), _('Generate payroll failed, no validate contracts were found for employee %s, please set contract and try again!')%(attend_line.emp_id.name))
                 continue
             contract_id = contract_ids[0]
             contract = contract_obj.browse(cr, uid, contract_id, context=context)
