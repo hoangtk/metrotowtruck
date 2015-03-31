@@ -270,7 +270,18 @@ class HttpRequest(WebRequest):
     """
     def dispatch(self, method):
         params = dict(self.httprequest.args)
-        params.update(self.httprequest.form)
+        #params.update(self.httprequest.form)
+        #handle the multi files upload, 03/27/2015, johnw
+        if self.httprequest.path == '/web/binary/upload_attachment_multi':
+            #form's data format: [('callback', u'oe_fileupload_temp53'), ('model', u'mail.compose. message'), ('id', u'0'), ('session_id', u''), ('session_id', u'8126514cfda64d7fbfc63c548c25ed74')]
+            #see Root.dispatch() changing for detail
+            dict_form_list = dict(self.httprequest.form)
+            dict_form = dict()
+            for key, value in dict_form_list.items():
+                dict_form[key] = value[0]
+            params.update(dict_form)
+        else:
+            params.update(self.httprequest.form)
         params.update(self.httprequest.files)
         self.init(params)
         akw = {}
@@ -509,7 +520,10 @@ class Root(object):
         Call the object directly.
         """
         request = werkzeug.wrappers.Request(environ)
-        request.parameter_storage_class = werkzeug.datastructures.ImmutableDict
+#        request.parameter_storage_class = werkzeug.datastructures.ImmutableDict
+        #use 'ImmutableMultiDict' to get the multi files, if change to 'ImmutableDict' then only can handle the last file, johnw 03/27/2015
+        if environ.get('PATH_INFO', '') != '/web/binary/upload_attachment_multi':
+            request.parameter_storage_class = werkzeug.datastructures.ImmutableDict
         request.app = self
 
         handler = self.find_handler(*(request.path.split('/')[1:]))
