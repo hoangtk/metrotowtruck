@@ -371,7 +371,7 @@ class rpt_account_cn_line(osv.osv_memory):
         'counter_account': fields.char('Counter Account', size=64, ),
         
         #for both Gl and detail, move line name or static:期初,本期合计,本年合计
-        'notes': fields.char('Notes', size=64, ),
+        'notes': fields.char('Notes', size=128, ),
         
         #for all
         'debit': fields.float('Debit', digits_compute=dp.get_precision('Account')),
