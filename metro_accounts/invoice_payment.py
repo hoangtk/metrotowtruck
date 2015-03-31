@@ -10,11 +10,16 @@ class account_invoice(osv.osv):
     def _sale_payments(self, cr, uid, ids, name, args, context=None):
         result = {}
         for invoice in self.browse(cr, uid, ids, context=context):
+            result[invoice.id] = {}
             payments = []
+            paymoves = []
             for so in invoice.sale_ids:
                 for payment in so.payment_ids:
                     payments.append(payment.id)
-            result[invoice.id] = payments
+                for move in so.payment_moves:
+                    paymoves.append(move.id)
+            result[invoice.id]['sale_payment_ids'] = payments
+            result[invoice.id]['sale_payment_moves'] = paymoves
         return result    
     def _purchase_payments(self, cr, uid, ids, name, args, context=None):
         result = {}
@@ -63,7 +68,9 @@ class account_invoice(osv.osv):
         return result          
     _columns={
         'sale_ids': fields.many2many('sale.order', 'sale_order_invoice_rel', 'invoice_id', 'order_id', 'Sale Orders', readonly=True,),
-        'sale_payment_ids': fields.function(_sale_payments, relation='account.move.line', type="many2many", string='Sale Payments'),
+        'sale_payment_ids': fields.function(_sale_payments, relation='account.move.line', type="many2many", string='Sale Payments', multi='sale_payment'),
+        'sale_payment_moves': fields.function(_sale_payments, relation='account.move', type="many2many", string='Sale Payment Moves', multi='sale_payment'),
+        
         'auto_reconcile_sale_pay': fields.boolean('Auto Reconcile Sale Payment',help='Auto reconcile the sale order payments when valid the invoice'),
         'purchase_ids': fields.many2many('purchase.order', 'purchase_invoice_rel', 'invoice_id', 'purchase_id', 'Purchase Orders', readonly=True,),
         'purchase_payment_ids': fields.function(_purchase_payments, relation='account.move.line', type="many2many", string='Purchase Payments'),
