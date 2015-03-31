@@ -36,7 +36,8 @@ Attendance report by employee and day, working period
 '''
 class hr_rpt_attend_emp_day(osv.osv):
     _name = "hr.rpt.attend.emp.day"
-    _description = "HR Attendance Employee Daily Report"
+    _description = "HR Attendance Employee Daily Report"    
+    _order = 'id desc'
     _columns = {
         'name': fields.char('Report Name', size=32, required=False),
         'title': fields.char('Report Title', required=False),

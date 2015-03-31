@@ -185,7 +185,7 @@ class drawing_order_line(osv.osv):
         #order fields to show in the drawing files view
         'sale_product_ids': fields.related('order_id','sale_product_ids',type='many2many',relation='sale.product',rel='drawing_order_id_rel',id1='drawing_order_id',id2='id_id',
                                              string="MFG IDs",readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
-        'main_part_id': fields.related('order_id','main_part_id',type='many2one',relation='product.product',string='Main Part'),
+        'main_part_id': fields.related('order_id','main_part_id',type='many2one',relation='product.product',string='Main Product'),
                 
     }
     

@@ -4891,3 +4891,10 @@ msgstr "%s 审批项目未通过, 不能完成离职!"
 #, python-format
 msgid "%s is not approved, can not finish the dimission!"
 msgstr "%s 没有交接完毕, 不能完成离职!"
+
+#. module: metro_hr
+#: code:addons/metro_hr/emppay/hr_emppay.py:481
+#, python-format
+msgid "Generate payroll failed, no validate contracts were found for employee %s, please set contract and try again!"
+msgstr "生成工资表失败, 找不到员工 %s 的有效合同, 请设置合同后重试!"
+
