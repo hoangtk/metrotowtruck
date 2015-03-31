@@ -16,6 +16,7 @@ class drawing_order(osv.osv):
     _name = "drawing.order"
     _inherit = ['mail.thread']
     _description = "Drawing Order"
+    _order = 'id desc'
     _columns = {
         'name': fields.char('Name', size=64, required=True,readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'note': fields.text('Description', required=False),
