@@ -1,0 +1,253 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+    <record model="ir.ui.view" id="view_drawing_order_form">
+    	<field name="name">view_drawing_order_form</field>
+    	<field name="model">drawing.order</field>
+    	<field name="arch" type="xml">
+    		<form string="Drawing Order" version="7.0">
+    			<header>
+    				<button name="action_ready" string="Ready" states="draft,rejected" class="oe_highlight" type="object"/>
+    				<button name="action_confirm" string="Confirm" states="ready" class="oe_highlight" type="object" groups="metro_mrp.group_mrp_supervisor"/>
+    				<button name="action_approve" string="Approve" states="confirmed" class="oe_highlight" type="object" groups="mrp.group_mrp_manager"/>
+    				<button name="action_reject" string="Reject" states="confirmed" type="object" groups="mrp.group_mrp_manager"/>
+    				
+    				<button name="action_draft" string="Set to Draft" states="ready" type="object"/>
+    				<button name="action_draft" string="Set to Draft" states="confirmed,cancel" type="object" groups="metro_mrp.group_mrp_supervisor"/>
+    				<button name="action_draft" string="Set to Draft" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
+    				
+    				<button name="action_cancel" string="Cancel" states="draft,rejected" type="object"/>
+    				<button name="action_cancel" string="Cancel" states="confirmed" type="object"  groups="metro_mrp.group_mrp_supervisor"/>
+    				<button name="action_cancel" string="Cancel" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
+    				
+    				<field name="state" widget="statusbar" statusbar_visible="draft,ready,confirmed,approved"/>    				
+    			</header>
+    			<!-- <sheet> -->
+    				<group>
+    					<h1><field name="name"/></h1>
+	                    <div class="oe_right oe_button_box" name="buttons">
+	                    		<button string="Upload multi drawings" name="%(action_upload_multi_drawings)d" type="action" states="draft,rejected"/>
+	                    		<button name="print_pdf" string="Print PDF" type="object"/>
+	                    </div>
+    				</group>
+                 	<group style="color:red">
+                		<field name="reject_message" states="rejected" readonly="1"/>
+                	</group>
+    				<group>
+    					<group>
+		    				<field name="sale_product_ids" widget="many2many_tags" required="1" domain="[('state','in',('confirmed','engineer','manufacture'))]"/>
+	                        <field name="main_part_id"/>             
+		    				<field name="create_uid"/>
+		    				<field name="create_date"/>
+		    				<field name="id"/>
+		    				<field name="company_id" groups="base.group_multi_company" widget="selection"/>
+    					</group>
+    					<group>
+		    				<field name="note"/>
+    					</group>
+    				</group>
+    				<field name="order_lines">
+    					<tree string="Lines" editable="bottom">
+		                    <field name="product_id"/>
+		                    <field name="drawing_file_name" invisible="1"/>
+		                    <field name="drawing_file" filename="drawing_file_name"/>
+		                    <field name="step_ids" widget="many2many_tags"/>     
+	                    </tree>
+	                    <form string="Lines" version="7.0">
+                        	<group>		       		       
+			                    <field name="product_id"/>
+			                    <field name="drawing_file_name" invisible="1"/> 
+		                        <field name="drawing_file" filename="drawing_file_name"/>
+		                        <field name="step_ids"/>
+                            </group>
+	                    </form>    					
+    				</field>
+    			<!-- </sheet> -->
+	            <div class="oe_chatter">
+	              <field name="message_follower_ids" widget="mail_followers"/>
+	              <field name="message_ids" widget="mail_thread"/>
+	            </div>     			
+    		</form>
+    	</field>
+    </record>
+    <record model="ir.ui.view" id="view_drawing_order_tree">
+    	<field name="name">view_drawing_order_tree</field>
+    	<field name="model">drawing.order</field>
+    	<field name="arch" type="xml">
+            <tree fonts="bold:state == 'approved'" colors="blue:state == 'confirmed';green:state == 'approved';grey:state == 'cancel';" string="Drawing Orders">
+                <field name="message_unread" invisible="1"/>
+		    	<field name="id"/>
+                <field name="name"/>
+                <field name="sale_product_ids" widget="many2many_tags"/>
+                <field name="main_part_id"/>
+                <field name="create_uid"/>
+                <field name="create_date"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state"/>
+            </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_drawing_order_filter">
+            <field name="name">view_drawing_order_filter</field>
+            <field name="model">drawing.order</field>
+            <field name="arch" type="xml">
+                <search string="Search Drawing Orders">
+                    <field name="id"/>
+                    <field name="name" string="Drawing Orders"/>
+                    <field name="sale_product_ids"/>
+                    <field name="product_id"/>
+                    <field name="main_part_id"/>
+                    <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter icon="terp-document-new" name="draft" string="Ready" domain="[('state','=','ready')]"/>
+                    <filter icon="terp-camera_test" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                    <filter icon="terp-camera_test" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+                    <filter icon="terp-camera_test" name="rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+                    <separator/>
+                    <filter icon="terp-personal-" string="Cancelled"  domain="[('state','=', 'cancel')]" help="Canceled"/>
+                    <field name="create_uid" />
+                </search>
+            </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_drawing_order">
+        <field name="name">Drawing Orders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">drawing.order</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_drawing_order_filter"/>
+    </record>
+
+    <menuitem
+        id="menu_drawing_order"
+        sequence="102"
+        parent="mrp.menu_mrp_manufacturing"
+        action="action_drawing_order"
+        groups="mrp.group_mrp_user"/>
+        
+<!-- Drawing order lines to list files -->        
+    <record model="ir.ui.view" id="view_drawing_order_line_form">
+    	<field name="name">view_drawing_order_line_form</field>
+    	<field name="model">drawing.order.line</field>
+    	<field name="arch" type="xml">
+    		<form string="Drawing Order Lines" version="7.0" create="false" edit="false" delete="false">
+				<group>
+			    	<field name="order_id"/>
+			    	<field name="sale_product_ids" widget="many2many_tags"/>
+			    	<field name="main_part_id"/>
+			    	<field name="product_id"/>
+			    	<field name="drawing_file_name"/>
+			    	<field name="drawing_file"/>		    	
+			    	<field name="step_ids"/>
+			    	<field name="state"/>
+	                <field name="create_uid"/>
+	                <field name="create_date"/>
+	                <field name="company_id" groups="base.group_multi_company"/>
+				</group>    			
+    		</form>
+    	</field>
+    </record>
+    <record model="ir.ui.view" id="view_drawing_order_line_list">
+    	<field name="name">view_drawing_order_line_list</field>
+    	<field name="model">drawing.order.line</field>
+    	<field name="arch" type="xml">
+            <tree string="Drawing Order Lines" create="false" edit="false" delete="false">
+		    	<field name="order_id"/>
+		    	<field name="sale_product_ids" widget="many2many_tags"/>
+		    	<field name="main_part_id"/>
+		    	<field name="product_id"/>
+			    <field name="drawing_file_name"/>
+		    	<field name="drawing_file"/>		    	
+		    	<field name="step_ids"/>
+		    	<field name="state"/>
+                <field name="create_uid"/>
+                <field name="create_date"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_drawing_order_line_filter">
+            <field name="name">view_drawing_order_line_filter</field>
+            <field name="model">drawing.order.line</field>
+            <field name="arch" type="xml">
+                <search string="Search Drawing Order Lines">
+                    <field name="order_id" string="Drawing Orders" filter_domain="[('order_id.name','ilike',self)]"/>
+                    <field name="sale_product_ids"/>
+		    		<field name="step_ids"/>
+                    <field name="main_part_id"/>
+                    <field name="product_id"/>  
+                    <field name="drawing_file_name"/>	
+                    <filter icon="terp-document-new" name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                    <filter icon="terp-document-new" name="draft" string="Ready" domain="[('state','=','ready')]"/>
+                    <filter icon="terp-camera_test" name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                    <filter icon="terp-camera_test" name="approved" string="Approved" domain="[('state','=','approved')]"/>
+                    <filter icon="terp-camera_test" name="rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+                    <separator/>
+                    <filter icon="terp-personal-" string="Cancelled"  domain="[('state','=', 'cancel')]" help="Canceled"/>
+                    <field name="create_uid" />
+                </search>
+            </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_drawing_order_line">
+        <field name="name">Drawing Order Files</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">drawing.order.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_drawing_order_line_filter"/>
+    </record>
+
+    <menuitem
+        id="menu_drawing_order_file"
+        sequence="103"
+        parent="mrp.menu_mrp_manufacturing"
+        action="action_drawing_order_line"
+        groups="mrp.group_mrp_user"/>           
+    
+<!-- Add 'Print PDF' to drawing order list page -->
+        <record id="action_server_drawing_order_print" model="ir.actions.server">
+            <field name="name">Print PDF</field>
+            <field name="condition">True</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_drawing_order" />
+            <field name="state">code</field>
+            <!-- the 'action' will be get actions_servre.run() to return to calling client -->
+            <field name="code">action=self.print_pdf(cr, uid, context.get('active_ids', []), context=context)</field>
+        </record>
+
+        <record model="ir.values" id="action_drawing_order_print">
+            <field name="name">action_drawing_order_print</field>
+            <field name="action_id" ref="action_server_drawing_order_print" />
+            <field name="value" eval="'ir.actions.server,' + str(ref('action_server_drawing_order_print'))" />
+            <field name="key">action</field>
+            <field name="model_id" ref="model_drawing_order" />
+            <field name="model">drawing.order</field>
+            <field name="key2">client_action_multi</field>
+        </record>     
+        
+<!-- Add 'Print PDF' to drawing order line list page -->
+        <record id="action_server_drawing_order_line_print" model="ir.actions.server">
+            <field name="name">Print PDF</field>
+            <field name="condition">True</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_drawing_order_line" />
+            <field name="state">code</field>
+            <!-- the 'action' will be get actions_servre.run() to return to calling client -->
+            <field name="code">action=self.print_pdf(cr, uid, context.get('active_ids', []), context=context)</field>
+        </record>
+
+        <record model="ir.values" id="action_drawing_order_line_print">
+            <field name="name">action_drawing_order_line_print</field>
+            <field name="action_id" ref="action_server_drawing_order_line_print" />
+            <field name="value" eval="'ir.actions.server,' + str(ref('action_server_drawing_order_line_print'))" />
+            <field name="key">action</field>
+            <field name="model_id" ref="model_drawing_order_line" />
+            <field name="model">drawing.order.line</field>
+            <field name="key2">client_action_multi</field>
+        </record> 
+        
+    </data>
+</openerp>
