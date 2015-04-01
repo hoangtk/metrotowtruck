@@ -173,6 +173,7 @@
             	</filter>
             	<filter name="sales" position="attributes">
             		<attribute name="string">Sales Orders</attribute>
+            		<attribute name="domain">[('state','not in',('draft','sent','cancel','agreed'))]</attribute>
             	</filter>
             	<filter name="sales" position="after">
             		<separator/>
