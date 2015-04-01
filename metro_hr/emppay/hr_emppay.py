@@ -603,6 +603,7 @@ class hr_emppay_sheet(osv.osv):
     _name = 'hr.emppay.sheet'
     _description = 'Payroll'
     _inherit = ['mail.thread']
+    _order = 'id desc'
     
     def _wage_all(self, cr, uid, ids, field_names, arg, context=None):
         res = {}
