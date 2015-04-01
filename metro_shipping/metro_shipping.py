@@ -97,7 +97,17 @@ class shipment_cost(osv.osv):
     _columns = {
         'shipment_id':fields.many2one('shipment.shipment', string='Shipment', ondelete='cascade'),
         'name':fields.char('Cost Name', size=64, required=True),
+        'currency_id': fields.many2one('res.currency', 'Currency', required=True),
         'amount': fields.float('Amount'),
+    }
+    def _get_currency(self, cr, uid, context=None):
+        if context is None:
+            context = {}
+        cur = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id
+        return cur and cur.id or False
+        
+    _defaults={
+        'currency_id': _get_currency
     }
 
 container_type()
@@ -141,6 +151,31 @@ class shipment_shipment(osv.osv):
         res[shipment_data.id] = flag
         return res
     
+    def _cost_total(self, cr, uid, ids, field_names, args, context=None):
+        res = {}
+        cur_obj = self.pool.get('res.currency')
+        currency_fields = {'CNY':'cost_cny','CAD':'cost_cad','USD':'cost_usd'}
+        currency_ids = {'CNY':None,'CAD':None,'USD':None}
+        
+        #get the currency ids
+        model_obj = self.pool.get('ir.model.data')
+        for cur_name in currency_ids.keys():
+            cur_model_name, cur_id = model_obj.get_object_reference(cr, uid, 'base',cur_name)
+            currency_ids[cur_name] = cur_id 
+        
+        for order in self.browse(cr, uid, ids, context=context):
+            res[order.id] = {'cost_cny':0.0, 'cost_cad':0.0, 'cost_usd':0.0}
+            #currency cost total
+            for cur_name, cur_id in currency_ids.items():
+                cost_total = 0.0
+                #convert all cost's currency to this currency
+                for cost in order.cost_ids:
+                    cost_total += cur_obj.compute(cr, uid, cost.currency_id.id, cur_id, cost.amount, context=context)
+                #set the related field value
+                res[order.id][currency_fields[cur_name]] = cost_total
+                
+        return res                            
+    
     _columns = {
         'shipment_type_id':fields.many2one('shipment.type', 'Shipment Type', required=True),
         'method': fields.selection([('ocean_freight','Ocean Freight'),('air_freight','Air Freight'),('courier','Courier')],'Shipment Method'),
@@ -173,6 +208,9 @@ class shipment_shipment(osv.osv):
 #        'brokerage':fields.integer('Brokerage'),
 #        'port_to_customer':fields.integer('Port to Customer'),
         'cost_ids':fields.one2many('shipment.cost', 'shipment_id', string = 'Costs'),
+        'cost_cny':fields.function(_cost_total, type='float', string='Cost(CNY)', multi='cost_sum'),
+        'cost_cad':fields.function(_cost_total, type='float', string='Cost(CAD)', multi='cost_sum'),
+        'cost_usd':fields.function(_cost_total, type='float', string='Cost(USD)', multi='cost_sum'),
         
         'product_ids':fields.one2many('product.shipment','partner_ref','Product'),
         'note':fields.text('Notes'),

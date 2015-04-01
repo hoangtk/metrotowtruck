@@ -136,9 +136,15 @@
 		                    </group>
                     	</page>
 	                    <page string="Costs">
+	                    	<group col="4">
+	                    		<field name="cost_cny"/>
+	                    		<field name="cost_cad"/>	                    		
+	                    		<field name="cost_usd"/>             	
+	                    	</group>
 	                    	<field name="cost_ids">
 	                    		<tree string="Costs" editable="bottom">
 	                    			<field name="name"/>
+	                    			<field name="currency_id"/>
 	                    			<field name="amount" sum='Amount'/>
 	                    		</tree>
 	                    	</field>

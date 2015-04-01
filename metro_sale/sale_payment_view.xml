@@ -160,21 +160,47 @@
             </field>
         </record>
         	
-        <!-- do not display sales agreements in the 'Sales Order' menu -->
-        <record id="view_sales_order_filter" model="ir.ui.view">
+        <!-- Add 'Sales Agreement' filter -->
+        <record id="view_sales_order_filter_ext" model="ir.ui.view">
             <field name="name">sale.order.list.select</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_sales_order_filter"/>
             <field name="arch" type="xml">
-            	<xpath expr="//filter[@name='draft']" position="replace">
+            	<filter name="message_unread" position="replace">
+            	</filter>
+            	<filter name="sales" position="before">
+            		<filter icon="terp-document-new" string="Agreements" name="agreement" domain="[('state','=','agreed')]"/>
+            	</filter>
+            	<filter name="sales" position="attributes">
+            		<attribute name="string">Sales Orders</attribute>
+            		<attribute name="domain">[('state','not in',('draft','sent','cancel','agreed'))]</attribute>
+            	</filter>
+            	<filter name="sales" position="after">
+            		<separator/>
+            	</filter>
+            	<xpath expr="//filter[@string='Done']" position="after">
+            		<separator/>
+            		<filter icon="terp-document-new" string="Cancel" name="cancel" domain="[('state','=','cancel')]"/>
             	</xpath>
+            	<field name="partner_id" position="after">
+            		<field name="state"/>
+            	</field>            	
             </field>
         </record>
-        <record id="sale.action_orders" model="ir.actions.act_window">
-            <field name="domain">[('state','not in',('draft','sent','cancel','agreed'))]</field>
+<!-- remove the domain and set the default filter for Quotations -->    
+        <record id="sale.action_quotations" model="ir.actions.act_window">
+            <field name="domain"></field>
+            <field name="context">{'show_address': 1, 'search_default_draft': 1}</field>
         </record>        
+                
+<!-- remove the domain and set the default filter for Sales Order -->        
+        <record id="sale.action_orders" model="ir.actions.act_window">
+            <field name="domain"></field>
+            <field name="context">{'show_address': 1, 'search_default_sales': 1}</field>
+        </record>        
+        
         <!-- new menu for sales agreement  -->
-        <record id="view_sales_agreement_filter" model="ir.ui.view">
+<!--         <record id="view_sales_agreement_filter" model="ir.ui.view">
             <field name="name">sale.order.list.select</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
@@ -194,7 +220,7 @@
                     </group>
                </search>
             </field>
-        </record>        
+        </record>     -->    
         <record id="action_sale_agreements" model="ir.actions.act_window">
             <field name="name">Sales Agreements</field>
             <field name="type">ir.actions.act_window</field>
@@ -202,9 +228,8 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="metro_view_order_tree"/>
             <field name="view_mode">tree,form,calendar,graph</field>
-            <field name="search_view_id" ref="view_sales_agreement_filter"/>
-            <field name="context">{'show_address': 1}</field>
-            <field name="domain">[('state','=','agreed')]</field>
+            <field name="search_view_id" ref="view_sales_order_filter_ext"/>
+            <field name="context">{'show_address': 1, 'search_default_agreement': 1}</field>
         </record>  
         <menuitem action="action_sale_agreements" id="menu_sale_agreement" parent="base.menu_sales" sequence="5" groups="base.group_sale_salesman,base.group_sale_manager"/>
         <!-- change the sales order menu sequence -->              
