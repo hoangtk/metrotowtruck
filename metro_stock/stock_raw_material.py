@@ -82,6 +82,7 @@ class stock_move(osv.osv):
             if move.type != 'in':
                 continue
             #increase the plate material whole quantity
-            self.pool.get('plate.material').update_plate_whole_qty(cr, uid, move.product_id.id, move['product_qty'], context=context)
+            move['product_qty']
+            self.pool.get('plate.material').update_plate_whole_qty(cr, uid, move.product_id.id, move['product_uom_base_qty'], context=context)
         return resu
         
