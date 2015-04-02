@@ -101,4 +101,46 @@ openerp.metro = function (instance) {
     	}
     });
 
+    instance.web.list.Binary = instance.web.list.Column.extend({
+        /**
+         * Return a link to the binary data as a file
+         *
+         * @private
+         */
+        _format: function (row_data, options) {
+            var text = _t("Download");
+            var value = row_data[this.id].value;
+            var download_url;
+            if (value && value.substr(0, 10).indexOf(' ') == -1) {
+                download_url = "data:application/octet-stream;base64," + value;
+            } else {
+                download_url = instance.session.url('/web/binary/saveas', {model: options.model, field: this.id, id: options.id});
+                if (this.filename) {
+                    download_url += '&filename_field=' + this.filename;
+                }
+            }
+            //johnw, add the download file name for one2many list binary field
+            /*
+            if (this.filename && row_data[this.filename]) {
+                text = _.str.sprintf(_t("Download \"%s\""), instance.web.format_value(
+                        row_data[this.filename].value, {type: 'char'}));
+            }
+            return _.template('<a href="<%-href%>"><%-text%></a> (<%-size%>)', {
+                text: text,
+                href: download_url,
+                size: instance.web.binary_to_binsize(value),
+            });
+            */
+            var row_filename = "Download";
+            if (this.filename && row_data[this.filename]) {
+            	row_filename = instance.web.format_value(row_data[this.filename].value, {type: 'char'})
+                text = _.str.sprintf(_t("Download \"%s\""), row_filename);
+            }
+            return _.template('<a href="<%-href%>" download="<%-download%>"><%-text%></a>', {
+                text: text,
+                href: download_url,
+                download: row_filename,
+            });
+        }
+    });
 };
