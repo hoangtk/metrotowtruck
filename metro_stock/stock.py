@@ -273,7 +273,7 @@ class stock_move(osv.osv):
                     if rec.state != 'cancel' \
                         and rec.location_dest_id.id == m.location_id.id \
                         and rec.location_id.id == m.location_dest_id.id:
-                        return_qty += (rec.product_qty * rec.product_uom.factor)
+                        return_qty += self.pool.get('product.uom')._compute_qty(cr, uid, m.product_uom.id, rec.product_qty, rec.product_uom.id)
             #calculate the product base uom quantity
             product_uom_base_qty = m.product_qty
             if m.product_uom.id != m.product_id.uom_id.id:
