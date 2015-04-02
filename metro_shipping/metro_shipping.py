@@ -164,7 +164,11 @@ class shipment_shipment(osv.osv):
             currency_ids[cur_name] = cur_id 
         
         for order in self.browse(cr, uid, ids, context=context):
-            res[order.id] = {'cost_cny':0.0, 'cost_cad':0.0, 'cost_usd':0.0}
+            res[order.id] = {'cost_cny':0.0, 'cost_cad':0.0, 'cost_usd':0.0,
+                             'curr_cny_id':currency_ids['CNY'], 
+                             'curr_cad_id':currency_ids['CAD'], 
+                             'curr_usd_id':currency_ids['USD']}
+        
             #currency cost total
             for cur_name, cur_id in currency_ids.items():
                 cost_total = 0.0
@@ -208,9 +212,12 @@ class shipment_shipment(osv.osv):
 #        'brokerage':fields.integer('Brokerage'),
 #        'port_to_customer':fields.integer('Port to Customer'),
         'cost_ids':fields.one2many('shipment.cost', 'shipment_id', string = 'Costs'),
-        'cost_cny':fields.function(_cost_total, type='float', string='Cost(CNY)', multi='cost_sum'),
-        'cost_cad':fields.function(_cost_total, type='float', string='Cost(CAD)', multi='cost_sum'),
-        'cost_usd':fields.function(_cost_total, type='float', string='Cost(USD)', multi='cost_sum'),
+        'cost_cny':fields.function(_cost_total, type='float', string='Cost (CNY)', multi='cost_currency'),
+        'cost_cad':fields.function(_cost_total, type='float', string='Cost (CAD)', multi='cost_currency'),
+        'cost_usd':fields.function(_cost_total, type='float', string='Cost (USD)', multi='cost_currency'),
+        'curr_cny_id':fields.function(_cost_total, type='many2one', relation='res.currency', string='Currency (CNY)', multi='cost_currency'),
+        'curr_cad_id':fields.function(_cost_total, type='many2one', relation='res.currency', string='Currency (CAD)', multi='cost_currency'),
+        'curr_usd_id':fields.function(_cost_total, type='many2one', relation='res.currency', string='Currency (USD)', multi='cost_currency'),
         
         'product_ids':fields.one2many('product.shipment','partner_ref','Product'),
         'note':fields.text('Notes'),

@@ -136,10 +136,13 @@
 		                    </group>
                     	</page>
 	                    <page string="Costs">
-	                    	<group col="4">
-	                    		<field name="cost_cny"/>
-	                    		<field name="cost_cad"/>	                    		
-	                    		<field name="cost_usd"/>             	
+	                    	<group>
+	                    		<field name="curr_cny_id" invisible="1"/>
+	                    		<field name="curr_cad_id" invisible="1"/>
+	                    		<field name="curr_usd_id" invisible="1"/>
+	                    		<field name="cost_cny" widget="monetary" options="{'currency_field': 'curr_cny_id'}"/>
+	                    		<field name="cost_cad" widget="monetary" options="{'currency_field': 'curr_cad_id'}"/>	                    		
+	                    		<field name="cost_usd" widget="monetary" options="{'currency_field': 'curr_usd_id'}"/>             	
 	                    	</group>
 	                    	<field name="cost_ids">
 	                    		<tree string="Costs" editable="bottom">
