@@ -157,7 +157,7 @@ class sale_order(orm.Model):
         period = period_obj.browse(cr, uid, period_id, context=context)
         move_name =  self._get_payment_move_name(cr, uid, journal,
                                                 period, context=context)
-        description = '%s : %s'%(_('Customer Advance Payment'),description)
+#        description = '%s : %s'%(_('Customer Advance Payment'),description)
         move_vals = self._prepare_payment_move(cr, uid, move_name, sale,
                                                journal, period, date, description,context=context)
         move_lines = self._prepare_payment_move_line(cr, uid, move_name, sale,
