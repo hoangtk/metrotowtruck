@@ -21,10 +21,8 @@
 ##############################################################################
 
 from openerp.osv import fields, osv
-from osv import osv
-from tools.translate import _
+import openerp.addons.decimal_precision as dp
 from openerp.tools.translate import _
-from datetime import datetime
 
 class future_shipment(osv.osv):
     '''
@@ -32,15 +30,27 @@ class future_shipment(osv.osv):
     '''
     _name="future.shipment"
     _columns = {
-        'origin_id':fields.many2one('res.partner', 'Origination'),
-        'dest_id': fields.many2one('res.partner','Destination'),
-        'shipment_line':fields.one2many('future.shipment.line','shipment_id','Future Shipment Line'),
+        'origin_id':fields.many2one('res.partner', 'Origination', required=True,readonly=True, states={'wait':[('readonly',False)]}),
+        'dest_id': fields.many2one('res.partner','Destination', required=True,readonly=True, states={'wait':[('readonly',False)]}),
         'state':fields.selection(
-                                 [('wait','Waiting'),('shipped','Shipped')],
+                                 [('wait','Waiting'),('shipped','Shipped'),('cancel','Cancelled')],
                                  'State',required=True
                                  ),
-        'line_ids' : fields.one2many('future.shipment.line','req_id','Products to future shipping',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'line_ids' : fields.one2many('future.shipment.line','shipment_id','Products to future shipping',readonly=True, states={'wait':[('readonly',False)]}),
+        'real_ship_id':fields.many2one('shipment.shipment','Final Shipment', readonly=True),
+        'new_future_ship_id':fields.many2one('future.shipment','New Future Shipment', readonly=True),
     }
+    
+    _defaults={'state':'wait'}
+    
+    def unlink(self, cr, uid, ids, context=None):
+        for order in self.read(cr, uid, ids, ['state'], context=context):
+            if order['state'] == 'shipped':
+                raise osv.except_osv(_('Error'), 'Future shipment was shipped, can not be delete!')
+        return super(future_shipment,self).unlink(cr, uid, ids, context=context)
+    
+    def action_cancel(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'state':'cancel', 'real_ship_id':None, 'new_future_ship_id':None}, context=context)
     
 future_shipment()
 
@@ -51,11 +61,9 @@ class future_shipment_line(osv.osv):
     '''
     _name="future.shipment.line"
     _columns = {
-        'line_ids' : fields.one2many('future.shipment.line','req_id','Products to future shipping',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
-        'req_id' : fields.many2one('future.shipment','Future Shipment Requisition', ondelete='cascade'),
-        'shipment_id':fields.many2one('future.shipment','Shipment'),
-        'product_id':fields.many2one('product.product', 'Product'),
-        'product_qty': fields.integer('Quantity Of Products'),
-        'notes':fields.text('The Description'),
+        'shipment_id':fields.many2one('future.shipment','Future Shipment'),
+        'product_id':fields.many2one('product.product', 'Product', required=True),
+        'product_qty': fields.float('Quantity Of Products', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
+        'notes':fields.text('Description'),
     } 
 future_shipment_line()
