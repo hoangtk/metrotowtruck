@@ -1,0 +1,78 @@
+#. module: metro
+#. openerp-web
+#: code:addons/metro/static/src/js/metro.js:31
+#, python-format
+msgid "Switch to English"
+msgstr "切换到英语"
+
+#==================i18n fixing for standard module ==================#
+#. module: mrp
+#: help:mrp.product.produce,mode:0
+msgid ""
+"'Consume only' mode will only consume the products with the quantity "
+"selected.\n"
+"'Consume & Produce' mode will consume as well as produce the products with "
+"the quantity selected and it will finish the production order when total "
+"ordered quantities are produced."
+msgstr ""
+"'只投料' 模式会仅消耗对应成品数量的原材料而无产成品产出。\n"
+"'投料并生产' 模式会消耗对应成品数量的原材料而且产出对应数量的产成品。"
+
+#. module: mrp
+#: selection:mrp.product.produce,mode:0
+msgid "Consume Only"
+msgstr "只投料"
+
+#. module: mrp
+#: selection:mrp.product.produce,mode:0
+msgid "Consume & Produce"
+msgstr "投料并生产"
+
+#. module: product
+#: field:product.product,incoming_qty:0
+msgid "Incoming"
+msgstr "将入库"
+
+#. module: product
+#: field:product.product,outgoing_qty:0
+msgid "Outgoing"
+msgstr "将出库"
+
+#. module: product
+#: view:product.product:0
+msgid "Inventory"
+msgstr "库存"
+
+#==================i18n fixing for customized module ==================#
+#. module: metro_product
+#: model:ir.model.fields,field_description:metro_product.field_product_product_qty_in
+#: field:product.product,qty_in:0
+msgid "Incoming"
+msgstr "将入库"
+
+#. module: metro_product
+#: model:ir.model.fields,field_description:metro_product.field_product_product_qty_out
+#: field:product.product,qty_out:0
+msgid "Outgoing"
+msgstr "将出库"
+
+#. module: metro
+#: view:product.product:0
+#: view:hr.employee:0
+#: view:project.project:0
+#: view:project.task:0
+#: view:shipment.shipment:0
+msgid "Attachment"
+msgstr "附件"
+
+#. module: metro
+#: view:account.move:0
+#: view:mto.design:0
+#: view:sale.order:0
+msgid "Attachments"
+msgstr "附件"
+
+#. module: multi_image
+#: view:product.product:0
+msgid "Images"
+msgstr "图片"
