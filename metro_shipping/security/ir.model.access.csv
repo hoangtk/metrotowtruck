@@ -19,3 +19,8 @@ access_shipping_user_ship,shipment.shipment user,model_shipment_shipment,group_m
 ,,,,,,,
 access_shipment_cost_manager,access_shipment_cost_manager,model_shipment_cost,group_metro_shipping_manager_right,1,1,1,1
 access_shipment_cost_user,access_shipment_cost_user,model_shipment_cost,group_metro_shipping_user_right,1,1,1,0
+,,,,,,,
+access_future_shipment_manager,access_future_shipment_manager,model_future_shipment,group_metro_shipping_manager_right,1,1,1,1
+access_future_shipment_user,access_future_shipment_user,model_future_shipment,group_metro_shipping_user_right,1,1,1,0
+access_future_shipment_line_manager,access_future_shipment_line_manager,model_future_shipment_line,group_metro_shipping_manager_right,1,1,1,1
+access_future_shipment_line_user,access_future_shipment_line_user,model_future_shipment_line,group_metro_shipping_user_right,1,1,1,0

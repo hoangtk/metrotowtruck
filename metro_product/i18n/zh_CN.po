@@ -75,7 +75,7 @@ msgstr "预测数量"
 #: model:ir.model.fields,field_description:metro_product.field_product_product_qty_in
 #: field:product.product,qty_in:0
 msgid "Incoming"
-msgstr "入库"
+msgstr "将入库"
 
 #. module: metro_product
 #: selection:product.batch.query,state:0
@@ -341,7 +341,7 @@ msgstr "多单位-单品种"
 #: model:ir.model.fields,field_description:metro_product.field_product_product_qty_out
 #: field:product.product,qty_out:0
 msgid "Outgoing"
-msgstr "出仓"
+msgstr "将出库"
 
 #. module: metro_product
 #: model:ir.actions.act_window,name:metro_product.action_view_product_set_printflag
@@ -655,16 +655,6 @@ msgstr "在手数量"
 #: field:product.product,qty_virtual:0
 msgid "Forecasted Quantity"
 msgstr "预测数量"
-
-#. module: metro_product
-#: field:product.product,qty_in:0
-msgid "Incoming"
-msgstr "入库"
-
-#. module: metro_product
-#: field:product.product,qty_out:0
-msgid "Outgoing"
-msgstr "出仓"
 
 #. module: stock
 #: view:product.product:0
