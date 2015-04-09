@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	<menuitem id="future_shipment_management_name" name="Future Shipment"
+        parent="menu_shipment_main_action"
+        action="future_shipment_form_action" sequence="10"/>
+        
+        <record id="future_shipment_form_action" model="ir.actions.act_window">
+            <field name="name">Future Shipment</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">future.shipment</field>
+            <field name="view_mode">form,tree</field>
+        </record>
+        
+        <!--  -->
+        <record id="future_shipment_form_view" model="ir.ui.view">
+    		<field name="name">future.shipment.form</field>
+        	<field name='model'>future.shipment</field>
+        	<field name="arch" type="xml">
+        		<form string="Future Shippings" version="7.0">
+        			<header>
+						<button name="pur_req_confirm" string="Confirm" class="oe_highlight"/>	
+						<button name="pur_req_approve" states="confirmed" string="Approve" class="oe_highlight"/>
+						<button name="pur_req_reject" states="confirmed" string="Reject"/>
+						<button name="%(act_fur_shipment_req)d" string="Generate Future Shipping" type="action" class="oe_highlight"/>
+						<button name="pur_req_cancel" string="Cancel"/>
+						<button name="action_cancel_draft" string="Set to Draft" type="object" />
+                		<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,in_purchase,done"/>
+            		</header>
+            		<!-- 只有在form里面才有 "shipment_line"-->
+        			<group>
+        				<field name="origin_id"/>
+                    	<field name="dest_id"/>
+                    	<field name="state"/>
+                    	<field name="shipment_line"/>
+                    </group>
+                </form> 
+			</field>
+        </record>
+                
+    	<record id="future_shipment_tree_view" model="ir.ui.view">
+    		<field name="name">future.shipment.tree</field>
+        	<field name='model'>future.shipment</field>
+        	<field name="arch" type="xml">
+        		<tree string="Future Shippings">
+        				<field name="origin_id"/>
+                    	<field name="dest_id"/>
+                    	<field name="state"/>
+                </tree>
+			</field>
+        </record>
+        
+        <record id="future_shipment_line_form_view" model="ir.ui.view">
+    		<field name="name">future.shipment.line.form</field>
+        	<field name='model'>future.shipment.line</field>
+        	<field name="arch" type="xml">
+        		<form string="Future Shippings Line" version="7.0">
+        			<group>
+        				<field name="product_id"/>
+                    	<field name="product_qty"/>
+                    	<field name="notes"/>
+                    	
+                    </group>
+                </form> 
+			</field>
+        </record>
+        
+        <record id="future_shipment_line_tree_view" model="ir.ui.view">
+    		<field name="name">future.shipment.line.tree</field>
+        	<field name='model'>future.shipment.line</field>
+        	<field name="arch" type="xml">
+        		<tree string="Future Shippings LINE">
+        				<field name="product_id"/>
+                    	<field name="product_qty"/>
+                    	<field name="notes"/>
+                </tree>
+			</field>
+        </record>
+    </data>
+</openerp>

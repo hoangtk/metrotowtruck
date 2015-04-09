@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>    
+         <act_window name="Generate Future Shipment"
+            res_model="future.ship.requi"
+            src_model="future.shipment"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            multi="True" id="act_fur_shipment_req"/>
+           
+        <record id="view_pur_req_form" model="ir.ui.view">
+            <field name="name">futureship.req.list.select</field>
+            <field name="model">future.ship.requi</field>
+            <field name="arch" type="xml">
+                <form string="Requisition lines" version="7.0">
+                    <separator string="Select Items to generate Future Shipment Ticket."/>
+                    <label for="line_ids"/>
+                    <field name="line_ids">
+                    		<tree string="Products">
+                      	<field name="product_id" readonly="1"/>
+                      	<field name="product_qty_remain" />
+                      	<field name="product_qty" />
+                      		</tree>
+                    </field>
+                    <footer>
+                        <button name="create_po" string="Create Future Shipping" type="object" class="oe_highlight"/>
+                        <button name="create_view_po" string="Create&amp;View PO" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</openerp>

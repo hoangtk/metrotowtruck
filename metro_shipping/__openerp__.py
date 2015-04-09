@@ -39,6 +39,9 @@
         "metro_shipping_view.xml",
         "security/ir.model.access.csv",
         "metro_workflow.xml",
+        "wizard/future_shipment_req_view.xml",
+        "future_shipping.xml",
+        
     ],
     'installable': True,
     'application': True,
