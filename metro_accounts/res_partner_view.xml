@@ -20,7 +20,7 @@
             <field name="arch" type="xml">
             	<div name="buttons" position="inside">
             		<button name="%(account.act_account_partner_account_move_all)d" type="action"  
-            		string="Receivables &amp; Payables" icon="gtk-justify-fill"
+            		string="Receivables &amp; Payables"
             		groups="account.group_account_invoice"/>
             	</div>
             </field>

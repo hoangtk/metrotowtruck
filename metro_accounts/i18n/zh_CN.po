@@ -1806,6 +1806,11 @@ msgstr "查看会计凭证"
 msgid "View Source Order"
 msgstr "查看源单据"
 
+#. module: metro_accounts
+#: view:res.partner:0
+msgid "Receivables & Payables"
+msgstr "应收&应付"
+
 ########################manual########################
 #. module: account_voucher
 #: model:ir.actions.act_window,name:account_voucher.action_vendor_payment

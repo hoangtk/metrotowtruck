@@ -29,7 +29,10 @@ class future_shipment(osv.osv):
     Define one future shipment order, one shipment have multiple product lines
     '''
     _name="future.shipment"
+    _rec_name="code"
+    _order = "id desc"
     _columns = {
+        'code': fields.char('Reference', size=16, required=True, readonly=True),        
         'origin_id':fields.many2one('res.partner', 'Origination', required=True,readonly=True, states={'wait':[('readonly',False)]}),
         'dest_id': fields.many2one('res.partner','Destination', required=True,readonly=True, states={'wait':[('readonly',False)]}),
         'state':fields.selection(
@@ -39,9 +42,15 @@ class future_shipment(osv.osv):
         'line_ids' : fields.one2many('future.shipment.line','shipment_id','Products to future shipping',readonly=True, states={'wait':[('readonly',False)]}),
         'real_ship_id':fields.many2one('shipment.shipment','Final Shipment', readonly=True),
         'new_future_ship_id':fields.many2one('future.shipment','New Future Shipment', readonly=True),
+        'multi_images': fields.text("Multi Images"),
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
     }
     
-    _defaults={'state':'wait'}
+    _defaults={
+               'state':'wait', 
+               'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'future.shipment') or '/',
+                }
     
     def unlink(self, cr, uid, ids, context=None):
         for order in self.read(cr, uid, ids, ['state'], context=context):
@@ -51,6 +60,7 @@ class future_shipment(osv.osv):
     
     def action_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'cancel', 'real_ship_id':None, 'new_future_ship_id':None}, context=context)
+        
     
 future_shipment()
 
@@ -62,8 +72,13 @@ class future_shipment_line(osv.osv):
     _name="future.shipment.line"
     _columns = {
         'shipment_id':fields.many2one('future.shipment','Future Shipment'),
-        'product_id':fields.many2one('product.product', 'Product', required=True),
-        'product_qty': fields.float('Quantity Of Products', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'notes':fields.text('Description'),
-    } 
+        'product_id':fields.many2one('product.product', 'Product', required=False),
+        'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
+        
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'write_uid':  fields.many2one('res.users', 'Operator', readonly=True),
+        'write_date': fields.datetime('Execution Date', readonly=True, select=True),
+        } 
 future_shipment_line()
