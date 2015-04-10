@@ -23,7 +23,7 @@
     'application': True,
     #web
     "js": ["static/src/js/help.js"],
-    'qweb' : ["static/src/xml/help.xml"],
+#    'qweb' : ["static/src/xml/help.xml"],
     'css' : ["static/src/css/help.css",],    
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
