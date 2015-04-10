@@ -37,7 +37,7 @@ class future_ship_req_line(osv.osv_memory):
     _name = "future.ship.req.line"
     _columns = {
         'wizard_id' : fields.many2one('future.ship.requi', string="Wizard"),
-        'product_id': fields.many2one('product.product', 'Product' ,required=True),
+        'product_id': fields.many2one('product.product', 'Product' ,required=False),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'product_qty_remain': fields.float('Quantity Remain', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'future_ship_line_id':fields.many2one('future.shipment.line', 'Future shipment line'),
