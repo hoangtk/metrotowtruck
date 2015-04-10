@@ -65,10 +65,13 @@ class future_shipment_line(osv.osv):
     _name="future.shipment.line"
     _columns = {
         'shipment_id':fields.many2one('future.shipment','Future Shipment'),
+        'notes':fields.text('Description'),
         'product_id':fields.many2one('product.product', 'Product', required=False),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
-        'notes':fields.text('Description'),
-        'write_uid':  fields.many2one('res.users', 'Creator', readonly=True),
-        'write_date': fields.datetime('Creation Date', readonly=True, select=True),
+        
+        'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
+        'create_date': fields.datetime('Creation Date', readonly=True, select=True),
+        'write_uid':  fields.many2one('res.users', 'Operator', readonly=True),
+        'write_date': fields.datetime('Execution Date', readonly=True, select=True),
         } 
 future_shipment_line()

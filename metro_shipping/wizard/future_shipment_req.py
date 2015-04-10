@@ -41,11 +41,15 @@ class future_ship_req_line(osv.osv_memory):
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'product_qty_remain': fields.float('Quantity Remain', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'future_ship_line_id':fields.many2one('future.shipment.line', 'Future shipment line'),
+        'notes':fields.text('Description'),
     }
+    def default_get(self, cr, uid, fields, context=None):pass
+       
+    
     def _check_product_qty(self, cursor, user, ids, context=None):
         for line in self.browse(cursor, user, ids, context=context):
             if line.product_qty > line.product_qty_remain:
-                raise osv.except_osv(_('Warning!'), _("Product '%s' max ship quantity is %s, you can not ship %s"%(line.product_id.default_code + '-' + line.product_id.name, line.uom_po_qty_remain, line.uom_po_qty)))
+                raise osv.except_osv(_('Warning!'), _("Product '%s' max ship quantity is %s, you can not ship %s"%(line.product_id.default_code + '-' + line.product_id.name, line.product_qty_remain, line.product_qty)))
             if line.product_qty <= 0:
                 raise osv.except_osv(_('Warning!'), _("Product '%s' ship quantity must be greater than zero!"%(line.product_id.default_code + '-' + line.product_id.name)))
         return True    
@@ -57,6 +61,7 @@ future_ship_req_line()
 class future_ship_req(osv.osv_memory):
     _name = 'future.ship.requi'
     _columns = {
+            
             'real_ship_id': fields.many2one('shipment.shipment', 'Shipment', required=True),    
             'line_ids' : fields.one2many('future.ship.req.line', 'wizard_id', 'Products'),
     }
@@ -82,7 +87,8 @@ class future_ship_req(osv.osv_memory):
             line_data.append({'product_id': line.product_id.id, 
                                   'product_qty': line.product_qty, 
                                   'product_qty_remain': line.product_qty,
-                                  'future_ship_line_id':line.id, 
+                                  'future_ship_line_id':line.id,
+                                  'notes':line.notes
                                 })
         res['line_ids'] = line_data
         return res
