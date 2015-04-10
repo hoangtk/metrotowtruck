@@ -41,6 +41,7 @@
         "metro_workflow.xml",
         "wizard/future_shipment_req_view.xml",
         "future_shipping.xml",
+        "ship_data.xml",
         
     ],
     'installable': True,

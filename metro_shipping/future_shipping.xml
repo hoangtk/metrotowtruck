@@ -38,6 +38,7 @@
         	<field name='model'>future.shipment</field>
         	<field name="arch" type="xml">
         		<tree string="Future Shippings">
+        				<field name="code"/>
         				<field name="origin_id"/>
                     	<field name="dest_id"/>
                     	<field name="state"/>
