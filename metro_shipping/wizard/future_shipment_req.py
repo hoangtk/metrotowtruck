@@ -49,7 +49,8 @@ class future_ship_req_line(osv.osv_memory):
     def _check_product_qty(self, cursor, user, ids, context=None):
         for line in self.browse(cursor, user, ids, context=context):
             if line.product_qty > line.product_qty_remain:
-                raise osv.except_osv(_('Warning!'), _("Product '%s' max ship quantity is %s, you can not ship %s"%(line.product_id.default_code + '-' + line.product_id.name, line.product_qty_remain, line.product_qty)))
+                prod_name = line.product_id and (line.product_id.default_code + '-' + line.product_id.name) or line.notes
+                raise osv.except_osv(_('Warning!'), _("Product '%s' max ship quantity is %s, you can not ship %s"%(prod_name, line.product_qty_remain, line.product_qty)))
             if line.product_qty <= 0:
                 raise osv.except_osv(_('Warning!'), _("Product '%s' ship quantity must be greater than zero!"%(line.product_id.default_code + '-' + line.product_id.name)))
         return True    
