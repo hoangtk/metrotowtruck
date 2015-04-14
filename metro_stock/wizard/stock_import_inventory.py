@@ -25,6 +25,8 @@ from openerp.tools.translate import _
 import base64
 import xlrd
 
+import os
+
 class stock_import_inventory(osv.osv_memory):
     _name = "stock.import.inventory"
     _description = "Import Inventory"
@@ -43,9 +45,21 @@ class stock_import_inventory(osv.osv_memory):
         'consider_inventory': fields.boolean('Consider Current Inventory', select=True), 
         'all_done': fields.boolean('All Data Imported', readonly=True, select=True), 
         'result_line': fields.one2many('stock.import.inventory.result', 'import_id', 'Importing Result', readonly=True), 
+        'file_template': fields.binary('Template File', readonly=True),
+        'file_template_name': fields.char('Template File Name'),
     }
+    
+    def _get_template(self, cr, uid, context):
+        cur_path = os.path.split(os.path.realpath(__file__))[0]
+        path = os.path.join(cur_path,'stock_import_template.xls')
+        data = open(path,'rb').read().encode('base64')
+#        data = os.path.getsize(path)
+        return data
+    
     _defaults = {
         'location_id': _default_location,
+        'file_template': _get_template,
+        'file_template_name': 'stock_import_template.xls'
     }
 
     def view_init(self, cr, uid, fields_list, context=None):

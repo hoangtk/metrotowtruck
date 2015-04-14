@@ -1544,6 +1544,12 @@ msgid "File"
 msgstr "Excel文件"
 
 #. module: metro_stock
+#: model:ir.model.fields,field_description:metro_stock.field_stock_import_inventory_file_template
+#: field:stock.import.inventory,file_template:0
+msgid "Template File"
+msgstr "模版文件"
+
+#. module: metro_stock
 #: model:ir.model.fields,field_description:metro_stock.field_stock_invoice_move_price_unit
 #: model:ir.model.fields,field_description:metro_stock.field_stock_move_price_unit_4390
 #: model:ir.model.fields,field_description:metro_stock.field_stock_mt_rpt_price_unit
