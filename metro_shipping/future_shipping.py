@@ -44,7 +44,7 @@ class future_shipment(osv.osv):
         'line_ids' : fields.one2many('future.shipment.line','shipment_id','Products to future shipping',readonly=True, states={'wait':[('readonly',False)]}),
         'real_ship_id':fields.many2one('shipment.shipment','Final Shipment', readonly=True),
         'new_future_ship_id':fields.many2one('future.shipment','New Future Shipment', readonly=True),
-        'multi_images': fields.text("Multi Images"),
+#        'multi_images': fields.text("Multi Images"),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'delivery_type':fields.selection(
@@ -68,6 +68,7 @@ class future_shipment(osv.osv):
         self.write(cr, uid, ids, {'state':'cancel', 'real_ship_id':None, 'new_future_ship_id':None}, context=context)
     
     def _email_notify(self, cr, uid, ids, action_name, group_params, context=None):
+        #ids 是int 需要转成list
         if isinstance(ids, (int, long)):
             ids = [ids]
         for order in self.browse(cr, uid, ids, context=context):
@@ -75,7 +76,7 @@ class future_shipment(osv.osv):
                 email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, group_param, context=context)
                 if email_group_id:                    
                     email_subject = 'Future Shipment reminder: %s %s'%(order.code,action_name)
-                    email_body_string = 'The Future Shipment({0}) has changed.'
+                    email_body_string = 'The Future Shipment({0}) has been changed.'
                     email_body = email_body_string.format(order.code,)
                     email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
                     utils.email_send_group(cr, uid, email_from, None, email_subject,email_body, email_group_id, context=context)      
@@ -107,6 +108,8 @@ class future_shipment_line(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'write_uid':  fields.many2one('res.users', 'Modified By', readonly=True),
         'write_date': fields.datetime('Modification Date', readonly=True, select=True),
+        
+        'multi_images': fields.text("Multi Images"),
         } 
 future_shipment_line()
 
