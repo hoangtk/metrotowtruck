@@ -89,7 +89,7 @@ class future_ship_req(osv.osv_memory):
                                   'product_qty': line.product_qty, 
                                   'product_qty_remain': line.product_qty,
                                   'future_ship_line_id':line.id,
-                                  'notes':line.notes
+                                  'notes':line.notes,
                                 })
         res['line_ids'] = line_data
         return res
