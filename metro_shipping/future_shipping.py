@@ -68,31 +68,26 @@ class future_shipment(osv.osv):
         self.write(cr, uid, ids, {'state':'cancel', 'real_ship_id':None, 'new_future_ship_id':None}, context=context)
     
     def _email_notify(self, cr, uid, ids, action_name, group_params, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
         for order in self.browse(cr, uid, ids, context=context):
             for group_param in group_params:
                 email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, group_param, context=context)
                 if email_group_id:                    
-                    email_subject = 'FS reminder: %s'%(action_name)
+                    email_subject = 'Future Shipment reminder: %s %s'%(order.code,action_name)
+                    email_body_string = 'The Future Shipment({0}) has changed.'
+                    email_body = email_body_string.format(order.code,)
                     email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
-                    utils.email_send_group(cr, uid, email_from, None,email_subject,email_body, email_group_id, context=context)        
+                    utils.email_send_group(cr, uid, email_from, None, email_subject,email_body, email_group_id, context=context)      
         
-    def action_ready(self, cr, uid, ids, context=None):
-        #set the ready state
-        self._set_state(cr, uid, ids, 'ready',context)
-        #send email to the user group that can confirm
-        self._email_notify(cr, uid, ids, 'need your confirmation', ['future_shipment_group_confirm'],context)     
-        return True
+  
     
     def write(self, cr, uid, ids, vals, context=None):
-        
         resu = super(future_shipment,self).write(cr, uid, ids, vals, context=context)
-        self._email_notify(cr, uid, 'need your confirmation', ['future_shipment_group_confirm'],context) #ids去掉之后 跑过一个死循环
+        self._email_notify(cr, uid, ids,'future shipment notice',['future_shipment_group_notice'],context)
         return resu
-    def create(self, cr, user, vals, context=None):
-        self._email_notify(cr, uid, ids, 'need your confirmation', ['future_shipment_group_confirm'],context)
-        resu = super(future_shipment,self).create(cr, user, vals, context=context)
-        #update product supplier info
-        return resu   
+    def create(self, cr, uid, vals, context=None):
+        return super(future_shipment, self).create(cr, uid, vals, context=context)
     
 future_shipment()
 
@@ -111,7 +106,7 @@ class future_shipment_line(osv.osv):
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'write_uid':  fields.many2one('res.users', 'Modified By', readonly=True),
-        'write_date': fields.datetime('Execution Date', readonly=True, select=True),
+        'write_date': fields.datetime('Modification Date', readonly=True, select=True),
         } 
 future_shipment_line()
 
