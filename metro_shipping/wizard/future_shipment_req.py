@@ -123,6 +123,7 @@ class future_ship_req(osv.osv_memory):
             context['__copy_data_seen'] = {}
             new_future_ship_data = future_ship_obj.copy_data(cr, uid, record_id, context=context)
             new_future_ship_data['line_ids'] = None
+            new_future_ship_data['code'] = self.pool.get('ir.sequence').get(cr, uid, 'future.shipment') or '/'               
             new_future_ship_id = future_ship_obj.create(cr, uid, new_future_ship_data, context=context)
             for line_id, qty in remain_future_ship_line_ids.items():
                 qty_old = future_ship_line_obj.read(cr, uid, line_id, ['product_qty'], context=context)['product_qty']
