@@ -43,6 +43,31 @@ msgstr "将出库"
 msgid "Inventory"
 msgstr "库存"
 
+#. module: account
+#: view:account.fiscalyear:0
+#: selection:account.fiscalyear,state:0
+#: selection:account.period,state:0
+msgid "Open"
+msgstr "打开"
+
+#. module: base
+#: view:ir.model:0
+#: model:ir.module.module,shortdesc:base.module_base
+#: field:res.currency,base:0
+msgid "Base"
+msgstr "基础货币"
+
+#. module: account_voucher
+#: model:ir.actions.act_window,name:account_voucher.action_voucher_list
+#: model:ir.ui.menu,name:account_voucher.menu_encode_entries_by_voucher
+msgid "Journal Vouchers"
+msgstr "原始凭据"
+
+#. module: account
+#: selection:account.journal,type:0
+msgid "Bank and Checks"
+msgstr "银行"
+
 #==================i18n fixing for customized module ==================#
 #. module: metro_product
 #: model:ir.model.fields,field_description:metro_product.field_product_product_qty_in
