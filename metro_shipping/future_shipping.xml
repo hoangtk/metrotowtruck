@@ -19,17 +19,18 @@
                     	<field name="new_future_ship_id"/>
                     	<field name="create_uid"/>
                     	<field name="create_date"/>
+                    	<field name="delivery_type"/>
                     </group>
                     <notebook>
                     	<page string="Products">
                     		<separator string="Products"/>
                     		<field name="line_ids"/>
                     	</page>
-                    	<page string="Images">
+                    	<!--page string="Images">
                 			<field name="multi_images" widget="image_multi"/>
-            			</page>
-                    </notebook>
-                </form> 
+            			</page-->
+            		</notebook>
+                </form>
 			</field>
 		</record>
                 
@@ -44,6 +45,7 @@
                     	<field name="state"/>
                     	<field name="real_ship_id"/>
                     	<field name="new_future_ship_id"/>
+                    	<field name="delivery_type"/>
                 </tree>
 			</field>
         </record>
@@ -69,15 +71,26 @@
         	<field name='model'>future.shipment.line</field>
         	<field name="arch" type="xml">
         		<form string="Future Shippings Line" version="7.0">
-        			<group>
-        				<field name="product_id"/>
-        				<field name="notes"/>
-                    	<field name="product_qty"/>
-                    	<field name="create_uid"/>
-                    	<field name="create_date"/>
-                    	<field name="write_uid"/>
-                    	<field name="write_date"/>
-                    	</group>
+        			<notebook>
+        				<page string="Basic Info.">
+        					<group>
+	        					<field name="product_id" options='{"no_open": True}'/>
+	        					<field name="notes"/>
+	                    		<field name="product_qty"/>
+	                    	</group>
+	                    </page>
+	                    <page string="Images">
+                			<field name="multi_images" widget="image_multi"/>
+	                    </page>
+	                    <page string="Change Log">
+        					<group>
+        						<field name="create_uid"/>
+	                    		<field name="create_date"/>
+	                    		<field name="write_uid"/>
+	                    		<field name="write_date"/>
+	                    	</group>
+        				</page>
+        			</notebook>
                 </form> 
 			</field>
 		</record>
@@ -87,14 +100,14 @@
         	<field name='model'>future.shipment.line</field>
         	<field name="arch" type="xml">
         		<tree string="Future Shippings Line">
-        				<field name="product_id"/>
-        				<field name="notes"/>
-                    	<field name="product_qty"/>
-                    	<field name="create_uid"/>
-                    	<field name="create_date"/>
-                    	<field name="write_uid"/>
-                    	<field name="write_date"/>
-                </tree>
+        			<field name="product_id"/>
+        			<field name="notes"/>
+                    <field name="product_qty"/>
+        			<field name="create_uid"/>
+                    <field name="create_date"/>
+                    <field name="write_uid"/>
+                    <field name="write_date"/>
+        		</tree>
 			</field>
         </record>
         

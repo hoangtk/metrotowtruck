@@ -6,11 +6,13 @@
             <field name="model">stock.import.inventory</field>
             <field name="arch" type="xml">
               <form string="Import Inventory" version="7.0">
+                  <field name="file_template_name" invisible="1"/>
                   <separator string="Import inventory from Excel"/>
                   <group>
-                      <field name="location_id" domain="[('usage','=','internal')]" />
-                      <field name="consider_inventory"/>
-                      <field name="import_file"/>
+                      	<field name="location_id" domain="[('usage','=','internal')]" />
+                      	<field name="consider_inventory" invisible="1"/>
+                  		<field name="import_file"/>
+                  		<field name="file_template" filename="file_template_name"/>
                   </group>
                   <footer>
                       <button name="import_inventory" string="Import Inventory" type="object" class="oe_highlight"/>

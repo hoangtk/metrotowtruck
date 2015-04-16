@@ -501,6 +501,11 @@ class stock_picking(osv.osv):
             if use_valuation_account:
                 invoice_line_vals['account_id'] = move_line.product_id.categ_id.property_stock_valuation_account_id.id
         return invoice_line_vals
+    #inherit from stock_cancel, to reset the picking date and deliver ticket#
+    def action_revert_done(self, cr, uid, ids, context=None):
+        resu = super(stock_picking, self).action_revert_done(cr, uid, ids, context=context)
+        self.write(cr, uid, ids, {'deliver_ticket_no':None, 'mr_ticket_no':None, 'date_done':None})
+        return resu
         
 class stock_picking_out(osv.osv):
     _inherit = "stock.picking.out"   

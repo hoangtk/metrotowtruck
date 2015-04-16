@@ -23,12 +23,14 @@
 from openerp.osv import fields, osv
 import openerp.addons.decimal_precision as dp
 from openerp.tools.translate import _
+from openerp.addons.metro import utils
 
 class future_shipment(osv.osv):
     '''
     Define one future shipment order, one shipment have multiple product lines
     '''
     _name="future.shipment"
+    
     _rec_name="code"
     _order = "id desc"
     _columns = {
@@ -42,16 +44,32 @@ class future_shipment(osv.osv):
         'line_ids' : fields.one2many('future.shipment.line','shipment_id','Products to future shipping',readonly=True, states={'wait':[('readonly',False)]}),
         'real_ship_id':fields.many2one('shipment.shipment','Final Shipment', readonly=True),
         'new_future_ship_id':fields.many2one('future.shipment','New Future Shipment', readonly=True),
-        'multi_images': fields.text("Multi Images"),
+#        'multi_images': fields.text("Multi Images"),
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
-    }
+        'delivery_type':fields.selection(
+                                [('container','Container'),('express','Express')],
+                                'Delivery Type',
+                                ),
+                }
     
     _defaults={
                'state':'wait', 
                'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'future.shipment') or '/',
                 }
     
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        code = self.pool.get('ir.sequence').get(cr, uid, 'future.shipment') or '/'
+        default.update({
+               'state':'wait', 
+               'code':code,
+               'real_ship_id':None,
+               'new_future_ship_id':None,
+        })
+        return super(future_shipment, self).copy(cr, uid, id, default, context)    
+        
     def unlink(self, cr, uid, ids, context=None):
         for order in self.read(cr, uid, ids, ['state'], context=context):
             if order['state'] == 'shipped':
@@ -60,7 +78,30 @@ class future_shipment(osv.osv):
     
     def action_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state':'cancel', 'real_ship_id':None, 'new_future_ship_id':None}, context=context)
-        
+    
+    def _email_notify(self, cr, uid, ids, action_name, group_params, context=None):
+        #ids 是int 需要转成list
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        for order in self.browse(cr, uid, ids, context=context):
+            for group_param in group_params:
+                email_group_id = self.pool.get('ir.config_parameter').get_param(cr, uid, group_param, context=context)
+                if email_group_id:                    
+                    email_subject = 'Future Shipment reminder: %s %s'%(order.code,action_name)
+                    email_body_string = 'The Future Shipment({0}) has been changed.'
+                    email_body = email_body_string.format(order.code,)
+                    email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
+                    utils.email_send_group(cr, uid, email_from, None, email_subject,email_body, email_group_id, context=context)      
+                    
+    def write(self, cr, uid, ids, vals, context=None):
+        resu = super(future_shipment,self).write(cr, uid, ids, vals, context=context)
+        self._email_notify(cr, uid, ids,'Future shipment was changed',['future_shipment_group_notice'],context)
+        return resu
+    
+    def create(self, cr, uid, vals, context=None):
+        new_id = super(future_shipment, self).create(cr, uid, vals, context=context)
+        self._email_notify(cr, uid, new_id,'New future shipment was created',['future_shipment_group_notice'],context)
+        return new_id
     
 future_shipment()
 
@@ -78,7 +119,10 @@ class future_shipment_line(osv.osv):
         
         'create_uid':  fields.many2one('res.users', 'Creator', readonly=True),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
-        'write_uid':  fields.many2one('res.users', 'Operator', readonly=True),
-        'write_date': fields.datetime('Execution Date', readonly=True, select=True),
+        'write_uid':  fields.many2one('res.users', 'Modified By', readonly=True),
+        'write_date': fields.datetime('Modification Date', readonly=True, select=True),
+        
+        'multi_images': fields.text("Multi Images"),
         } 
 future_shipment_line()
+
