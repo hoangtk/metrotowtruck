@@ -85,10 +85,12 @@ class future_shipment(osv.osv):
     
     def write(self, cr, uid, ids, vals, context=None):
         resu = super(future_shipment,self).write(cr, uid, ids, vals, context=context)
-        self._email_notify(cr, uid, ids,'future shipment notice',['future_shipment_group_notice'],context)
+        self._email_notify(cr, uid, ids,'Future shipment was changed',['future_shipment_group_notice'],context)
         return resu
     def create(self, cr, uid, vals, context=None):
-        return super(future_shipment, self).create(cr, uid, vals, context=context)
+        new_id = super(future_shipment, self).create(cr, uid, vals, context=context)
+        self._email_notify(cr, uid, new_id,'New future shipment was created',['future_shipment_group_notice'],context)
+        return new_id
     
 future_shipment()
 
