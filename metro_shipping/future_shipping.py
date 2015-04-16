@@ -58,6 +58,18 @@ class future_shipment(osv.osv):
                'code':lambda self, cr, uid, obj, ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'future.shipment') or '/',
                 }
     
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default:
+            default = {}
+        code = self.pool.get('ir.sequence').get(cr, uid, 'future.shipment') or '/'
+        default.update({
+               'state':'wait', 
+               'code':code,
+               'real_ship_id':None,
+               'new_future_ship_id':None,
+        })
+        return super(future_shipment, self).copy(cr, uid, id, default, context)    
+        
     def unlink(self, cr, uid, ids, context=None):
         for order in self.read(cr, uid, ids, ['state'], context=context):
             if order['state'] == 'shipped':
@@ -80,13 +92,12 @@ class future_shipment(osv.osv):
                     email_body = email_body_string.format(order.code,)
                     email_from = self.pool.get("res.users").read(cr, uid, uid, ['email'],context=context)['email']
                     utils.email_send_group(cr, uid, email_from, None, email_subject,email_body, email_group_id, context=context)      
-        
-  
-    
+                    
     def write(self, cr, uid, ids, vals, context=None):
         resu = super(future_shipment,self).write(cr, uid, ids, vals, context=context)
         self._email_notify(cr, uid, ids,'Future shipment was changed',['future_shipment_group_notice'],context)
         return resu
+    
     def create(self, cr, uid, vals, context=None):
         new_id = super(future_shipment, self).create(cr, uid, vals, context=context)
         self._email_notify(cr, uid, new_id,'New future shipment was created',['future_shipment_group_notice'],context)
