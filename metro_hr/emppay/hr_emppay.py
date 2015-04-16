@@ -1227,7 +1227,7 @@ class hr_emppay(osv.osv):
         return self.write(cr, uid, ids, {'state': 'verified'}, context=context)
    
     def action_approve(self, cr, uid, ids, context=None):
-        return self._set_state(cr, uid, ids, 'approved', context)
+        return self.write(cr, uid, ids, {'state': 'approved'}, context=context)
     
     def action_pay(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'paid'}, context=context)
