@@ -155,9 +155,16 @@ class product_product(osv.osv):
 				c.update({ 'states': ('confirmed','waiting','assigned'), 'what': ('in',) })
 			if f in ('outgoing_qty','qty_out'):
 				c.update({ 'states': ('confirmed','waiting','assigned'), 'what': ('out',) })
+			if f == 'qty_out_assigned':
+				c.update({ 'states': ('assigned'), 'what': ('out',) })				
 			stock = self.get_product_available(cr, uid, ids, context=c)
 			for id in ids:
 				res[id][f] = stock.get(id, 0.0)
+		#update qty_out_available
+		if 'qty_onhand' in field_names and 'qty_out_assigned' in field_names:
+			for id in ids:
+				res[id]['qty_out_available'] = res[id]['qty_onhand'] - res[id]['qty_out_assigned']
+		
 		return res		
 	
 	_columns = {
@@ -201,7 +208,19 @@ class product_product(osv.osv):
 			string='Outgoing',
              store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
 					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
-             ),		
+             ),
+		'qty_out_assigned': fields.function(_product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Outgoing Assigned',
+             store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+             ),	
+		'qty_out_available': fields.function(_product_available, multi='qty_available',
+			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
+			string='Outgoing Available',
+             store = {'stock.move': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10),
+					'material.request.line': (_get_move_products, ['product_qty', 'location_id', 'location_dest_id', 'state'], 10)}
+             ),	
 		'qty_available': fields.function(_product_available, multi='qty_available',
 			type='float',  digits_compute=dp.get_precision('Product Unit of Measure'),
 			string='Quantity On Hand(FUNC)',

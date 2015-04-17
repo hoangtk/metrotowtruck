@@ -160,6 +160,8 @@
             		<field name="qty_in"/>
             		<field name="qty_out"/>
             		<field name="qty_virtual"/>
+            		<field name="qty_out_assigned"/>
+            		<field name="qty_out_available"/>
             	</field>         	
             		            
 	            <field name="virtual_available" position="after">
@@ -262,10 +264,26 @@
 	                    <button name="button_draft" states="end,obsolete" string="Restart" type="object" class="oe_highlight" groups="metro.group_data_maintain_manager"/>
 	                    <field name="state" widget="statusbar" statusbar_visible="draft,sellable,end" statusbar_colors='{"end":"red","obsolete":"red"}' readonly="1"/>
 	                </header>	            
-	            </xpath>                
+	            </xpath>            
             </data>
             </field>
 		</record>
+        
+		<record id="metro_product_normal_form_view_qty_out" model="ir.ui.view">
+            <field name="name">metro.product.normal.form</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="arch" type="xml">
+            	<data>         
+	            	<field name="virtual_available" position="after">
+	            		<field name="qty_out_assigned"/>
+	            		<field name="qty_out_available"/>
+	            	</field>         
+            	</data>
+        	</field>
+       </record>
+        		
 		<record id="metro_product_mfg_view" model="ir.ui.view">
             <field name="name">metro_product_mfg_view</field>
             <field name="model">product.product</field>
