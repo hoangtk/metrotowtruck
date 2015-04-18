@@ -102,6 +102,15 @@ class future_shipment(osv.osv):
         new_id = super(future_shipment, self).create(cr, uid, vals, context=context)
         self._email_notify(cr, uid, new_id,'New future shipment was created',['future_shipment_group_notice'],context)
         return new_id
+
+    def print_report(self, cr, uid, ids, context=None):
+        datas = {
+                 'model': 'future.shipment',
+                 'ids': ids,
+                 'form': self.read(cr, uid, ids[0], context=context),
+                }
+        return {'type': 'ir.actions.report.xml', 'report_name': 'future.shipment.briefreport', 'datas': datas, 'nodestroy': True}
+
     
 future_shipment()
 
@@ -123,6 +132,6 @@ class future_shipment_line(osv.osv):
         'write_date': fields.datetime('Modification Date', readonly=True, select=True),
         
         'multi_images': fields.text("Multi Images"),
-        } 
+        }
 future_shipment_line()
 

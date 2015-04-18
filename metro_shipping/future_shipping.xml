@@ -5,10 +5,15 @@
     		<field name="name">future.shipment.form</field>
         	<field name='model'>future.shipment</field>
         	<field name="arch" type="xml">
+                <!--这里为什么错了  xpath expr="//button[@string='Apply Report']" position="after">
+                    <button name="print_future_shipment_briefreport" string="Print Report" type="object" states="agreed"/>
+                </xpath-->
         		<form string="Future Shippings" version="7.0">
         			<header>
+        				<!-- button name="print_report" string="Print Report" type="object" states="agreed" /有这个states就出不来按钮 为什么-->
 						<button name="%(act_fur_shipment_ship)d" string="Ship" type="action" class="oe_highlight" states="wait"/>
 						<button name="action_cancel" string="Cancel" type="object" confirm="Are you sure to cancel this order?" states="wait,shipped"/>
+						<button name="print_report" string="Print Report" type="object"/>
                 		<field name="state" widget="statusbar" statusbar_visible="wait,shipped"/>
             		</header>
             		<!-- <field name=""/>-->
