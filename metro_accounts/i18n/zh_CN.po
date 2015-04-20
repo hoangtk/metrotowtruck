@@ -1820,7 +1820,7 @@ msgstr "供应商付款"
 #. module: account
 #: view:account.move:0
 msgid "Cancel Entry"
-msgstr "取消登帐"
+msgstr "取消过帐"
 
 #. module: account
 #: selection:account.account.type,report_type:0
