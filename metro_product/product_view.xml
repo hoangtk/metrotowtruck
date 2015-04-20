@@ -160,8 +160,8 @@
             		<field name="qty_in"/>
             		<field name="qty_out"/>
             		<field name="qty_virtual"/>
-            		<field name="qty_out_assigned"/>
-            		<field name="qty_out_available"/>
+            		<!-- <field name="qty_out_assigned"/>
+            		<field name="qty_out_available"/> -->
             	</field>         	
             		            
 	            <field name="virtual_available" position="after">
@@ -269,7 +269,7 @@
             </field>
 		</record>
         
-		<record id="metro_product_normal_form_view_qty_out" model="ir.ui.view">
+		<!-- <record id="metro_product_normal_form_view_qty_out" model="ir.ui.view">
             <field name="name">metro.product.normal.form</field>
             <field name="model">product.product</field>
             <field name="type">form</field>
@@ -282,7 +282,7 @@
 	            	</field>         
             	</data>
         	</field>
-       </record>
+       </record> -->
         		
 		<record id="metro_product_mfg_view" model="ir.ui.view">
             <field name="name">metro_product_mfg_view</field>

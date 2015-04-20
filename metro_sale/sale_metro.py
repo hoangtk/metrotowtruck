@@ -84,8 +84,12 @@ class sale_order(osv.osv):
         set_seq_o2m(cr, uid, data.get('order_line'), context=context)
         return super(sale_order, self).create(cr, uid, data, context)
         
-    def write(self, cr, uid, ids, vals, context=None):                
-        set_seq_o2m(cr, uid, vals.get('order_line'), 'sale_order_line', 'order_id', ids[0], context=context)  
+    def write(self, cr, uid, ids, vals, context=None):            
+        if not isinstance(ids, (int, long)):
+            write_id = ids[0]
+        else:
+            write_id = ids
+        set_seq_o2m(cr, uid, vals.get('order_line'), 'sale_order_line', 'order_id', write_id, context=context)  
         resu = super(sale_order, self).write(cr, uid, ids, vals, context=context)
         if 'state' in vals and vals['state'] == 'agreed':
             #check serials
