@@ -30,6 +30,6 @@ class future_shipment_briefreport(rml_parser_ext):
             'time': time, 
         })
 
-report_sxw.report_sxw('report.future.shipment.briefreport', 'future.shipment', 'addons/metro_shipping/report/future_shipment_notice_print.rml', parser=rml_parser_ext, header="external")
+report_sxw.report_sxw('report.future.shipment.briefreport', 'future.shipment', 'addons/metro_shipping/report/future_shipment_notice_print.rml', parser=rml_parser_ext, header="internal")
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
