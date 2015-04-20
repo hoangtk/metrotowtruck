@@ -68,6 +68,11 @@ msgstr "原始凭据"
 msgid "Bank and Checks"
 msgstr "银行"
 
+#. module: account
+#: view:account.move:0
+msgid "Cancel Entry"
+msgstr "取消过帐"
+
 #==================i18n fixing for customized module ==================#
 #. module: metro_product
 #: model:ir.model.fields,field_description:metro_product.field_product_product_qty_in

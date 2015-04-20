@@ -9,9 +9,9 @@
         			<header>
 						<button name="%(act_fur_shipment_ship)d" string="Ship" type="action" class="oe_highlight" states="wait"/>
 						<button name="action_cancel" string="Cancel" type="object" confirm="Are you sure to cancel this order?" states="wait,shipped"/>
+						<button name="print_report" string="Print Report" type="object"/>
                 		<field name="state" widget="statusbar" statusbar_visible="wait,shipped"/>
             		</header>
-            		<!-- <field name=""/>-->
         			<group col="4">
         				<field name="origin_id" domain="[('is_company','=',True)]"/>
                     	<field name="dest_id" domain="[('is_company','=',True)]"/>
