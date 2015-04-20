@@ -42,6 +42,7 @@
         "wizard/future_shipment_req_view.xml",
         "future_shipping.xml",
         "ship_data.xml",
+        "future_shipment_report.xml",
         
     ],
     'installable': True,
