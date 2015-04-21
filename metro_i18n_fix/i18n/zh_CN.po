@@ -70,8 +70,106 @@ msgstr "银行"
 
 #. module: account
 #: view:account.move:0
+msgid "Post"
+msgstr "登账"
+
+#. module: account
+#: view:account.move:0
 msgid "Cancel Entry"
-msgstr "取消过帐"
+msgstr "取消登帐"
+
+#. module: account
+#: model:ir.ui.menu,name:account.periodical_processing_journal_entries_validation
+msgid "Draft Entries"
+msgstr "未登帐凭证"
+
+#. module: account
+#: view:account.entries.report:0
+#: selection:account.entries.report,move_state:0
+#: view:account.move:0
+#: selection:account.move,state:0
+#: view:account.move.line:0
+msgid "Unposted"
+msgstr "未登账"
+
+#. module: account
+#: view:account.entries.report:0
+#: selection:account.entries.report,move_state:0
+#: view:account.move:0
+#: selection:account.move,state:0
+#: view:account.move.line:0
+msgid "Posted"
+msgstr "已登账"
+
+#. module: account
+#: view:account.entries.report:0
+msgid "Posted entries"
+msgstr "已登账凭证"
+
+#. module: account
+#: view:account.move.line:0
+msgid "Posted Journal Items"
+msgstr "已登账凭证"
+
+#. module: account
+#: view:account.move:0
+#: view:account.move.line:0
+msgid "Unposted Journal Entries"
+msgstr "未登账凭证"
+
+#. module: account
+#: code:addons/account/account.py:1327
+#, python-format
+msgid ""
+"You cannot modify a posted entry of this journal.\n"
+"First you should set the journal to allow cancelling entries."
+msgstr "不能修改已经登账的凭证项，首先设置分类账允许取消"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Post account entries by batch"
+msgstr "凭证批量登帐"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Note: Only unposted entries can be post!"
+msgstr "注意: 只有未登账的凭证可以登帐!"
+
+#. module: metro_accounts
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_target_move
+#: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_partner_target_move
+#: field:rpt.account.cn,target_move:0 field:rpt.account.partner,target_move:0
+msgid "Target Moves"
+msgstr "凭证登帐"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Are you sure to post the selected acccount entries?"
+msgstr "确认将选择的凭证登帐吗?"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+#: model:ir.actions.act_window,name:metro_accounts.action_view_account_move_post
+msgid "Post"
+msgstr "登帐"
+
+#. module: metro_account
+#: code:addons/metro_accounts/cash_bank_trans.py:81
+#: code:addons/metro_accounts/emp_borrow.py:0
+#: code:addons/metro_accounts/emp_reimburse.py:0
+#, python-format
+msgid "The accounting entry to the order was posted, can not be deleted!"
+msgstr "会计凭证已经登帐，此存取款单不能删除！"
+
+#. module: metro_accounts
+#: view:account.move.batch:0
+msgid "Note: Only posted entries will be cancel!"
+msgstr "注意:只有登账的凭证可以取消"
+
+#. module: account
+#: model:ir.ui.menu,name:account.menu_finance_periodical_processing
+msgid "Periodic Processing"
+msgstr "期间处理"
 
 #==================i18n fixing for customized module ==================#
 #. module: metro_product
