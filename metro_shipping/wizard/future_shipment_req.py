@@ -98,15 +98,15 @@ class future_ship_req(osv.osv_memory):
         '''
         This method also include the split button function
         '''
-        record_id = context and context.get('active_id', False) or False#估计就是这里拿的ship那个button
+        record_id = context and context.get('active_id', False) or False#
         future_ship = self.pool.get('future.shipment').browse(cr, uid, record_id, context=None);
         future_ship_line_obj = self.pool.get("future.shipment.line")
         future_ship_obj = self.pool.get("future.shipment")
         #the  lines that partial shipped or not shipped, need to create a new future shipment based on them
         #{id:remain_qty}
         remain_future_ship_line_ids = dict((line.id,line.product_qty) for line in future_ship.line_ids)
-        
-        data =  self.browse(cr, uid, ids, context=context)[0]        
+        data =  self.browse(cr, uid, ids, context=context)[0]
+        print data  
         #loop user selected product lines, to update the products need to remain
         for line in data.line_ids:
             future_line_id = line.future_ship_line_id.id
@@ -141,23 +141,21 @@ class future_ship_req(osv.osv_memory):
                     future_ship_line_obj.write(cr, uid, new_line_id, {'product_qty':qty, 'shipment_id':new_future_ship_id})
                     #update the old future shipment quantity to the real shipped quantity
                     future_ship_line_obj.write(cr, uid, line_id, {'product_qty':(qty_old-qty)})
-            
+
         #update current future shipment to 'shipped'
         #TODO check split parameter from context
-        #if 在future_shipment.xml button那里的是不是true 即不选split 就走if not那步
-        if context.get('split'):#逻辑不对
-            vals = {'state':'wait'}
-#            future_ship_obj.write(cr, uid, record_id, vals, context)
-        else:
+        if not context.get('split'):
             vals = {'state':'shipped', 'real_ship_id':data.real_ship_id.id}
-            future_ship_obj.write(cr, uid, record_id, vals, context)#do not delete this line as it may cause a bug on full ship
+            future_ship_obj.write(cr, uid, record_id, vals, context)
         #update the generated new future shipment order id
         if new_future_ship_id:
+            vals = {}
             vals['new_future_ship_id'] = new_future_ship_id
             future_ship_obj.write(cr, uid, record_id, vals, context)
-        return {'type': 'ir.actions.act_window_close'}
-
+        
+        return {'type': 'ir.actions.act_window_close'} 
     
-future_ship_req()
+future_ship_req() 
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

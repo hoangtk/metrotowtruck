@@ -25,7 +25,7 @@
         		<form string="Future Shippings" version="7.0">
         			<header>
 						<button name="%(act_fur_shipment_ship)d" string="Ship" type="action" class="oe_highlight" states="wait"/>
-						<button name="%(act_fur_shipment_split)d" string="Split" type="action" class="oe_highlight" states="wait" context="{'split':True}"/>
+						<button name="%(act_fur_shipment_split)d" string="Split" type="action" states="wait" context="{'split':True}"/>
 						<button name="action_cancel" string="Cancel" type="object" confirm="Are you sure to cancel this order?" states="wait,shipped"/>
 						<button name="print_report" string="Print Report" type="object"/>
                 		<field name="state" widget="statusbar" statusbar_visible="wait,shipped"/>
@@ -56,7 +56,7 @@
     		<field name="name">future_shipment_view_search</field>
         	<field name='model'>future.shipment</field>
         	<field name="arch" type="xml">
-                <search string="Search Future Shippings"><!--下面三个field是搜索的对象用的-->
+                <search string="Search Future Shippings">
        				<field name="origin_id"/>
                    	<field name="dest_id"/>
                    	<field name="real_ship_id"/>
@@ -117,7 +117,7 @@
             <field name="name">Future Shipment</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">future.shipment</field>
-            <field name="view_mode">tree,form</field><!--这个tree和form在右上角-->
+            <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="future_shipment_view_search"/>
             <field name="context">{'search_default_wait':True}</field>
         </record>
