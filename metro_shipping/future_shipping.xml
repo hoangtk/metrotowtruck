@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+        <menuitem id="future_shipment_management_name" name="Future Shipment"
+        parent="menu_shipment_main_action"
+        action="future_shipment_form_action" sequence="10"/>
+
+        <record id="future_shipment_tree_view" model="ir.ui.view">
+            <field name="name">future.shipment.tree</field>
+            <field name='model'>future.shipment</field>
+            <field name="arch" type="xml">
+                <tree string="Future Shippings">
+                        <field name="code"/>
+                        <field name="origin_id"/>
+                        <field name="dest_id"/>
+                        <field name="state"/>
+                        <field name="real_ship_id"/>
+                        <field name="new_future_ship_id"/>
+                        <field name="delivery_type"/>
+                </tree>
+            </field>
+        </record>
+
         <record id="future_shipment_form_view" model="ir.ui.view">
     		<field name="name">future.shipment.form</field>
         	<field name='model'>future.shipment</field>
@@ -8,6 +28,7 @@
         		<form string="Future Shippings" version="7.0">
         			<header>
 						<button name="%(act_fur_shipment_ship)d" string="Ship" type="action" class="oe_highlight" states="wait"/>
+						<button name="%(act_fur_shipment_split)d" string="Split" type="action" class="oe_highlight" states="wait" context="{'split':True}"/>
 						<button name="action_cancel" string="Cancel" type="object" confirm="Are you sure to cancel this order?" states="wait,shipped"/>
 						<button name="print_report" string="Print Report" type="object"/>
                 		<field name="state" widget="statusbar" statusbar_visible="wait,shipped"/>
@@ -33,28 +54,22 @@
                 </form>
 			</field>
 		</record>
-                
-    	<record id="future_shipment_tree_view" model="ir.ui.view">
-    		<field name="name">future.shipment.tree</field>
-        	<field name='model'>future.shipment</field>
-        	<field name="arch" type="xml">
-        		<tree string="Future Shippings">
-        				<field name="code"/>
-        				<field name="origin_id"/>
-                    	<field name="dest_id"/>
-                    	<field name="state"/>
-                    	<field name="real_ship_id"/>
-                    	<field name="new_future_ship_id"/>
-                    	<field name="delivery_type"/>
-                </tree>
-			</field>
-        </record>
-                
+        
+        <record id="future_shipment_form_action" model="ir.actions.act_window">
+            <field name="name">Future Shipment</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">future.shipment</field>
+            <field name="view_mode">tree,form</field><!--这个tree和form在右上角-->
+            <field name="search_view_id" ref="future_shipment_view_search"/>
+            <field name="context">{'search_default_wait':True}</field>
+        </record>        
+        
+        <!--这个record-->        
     	<record id="future_shipment_view_search" model="ir.ui.view">
     		<field name="name">future_shipment_view_search</field>
         	<field name='model'>future.shipment</field>
         	<field name="arch" type="xml">
-                <search string="Search Future Shippings">
+                <search string="Search Future Shippings"><!--下面三个field是搜索的对象用的-->
        				<field name="origin_id"/>
                    	<field name="dest_id"/>
                    	<field name="real_ship_id"/>
@@ -80,7 +95,7 @@
 	                    	</group>
 	                    </page>
 	                    <page string="Images">
-                			<field name="multi_images" widget="image_multi"/>
+                            <field name="multi_images" widget="image_multi"/>
 	                    </page>
 	                    <page string="Change Log">
         					<group>
@@ -111,17 +126,6 @@
 			</field>
         </record>
         
-        <record id="future_shipment_form_action" model="ir.actions.act_window">
-            <field name="name">Future Shipment</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">future.shipment</field>
-            <field name="view_mode">tree,form</field>
-        	<field name="search_view_id" ref="future_shipment_view_search"/>
-        	<field name="context">{'search_default_wait':True}</field>
-        </record>
         
-    	<menuitem id="future_shipment_management_name" name="Future Shipment"
-        parent="menu_shipment_main_action"
-        action="future_shipment_form_action" sequence="10"/>
     </data>
 </openerp>
