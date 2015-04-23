@@ -145,16 +145,16 @@ class future_ship_req(osv.osv_memory):
         #update current future shipment to 'shipped'
         #TODO check split parameter from context
         #if 在future_shipment.xml button那里的是不是true 即不选split 就走if not那步
-        if not context.get('split'):
-            vals = {'state':'shipped', 'real_ship_id':data.real_ship_id.id}
-        else:
+        if context.get('split'):#逻辑不对
             vals = {'state':'wait'}
+#            future_ship_obj.write(cr, uid, record_id, vals, context)
+        else:
+            vals = {'state':'shipped', 'real_ship_id':data.real_ship_id.id}
+            future_ship_obj.write(cr, uid, record_id, vals, context)#do not delete this line as it may cause a bug on full ship
         #update the generated new future shipment order id
         if new_future_ship_id:
             vals['new_future_ship_id'] = new_future_ship_id
             future_ship_obj.write(cr, uid, record_id, vals, context)
-        else:
-            pass
         return {'type': 'ir.actions.act_window_close'}
 
     
