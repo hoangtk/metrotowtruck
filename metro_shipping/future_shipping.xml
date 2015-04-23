@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        <menuitem id="future_shipment_management_name" name="Future Shipment"
-        parent="menu_shipment_main_action"
-        action="future_shipment_form_action" sequence="10"/>
 
         <record id="future_shipment_tree_view" model="ir.ui.view">
             <field name="name">future.shipment.tree</field>
@@ -54,17 +51,7 @@
                 </form>
 			</field>
 		</record>
-        
-        <record id="future_shipment_form_action" model="ir.actions.act_window">
-            <field name="name">Future Shipment</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="res_model">future.shipment</field>
-            <field name="view_mode">tree,form</field><!--这个tree和form在右上角-->
-            <field name="search_view_id" ref="future_shipment_view_search"/>
-            <field name="context">{'search_default_wait':True}</field>
-        </record>        
-        
-        <!--这个record-->        
+               
     	<record id="future_shipment_view_search" model="ir.ui.view">
     		<field name="name">future_shipment_view_search</field>
         	<field name='model'>future.shipment</field>
@@ -126,6 +113,17 @@
 			</field>
         </record>
         
+        <record id="future_shipment_form_action" model="ir.actions.act_window">
+            <field name="name">Future Shipment</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">future.shipment</field>
+            <field name="view_mode">tree,form</field><!--这个tree和form在右上角-->
+            <field name="search_view_id" ref="future_shipment_view_search"/>
+            <field name="context">{'search_default_wait':True}</field>
+        </record>
         
+        <menuitem id="future_shipment_management_name" name="Future Shipment"
+        parent="menu_shipment_main_action"
+        action="future_shipment_form_action" sequence="10"/>
     </data>
 </openerp>
