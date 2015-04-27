@@ -43,7 +43,8 @@
 						    <field name="period_to" domain="[('company_id', '=', company_id)]" attrs="{'required':[('filter', '=', 'filter_period')]}" class="oe_inline"/>  
 	                        </div>		
 	                        
-							<field name="target_move"/>			
+							<field name="target_move"/>
+							<field name="no_zero_balance"/>			
 		                </group>
 		                <group>
 							<field name="level" invisible="1"/>

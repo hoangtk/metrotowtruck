@@ -52,7 +52,8 @@ class rpt_account_partner(osv.osv_memory):
         'partner_type': fields.selection([('customer', 'Customer'),('supplier', 'Supplier'),], "Partner Type", required=True),         
         #Show counterpart account flag for detail report level   
         'show_counter': fields.boolean("Show counterpart", required=False),   
-        'no_zero_balance': fields.boolean("Hide data with zero final balance", required=False),   
+        'no_zero_balance': fields.boolean("Hide data with zero balance", required=False, 
+                                          help="Check this to hide: \n1.The period without entries\n2.The partner with zero initial balance and all periods have no entries"),
         }
         
     _defaults = {
@@ -61,6 +62,7 @@ class rpt_account_partner(osv.osv_memory):
         'level': 'general',   
         'partner_type': 'supplier',   
         'reconcile':'all',
+        'no_zero_balance':True
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(rpt_account_partner,self).default_get(cr, uid, fields_list, context)
@@ -309,7 +311,7 @@ class rpt_account_partner(osv.osv_memory):
                                     'data_level':'detail'}
                         if rpt.show_counter:
                             rpt_ln['counter_account'] = ''
-                        rpt_lns_row.append(rpt_ln)    
+                        rpt_lns_row.append(rpt_ln)
                         seq += 1
                 
                 #the period credit/debit
@@ -326,7 +328,10 @@ class rpt_account_partner(osv.osv_memory):
                 #period sum line
                 debit = row[0]
                 credit = row[1]            
-                balance, direction = self._get_account_balance(rpt.partner_type, debit, credit)
+                balance, direction = self._get_account_balance(rpt.partner_type, debit, credit)                               
+                #if "no zero balance period" is set, and no entries of this period, then do not show this period
+                if rpt.no_zero_balance and debit == 0.0 and credit == 0:
+                    continue                
                 balance_sum += balance
                 rpt_ln = {'seq':seq,
                             'code':'', 
@@ -339,7 +344,7 @@ class rpt_account_partner(osv.osv_memory):
                             'balance':balance_sum,
                             'data_level':'period_sum'}
                 rpt_lns_row.append(rpt_ln)    
-                seq += 1  
+                seq += 1                
                 
                 #year sum line  
                 debit_year = debit + year_sum[period.fiscalyear_id.code]['debit']
@@ -360,13 +365,12 @@ class rpt_account_partner(osv.osv_memory):
                 year_sum[period.fiscalyear_id.code]['debit'] = debit_year
                 year_sum[period.fiscalyear_id.code]['credit'] = credit_year
                 
-                #if total balance is zero and have no zero balance flag then continue
-                if balance_year == 0.0 and rpt.no_zero_balance:
-                    continue
-                
                 rpt_lns_row.append(rpt_ln)
-                seq += 1            
-                
+                seq += 1
+            
+            #if only have the initial balance row, and the initial balance is zero then skip this partner        
+            if rpt.no_zero_balance and len(rpt_lns_row) == 1 and rpt_lns_row[0]['balance'] == 0.0:                    
+                    continue
             rpt_lns += rpt_lns_row
               
         #update the reconcile and residual data
