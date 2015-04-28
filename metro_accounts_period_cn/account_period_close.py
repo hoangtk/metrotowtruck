@@ -53,22 +53,32 @@ class account_period_close(osv.osv_memory):
                     raise osv.except_osv(_('Invalid Action!'), _('In order to close a period, you must first post related journal entries.'))
                 
                 '''
+                For the 'period_close_type'='period' or the last period of 'period_close_type'='year'
                 check if there are new balance for the incoming/expense account again
                 since if there are new moves added after the closing entry generated, or user modified the closing entry, this will make data be wrong
                 if there is balance, then need user to generate closing entry again
                 '''
-                obj_acc_account = self.pool.get('account.account')
                 company = period.company_id
-                #incoming accounts
-                account_type_ids = [account_type.id for account_type in company.income_account_types]
-                #expense accounts
-                account_type_ids += [account_type.id for account_type in company.expense_account_types]
-                account_ids = obj_acc_account.search(cr, uid, [('user_type', 'in', account_type_ids), ('type', '!=', 'view'), ('company_id', '=', company.id)], context=context)
-                balance_total = 0.0
-                for account in obj_acc_account.browse(cr, uid, account_ids, context={'periods': [period.id]}):
-                    balance_total += account.balance
-                if balance_total != 0.0:
-                    raise osv.except_osv(_('Invalid Action!'), _('New Incoming/Expense balance found, this is caused by new entries added or modification to the closing entry after the closing entry was generated.'))    
+                last_year_period = False
+                if company.period_close_type == 'year':        
+                    #find the last period of this year
+                    last_periods = period_obj.search(cr, uid, [('fiscalyear_id','=',period.fiscalyear_id.id)], order="date_stop desc", limit=1, context=context)
+                    #if the current closing period is the last period then continue, otherwise return
+                    last_year_period = last_periods and period.id == last_periods or False
+                                                        
+                if company.period_close_type == 'period' or last_year_period:
+                    obj_acc_account = self.pool.get('account.account')
+                    
+                    #incoming accounts
+                    account_type_ids = [account_type.id for account_type in company.income_account_types]
+                    #expense accounts
+                    account_type_ids += [account_type.id for account_type in company.expense_account_types]
+                    account_ids = obj_acc_account.search(cr, uid, [('user_type', 'in', account_type_ids), ('type', '!=', 'view'), ('company_id', '=', company.id)], context=context)
+                    balance_total = 0.0
+                    for account in obj_acc_account.browse(cr, uid, account_ids, context={'periods': [period.id]}):
+                        balance_total += account.balance
+                    if balance_total != 0.0:
+                        raise osv.except_osv(_('Invalid Action!'), _('New Incoming/Expense balance found, this may be caused by new entries added or modification to the closing entry after the closing entry was generated.'))    
 
                 cr.execute('update account_journal_period set state=%s where period_id=%s', (mode, period.id))
                 cr.execute('update account_period set state=%s where id=%s', (mode, period.id))

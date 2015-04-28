@@ -40,59 +40,39 @@ class account_period(osv.osv):
             if period.state != 'done':
                 continue
             period_obj = self.pool.get('account.period')
-            #此期间的前一个期间状态必须为close, 例如前一个期间可能已经生成转帐凭证但是没有close(close_entry_done=True and state != 'done'), 此种状态则没有可以进行结账的可用期间
+            #要打开的月之后没有已经生成结转凭证或者关闭的期间: close_entry_done=False and state !='done'
             domain = [('date_start', '>', period.date_stop), ('special','!=',True),  ('company_id','=',period.company_id.id), '|', ('close_entry_done', '=', True), ('state','=','done')]
             new_periods = period_obj.search(cr, uid, domain, context=context)            
             if new_periods:
-                raise osv.except_osv(_('Invalid Action!'), _('%s: there are periods closed or in closing after this period, please open them first.')%(period.name,))            
+                raise osv.except_osv(_('Invalid Action!'), _('%s: there are periods closed or in closing after this period, please open them first.')%(period.name,))
+            #区间所属年度不能关闭或者或者生成年结凭证
+            if period.fiscalyear_id.state == 'done' or period.fiscalyear_id.close_entry_done:
+                raise osv.except_osv(_('Invalid Action!'), _('%s: the year of this period is closed or in closing, please re-open the year first.')%(period.name,))
+                     
             open_ids.append(period.id)
             
-        return super(account_period, self).action_draft(cr, uid, ids)
+        return super(account_period, self).action_draft(cr, uid, open_ids)
+    
+    def cancel_close_entry(self, cr, uid, ids, context=None):
+        obj_acc_move = self.pool.get("account.move")
+        obj_acc_journal_period = self.pool.get('account.journal.period')
+        for period in self.browse(cr, uid, ids, context=context):
+            if not period.close_entry_done:
+                continue
+            if period.state == 'done':
+                raise osv.except_osv(_('Invalid Action!'), _('%s is closed, please re-open it first then can do the close entry cancel.')%(period.name,))
+            #cancel and delete the close journal entry
+            if period.close_move_id:
+                if period.close_move_id.state == 'posted':
+                    obj_acc_move.button_cancel(cr, uid, [period.close_move_id.id],context=context)
+                obj_acc_move.unlink(cr, uid, [period.close_move_id.id],context=context)                
+            if period.close_journal_period_id:
+                obj_acc_journal_period.unlink(cr, uid, [period.close_journal_period_id.id],context=context)            
+            
+        #clear the fields recording the closed entry
+        self.write(cr, uid, ids, {'close_journal_period_id':None, 'close_move_id': None, 'close_entry_done':False})
+                    
+        return True
             
 account_period()
-
-class account_fiscalyear(osv.osv):
-    _inherit = "account.fiscalyear"
-    _columns = {
-        #do we need generate the opening period for this  year when do peridos generating
-        'need_open_period':fields.boolean('Generate Opening Period'),
-    }
-
-    def create_period(self, cr, uid, ids, context=None, interval=1):
-        period_obj = self.pool.get('account.period')
-        for fy in self.browse(cr, uid, ids, context=context):
-            ds = datetime.strptime(fy.date_start, '%Y-%m-%d')
-#            period_obj.create(cr, uid, {
-#                    'name':  "%s %s" % (_('Opening Period'), ds.strftime('%Y')),
-#                    'code': ds.strftime('00/%Y'),
-#                    'date_start': ds,
-#                    'date_stop': ds,
-#                    'special': True,
-#                    'fiscalyear_id': fy.id,
-#                })
-            #johnw, add the checking of need_open_period
-            if fy.need_open_period:
-                period_obj.create(cr, uid, {
-                        'name':  "%s %s" % (_('Opening Period'), ds.strftime('%Y')),
-                        'code': ds.strftime('00/%Y'),
-                        'date_start': ds,
-                        'date_stop': ds,
-                        'special': True,
-                        'fiscalyear_id': fy.id,
-                    })
-            while ds.strftime('%Y-%m-%d') < fy.date_stop:
-                de = ds + relativedelta(months=interval, days=-1)
-
-                if de.strftime('%Y-%m-%d') > fy.date_stop:
-                    de = datetime.strptime(fy.date_stop, '%Y-%m-%d')
-
-                period_obj.create(cr, uid, {
-                    'name': ds.strftime('%m/%Y'),
-                    'code': ds.strftime('%m/%Y'),
-                    'date_start': ds.strftime('%Y-%m-%d'),
-                    'date_stop': de.strftime('%Y-%m-%d'),
-                    'fiscalyear_id': fy.id,
-                })
-                ds = ds + relativedelta(months=interval)
-        return True
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

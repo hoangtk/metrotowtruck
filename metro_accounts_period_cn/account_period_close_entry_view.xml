@@ -10,7 +10,7 @@
                     <label string="This wizard will generate the end of period journal entries of selected period. Note that you can run this wizard many times for the same period: it will simply replace the old closing entries with the new ones."/>
                     <newline/>
                     <group col="4">
-                        <field name="period_id" domain = "[('close_entry_done', '=', False), ('company_id','=',company_id)]"/>
+                        <field name="period_id"/>
                         <field name="journal_id"/>
                         <field name="auto_opt"/>
                         <field name="company_id" groups="base.group_multi_company"/>

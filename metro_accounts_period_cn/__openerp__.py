@@ -33,6 +33,8 @@
              'account_period_view.xml',
              'account_period_close_entry_view.xml',
 #             'account_period_close_view.xml',
+             'account_fiscalyear_close_entry_view.xml',
+             'account_fiscalyear_view.xml'
              ],
     'installable': True,
     'auto_install': False,

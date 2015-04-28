@@ -50,11 +50,18 @@ class account_period_close_entry(osv.osv_memory):
             #find the earliest period that not done, 第一个打开的会计期间
             period_ids = period_obj.search(cr, uid, [ ('state','!=','done'), ('company_id','=',company_id), ('special','=',False)], order='date_start', limit=1, context=context)
             if period_ids:
-                defaults['period_id'] = period_ids[0]
-                period_name = period_obj.read(cr, uid, period_ids[0], ['name'], context=context)['name']
-                defaults['notes'] = _('Period closing entry for %s')%(period_name,)
+                period = period_obj.browse(cr, uid, period_ids[0], context=context)
+                #find the period's previous year, if the previous year is not closed, then raise error
+                p_year_ids = self.pool.get('account.fiscalyear').search(cr, uid, [('date_stop', '<', period.fiscalyear_id.date_start)], order='date_start desc', limit=1, context=context)
+                if p_year_ids:
+                    p_year = self.pool.get('account.fiscalyear').browse(cr, uid, p_year_ids[0], context=context)
+                    if p_year.state != 'done':
+                        raise osv.except_osv(_('Error!'), _('Please first close the previous fiscal year[%s], then do period closing of this year')%(p_year.name,))                        
+                #set the default value
+                defaults['period_id'] = period_ids[0]                
+                defaults['notes'] = _('Period closing entry for %s')%(period.name,)
         if not defaults.get('period_id'):
-            raise osv.except_osv(_('Error!'), _('No available period was found, please close the period that generated closing entry in time'))
+            raise osv.except_osv(_('Error!'), _('No available period was found, please make sure there are periods with "Draft" state'))
         
         #月结账簿-默认为本公司的period_close=1, type=('situation', 'Opening/Closing Situation'), centralisation=True的account_journal         
         if 'journal_id' in fields:
@@ -89,22 +96,24 @@ class account_period_close_entry(osv.osv_memory):
         if context is None:
             context = {}
         #delete the entry closing account move if exist
-        if  period.close_move_id:
-            if period.close_move_id.state == 'posted':
-                obj_acc_move.button_cancel(cr, uid, [period.close_move_id.id],context=context)
-            obj_acc_move.unlink(cr, uid, [period.close_move_id.id],context=context)
+        if  period.close_entry_done:
+            obj_acc_period.cancel_close_entry(cr, uid, [period.id], context=context)
         #if there are any existing draft moves of this period, then report one error message
         draft_move_ids = obj_acc_move.search(cr, uid, [('period_id', '=', period.id), ('state', '!=', "posted")], context=context)
         if draft_move_ids:
-            raise osv.except_osv(_('Error!'), _('In order to close a period, you must first post related journal entries.'))
+            raise osv.except_osv(_('Error!'), _('In order to close a period, you must first post all journal entries of this period.'))
         #if period closing parameters are missing, then raise error
         if not company.period_close_type or not company.income_account_types  or not company.expense_account_types:
             raise osv.except_osv(_('Error!'), _('Please set the period closing parameter for company %s')%(company.name))
         
         #if period_close_type is year, then update period and exit directly
         if company.period_close_type == 'year':
-            obj_acc_period.write(cr, uid, data.period_id.id, {'close_entry_done':True}, context=context)
-            return {'type': 'ir.actions.act_window_close'}
+            #find the last period of this year
+            last_periods = obj_acc_period.search(cr, uid, [('fiscalyear_id','=',period.fiscalyear_id.id)], order="date_stop desc", limit=1, context=context)
+            #if the current closing period is the last period then continue, otherwise return
+            if not(last_periods and period.id == last_periods[0]):
+                obj_acc_period.write(cr, uid, data.period_id.id, {'close_entry_done':True}, context=context)
+                return {'type': 'ir.actions.act_window_close'}
         
         #journal's restriction checking
         if not journal.default_credit_account_id or not journal.default_debit_account_id:
@@ -123,14 +132,21 @@ class account_period_close_entry(osv.osv_memory):
         }
         move_id = obj_acc_move.create(cr, uid, vals, context=context)
         
-        query_line = obj_acc_move_line._query_get(cr, uid,obj='account_move_line', context={'periods': [period.id]}) 
+        ctx_account = {}
+        if company.period_close_type == 'period':
+            ctx_account = {'periods': [period.id]}
+        else:
+            #closing the last period for the year under 'year' mode, need to include all data of this year
+            ctx_account = {'fiscalyear': period.fiscalyear_id.id}
+            
+        query_line = obj_acc_move_line._query_get(cr, uid,obj='account_move_line', context=ctx_account) 
         
         def _add_move_lines():
             #add the account(income/expense) balance move lines
             account_ids = obj_acc_account.search(cr, uid, [('user_type', 'in', account_type_ids), ('type', '!=', 'view'), ('company_id', '=', company.id)], context=context)
             balance_total = 0.0
             balance_in_currency_total = 0.0
-            for account in obj_acc_account.browse(cr, uid, account_ids, context={'periods': [period.id]}):
+            for account in obj_acc_account.browse(cr, uid, account_ids, ctx_account):
                 balance = account.balance
                 balance_total += account.balance
                 balance_in_currency = 0.0
@@ -181,10 +197,12 @@ class account_period_close_entry(osv.osv_memory):
                     credit = balance<0 and -balance or 0
                     account_id = balance>0 and journal.default_debit_account_id or journal.default_crediit_account_id
                 vals = {'move_id':move_id, 'name':move_line_profit_name, 'account_id':account_id.id,
-                        'debit': debit, 'credit': credit, 'amount_currency':balance_in_currency}
+                        'debit': debit, 'credit': credit
+                        #, 'amount_currency':balance_in_currency
+                        }
                 obj_acc_move_line.create(cr, uid, vals, context=context)
         
-        move_line_profit_name = _('period close profit transfer - %s')%(period.name,)
+        move_line_profit_name = _('period close profit of year transfer - %s')%(period.name,)
         
         #add move lines for incoming accounts balance
         account_type_ids = [account_type.id for account_type in company.income_account_types]
@@ -205,7 +223,7 @@ class account_period_close_entry(osv.osv_memory):
             obj_acc_move.unlink(cr, uid, [move_id], context=context)
         else:
             obj_acc_move.validate(cr, uid, [move_id], context=context)
-            #create the journal.period object and link it to the old fiscalyear
+            #create the journal.period object
             journal_period_ids = obj_acc_journal_period.search(cr, uid, [('journal_id', '=', journal.id), ('period_id', '=', period.id)])
             if not journal_period_ids:
                 journal_period_ids = [obj_acc_journal_period.create(cr, uid, {
@@ -223,8 +241,11 @@ class account_period_close_entry(osv.osv_memory):
         if move.line_id and data.auto_opt in('post', 'post_close'):
             obj_acc_move.post(cr, uid, [move.id], context=context)
             
-        #auto close the period
-        if data.auto_opt == 'post_close':
+        '''
+        auto close the period
+        for  the last month of the period_close_type='year', can not do auto close, since the year close entry need to add this period later
+        '''
+        if data.auto_opt == 'post_close' and company.period_close_type == 'period':
             period_close_obj = self.pool.get('account.period.close')
             #create close object
             c = context.copy()
