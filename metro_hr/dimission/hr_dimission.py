@@ -205,8 +205,8 @@ class hr_dimission(osv.osv):
         update related data
         '''
         #1.设置员工:辞职申请: employment_resigned, 离职日期:employment_finish , active=false
-        emp_vals = {'employment_resigned':order.date_request, 'employment_finish': datetime.now(), 'active':False}
-        self.pool.get('hr.employee').write(cr, uid, order.employee_id.id, emp_vals, context=context)
+#        emp_vals = {'employment_resigned':order.date_request, 'employment_finish': datetime.now(), 'active':False}
+#        self.pool.get('hr.employee').write(cr, uid, order.employee_id.id, emp_vals, context=context)
         #2.禁用相关res_users
         if order.employee_id.user_id:
             self.pool.get('res.users').write(cr, uid, order.employee_id.user_id.id, {'active':False}, context=context)
