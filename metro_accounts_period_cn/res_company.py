@@ -39,6 +39,7 @@ class res_company(osv.osv):
             period_ids = self.pool.get('account.period').search(cr, uid, ['|', ('close_entry_done', '=', True), ('state', '=', 'done')])
             if period_ids:
                 raise osv.except_osv(_('Error!'), _("You cannot change the Accounting Transfer Method once there are closed or closing periods!"))
+        return super(res_company,self).write(cr, uid, ids, vals, context=context)
 res_company()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
