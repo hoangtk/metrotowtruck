@@ -181,6 +181,9 @@
 	            </xpath>
 	            <field name='company_id' position="attributes">
 	            	<attribute name="invisible">0</attribute>
+	            </field>	            		            
+	            <field name="purchase_ok" position="after">
+                    <field name="checked"/>
 	            </field>
             </field>
         </record>
@@ -233,6 +236,7 @@
                 </field>
                 <xpath expr="//page[@string='Information']/group/group[3]" position="after">
                      <group>
+                    	<field name="checked"/>
                          <field name="create_uid"/>
                          <field name="create_date"/>
                      </group>
@@ -264,7 +268,7 @@
 	                    <button name="button_draft" states="end,obsolete" string="Restart" type="object" class="oe_highlight" groups="metro.group_data_maintain_manager"/>
 	                    <field name="state" widget="statusbar" statusbar_visible="draft,sellable,end" statusbar_colors='{"end":"red","obsolete":"red"}' readonly="1"/>
 	                </header>	            
-	            </xpath>            
+	            </xpath>           
             </data>
             </field>
 		</record>
@@ -407,6 +411,9 @@
             		<separator/>
             		<filter string="No Onhand" icon="terp-accessories-archiver" domain="[('qty_onhand','&lt;=',0)]"/>
             		<filter string="Negative Onhand" icon="terp-accessories-archiver" domain="[('qty_onhand','&lt;',0)]"/>
+            		<separator/>
+            		<filter string="Checked" icon="terp-accessories-archiver" domain="[('checked','=',True)]"/>
+            		<filter string="Not Checked" icon="terp-accessories-archiver" domain="[('checked','=',False)]"/>
             	</filter>
             </field>
         </record>

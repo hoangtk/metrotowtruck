@@ -182,6 +182,7 @@ class product_product(osv.osv):
 		'default_code' : fields.char('Internal Reference', size=64, select=True, required=True),
 		'partner_ref' : fields.function(_product_partner_ref, type='char', string='Customer ref'),
         'part_no_external': fields.char(string=u'External Part#', size=32, help="The external part#, may be from engineering, purchase..."),
+        'checked': fields.boolean('Checked', help="User can use this flag field to check the products, once you finish checking, once finish the checking and fixed data, then check it, you only need to check the items without this flag"),
         #add the field qty_onhand, qty_virtual, qty_in, qty_out, to store them into database, then user can sort and query them on GUI
         #they are corresponding to the original columns: qty_available, virtual_available, incoming_qty, outgoing_qty
         #replace the xml view with the new columns, and other program also read from the original qty function columns
