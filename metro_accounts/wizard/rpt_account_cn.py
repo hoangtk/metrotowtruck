@@ -49,6 +49,8 @@ class rpt_account_cn(osv.osv_memory):
         'level': fields.selection([('general', 'General'),('detail', 'Detail'),], "Report Level", required=True),     
         #Show counterpart account flag for detail report level   
         'show_counter': fields.boolean("Show counterpart", required=False),
+        'no_zero_balance': fields.boolean("Hide data with zero balance", required=False, 
+                                          help="Check this to hide: \n1.The periods without entries\n2.The accounts with zero initial balance and all periods have no entries"),
         }
     
     def _get_accounts_default(self, cr, uid, context=None):
@@ -62,6 +64,7 @@ class rpt_account_cn(osv.osv_memory):
         'target_move': 'posted',
 #        'account_ids': _get_accounts_default,
         'level': 'general',   
+        'no_zero_balance':True
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(rpt_account_cn,self).default_get(cr, uid, fields_list, context)
@@ -295,7 +298,10 @@ class rpt_account_cn(osv.osv_memory):
                 #period sum line
                 debit = row[0]
                 credit = row[1]            
-                balance, direction = self._get_account_balance(account, debit, credit)
+                balance, direction = self._get_account_balance(account, debit, credit)                             
+                #if "no zero balance period" is set, and no entries of this period, then do not show this period
+                if rpt.no_zero_balance and debit == 0.0 and credit == 0:
+                    continue                
                 balance_sum += balance
                 rpt_ln = {'seq':seq,
                             'code':'', 
@@ -330,7 +336,16 @@ class rpt_account_cn(osv.osv_memory):
                 year_sum[period.fiscalyear_id.code]['credit'] = credit_year
                 
                 rpt_lns.append(rpt_ln)     
-                seq += 1              
+                seq += 1
+                
+                    
+            if rpt.no_zero_balance:
+                #get the last report line of this account
+                rpt_ln = rpt_lns.pop()
+                #if only have the initial balance row, and the initial balance is zero then skip this account
+                if not (rpt_ln['data_level'] == 'init_bal' and rpt_ln['balance'] == 0.0):
+                    rpt_lns.append(rpt_ln)
+                              
         return self.pool.get('rpt.account.cn.line'), rpt_lns    
 #        upt_lines = [(0,0,rpt_ln) for rpt_ln in rpt_lns]
 #        self.write(cr, uid, rpt.id, {'rpt_lines':upt_lines,'show_search':False},context=context)

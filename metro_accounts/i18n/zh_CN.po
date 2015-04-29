@@ -220,7 +220,7 @@ msgstr "贷方"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Post account entries by batch"
-msgstr "凭证批量过账"
+msgstr "凭证批量登帐"
 
 #. module: metro_accounts
 #: view:cash.bank.trans:0
@@ -347,7 +347,7 @@ msgstr "加"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Note: Only unposted entries can be post!"
-msgstr "注意: 只有未记账的凭证可以过账!"
+msgstr "注意: 只有未登账的凭证可以登帐!"
 
 #. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_inventory_amount_action
@@ -433,7 +433,7 @@ msgstr "核销"
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_partner_target_move
 #: field:rpt.account.cn,target_move:0 field:rpt.account.partner,target_move:0
 msgid "Target Moves"
-msgstr "凭证过账"
+msgstr "凭证登帐"
 
 #. module: metro_accounts
 #: help:account.voucher,receipt_number:0
@@ -844,7 +844,7 @@ msgstr "入库数量"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Are you sure to post the selected acccount entries?"
-msgstr "确认过账选择的凭证吗?"
+msgstr "确认登帐选择的凭证吗?"
 
 #. module: metro_accounts
 #: field:emp.reimburse,amount_credit:0
@@ -1140,7 +1140,7 @@ msgstr "日期:"
 #: view:account.move.batch:0
 #: model:ir.actions.act_window,name:metro_accounts.action_view_account_move_post
 msgid "Post"
-msgstr "过账"
+msgstr "登帐"
 
 #. module: metro_accounts
 #: selection:account.financial.report,operator:0
@@ -1336,7 +1336,7 @@ msgstr "General"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Note: Only posted entries will be cancel!"
-msgstr "注意:只有过账的凭证可以取消"
+msgstr "注意:只有登账的凭证可以取消"
 
 #. module: metro_accounts
 #: selection:cash.bank.trans,state:0 selection:emp.borrow,state:0
@@ -1885,7 +1885,7 @@ msgstr "平"
 #: code:addons/metro_accounts/emp_reimburse.py:0
 #, python-format
 msgid "The accounting entry to the order was posted, can not be deleted!"
-msgstr "会计凭证已经过账，此存取款单不能删除！"
+msgstr "会计凭证已经登帐，此存取款单不能删除！"
 
 #. module: metro_account
 #: code:addons/metro_accounts/cash_bank_trans.py:96
