@@ -32,8 +32,12 @@ class account_period_close_entry(osv.osv_memory):
        'period_id': fields.many2one('account.period', 'Closing Period', required=True, readonly=True),
        'journal_id': fields.many2one('account.journal', 'Closing Journal', domain="[('company_id','=', company_id),('period_close','=', True), ('type','=','situation'),('centralisation','=',True)]", required=True),
        'notes': fields.char('Notes',size=64, required=True),       
-       'company_id': fields.many2one('res.company', 'Company', required=True, select=1, help="Company related to this journal"),
-       'auto_opt': fields.selection([('none','None'),('post','Post Entry'),('post_close','Post Entry and Close Period')], 'Auto options', required=True),
+       'company_id': fields.many2one('res.company', 'Company', required=True, select=1),
+       'auto_opt': fields.selection([('none','None'),('post','Post Entry'),('post_close','Post Entry and Close Period')], 'Auto options', required=True,
+                                     help="1.Post Entry\n  auto post  the generated closing entry\n"\
+                                            "2.Post Entry and Close Period\n  auto post the generated closing entry, and close this period at last,"\
+                                            " but if this month is the last month of this year, then this period will not be close, "\
+                                            "since the year closing need this period be opening to add closing entry"),
     }
     _defaults={'auto_opt':'none'}
     
@@ -106,14 +110,18 @@ class account_period_close_entry(osv.osv_memory):
         if not company.period_close_type or not company.income_account_types  or not company.expense_account_types:
             raise osv.except_osv(_('Error!'), _('Please set the period closing parameter for company %s')%(company.name))
         
-        #if period_close_type is year, then update period and exit directly
-        if company.period_close_type == 'year':
-            #find the last period of this year
-            last_periods = obj_acc_period.search(cr, uid, [('fiscalyear_id','=',period.fiscalyear_id.id)], order="date_stop desc", limit=1, context=context)
-            #if the current closing period is the last period then continue, otherwise return
-            if not(last_periods and period.id == last_periods[0]):
-                obj_acc_period.write(cr, uid, data.period_id.id, {'close_entry_done':True}, context=context)
-                return {'type': 'ir.actions.act_window_close'}
+        #year's last period flag
+        is_year_last_period = False
+        #find the last period of this year
+        last_periods = obj_acc_period.search(cr, uid, [('fiscalyear_id','=',period.fiscalyear_id.id)], order="date_stop desc", limit=1, context=context)
+        #if the current closing period is the last period then continue, otherwise return
+        if last_periods and period.id == last_periods[0]:
+            is_year_last_period = True              
+                    
+        #if period_close_type is year and is not the last period of this year, then update period and exit directly     
+        if company.period_close_type == 'year' and not is_year_last_period:
+            obj_acc_period.write(cr, uid, data.period_id.id, {'close_entry_done':True}, context=context)
+            return {'type': 'ir.actions.act_window_close'}
         
         #journal's restriction checking
         if not journal.default_credit_account_id or not journal.default_debit_account_id:
@@ -243,9 +251,9 @@ class account_period_close_entry(osv.osv_memory):
             
         '''
         auto close the period
-        for  the last month of the period_close_type='year', can not do auto close, since the year close entry need to add this period later
+        for  the last month of the year, can not do auto close, since the year close entry need to add this period later
         '''
-        if data.auto_opt == 'post_close' and company.period_close_type == 'period':
+        if data.auto_opt == 'post_close' and not is_year_last_period:
             period_close_obj = self.pool.get('account.period.close')
             #create close object
             c = context.copy()

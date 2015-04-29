@@ -32,7 +32,7 @@ class account_fiscalyear_close_entry(osv.osv_memory):
        'fiscalyear_id': fields.many2one('account.fiscalyear', 'Closing Year', required=True, readonly=True),
        'journal_id': fields.many2one('account.journal', 'Closing Journal', domain="[('company_id','=', company_id),('year_close','=', True), ('type','=','situation'),('centralisation','=',True)]", required=True),
        'notes': fields.char('Notes',size=64, required=True),       
-       'company_id': fields.many2one('res.company', 'Company', required=True, select=1, help="Company related to this journal"),
+       'company_id': fields.many2one('res.company', 'Company', required=True, select=1),
        'auto_opt': fields.selection([('none','None'),('post','Post Entry'),('post_close','Post Entry and Close Last Period and Fiscal Year')], 'Auto options', required=True),
     }
     _defaults={'auto_opt':'none'}

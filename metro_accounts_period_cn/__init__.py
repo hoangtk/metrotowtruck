@@ -6,3 +6,4 @@ import account_period_close
 import account_move
 import account_fiscalyear_close_entry
 import account_fiscalyear
+import validate_account_move
