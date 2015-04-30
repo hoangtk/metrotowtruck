@@ -26,7 +26,7 @@ class account_move(osv.osv):
     _inherit = "account.move"
     
     def _centralise(self, cr, uid, move, mode, context=None):
-        if move.journal_id.period_close:
+        if move.journal_id.period_close or move.journal_id.year_close:
             '''
             for the centralise journal, the original _centralise() will generate move line to make the whole move is balance
             But this logic need to add all move lines in one time, if use create() to add move line, then one new move line may be generated each time for the centralise journal if this move is unbalance

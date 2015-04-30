@@ -9,7 +9,7 @@
             <field name="arch" type="xml">
             	<field name="date_stop" position="after">
             		<field name="need_open_period"/>
-	                <field name="close_journal_period_id"/>
+	                <field name="close_journal_period_id" invisible="1"/>
 	                <field name="close_move_id"/>
 	                <field name="close_entry_done"/>
 	            </field>
@@ -42,7 +42,7 @@
             <field name="model">account.fiscalyear</field>
             <field name="arch" type="xml">
 	            <field name="state" position="after">
-	                <field name="close_journal_period_id"/>
+	                <field name="close_journal_period_id" invisible="1"/>
 	                <field name="close_move_id"/>
 	                <field name="close_entry_done"/>
 	            </field>
