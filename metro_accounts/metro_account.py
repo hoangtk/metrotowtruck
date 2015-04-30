@@ -12,5 +12,10 @@ class account_account(osv.osv):
             ('c', 'Credit'),
         ], 'Balance Direction',) 
     }
+'''
+Update SQL:
+update account_account set bal_direct = 'd' where user_type in (select id from account_account_type where name in('Check','Asset','Bank','Cash','Receivable'))
+update account_account set bal_direct = 'c' where user_type in (select id from account_account_type where name in('Equity','Liability','Payable','Tax'))
+'''    
 account_account()
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
