@@ -97,7 +97,7 @@ class account_fiscalyear_close_entry(osv.osv_memory):
         last_period_ids = obj_acc_period.search(cr, uid, [('fiscalyear_id','=',year.id)], order="date_stop desc", limit=1, context=context)
         last_period = obj_acc_period.browse(cr, uid, last_period_ids[0], context=context)
         if not last_period.close_entry_done \
-                or (last_period.close_move_id and last_period.last_move_id.state != 'posted') \
+                or (last_period.close_move_id and last_period.close_move_id.state != 'posted') \
                 or last_period.state == 'done':
             raise osv.except_osv(_('Error!'), _('The last period[%s] of this year must be: \n1.generated closing entry \n2.the closing entry is posted \n3.the last period must keep opening to add the year closing entry.')%(last_period.name,))
         
@@ -152,7 +152,8 @@ class account_fiscalyear_close_entry(osv.osv_memory):
                     'account_id':account.id,
                     'debit': debit, 
                     'credit': credit, 
-                    'amount_currency':balance_in_currency}
+                    'amount_currency':balance_in_currency,
+                    'date_biz':last_period.date_stop}
             obj_acc_move_line.create(cr, uid, vals, context=context)
             
             #未分配利润科目
@@ -162,7 +163,8 @@ class account_fiscalyear_close_entry(osv.osv_memory):
                     'name':_('Year close profit wait allocation transfer %s')%(year.name,), 
                     'account_id':journal.default_credit_account_id.id,
                     'debit': debit, 
-                    'credit': credit}
+                    'credit': credit,
+                    'date_biz':last_period.date_stop}
             obj_acc_move_line.create(cr, uid, vals, context=context)
                 
         year_vals = {}

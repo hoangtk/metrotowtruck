@@ -23,10 +23,25 @@
     'name': 'Metro Accounting Period Processing CN',
     'version': '1.0',
     'category': 'Metro',
-    'description': "Metro Accounting Period Processing CN",        
+    'description' : """    
+Metro Accounting Period Processing CN.
+====================================
+
+Accounting Period Processing for China that covers:
+--------------------------------------------
+    * Period closing entry generation and closing
+    * Year closing entry generation and closing
+    * Not allow to cancel account entries for the closed period
+    * Only can select opening period on Accouting Entry
+    
+Depends:
+--------------------------------------------
+    * metro_accounts for the account_move_line.date_biz
+        
+    """,
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
-    'depends': ["account"],
+    'depends': ["account","metro_accounts"],
     'data': ['menu.xml',
              'res_company_view.xml',
              'account_journal_view.xml',
@@ -34,7 +49,8 @@
              'account_period_close_entry_view.xml',
 #             'account_period_close_view.xml',
              'account_fiscalyear_close_entry_view.xml',
-             'account_fiscalyear_view.xml'
+             'account_fiscalyear_view.xml',
+             'account_move_view.xml'
              ],
     'installable': True,
     'auto_install': False,

@@ -128,7 +128,7 @@ msgstr "or"
 #. module: metro_accounts_period_cn
 #: selection:res.company,period_close_type:0
 msgid "Period"
-msgstr "期间"
+msgstr "账结法"
 
 #. module: metro_accounts_period_cn
 #: model:ir.actions.act_window,name:metro_accounts_period_cn.action_account_period_close_entry_cancel
@@ -259,7 +259,7 @@ msgstr "期间结转"
 #. module: metro_accounts_period_cn
 #: selection:res.company,period_close_type:0
 msgid "Year"
-msgstr "年度"
+msgstr "表结法"
 
 #. module: metro_accounts_period_cn
 #: model:ir.model,name:metro_accounts_period_cn.model_account_period_close

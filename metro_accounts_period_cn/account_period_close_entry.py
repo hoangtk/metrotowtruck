@@ -184,7 +184,7 @@ class account_period_close_entry(osv.osv_memory):
                         credit = balance>0 and balance or 0
                         
                     vals = {'move_id':move_id, 'name':move_line_name, 'account_id':account.id,
-                            'debit': debit, 'credit': credit, 'amount_currency':balance_in_currency}
+                            'debit': debit, 'credit': credit, 'amount_currency':balance_in_currency,'date_biz':period.date_stop}
                     obj_acc_move_line.create(cr, uid, vals, context=context)
                 
             #add the profit move lines as the counterpart of the above move lines
