@@ -272,6 +272,7 @@ class pur_req_line(osv.osv):
         'order_date_request': fields.related('req_id','date_request',type='datetime',string='Requisition Date',readonly=True),
         'order_state': fields.related('req_id', 'state', type='selection',string='Status',readonly=True,
                                       selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),
+        'mfg_ids': fields.many2many('sale.product',string="MFG IDs"),
                         
     }
     _rec_name = 'product_id'

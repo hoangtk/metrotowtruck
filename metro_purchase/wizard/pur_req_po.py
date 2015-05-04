@@ -41,6 +41,7 @@ class pur_req_po_line(osv.osv_memory):
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure',required=True),
         'date_required': fields.date('Date Required',required=True),
         'inv_qty': fields.float('Inventory'),
+        'mfg_ids': fields.many2many('sale.product', string="MFG IDs"),
         'req_reason': fields.char('Reason and use',size=64),
         'req_line_id':fields.many2one('pur.req.line', 'Purchase Requisition'),
         'supplier_prod_id': fields.integer(string='Supplier Product ID', required=False),
@@ -115,7 +116,6 @@ class pur_req_po_line(osv.osv_memory):
             product_name = self.pool.get("product.product").read(cr,user,[vals['product_id']],['name'],context=context)[0]['name']
             raise osv.except_osv(_('Error!'),
                                  _('The product supplier name is required to product .\n %s'%product_name))     
-
         resu = super(pur_req_po_line,self).create(cr, user, vals, context=context)
         #update product supplier info
         self._update_prod_supplier(cr, user, [], vals, context)
@@ -167,6 +167,8 @@ class pur_req_po(osv.osv_memory):
                 if not line.generated_po:
                     uom_po_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom_id, line.product_qty_remain, line.product_id.uom_po_id, context=context)
                     uom_po_factor = line.product_id.uom_po_factor/line.product_uom_id.factor_display
+                    mfg_ids = line.mfg_ids and [mfg_id.id for mfg_id in line.mfg_ids] or []
+                    mfg_ids = [[6, False, mfg_ids]]
                     line_data.append({'product_id': line.product_id.id, 
                                       'product_qty_remain': line.product_qty_remain,
                                       'product_qty': line.product_qty_remain, 
@@ -183,6 +185,7 @@ class pur_req_po(osv.osv_memory):
                                       'date_required': line.date_required,
                                       'req_line_id':line.id, 
                                       'req_reason':line.req_reason,
+                                      'mfg_ids':mfg_ids
                                     })
                     if partner_id == None and line.product_id.seller_id.active:
                         partner_id = line.product_id.seller_id.id    									
@@ -228,15 +231,19 @@ class pur_req_po(osv.osv_memory):
                        'req_line_id':line.req_line_id.id,'date_planned':line.date_required,'price_unit':line.uom_po_price,
                        'name':(line.req_reason or ''),
                        'supplier_prod_id':line.supplier_prod_id, 'supplier_prod_name':line.supplier_prod_name, 
-                       'supplier_prod_code':line.supplier_prod_code,'supplier_delay':line.supplier_delay,}
-            #add the move_dest_id for the po_line
+                       'supplier_prod_code':line.supplier_prod_code,'supplier_delay':line.supplier_delay}
+            #update mfg_ids
+            mfg_ids = line.mfg_ids and [mfg_id.id for mfg_id in line.mfg_ids] or []
             procurement_id = line.req_line_id.procurement_ids and line.req_line_id.procurement_ids[0] or False
             if procurement_id:
                 if procurement_id.move_id:
+                    #add the move_dest_id for the po_line
                     po_line.update({'move_dest_id': procurement_id.move_id.id})
-                if procurement_id.mfg_ids and len(procurement_id.mfg_ids) > 0:
-                    po_line.update({'mfg_id': procurement_id.mfg_ids[0].id})
-                
+                if procurement_id.mfg_ids and len(procurement_id.mfg_ids) > 0:       
+                    mfg_ids.extend([mfg_id.id for mfg_id in procurement_id.mfg_ids])
+            if mfg_ids:
+                po_line.update({'mfg_ids': [[6,False,mfg_ids]]})
+                                                    
             po_lines.append(po_line);
         po_data['lines']=po_lines
         #call purchase.oder to generate order

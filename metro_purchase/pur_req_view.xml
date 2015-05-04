@@ -64,6 +64,7 @@
 	                    <field name="inv_uom_id" />
                         <field name="req_emp_id"/>
                         <field name="req_dept_id"/>
+                        <field name="mfg_ids" widget="many2many_tags"/>
                         <field name="req_reason"/>
                         <field name="req_ticket_no"/>
                         <field name="generated_po"/>
@@ -81,6 +82,7 @@
                         	<group>
 	                        	<field name="req_emp_id"/>
 	                       		<field name="req_dept_id"/>
+	                       		<field name="mfg_ids" widget="many2many_tags"/>
 	                            <field name="req_reason" />
 	                        	<field name="req_ticket_no"/>
 	                        	<field name="product_qty_remain" readonly="1"/>
@@ -190,6 +192,7 @@
                 <field name="inv_qty" />
             	<field name="req_emp_id"/>
                 <field name="req_dept_id"/>
+                <field name="mfg_ids" widget="many2many_tags"/>
                 <field name="req_reason" />
             	<field name="req_ticket_no"/>
                 <field name="order_warehouse_id"/>
@@ -213,6 +216,7 @@
 		                <field name="order_state"/>
 	                	<field name="req_emp_id" readonly="1"/>
 	                	<field name="req_ticket_no" readonly="1"/> 
+	                	<field name="mfg_ids" widget="many2many_tags"  readonly="1"/>
 	                	<field name="req_reason"  readonly="1"/>   
                 	</group>
                 	<group>
@@ -238,6 +242,7 @@
             <field name="arch" type="xml">
                 <search string="Search Purchase Requisition Lines">
                     <field name="product_id" string="Purducts"/>
+	                <field name="mfg_ids"/>
                     <field name="req_id" string="Purchase Requisition"/>
                     <filter icon="terp-document-new" name="draft" string="Draft" domain="[('order_state','=','draft')]"/>
                     <filter icon="terp-camera_test" name="confirmed" string="Confirmed" domain="[('order_state','=','confirmed')]"/>

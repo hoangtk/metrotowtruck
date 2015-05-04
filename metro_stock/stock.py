@@ -300,6 +300,7 @@ class stock_move(osv.osv):
         ),                
         'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
         'product_uom_base_qty': fields.function(_get_rec_info, type='float', string='Base Quantity', multi="rec_info", digits_compute=dp.get_precision('Product Unit of Measure'),readonly=True),
+        'mfg_ids': fields.related('purchase_line_id','mfg_ids',type='many2many',relation='sale.product',string="MFG IDs"),      
     }
 
     def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
