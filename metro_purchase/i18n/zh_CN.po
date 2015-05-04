@@ -1722,3 +1722,9 @@ msgstr "已收"
 msgid "Returned Quantity"
 msgstr "退货"
 
+#. module: metro_purchase
+#: model:ir.model.fields,field_description:metro_purchase.field_product_product_product_qty_req
+#: field:product.product,product_qty_req:0
+msgid "Requesting Quantities"
+msgstr "请购中"
+

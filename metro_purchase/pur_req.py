@@ -378,7 +378,7 @@ class product_product(osv.osv):
         res = {}
         req_obj = self.pool.get('pur.req.line')# get the object of model,pur_req_line
         for prod in self.browse(cr, uid, ids, context=context):
-            req_line_ids = req_obj.search(cr, uid, [('product_id','=',prod.id),('order_state','!=','cancel'),], context=context)#('cancel','Cancelled')
+            req_line_ids = req_obj.search(cr, uid, [('product_id','=',prod.id),('order_state','!=','cancel'),], context=context)
             prod_req_qty = 0.0
             for req_line in req_obj.browse(cr, uid, req_line_ids, context=context):#get the above req_line_ids 's product
                 prod_req_qty += req_line.product_qty #get the  'product_qty' in  fields.float('Quantity',
@@ -393,7 +393,7 @@ class product_product(osv.osv):
         return res
     
     _columns = {
-                'product_qty_req': fields.function(_product_qty_req, string='Requested Quantity without approval', type='float', digits_compute=dp.get_precision('Product Unit of Measure')),
+                'product_qty_req': fields.function(_product_qty_req, string='Requesting Quantities', type='float', digits_compute=dp.get_precision('Product Unit of Measure')),
                 }
 
 product_product()   

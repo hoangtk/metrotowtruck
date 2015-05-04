@@ -279,7 +279,7 @@
             <field name="arch" type="xml">
             <data>
                 <field name="qty_virtual" position="after">
-	            	<field name="product_qty_req" string="请购未采购数量"/>
+	            	<field name="product_qty_req"/>
 	            </field>
             </data>
         	</field>
@@ -293,7 +293,7 @@
             <field name="arch" type="xml">
             <data>
                 <field name="virtual_available" position="after">
-	            	<field name="product_qty_req" string="请购未采购数量"/>
+	            	<field name="product_qty_req"/>
 	            </field>
             </data>
         	</field>
