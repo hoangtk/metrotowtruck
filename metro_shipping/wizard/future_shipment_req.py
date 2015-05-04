@@ -106,7 +106,6 @@ class future_ship_req(osv.osv_memory):
         #{id:remain_qty}
         remain_future_ship_line_ids = dict((line.id,line.product_qty) for line in future_ship.line_ids)
         data =  self.browse(cr, uid, ids, context=context)[0]
-        print data  
         #loop user selected product lines, to update the products need to remain
         for line in data.line_ids:
             future_line_id = line.future_ship_line_id.id

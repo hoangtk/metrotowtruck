@@ -270,6 +270,35 @@
         <field name="view_id" ref="view_pur_req_line_full_tree"/>
         <field name="act_window_id" ref="action_pur_req_line_full"/>
     </record>
+    
+    <record id="product_normal_tree_view_req_qty" model="ir.ui.view">
+            <field name="name">product_normal_tree_view_req_qty</field>
+            <field name="model">product.product</field>
+            <field name="type">tree</field>
+            <field name="inherit_id" ref="metro_product.metro_product_product_tree_view"/>
+            <field name="arch" type="xml">
+            <data>
+                <field name="qty_virtual" position="after">
+	            	<field name="product_qty_req" string="请购未采购数量"/>
+	            </field>
+            </data>
+        	</field>
+    </record>
+    
+    <record id="product_normal_form_view_req_qty" model="ir.ui.view">
+            <field name="name">product_normal_form_view_req_qty</field>
+            <field name="model">product.product</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="arch" type="xml">
+            <data>
+                <field name="virtual_available" position="after">
+	            	<field name="product_qty_req" string="请购未采购数量"/>
+	            </field>
+            </data>
+        	</field>
+    </record>
+    
     <record model="ir.actions.act_window.view" id="action_pur_req_line_full_form">
         <field name="sequence" eval="2"/>
         <field name="view_mode">form</field>

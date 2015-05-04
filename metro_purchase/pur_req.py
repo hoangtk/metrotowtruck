@@ -197,7 +197,7 @@ class pur_req_line(osv.osv):
     _name = "pur.req.line"
     _description="Purchase Requisition Line"
     _rec_name = 'product_id'
-
+    
     def _generated_po(self, cursor, user, ids, name, arg, context=None):
         res = {}
         for req_line in self.browse(cursor, user, ids, context=context):
@@ -246,7 +246,9 @@ class pur_req_line(osv.osv):
             res[req_line.id]['generated_po'] = generated_po 
             res[req_line.id]['product_qty_remain'] = product_qty_remain
             res[req_line.id]['po_info'] = po_qty_str
-        return res    
+        return res  
+
+      
     _columns = {
         'req_id' : fields.many2one('pur.req','Purchase Requisition', ondelete='cascade'),
         'product_id': fields.many2one('product.product', 'Product' ,required=True),
@@ -269,8 +271,8 @@ class pur_req_line(osv.osv):
         'order_user_id': fields.related('req_id','user_id',type='many2one',relation='res.users',string='Requester',readonly=True),
         'order_date_request': fields.related('req_id','date_request',type='datetime',string='Requisition Date',readonly=True),
         'order_state': fields.related('req_id', 'state', type='selection',string='Status',readonly=True,
-                                      selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),        
-                
+                                      selection=[('draft','New'),('confirmed','Confirmed'),('approved','Approved'),('rejected','Rejected'),('in_purchase','In Purchasing'),('done','Purchase Done'),('cancel','Cancelled')]),
+                        
     }
     _rec_name = 'product_id'
     
@@ -363,4 +365,36 @@ class purchase_order_line(osv.osv):
     
 purchase_order_line()
 
+class product_product(osv.osv):
+    """
+    Requested Quantity without approval: we need the result of (PR - PO),
+    """
+    
+    _inherit = "product.product"
+    
+    def _product_qty_req(self, cr, uid, ids, field_names=None, arg=False, context=None):
+        if context is None:
+            context = {}
+        res = {}
+        req_obj = self.pool.get('pur.req.line')# get the object of model,pur_req_line
+        for prod in self.browse(cr, uid, ids, context=context):
+            req_line_ids = req_obj.search(cr, uid, [('product_id','=',prod.id),('order_state','!=','cancel'),], context=context)#('cancel','Cancelled')
+            prod_req_qty = 0.0
+            for req_line in req_obj.browse(cr, uid, req_line_ids, context=context):#get the above req_line_ids 's product
+                prod_req_qty += req_line.product_qty #get the  'product_qty' in  fields.float('Quantity',
+                if req_line.po_lines_ids:#if the purchase order has already been generated
+                    #calculate the quantity of this request line
+                    for po_line in req_line.po_lines_ids:#get the PO lines- products
+                        required_state = ('draft', 'confirmed', 'rejected', 'cancel', 'cancel_except')
+                        if po_line.order_id.state not in required_state:
+                            prod_req_qty -= po_line.product_qty    #deduct the number in PO
+                    prod_req_qty = max(0, prod_req_qty)
+            res[prod.id] = prod_req_qty           
+        return res
+    
+    _columns = {
+                'product_qty_req': fields.function(_product_qty_req, string='Requested Quantity without approval', type='float', digits_compute=dp.get_precision('Product Unit of Measure')),
+                }
+
+product_product()   
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
