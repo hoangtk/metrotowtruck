@@ -696,6 +696,7 @@
             	</field>
             	<field name="state" position="before">
             		<field name="date"/>
+            		<field name="mfg_ids"/>
             	</field>
         	</field>        
 		</record>
@@ -746,6 +747,7 @@
             	<field name="product_uom" position="after">
             		<field name="product_uom_base_qty"/>
             		<field name="product_uom_base"/>
+            		<field name="mfg_ids"/>
             	</field>
             	<field name="picking_id" position="attributes">
             		<attribute name="invisible">0</attribute>
@@ -822,6 +824,7 @@
             	<field name="date" position='replace'>
             		 <field name="date"/>
             		 <field name="type"/>
+            		 <field name="mfg_ids"/>
             	</field>
             	<filter string="Today"  position='after'>
             		 <separator/>

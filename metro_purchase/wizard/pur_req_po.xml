@@ -35,6 +35,7 @@
                       <field name="uom_po_factor" readonly="1"/>
                                   
                       <field name="date_required" on_change = "onchange_lead('date_required',date_required,context)"/>
+					  <field name="mfg_ids" widget="many2many_tags"/>
                       <field name="req_reason"/>
                       <field name="inv_qty" readonly="1"/>
                       <field name="product_uom_id" readonly="1"/>

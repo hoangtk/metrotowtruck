@@ -794,7 +794,8 @@ class purchase_order_line(osv.osv):
         'product_uom_base': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Base UOM',readonly=True),
         'product_uom_base_qty': fields.function(_get_rec_info, type='float', digits_compute=dp.get_precision('Product Unit of Measure'), string='Base Quantity', multi="rec_info"),
         'mfg_id': fields.many2one('sale.product', string='MFG ID'),     
-        'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of sales order lines."),   
+        'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of sales order lines."),
+        'mfg_ids': fields.many2many('sale.product','po_line_id_rel','po_line_id','id_id', string="MFG IDs"),        
     }  
     _order = "order_id desc, sequence, id"
     _defaults = {
