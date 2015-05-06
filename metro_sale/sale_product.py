@@ -289,7 +289,59 @@ class sale_product(osv.osv):
             'limit': 80,
             'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
         }
-          
+                
+    def cost_detail(self, cr, uid, ids, context):
+        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'hr_timesheet', 'act_analytic_cost_revenue')
+        act_id = act_id and act_id[1] or False
+        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+        #set the analytic account id            
+        analytic_account_id = self.read(cr, uid, ids[0], ['analytic_account_id'], context=context)['analytic_account_id'][0]
+        context['active_id'] = analytic_account_id
+        act_win['context'] = eval(act_win['context'], context)        
+        return act_win
+                
+    def material_requested(self, cr, uid, ids, context):
+        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_purchase', 'action_pur_req_line_full')
+        act_id = act_id and act_id[1] or False        
+        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+        act_win['context'] = {'search_default_mfg_ids': ids[0]}
+        return act_win
+                
+    def material_purchased(self, cr, uid, ids, context):
+        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_purchase', 'metro_po_line_full_action')
+        act_id = act_id and act_id[1] or False       
+        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+        act_win['context'] = {'search_default_mfg_ids': ids[0]}
+        return act_win
+                
+    def material_incoming(self, cr, uid, ids, context):
+        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'action_reception_picking_move')
+        act_id = act_id and act_id[1] or False        
+        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+        act_win['context'] = {'search_default_mfg_ids': ids[0]}
+        return act_win
+                
+    def material_consumed(self, cr, uid, ids, context):
+        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_stock', 'action_stock_mt_rpt')
+        act_id = act_id and act_id[1] or False        
+        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+        act_win['context'] = {'search_default_mr_sale_prod_id': ids[0]}
+        return act_win
+                
+#    def product_produced(self, cr, uid, ids, context):
+#        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_purchase', 'action_pur_req_line_full')
+#        act_id = act_id and act_id[1] or False            
+#        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+#        act_win['context'] = {'search_default_mfg_ids': ids[0]}
+#        return act_win
+#                
+#    def product_delivered(self, cr, uid, ids, context):
+#        act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_purchase', 'action_pur_req_line_full')
+#        act_id = act_id and act_id[1] or False           
+#        act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
+#        act_win['context'] = {'search_default_mfg_ids': ids[0]}
+#        return act_win
+                                  
 class mttl_serials(osv.osv):
     _inherit = "mttl.serials"
     _columns = {

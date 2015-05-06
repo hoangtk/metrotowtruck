@@ -52,6 +52,13 @@
                     </div>
                     <div class="oe_right oe_button_box" name="buttons">
                         <button name="attachment_tree_view" string="Documents" type="object"/>
+                        <button name="cost_detail" string="Cost Detail" type="object"/>
+                        <button name="material_requested" string="Requested Material" type="object"/>
+                        <button name="material_purchased" string="Purchased Material" type="object"/>
+                        <button name="material_incoming" string="Incoming Materials" type="object"/>
+                        <button name="material_consumed" string="Consumed Materials" type="object"/>
+                        <!-- <button name="product_produced" string="Produced Products" type="object"/>
+                        <button name="product_delivered" string="Delivered Products" type="object"/> -->
                     </div>
 	            	<group>
 	            		<group>
