@@ -347,7 +347,7 @@ msgstr "加"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Note: Only unposted entries can be post!"
-msgstr "注意: 只有未登账的凭证可以过账!"
+msgstr "注意: 只有未过账的凭证可以过账!"
 
 #. module: metro_accounts
 #: model:ir.actions.act_window,name:metro_accounts.rpt_inventory_amount_action
@@ -1336,7 +1336,7 @@ msgstr "General"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Note: Only posted entries will be cancel!"
-msgstr "注意:只有登账的凭证可以取消"
+msgstr "注意:只有过账的凭证可以取消"
 
 #. module: metro_accounts
 #: selection:cash.bank.trans,state:0 selection:emp.borrow,state:0
@@ -1745,7 +1745,7 @@ msgstr "科目报表"
 #: model:ir.model.fields,field_description:metro_accounts.field_emp_borrow_journal_cash_id
 #: model:ir.model.fields,field_description:metro_accounts.field_emp_reimburse_journal_cash_id
 msgid "Cash Journal"
-msgstr "现金帐"
+msgstr "现金账"
 
 #. module: metro_accounts
 #: view:account.financial.report.account.item:0
@@ -1825,7 +1825,7 @@ msgstr "供应商付款"
 #. module: account
 #: view:account.move:0
 msgid "Cancel Entry"
-msgstr "取消过帐"
+msgstr "取消过账"
 
 #. module: account
 #: selection:account.account.type,report_type:0
@@ -1922,7 +1922,7 @@ msgstr "其他收款"
 #: code:addons/metro_accounts/cash_bank_trans.py:84
 #, python-format
 msgid "Bank Trans"
-msgstr "银行转帐"
+msgstr "银行转账"
 
 #. module: metro_account
 #: code:addons/metro_accounts/cash_bank_trans.py:195
