@@ -24,7 +24,7 @@
                    <field name="chart_account_id" widget='selection' on_change="onchange_chart_id(chart_account_id, context)"/>
                    <field name="target_move"/>
                    <field name="fiscalyear_id" domain="[('company_id','=',company_id)]" required="1"/>
-                   <field name="period_to" domain="[('fiscalyear_id', '=', fiscalyear_id)]" required="1"/>
+                   <field name="period_to" domain="[('fiscalyear_id', '=', fiscalyear_id)]" required="1" string="Period"/>
                    
                    <field name="account_report_id" domain="[('parent_id','=',False)]" invisible="1"/>
                 </group>
@@ -76,7 +76,7 @@
                    <field name="chart_account_id" widget='selection' on_change="onchange_chart_id(chart_account_id, context)"/>
                    <field name="target_move"/>
                    <field name="fiscalyear_id" domain="[('company_id','=',company_id)]" required="1"/>
-                   <field name="period_to" domain="[('fiscalyear_id', '=', fiscalyear_id)]" required="1"/>
+                   <field name="period_to" domain="[('fiscalyear_id', '=', fiscalyear_id)]" required="1" string="Period"/>
                    
                    <field name="account_report_id" domain="[('parent_id','=',False)]" invisible="1"/>
                 </group>

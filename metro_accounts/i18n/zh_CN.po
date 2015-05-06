@@ -317,7 +317,7 @@ msgstr "借方"
 #: model:ir.ui.menu,name:metro_accounts.account_financial_report_plcn_menu
 #: field:res.company,report_plcn_id:0
 msgid "Profit and Loss"
-msgstr "损益类"
+msgstr "损益表"
 
 #. module: metro_accounts
 #: field:cash.bank.trans,amount:0 field:emp.borrow,amount:0
@@ -1810,6 +1810,11 @@ msgstr "查看源单据"
 #: view:res.partner:0
 msgid "Receivables & Payables"
 msgstr "应收&应付"
+
+#. module: metro_accounts
+#: view:accounting.report:0
+msgid "Period"
+msgstr "期间"
 
 ########################manual########################
 #. module: account_voucher

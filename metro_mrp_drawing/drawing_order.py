@@ -32,6 +32,8 @@ class drawing_order(osv.osv):
         'company_id': fields.many2one('res.company', 'Company', readonly=True),     
         'product_id': fields.related('drawing_order_line','product_id', type='many2one', relation='product.product', string='Product'),
         'main_part_id': fields.many2one('product.product','Main Product',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
+        'drawing_file_name': fields.char('BOM File Name', size=64),
+        'drawing_file': fields.function(utils.field_get_file, fnct_inv=utils.field_set_file, string="BOM File", type="binary", multi="_get_file",),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'drawing.order', context=c),
