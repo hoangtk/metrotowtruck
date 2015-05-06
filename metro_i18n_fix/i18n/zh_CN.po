@@ -71,7 +71,7 @@ msgstr "银行"
 #. module: account
 #: view:account.move:0
 msgid "Post"
-msgstr "登账"
+msgstr "过账"
 
 #. module: account
 #: view:account.move:0
@@ -90,7 +90,7 @@ msgstr "未过账凭证"
 #: selection:account.move,state:0
 #: view:account.move.line:0
 msgid "Unposted"
-msgstr "未登账"
+msgstr "未过账"
 
 #. module: account
 #: view:account.entries.report:0
@@ -99,23 +99,23 @@ msgstr "未登账"
 #: selection:account.move,state:0
 #: view:account.move.line:0
 msgid "Posted"
-msgstr "已登账"
+msgstr "已过账"
 
 #. module: account
 #: view:account.entries.report:0
 msgid "Posted entries"
-msgstr "已登账凭证"
+msgstr "已过账凭证"
 
 #. module: account
 #: view:account.move.line:0
 msgid "Posted Journal Items"
-msgstr "已登账凭证"
+msgstr "已过账凭证"
 
 #. module: account
 #: view:account.move:0
 #: view:account.move.line:0
 msgid "Unposted Journal Entries"
-msgstr "未登账凭证"
+msgstr "未过账凭证"
 
 #. module: account
 #: code:addons/account/account.py:1327
@@ -123,7 +123,7 @@ msgstr "未登账凭证"
 msgid ""
 "You cannot modify a posted entry of this journal.\n"
 "First you should set the journal to allow cancelling entries."
-msgstr "不能修改已经登账的凭证项，首先设置分类账允许取消"
+msgstr "不能修改已经过账的凭证项，首先设置分类账允许取消"
 
 #. module: metro_accounts
 #: view:account.move.batch:0
@@ -133,7 +133,7 @@ msgstr "凭证批量过账"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Note: Only unposted entries can be post!"
-msgstr "注意: 只有未登账的凭证可以过账!"
+msgstr "注意: 只有未过账的凭证可以过账!"
 
 #. module: metro_accounts
 #: model:ir.model.fields,field_description:metro_accounts.field_rpt_account_cn_target_move
@@ -164,7 +164,7 @@ msgstr "会计凭证已经过账，此存取款单不能删除！"
 #. module: metro_accounts
 #: view:account.move.batch:0
 msgid "Note: Only posted entries will be cancel!"
-msgstr "注意:只有登账的凭证可以取消"
+msgstr "注意:只有过账的凭证可以取消"
 
 #. module: account
 #: model:ir.ui.menu,name:account.menu_finance_periodical_processing
@@ -204,3 +204,60 @@ msgstr "附件"
 #: view:product.product:0
 msgid "Images"
 msgstr "图片"
+#. module: account
+#: help:account.account,user_type:0
+msgid ""
+"Account Type is used for information purpose, to generate country-specific "
+"legal reports, and set the rules to close a fiscal year and generate opening "
+"entries."
+msgstr "科目类别用于生成合乎各国财税规范的报表，设置财年结帐的规则以及生成未过账凭证"
+
+#. module: account
+#: code:addons/account/account.py:1411
+#, python-format
+msgid "You cannot delete a posted journal entry \"%s\"."
+msgstr "你不能删除已经过账的分类账分录\"%s\"."
+
+#. module: account
+#: help:account.journal,entry_posted:0
+msgid ""
+"Check this box if you don't want new journal entries to pass through the "
+"'draft' state and instead goes directly to the 'posted state' without any "
+"manual validation. \n"
+"Note that journal entries that are automatically created by the system are "
+"always skipping that state."
+msgstr ""
+"勾选，如果您不想新的分录跳过“草稿”状态直接到“已过账”状态，中间无需手动审核。\n"
+"注意系统自动创建的分录总是跳过这状态。"
+
+
+#. module: account
+#: selection:account.aged.trial.balance,target_move:0
+#: selection:account.balance.report,target_move:0
+#: selection:account.central.journal,target_move:0
+#: selection:account.chart,target_move:0
+#: selection:account.common.account.report,target_move:0
+#: selection:account.common.journal.report,target_move:0
+#: selection:account.common.partner.report,target_move:0
+#: selection:account.common.report,target_move:0
+#: selection:account.general.journal,target_move:0
+#: selection:account.partner.balance,target_move:0
+#: selection:account.partner.ledger,target_move:0
+#: selection:account.print.journal,target_move:0
+#: selection:account.report.general.ledger,target_move:0
+#: selection:account.tax.chart,target_move:0
+#: selection:account.vat.declaration,target_move:0
+#: selection:accounting.report,target_move:0
+#: code:addons/account/report/common_report_header.py:68
+#, python-format
+msgid "All Posted Entries"
+msgstr "所有已过账凭证"
+
+#. module: account
+#: model:ir.actions.act_window,name:account.action_validate_account_move
+#: model:ir.actions.act_window,name:account.action_validate_account_move_line
+#: model:ir.ui.menu,name:account.menu_validate_account_moves
+#: view:validate.account.move:0
+#: view:validate.account.move.lines:0
+msgid "Post Journal Entries"
+msgstr "过账"
