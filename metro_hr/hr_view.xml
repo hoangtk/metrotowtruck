@@ -76,10 +76,17 @@
 		                    	<field name="known_medical_type" widget="many2many_tags"/>
 		                        <field name="known_allergies"/>
 		                        <field name="room_no"/>
-		                        <field name="bunk_no"/>
+		                        <field name="bunk_no"/>		                        
 		                    </group>
 	                    </group>
                     </group>
+                    <field name="notes" position="replace">
+                    </field>
+                    <field name="emp_code" position="after">
+                    	<field name="notes"/>
+                    </field>
+                    
+                    <field name="notes"/>
                     <xpath expr="//div[@name='button_box']" position="inside">
                         <button name="%(action_hr_send_checklist_batch)d" string="Send Welcome Cheklist" type="action" groups="base.group_hr_manager"/>
                     </xpath>

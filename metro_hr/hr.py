@@ -113,8 +113,6 @@ class hr_employee(osv.osv):
         'tools_assigned': fields.char('Tools Assigned',size=128),
         'business_card': fields.char('Business Cards',size=128),
         'computer_id': fields.char('Computer ID',size=128),
-        #the notes that is private, not public to other users
-        'notes_hr': fields.text('Notes'),
 	}
 	_sql_constraints = [
 		('emp_code_uniq', 'unique(emp_code)', 'Employee Code must be unique!'),
