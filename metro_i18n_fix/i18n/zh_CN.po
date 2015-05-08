@@ -204,6 +204,7 @@ msgstr "附件"
 #: view:product.product:0
 msgid "Images"
 msgstr "图片"
+
 #. module: account
 #: help:account.account,user_type:0
 msgid ""

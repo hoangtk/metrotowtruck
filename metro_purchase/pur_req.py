@@ -252,6 +252,7 @@ class pur_req_line(osv.osv):
     _columns = {
         'req_id' : fields.many2one('pur.req','Purchase Requisition', ondelete='cascade'),
         'product_id': fields.many2one('product.product', 'Product' ,required=True),
+        'uom_categ_id': fields.related('product_uom_id','category_id',type='many2one',relation='product.uom.categ',String="UOM Category"),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'),required=True),
         'product_uom_id': fields.many2one('product.uom', 'Product UOM',required=True),
         'inv_uom_id': fields.related('product_id','uom_id',type='many2one',relation='product.uom', string='Inventory UOM',readonly=True),
@@ -283,17 +284,17 @@ class pur_req_line(osv.osv):
         @return:  Dictionary of changed values
         """
         value = {'product_uom_id': '', 'inv_qty': ''}
-        res = {}
         if product_id:
             prod = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
             value = {'product_qty':1.0,'inv_qty':prod.qty_available}
-            uom = prod.uom_po_id or prod.uom_id
+            uom = prod.uom_id or prod.uom_po_id
             value.update({'product_uom_id': uom.id,'inv_uom_id':prod.uom_id.id})
-            # - set a domain on product_uom
-            domain = {'product_uom_id': [('category_id','=',uom.category_id.id)]}
-        res['domain'] = domain
-        res['value'] = value
-        return res
+            '''
+            Add the uom_categ_id, johnw, 05/08/2015
+            '''
+            value['uom_categ_id'] = prod.uom_id.category_id.id
+            
+        return {'value':value}
 
     _defaults = {
         'product_qty': lambda *a: 1.0,
@@ -308,18 +309,15 @@ class pur_req_line(osv.osv):
             return {'value': {'product_uom_id' : False}}
         # - check that uom and product uom belong to the same category
         product = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
-        prod_uom = product.uom_po_id or product.uom_id
+        prod_uom = product.uom_id or product.uom_po_id
         uom = self.pool.get('product.uom').browse(cr, uid, uom_id, context = context)
         if prod_uom.category_id.id != uom.category_id.id:
             if self._check_product_uom_group(cr, uid, context=context):
                 res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
             uom_id = prod_uom.id
-
-        # - set a domain on product_uom
-        domain = {'product_uom_id': [('category_id','=',prod_uom.category_id.id)]}
-        res['domain'] = domain
-        res['value'] = {'product_uom_id': uom_id}
+        res['value'] = {'product_uom_id': uom_id, 'uom_categ_id':uom.category_id.id}
         return res
+    
     def _check_product_uom_group(self, cr, uid, context=None):
         group_uom = self.pool.get('ir.model.data').get_object(cr, uid, 'product', 'group_uom')
         res = [user for user in group_uom.users if user.id == uid]
