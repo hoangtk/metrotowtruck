@@ -50,6 +50,17 @@ class accounting_report(osv.osv_memory):
                 lines[report.code]['balance_cmp'] = balance_cmp
         return lines
     
+    def check_report(self, cr, uid, ids, context=None):
+        resu = super(accounting_report, self).check_report(cr, uid, ids, context=context)
+        #clear the fiscal year parameter to make sure to query date by period only,  the reason see the account_move_line._query_get() method
+        used_context = resu['datas']['form']['used_context']
+        used_context['fiscalyear'] = False
+        used_context['all_fiscalyear'] = True
+        comparison_context = resu['datas']['form']['comparison_context']
+        comparison_context['fiscalyear'] = False
+        comparison_context['all_fiscalyear'] = True
+        return resu
+    
     def check_report_excel(self, cr, uid, ids, context=None):
         data = self.check_report(cr, uid, ids, context)['datas']
         #get report meta data
@@ -267,8 +278,8 @@ class accounting_report(osv.osv_memory):
                                      })
                     
                     #clear the fiscal year parameter to make sure to query date by period only,  the reason see the account_move_line._query_get() method
-                    if 'fiscalyear_id' in vals: vals.pop('fiscalyear_id')
-                    if 'fiscalyear_id_cmp' in vals: vals.pop('fiscalyear_id_cmp')
+#                    if 'fiscalyear_id' in vals: vals.pop('fiscalyear_id')
+#                    if 'fiscalyear_id_cmp' in vals: vals.pop('fiscalyear_id_cmp')
 #                    vals.update({'fiscalyear_id':None,
 #                                 'fiscalyear_id_cmp':None,
 #                                 })
