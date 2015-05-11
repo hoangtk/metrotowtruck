@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>                       
-        <act_window name="MFG ID Purchase Requisition"
+        <act_window name="Inventory Reservation and Purchae Requisition"
             res_model="mfg.id.req"
             src_model="sale.product"
             view_mode="form"
@@ -11,7 +11,7 @@
             id="act_mfg_id_req"/>
             
         <record id="view_mfg_id_req_form" model="ir.ui.view">
-            <field name="name">MFG ID Purchase Requisition</field>
+            <field name="name">MFG ID Inventory Reservation and Purchae Requisition</field>
             <field name="model">mfg.id.req</field>
             <field name="arch" type="xml">
                 <form string="MFG ID Purchase Requisition" version="7.0">

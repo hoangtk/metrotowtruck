@@ -36,8 +36,8 @@
                 	<field name="location_id"/>
                 	<field name="product_qty"/>
                 	<field name="product_qty_consumed"/>
-                	<field name="pur_req_line_id"/>
                 	<field name="pur_req_id"/>
+                	<field name="pur_req_line_id"/>
             </tree>
       </field>
     </record>
@@ -121,7 +121,7 @@
 	            	<field name="bom_id_material"/>
 	            </field>
 	            <button name="wkf_cancel" position="after">
-	            	<button name="%(act_mfg_id_req)d" states="confirmed,engineer,manufacture" type="action" string="Inventory Reservation and Purchae Requisition"/>
+	            	<button name="%(act_mfg_id_req)d" states="confirmed,engineer,manufacture" type="action" string="Generate Inventory Reservation and Purchase Requisition"/>
 	            </button>
 	            <button name="material_requested" position="before">
 	            	<button name="material_reserved" string="Reserved Material" type="object"/>

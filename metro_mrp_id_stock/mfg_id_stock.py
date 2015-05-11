@@ -98,7 +98,7 @@ class sale_product(osv.osv):
         bom_mfg_ids = {}
         for mfg_id in self.browse(cr, uid, ids, context=context):
             if not mfg_id.bom_id_material:
-                raise osv.except_osv(_('Error'), _('Please assign BOM to MFG ID (%s), then you can generated purchase requisitions from it'))
+                raise osv.except_osv(_('Error'), _('Please assign material BOM to MFG ID (%s), then you can generated purchase requisitions from it')%(mfg_id.name,))
             bom = mfg_id.bom_id_material
             mfg_ids = bom_mfg_ids.get(bom.id,[])
             if not mfg_ids:
@@ -159,6 +159,10 @@ class sale_product(osv.osv):
                     
                 #create reservation line
                 for mfg_id in mfg_ids:
+                    #if there are reservation and having consumed quantity,  then can raise error
+                    ids_used = id_reserve_obj.search(cr, uid, [('mfg_id','=',mfg_id),('product_id','=',line['product_id']),('product_qty_consumed','>',0)], context=context)
+                    if ids_used:
+                        raise osv.except_osv(_('Error'), _('MFG ID(%s) consumed product [%s]%s, can not generated reservation again!')%(mfg_id,product.default_code,product.name))
                     cr.execute('delete from mfg_id_reserve where mfg_id=%s and product_id=%s',(mfg_id, line['product_id']))
                     reserve_vals = {'mfg_id':mfg_id, 'product_id':line['product_id'], 'location_id':location_id, 'product_qty':bom_qty/len(mfg_ids), 'pur_req_line_id':pur_req_line_id}
                     id_reserve_obj.create(cr, uid, reserve_vals, context=context)
@@ -180,7 +184,7 @@ class sale_product(osv.osv):
         act_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'metro_mrp_id_stock', 'action_mfg_id_reserve')
         act_id = act_id and act_id[1] or False        
         act_win = self.pool.get('ir.actions.act_window').read(cr, uid, act_id, [], context=context)
-        act_win['context'] = {'search_default_mfg_id': ids}
+        act_win['context'] = {'search_default_mfg_id': ids[0]}
         return act_win
 
 class stock_move(osv.osv):
