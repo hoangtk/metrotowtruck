@@ -1832,7 +1832,7 @@ msgid "Report Items"
 msgstr "报表项目"
 
 #. module: metro_accounts
-#: field:account.move,parent_report_item_ids:0
+#: field:account.account,parent_report_item_ids:0
 msgid "Parent Report Items"
 msgstr "所属报表项目"
               
