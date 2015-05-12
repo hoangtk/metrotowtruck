@@ -52,7 +52,7 @@ class account_journal(osv.osv):
         for journal in self.browse(cr, uid, ids, context=context):
             '''
             Journal can not be year and period close at the same time, 
-            since only one entry can be created for the centralisation journal, 
+            since only one entry can be created for the period/year close journal, 
             so if period and year create the closing entry to same journal/period, then error will be occured
             '''
             if journal.period_close and journal.year_close:

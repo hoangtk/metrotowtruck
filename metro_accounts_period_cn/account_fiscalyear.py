@@ -86,6 +86,9 @@ class account_fiscalyear(osv.osv):
             #cancel and delete the close journal entry
             if year.close_move_id:
                 if year.close_move_id.state == 'posted':
+                    #open the last month first
+                    context['force_open'] = True
+                    self.pool.get('account.period').action_draft(cr, uid, [year.close_move_id.period_id.id], context=context)
                     obj_acc_move.button_cancel(cr, uid, [year.close_move_id.id],context=context)
                 obj_acc_move.unlink(cr, uid, [year.close_move_id.id],context=context)                
             if year.close_journal_period_id:
@@ -111,7 +114,7 @@ class account_fiscalyear(osv.osv):
                 raise osv.except_osv(_('Invalid Action!'), _('In order to close a year, you must first close all periods of this year.'))
             
             #check the profit account balance, if there are balance of  this year, can not be close   
-            domain = [('company_id', '=', year.company_id.id), ('year_close', '=', True), ('type', '=', 'situation'), ('centralisation', '=', True)]
+            domain = [('company_id', '=', year.company_id.id), ('year_close', '=', True), ('type', '=', 'situation')]
             journal_ids = journal_obj.search(cr, uid, domain, context=context)            
             if not journal_ids:
                 raise osv.except_osv(_('Error!'), _('No available year close journal found, system need use it to get the profit account.'))

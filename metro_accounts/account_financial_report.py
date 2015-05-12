@@ -223,12 +223,55 @@ class account_financial_report_account_item(osv.osv):
         res.update({'value':{'fetch_logic':bal_direct,'name':account_data['name']}})
         return res
 '''
-Add 'code' match exactly function for the name_search, 
+1.Add 'code' match exactly function for the name_search, 
 this is for the account_financial_report_account_item importing using account code in csv
-use 'code:1001' in csv to replace the account name column is OK 
+use 'code:1001' in csv to replace the account name column is OK
+2.Add related finance report items
 '''
 class account_account(osv.osv):
     _inherit = "account.account"
+
+    '''
+    account.financial.report
+    
+            'type': fields.selection([
+                ('sum','View'),
+    'children_ids':  fields.one2many('account.financial.report', 'parent_id', 'Account Report'),
+    
+                ('accounts','Accounts'),
+    'account_ids': fields.many2many('account.account', 'account_account_financial_report', 'report_line_id', 'account_id', 'Accounts'),
+    
+                ('account_item','Account Items'),
+    'account_item_ids': fields.one2many('account.financial.report.account.item', 'report_id', string='Account Items'),
+    
+                ('account_type','Account Type'),
+    'account_type_ids': fields.many2many('account.account.type', 'account_account_financial_report_type', 'report_id', 'account_type_id', 'Account Types'),
+    
+                ('account_report','Report Value'),
+                ],'Type'),
+    'account_report_id':  fields.many2one('account.financial.report', 'Report Value'),
+    
+    '''    
+    def _parent_report_items(self, cr, uid, ids, field_names=None, arg=False, context=None):
+        if context is None:
+            context = {}
+        res = {}
+        for id in ids:
+            res[id] = []
+            
+        for account in self.browse(cr, uid, ids, context=context):
+            for item in account.report_item_ids:
+                if item.report_id.code:
+                    #only add the report with code
+                    res[item.account_id.id].append( item.report_id.id)
+                           
+        return res
+            
+    _columns={        
+              'report_item_ids':fields.one2many('account.financial.report.account.item','account_id', string='Report Items', readonly=True),
+              'parent_report_item_ids':fields.function(_parent_report_items, string="Finance Report Items", type="many2many", relation="account.financial.report")
+              }
+    
     def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=100):
         if not args:
             args = []

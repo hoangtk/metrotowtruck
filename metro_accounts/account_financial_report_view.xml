@@ -103,5 +103,31 @@
         </record>
         <menuitem id="menu_account_financial_report_account_item_tree" parent="account.menu_account_reports" action="action_account_financial_report_account_item_tree"/>
         
+<!-- Add parent_report_item_ids/report_item_ids to account view -->
+        <record model="ir.ui.view" id="view_account_form_rpt_item">
+            <field name="name">view_account_form_rpt_item</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_form"/>
+            <field name="arch" type="xml">
+            	<field name="user_type" position="after">
+            		<field name="parent_report_item_ids" widget="many2many_tags"/>
+            	</field>
+            	<field name="note" position="before">
+            		<label for="report_item_ids"/>
+            		<field name="report_item_ids"/>
+            	</field>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_account_list_rpt_item">
+            <field name="name">view_account_list_rpt_item</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_list"/>
+            <field name="arch" type="xml">
+            	<field name="user_type" position="after">
+            		<field name="parent_report_item_ids" widget="many2many_tags"/>
+            	</field>
+            </field>
+        </record>
+                
     </data>
 </openerp>
