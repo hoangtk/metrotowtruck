@@ -30,7 +30,7 @@ class account_period_close_entry(osv.osv_memory):
     _description = "Generate Period Closing Entries"
     _columns = {
        'period_id': fields.many2one('account.period', 'Closing Period', required=True, readonly=True),
-       'journal_id': fields.many2one('account.journal', 'Closing Journal', domain="[('company_id','=', company_id),('period_close','=', True), ('type','=','situation'),('centralisation','=',True)]", required=True),
+       'journal_id': fields.many2one('account.journal', 'Closing Journal', domain="[('company_id','=', company_id),('period_close','=', True), ('type','=','situation')]", required=True),
        'notes': fields.char('Notes',size=64, required=True),       
        'company_id': fields.many2one('res.company', 'Company', required=True, select=1),
        'auto_opt': fields.selection([('none','None'),('post','Post Entry'),('post_close','Post Entry and Close Period')], 'Auto options', required=True,
@@ -67,9 +67,9 @@ class account_period_close_entry(osv.osv_memory):
         if not defaults.get('period_id'):
             raise osv.except_osv(_('Error!'), _('No available period was found, please make sure there are periods with "Draft" state'))
         
-        #月结账簿-默认为本公司的period_close=1, type=('situation', 'Opening/Closing Situation'), centralisation=True的account_journal         
+        #月结账簿-默认为本公司的period_close=1, type=('situation', 'Opening/Closing Situation')的account_journal         
         if 'journal_id' in fields:
-            domain = [('company_id', '=', company_id), ('period_close', '=', True), ('type', '=', 'situation'), ('centralisation', '=', True)]
+            domain = [('company_id', '=', company_id), ('period_close', '=', True), ('type', '=', 'situation')]
             journal_ids = self.pool.get('account.journal').search(cr, uid, domain, context=context)
             if journal_ids:
                 defaults['journal_id'] = journal_ids[0]
@@ -126,8 +126,8 @@ class account_period_close_entry(osv.osv_memory):
         #journal's restriction checking
         if not journal.default_credit_account_id or not journal.default_debit_account_id:
             raise osv.except_osv(_('User Error!'),_('The journal must have default credit and debit account.'))
-        if (not journal.centralisation) or journal.entry_posted or not journal.period_close:
-            raise osv.except_osv(_('User Error!'),_('The journal must have centralized counterpart without the Skipping draft state option checked and for period close.'))            
+        if journal.entry_posted or not journal.period_close:
+            raise osv.except_osv(_('User Error!'),_('The journal must be without the Skipping draft state option checked and for period close.'))            
             
         #create the opening move
         vals = {
@@ -188,7 +188,7 @@ class account_period_close_entry(osv.osv_memory):
                     obj_acc_move_line.create(cr, uid, vals, context=context)
                 
             #add the profit move lines as the counterpart of the above move lines
-            if balance_total > 0:
+            if balance_total != 0.0:
                 balance = balance_total
                 balance_in_currency = balance_in_currency_total
                 if bal_direct == 'credit':
@@ -197,13 +197,13 @@ class account_period_close_entry(osv.osv_memory):
                     #record the profit amount
                     debit = balance<0 and -balance or 0
                     credit = balance>0 and balance or 0
-                    account_id = balance>0 and journal.default_crediit_account_id or journal.default_debit_account_id
+                    account_id = balance>0 and journal.default_credit_account_id or journal.default_debit_account_id
                 else:
                     #for the expense, the balance should be in debit
                     #record the profit amount
                     debit = balance>0 and balance or 0
                     credit = balance<0 and -balance or 0
-                    account_id = balance>0 and journal.default_debit_account_id or journal.default_crediit_account_id
+                    account_id = balance>0 and journal.default_debit_account_id or journal.default_credit_account_id
                 vals = {'move_id':move_id, 'name':move_line_profit_name, 'account_id':account_id.id,
                         'debit': debit, 'credit': credit
                         #, 'amount_currency':balance_in_currency

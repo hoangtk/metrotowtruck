@@ -45,8 +45,8 @@ class account_period(osv.osv):
             new_periods = period_obj.search(cr, uid, domain, context=context)            
             if new_periods:
                 raise osv.except_osv(_('Invalid Action!'), _('%s: there are periods closed or in closing after this period, please open them first.')%(period.name,))
-            #区间所属年度不能关闭或者或者生成年结凭证
-            if period.fiscalyear_id.state == 'done' or period.fiscalyear_id.close_entry_done:
+            #区间所属年度不能关闭或者或者生成年结凭证, force_open is used for the cancel one year's closing entry
+            if not context.get('force_open',False) and (period.fiscalyear_id.state == 'done' or period.fiscalyear_id.close_entry_done):
                 raise osv.except_osv(_('Invalid Action!'), _('%s: the year of this period is closed or in closing, please re-open the year first.')%(period.name,))
                      
             open_ids.append(period.id)

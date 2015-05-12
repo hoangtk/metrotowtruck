@@ -30,7 +30,7 @@ class account_fiscalyear_close_entry(osv.osv_memory):
     _description = "Generate Period Closing Entries"
     _columns = {
        'fiscalyear_id': fields.many2one('account.fiscalyear', 'Closing Year', required=True, readonly=True),
-       'journal_id': fields.many2one('account.journal', 'Closing Journal', domain="[('company_id','=', company_id),('year_close','=', True), ('type','=','situation'),('centralisation','=',True)]", required=True),
+       'journal_id': fields.many2one('account.journal', 'Closing Journal', domain="[('company_id','=', company_id),('year_close','=', True), ('type','=','situation')]", required=True),
        'notes': fields.char('Notes',size=64, required=True),       
        'company_id': fields.many2one('res.company', 'Company', required=True, select=1),
        'auto_opt': fields.selection([('none','None'),('post','Post Entry'),('post_close','Post Entry and Close Last Period and Fiscal Year')], 'Auto options', required=True),
@@ -56,9 +56,9 @@ class account_fiscalyear_close_entry(osv.osv_memory):
         if not defaults.get('fiscalyear_id'):
             raise osv.except_osv(_('Error!'), _('No available fiscal year was found, please make sure there are years with "Draft" state'))
         
-        #年结账簿-默认为本公司的year_close=1, type=('situation', 'Opening/Closing Situation'), centralisation=True的account_journal         
+        #年结账簿-默认为本公司的year_close=1, type=('situation', 'Opening/Closing Situation')的account_journal         
         if 'journal_id' in fields:
-            domain = [('company_id', '=', company_id), ('year_close', '=', True), ('type', '=', 'situation'), ('centralisation', '=', True)]
+            domain = [('company_id', '=', company_id), ('year_close', '=', True), ('type', '=', 'situation')]
             journal_ids = self.pool.get('account.journal').search(cr, uid, domain, context=context)
             if journal_ids:
                 defaults['journal_id'] = journal_ids[0]
@@ -108,8 +108,8 @@ class account_fiscalyear_close_entry(osv.osv_memory):
         #journal's restriction checking
         if not journal.default_credit_account_id or not journal.default_debit_account_id:
             raise osv.except_osv(_('User Error!'),_('The journal must have default credit and debit account.'))
-        if (not journal.centralisation) or journal.entry_posted or not journal.year_close:
-            raise osv.except_osv(_('User Error!'),_('The journal must have centralized counterpart without the Skipping draft state option checked and for year close.'))            
+        if  journal.entry_posted or not journal.year_close:
+            raise osv.except_osv(_('User Error!'),_('The journal must be without the Skipping draft state option checked and for year close.'))            
             
         #create the opening move
         vals = {
