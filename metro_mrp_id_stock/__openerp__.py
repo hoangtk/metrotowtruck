@@ -34,7 +34,7 @@ Metro MFG ID Stocking related
     'author': 'Metro Tower Trucks',
     'website': 'http://www.metrotowtrucks.com',
     'depends': ["metro_sale", "metro_purchase", "metro_stock", "metro_product"],
-    'data': ['mfg_id_reserve_view.xml', "wizard/mfg_id_req_view.xml", "security/ir.model.access.csv"],
+    'data': ["wizard/mfg_id_req_view.xml", 'mfg_id_reserve_view.xml',  "security/ir.model.access.csv"],
     'installable': True,
     'auto_install': True,
     'application': True,
