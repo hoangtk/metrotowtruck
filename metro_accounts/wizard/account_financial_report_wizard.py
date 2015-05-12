@@ -59,6 +59,14 @@ class accounting_report(osv.osv_memory):
         comparison_context = resu['datas']['form']['comparison_context']
         comparison_context['fiscalyear'] = False
         comparison_context['all_fiscalyear'] = True
+        #set the flag for plcn report to ingore the journal items in the closed journals
+        rpt_code = self.pool.get('account.financial.report').read(cr, uid, resu['datas']['form']['account_report_id'][0], ['code'], context=context)['code']
+        if rpt_code == 'plcn':
+            company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
+            journal_ids = self.pool.get('account.journal').search(cr, uid, [('company_id','=',company_id),('period_close','=',False),('year_close','=',False)],context=context)
+            used_context['journal_ids'] = journal_ids
+            comparison_context['journal_ids'] = journal_ids
+        
         return resu
     
     def check_report_excel(self, cr, uid, ids, context=None):
