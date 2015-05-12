@@ -45,6 +45,8 @@
        "res_company_view.xml",
        "hr_view.xml",
        "res_partner_view.xml",
+       "account_move_report.xml",
+       
         ],
     'demo': [],
     'test': [],

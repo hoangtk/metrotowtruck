@@ -269,7 +269,7 @@ class account_account(osv.osv):
             
     _columns={        
               'report_item_ids':fields.one2many('account.financial.report.account.item','account_id', string='Report Items', readonly=True),
-              'parent_report_item_ids':fields.function(_parent_report_items, string="Finance Report Items", type="many2many", relation="account.financial.report")
+              'parent_report_item_ids':fields.function(_parent_report_items, string="Parent Report Items", type="many2many", relation="account.financial.report")
               }
     
     def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=100):
