@@ -5,7 +5,7 @@
         name="account.move.print" rml="metro_accounts/report/account_move.rml" 
         string="Account Move" header="False"/>
                
-		<record id="account_move_invoice" model="ir.actions.report.xml">
+		<record id="account_move_print" model="ir.actions.report.xml">
 			<field name="download_filename">Account Move</field>
 		</record>
 		
