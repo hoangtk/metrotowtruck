@@ -1816,6 +1816,26 @@ msgstr "应收&应付"
 msgid "Period"
 msgstr "期间"
 
+#. module: metro_accounts
+#: view:account.move:0
+msgid "Print"
+msgstr "打印"
+
+#. module: metro_accounts
+#: model:ir.actions.report.xml,name:metro_accounts.account_move_print
+msgid "Account Move"
+msgstr "会计凭证"
+
+#. module: metro_accounts
+#: field:account.move,report_item_ids:0
+msgid "Report Items"
+msgstr "报表项目"
+
+#. module: metro_accounts
+#: field:account.move,parent_report_item_ids:0
+msgid "Parent Report Items"
+msgstr "所属报表项目"
+              
 ########################manual########################
 #. module: account_voucher
 #: model:ir.actions.act_window,name:account_voucher.action_vendor_payment

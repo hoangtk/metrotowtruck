@@ -25,9 +25,9 @@ from openerp.report import report_sxw
 from openerp.addons.metro.rml import rml_parser_ext  
 from metro.utils import cnumber
 
-class account_move(rml_parser_ext):
+class account_move_print(rml_parser_ext):
     def __init__(self, cr, uid, name, context=None):
-        super(account_move, self).__init__(cr, uid, name, context=context)
+        super(account_move_print, self).__init__(cr, uid, name, context=context)
         self.localcontext.update({
             'time': time, 
             'to_cn': self.to_cn, 
@@ -43,6 +43,6 @@ class account_move(rml_parser_ext):
             cn_amt = pt.cwchange(amount)
         return cn_amt
             
-report_sxw.report_sxw('report.account.move.invoice', 'account.move', 'addons/metro_accounts/account_move.rml', parser=account_move, header="internal")
+report_sxw.report_sxw('report.account.move.print', 'account.move', 'addons/metro_accounts/account_move.rml', parser=account_move_print, header=False)
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
