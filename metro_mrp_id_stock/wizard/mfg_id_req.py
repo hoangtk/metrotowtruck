@@ -24,7 +24,7 @@ from openerp.osv import fields, osv
 class mfg_id_req(osv.osv_memory):
     _name = "mfg.id.req"
     _columns={  
-                'location_id': fields.many2one("stock.location", string="Location"),
+                'location_id': fields.many2one("stock.location", string="Location", required=True),
               }
     def do_save(self, cr, uid, ids, context=None):
         mfg_ids = context.get('active_ids',[])
