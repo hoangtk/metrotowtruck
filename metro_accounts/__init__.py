@@ -16,3 +16,4 @@ import account_financial_report
 import res_company
 import account_move_source
 import hr
+import report

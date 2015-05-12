@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <report auto="False" id="account_move_invoice" model="account.move" name="account.move.invoice" rml="metro_accounts/report/account_move.rml" string="Journal Entries"/>
+               
+		<record id="account_move_invoice" model="ir.actions.report.xml">
+			<field name="download_filename">Account_move</field>
+		</record>
+		
+    </data>
+</openerp>
