@@ -161,7 +161,7 @@ class emp_reimburse(osv.osv):
             relation='account.account',
             string="Employee Reimburse Account",
             view_load=True,
-            domain="[('user_type.report_type','=','expense'), ('type','!=','view')]",
+            domain="[('type','!=','view')]",
             required=True),
         'description': fields.char('Description', size=128, required=False),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
