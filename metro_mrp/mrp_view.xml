@@ -76,7 +76,7 @@
                         			<field name='bom_id' invisible='1'/>
                         			<field name='routing_id' invisible='1'/>        			
                         			<field name='routing_workcenter_id' domain="[('routing_id','=',routing_id)]"/>
-                        			<field name='bom_comp_id' domain="[('bom_lines','!=',False),('bom_id','child_of',bom_id)]"/>
+                        			<field name='bom_comp_id' domain="[('bom_lines','!=',False),'|',('bom_id','=',bom_id),('id','=',bom_id)]"/>
                         			<field name='consume_material'/>        		
                         		</tree>
                         	</field>
