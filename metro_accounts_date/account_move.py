@@ -44,8 +44,10 @@ class account_move_line(osv.osv):
     #do not write move line's move_id
     def write(self, cr, uid, ids, vals, context=None, check=True, update_check=True):
         if 'move_id' in vals:
-#            vals.pop('move_id')
-            raise osv.except_osv(_('Error!'), _('Account move line can not be assigned to other entry once it is created!'))
+            exist_ids = self.search(cr, uid, [('move_id','=',vals['move_id']), ('id', 'in', ids)], context=context)
+            if len(exist_ids) != len(ids):
+                #the move_id will be change
+                raise osv.except_osv(_('Error!'), _('Account move line can not be assigned to other entry once it is created!'))
         return super(account_move_line, self).write(cr, uid, ids, vals, context=context, check=check, update_check=update_check)
 class account_journal(osv.osv):
     _inherit = "account.journal"
