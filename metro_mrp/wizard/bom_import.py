@@ -62,6 +62,10 @@ class bom_import(osv.osv_memory):
             context = {}
         res = super(bom_import, self).default_get(cr, uid, fields, context=context)
         mrp_bom_id = context and context.get('active_id', False) or False
+        active_model = context and context.get('active_model', False) or False
+        if active_model and active_model == 'project.project':
+            project = self.pool.get('project.project').browse(cr, uid, mrp_bom_id, context=context)            
+            mrp_bom_id = project.bom_id and project.bom_id.id or False
         if mrp_bom_id:
             mrp_bom = self.pool.get('mrp.bom').browse(cr, uid, mrp_bom_id, context=context)
             res.update({'mrp_bom_id': mrp_bom_id, 'product_id':mrp_bom.product_id.id, 'name':mrp_bom.name})
