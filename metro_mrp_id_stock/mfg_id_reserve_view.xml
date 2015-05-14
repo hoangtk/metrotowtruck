@@ -118,7 +118,7 @@
 	            	<attribute name="on_change">onchange_bom_id(bom_id, context)</attribute>
 	            </field>
                 <field name="bom_id" position="after">
-	            	<field name="bom_id_material"/>
+	            	<field name="bom_id_material" domain="[('product_id','=',product_id),('bom_lines','!=',False)]"/>
 	            </field>
 	            <button name="wkf_cancel" position="after">
 	            	<button name="%(act_mfg_id_req)d" states="confirmed,engineer,manufacture" type="action" string="Generate Inventory Reservation and Purchase Requisition"/>

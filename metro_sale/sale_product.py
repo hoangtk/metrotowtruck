@@ -162,7 +162,9 @@ class sale_product(osv.osv):
         return {'value': result}
     def unlink(self, cr, uid, ids, context=None):
         for sale_product_id in self.browse(cr, uid, ids, context=context):
-            if sale_product_id.project_ids or sale_product_id.mrp_prod_ids:
+            if sale_product_id.state != 'draft': 
+                raise osv.except_osv(_('Error'),_("Only MFG ID(%s) with Draft state can be delete!"%(sale_product_id.name,)))
+            elif sale_product_id.project_ids or sale_product_id.mrp_prod_ids:
                 raise osv.except_osv(_('Error'),_("This ID '%s' already have related projects or manufacture order, can not be delete!"%(sale_product_id.name,)))
         return super(sale_product,self).unlink(cr, uid, ids, context=context)
     
