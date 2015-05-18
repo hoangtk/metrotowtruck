@@ -230,7 +230,7 @@
 	                    <field name="trans_type" invisible="1"/>
 	                    <field name="amount"/>
 	                    <field name="journal_bank_id" domain="[('type','in',('bank','cash'))]" string="Receipt/Payment Method"/>
-	                    <field name="employee_id"/>
+	                    <field name="employee_id" required="False"/>
 	                </group>
 	                <group>
 	                    <field name="account_to_id" string="Payments/Receipts account" required="1"/>
