@@ -2114,3 +2114,9 @@ msgstr "客户应收明细账"
 #: view:account.voucher:0
 msgid "Payment Ref"
 msgstr "单号"
+
+#. module: metro_accounts
+#: field:cash.bank.trans,employee_id:0
+#: model:ir.model.fields,field_description:metro_accounts.field_cash_bank_trans_employee_id
+msgid "Employee"
+msgstr "经手人"

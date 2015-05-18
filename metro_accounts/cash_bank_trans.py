@@ -25,7 +25,7 @@ from openerp.tools.translate import _
 
 class cash_bank_trans(osv.osv):
     _name = 'cash.bank.trans'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread','hr.contract']#need to add a "handler" so import hr.contract
     _description = "Withdraw/Deposit Order"
     _rec_name = 'id'
     _order = 'id desc'
