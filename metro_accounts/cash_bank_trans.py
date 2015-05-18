@@ -25,7 +25,7 @@ from openerp.tools.translate import _
 
 class cash_bank_trans(osv.osv):
     _name = 'cash.bank.trans'
-    _inherit = ['mail.thread','hr.contract']#need to add a "handler" so import hr.contract
+    _inherit = ['mail.thread']
     _description = "Withdraw/Deposit Order"
     _rec_name = 'id'
     _order = 'id desc'
@@ -48,6 +48,7 @@ class cash_bank_trans(osv.osv):
         'move_lines': fields.related('move_id','line_id', type='one2many', relation='account.move.line', string='Entry Items', readonly=True),
         #account for other payments/receipts
         'account_to_id': fields.many2one('account.account', 'To account', domain=[('type','!=','view')],required=True,readonly=True, states={'draft':[('readonly',False)]}),
+        'employee_id': fields.many2one('hr.employee', "Employee"), #add a new string for "jing shou ren" to record who have the payment
     }
     def default_get(self, cr, uid, fields_list, context=None):
         resu = super(cash_bank_trans,self).default_get(cr, uid, fields_list, context)
