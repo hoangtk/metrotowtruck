@@ -179,7 +179,7 @@ class product_product(osv.osv):
 		'loc_pos_code': fields.char('Storage Position Code',size=16),
 		'is_print_barcode': fields.boolean('Print barcode label'),
 		'mfg_standard': fields.char(string=u'Manufacture Standard', size=32, help="The manufacture standard name, like GB/T5782-86"),
-		'default_code' : fields.char('Internal Reference', size=64, select=True, required=True),
+		'default_code' : fields.char('Internal Reference', size=64, readonly=True, select=True, required=True),
 		'partner_ref' : fields.function(_product_partner_ref, type='char', string='Customer ref'),
         'part_no_external': fields.char(string=u'External Part#', size=32, help="The external part#, may be from engineering, purchase..."),
         'checked': fields.boolean('Checked', help="User can use this flag field to check the products, once you finish checking, once finish the checking and fixed data, then check it, you only need to check the items without this flag"),
