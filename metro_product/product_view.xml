@@ -224,13 +224,13 @@
             		</page>
             	</notebook>
             	
-                <field name="default_code" position="replace">
+                <field name="default_code" position="replace" readonly="1">
                     <label for="default_code"/>
                     <div>
-                        <field name="default_code" class="oe_inline"/> 
+                        <field name="default_code" class="oe_inline"/>
                         <button type="object" icon="gtk-execute" name="get_sequence" string=""
                                     help="Only press this button to create a new part number! 只有按这个按钮来创建一个新的零件编号！"
-									groups="metro.group_metro_base_manager"  />
+									groups="metro.group_metro_base_manager"  invisible="1"/>
                     </div>
                 	<field name="part_no_external"/>
                 </field>
