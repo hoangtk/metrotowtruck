@@ -20,7 +20,11 @@
 ##############################################################################
 
 import logging
+from openerp import pooler
 from openerp.osv import fields, osv
+from openerp import SUPERUSER_ID
+from openerp.tools.translate import _
+
 _logger = logging.getLogger(__name__)
 
 class res_users(osv.osv):
@@ -40,6 +44,25 @@ class res_users(osv.osv):
                 user_info = self.browse(cr, uid, id, context=context)
                 self.pool.get('res.partner').write(cr, uid, user_info.partner_id.id, {'company_id':user_info.company_id.id}, context=context)
         return resu
+    '''
+    set the system config paramter 'remote_access' to only allow some users access ERP by some host
+    remote_access format: {'address-1':['login1','login2'...], ..., 'address-n':[...]}
+    sample: {'www.myerp.com:1021':['johnw','johnw1']}
+    '''
+    def authenticate(self, db, login, password, user_agent_env):
+        cr = pooler.get_db(db).cursor()
+        #check the remote access configuration parameter
+        ICP = self.pool.get('ir.config_parameter')
+        remote_access = ICP.get_param(cr, SUPERUSER_ID, 'remote_access')
+        if remote_access:
+            access_host = eval(remote_access)
+            remote_host = user_agent_env.get('HTTP_HOST')
+            if remote_host in access_host:
+                logins = access_host.get(remote_host,[])
+                if login not in logins:
+                    raise osv.except_osv(_('Error!'), _("You are not allowed to access this site!"))
+                    
+        return super(res_users, self).authenticate(db, login, password, user_agent_env) 
 res_users()
 
 
