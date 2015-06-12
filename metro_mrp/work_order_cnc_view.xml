@@ -15,7 +15,7 @@
     				<button name="action_draft" string="Set to Draft" states="confirmed,cancel" type="object" groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_draft" string="Set to Draft" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="action_done" string="Done" states="approved" type="object" groups="metro_mrp.group_mrp_cnc_manager"/>
-    				<button name="action_cancel" string="Cancel" states="draft,rejected" type="object"/>
+    				<button name="action_cancel" string="Cancel" states="draft,rejected" type="object" groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_cancel" string="Cancel" states="confirmed" type="object"  groups="metro_mrp.group_mrp_supervisor"/>
     				<button name="action_cancel" string="Cancel" states="approved,in_progress" type="object" groups="mrp.group_mrp_manager"/>
     				<button name="print_pdf" string="Print PDF" type="object"/>
