@@ -30,7 +30,7 @@ class drawing_order(osv.osv):
         'create_date': fields.datetime('Creation Date', readonly=True),   
 #        'date_finished': fields.datetime('Finished Date', readonly=True),
         'company_id': fields.many2one('res.company', 'Company', readonly=True),     
-        'product_id': fields.related('drawing_order_line','product_id', type='many2one', relation='product.product', string='Product'),
+        'product_id': fields.related('order_lines','product_id', type='many2one', relation='product.product', string='Product'),
         'main_part_id': fields.many2one('product.product','Main Product',readonly=True, states={'draft':[('readonly',False)],'rejected':[('readonly',False)]}),
         'bom_file_name': fields.char('BOM File Name', size=64),
         'bom_file': fields.function(utils.field_get_file, fnct_inv=utils.field_set_file, string="BOM File", type="binary", multi="_get_file",),
