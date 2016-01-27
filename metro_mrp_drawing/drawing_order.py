@@ -11,7 +11,7 @@ import zipfile
 import random
 import os
 from openerp import SUPERUSER_ID
-    
+import tempfile    
 class drawing_order(osv.osv):
     _name = "drawing.order"
     _inherit = ['mail.thread']
@@ -174,7 +174,9 @@ class drawing_order_line(osv.osv):
     _name = "drawing.order.line"
     _description = "Drawing Order Line"
     _rec_name = "drawing_file_name"
-    
+    #+++HoangTK - 11/06/2015: Ordery by Drawing PDF Name asc
+    _order = "drawing_file_name asc"
+    #---HoangTK
     _columns = {
         'order_id': fields.many2one('drawing.order','Drawing Order'),
         'product_id': fields.many2one('product.product','Sub Product'),
@@ -222,18 +224,34 @@ class drawing_order_line(osv.osv):
                         output.addPage(page)
                         page_cnt += 1
         if page_cnt > 0:
-            full_path_temp = attachment_obj.full_path(cr, uid, 'temp')
-#            file_name = self._format_file_name(order.name)
+            #+++ HoangTK - 12/10/2015: Use system temp file and controller, fix osv_memory error when pdf file large
             file_name = "Drawing"
             if context.get('order_name'):
-                file_name = '%s-%s'%(file_name, self._format_file_name(context.get('order_name')))
-            full_file_name =  '%s/%s.pdf'%(full_path_temp, file_name,)
-            outputStream = file(full_file_name, "wb") 
+                file_name = '%s-%s'%(file_name, self._format_file_name(context.get('order_name')))            
+            temp_drawing_pdf_file = tempfile.NamedTemporaryFile(delete=False)
+            temp_drawing_pdf_file_name = temp_drawing_pdf_file.name
+            temp_drawing_pdf_file.close()
+            outputStream = file(temp_drawing_pdf_file_name, "wb") 
             output.write(outputStream) 
             outputStream.close()
-            filedata = open(full_file_name,'rb').read().encode('base64')
-            os.remove(full_file_name)
-            return self.pool.get('file.down').download_data(cr, uid, "%s.pdf"%(file_name,), filedata, context)
+            return {
+                    'type' : 'ir.actions.act_url',
+                    'url': '/web/export/drawing_order_print_pdf?file_name=%s&file_data=%s'%(file_name, temp_drawing_pdf_file_name),
+                    'target': 'self', 
+                    }              
+#             full_path_temp = attachment_obj.full_path(cr, uid, 'temp')
+# #            file_name = self._format_file_name(order.name)
+#             file_name = "Drawing"
+#             if context.get('order_name'):
+#                 file_name = '%s-%s'%(file_name, self._format_file_name(context.get('order_name')))
+#             full_file_name =  '%s/%s.pdf'%(full_path_temp, file_name,)
+#             outputStream = file(full_file_name, "wb") 
+#             output.write(outputStream) 
+#             outputStream.close()
+#             filedata = open(full_file_name,'rb').read().encode('base64')
+#             os.remove(full_file_name)
+#             return self.pool.get('file.down').download_data(cr, uid, "%s.pdf"%(file_name,), filedata, context)
+            #--- HoangTK - 12/10/2015: Use system temp file and controller, fix osv_memory error when pdf file large
         else:
             raise osv.except_osv(_("Error!"),'No PDF files were found!')
             return False

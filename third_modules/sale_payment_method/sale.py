@@ -220,7 +220,6 @@ class sale_order(orm.Model):
                                                             company.currency_id.id,
                                                             amount,
                                                             context=context))
-
         # payment line (bank / cash)
         debit_line = {
             'name': description,
@@ -269,6 +268,12 @@ class sale_order(orm.Model):
             'currency_id': currency_id,
             'sale_ids': [(4, sale.id)],
         }
+        #+++ HoangTK 11/12/2015: Not change amount if accounts and sale order have the same currency
+        if (partner.property_account_receivable.currency_id.id == journal.default_credit_account_id.currency_id.id and 
+			journal.default_credit_account_id.currency_id.id == order_currency_id):
+            debit_line.update({'debit': amount_currency})
+            credit_line.update({'credit': amount_currency})
+        #--- HoangTK 11/12/2015
         return debit_line, credit_line
 
     def onchange_payment_method_id(self, cr, uid, ids, payment_method_id, context=None):

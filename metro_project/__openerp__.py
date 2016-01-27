@@ -49,7 +49,8 @@
         'project_data.xml',
         'wizard/task_print.xml',
         'wizard/project_task_batchset_view.xml',
-        'board_tasks_view.xml'
+        'board_tasks_view.xml',
+        'project_menu_view.xml'
     ],
     'test': [],
     'demo': [],

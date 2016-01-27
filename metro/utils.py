@@ -287,12 +287,32 @@ def field_get_file(self, cr, uid, ids, field_names, args, context=None):
     result = dict.fromkeys(ids, {})
     attachment_obj = self.pool.get('ir.attachment')
     for obj in self.browse(cr, uid, ids):
+        result[obj.id] = {}
         for field_name in field_names:
+            #+++ HoangTK - 11/13/2015: Fix downloading wrong pdf file content in drawing order line
             result[obj.id][field_name] = None
-            file_ids = attachment_obj.search(
+            if self._name == 'drawing.order.line': 
+                file_ids = attachment_obj.search(
                 cr, uid, [('name', '=', field_name),
                           ('res_id', '=', obj.id),
+                          ('res_name','=', obj.drawing_file_name),
                           ('res_model', '=', self._name)],context=context)
+            elif self._name == 'drawing.order':
+                file_ids = attachment_obj.search(
+                cr, uid, [('name', '=', field_name),
+                          ('res_id', '=', obj.id),
+                          ('res_name','=', obj.name),
+                          ('res_model', '=', self._name)],context=context)
+            else:
+                file_ids = attachment_obj.search(
+                cr, uid, [('name', '=', field_name),
+                          ('res_id', '=', obj.id),
+                          ('res_model', '=', self._name)],context=context)                
+            #file_ids = attachment_obj.search(
+            #    cr, uid, [('name', '=', field_name),
+            #              ('res_id', '=', obj.id),
+            #              ('res_model', '=', self._name)],context=context)
+            #--- HoangTK - 11/13/2015
             if file_ids:
                 result[obj.id][field_name] = attachment_obj.browse(cr, uid, file_ids[0]).datas
     return result

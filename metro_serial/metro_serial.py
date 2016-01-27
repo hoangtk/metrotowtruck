@@ -27,6 +27,9 @@ class years(osv.osv):
         'name': fields.char('Year', size=4, required=True),
         'code':fields.char('Code', size=1, required=True)
     }
+    #++HoangTK - 11/05/2015: Sorting year by descending
+    _order = 'name desc'
+    #--HoangTK
 
 
 class location(osv.osv):

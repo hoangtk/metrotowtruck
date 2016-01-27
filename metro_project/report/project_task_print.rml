@@ -95,11 +95,71 @@
       <blockLeftPadding length="1"/>
       <blockRightPadding length="1"/>
     </blockTableStyle>
+    <blockTableStyle id="Table3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <blockTopPadding length="1"/>
+      <blockBottomPadding length="1"/>
+      <blockLeftPadding length="1"/>
+      <blockRightPadding length="1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table4">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <blockTopPadding length="1"/>
+      <blockBottomPadding length="1"/>
+      <blockLeftPadding length="1"/>
+      <blockRightPadding length="1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table5">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <blockTopPadding length="1"/>
+      <blockBottomPadding length="1"/>
+      <blockLeftPadding length="1"/>
+      <blockRightPadding length="1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table6">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <blockTopPadding length="1"/>
+      <blockBottomPadding length="1"/>
+      <blockLeftPadding length="1"/>
+      <blockRightPadding length="1"/>
+    </blockTableStyle>
     <initialize>
       <paraStyle name="all" alignment="justify"/>
     </initialize>
     <paraStyle name="P1" fontName="Helvetica-Bold" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
     <paraStyle name="P2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P3" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="13.0" leading="16" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P4" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="20.0" leading="25" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P5" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="LEFT" backColor="#ffffff" spaceBefore="0.0" spaceAfter="0.0" textColor="#000000"/>
+    <paraStyle name="P6" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="JUSTIFY" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="P7" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" backColor="#ffffff" spaceBefore="0.0" spaceAfter="0.0" textColor="#000000"/>
+    <paraStyle name="P8" fontName="Helvetica" fontSize="8.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="P9" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Standard" fontName="Helvetica"/>
     <paraStyle name="Text body" fontName="Helvetica" spaceBefore="0.0" spaceAfter="6.0"/>
     <paraStyle name="Heading" fontName="Helvetica" fontSize="15.0" leading="19" spaceBefore="12.0" spaceAfter="6.0"/>
@@ -128,7 +188,7 @@
     <paraStyle name="terp_default_address" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="10.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Bold_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="terp_default_Centre_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="CENTER" backColor="#ffffff" spaceBefore="0.0" spaceAfter="0.0" textColor="#000000"/>
     <paraStyle name="terp_default_Right_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Bold_Right_9" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica-Bold" fontSize="9.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_2" rightIndent="0.0" leftIndent="0.0" fontName="Helvetica" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
@@ -138,114 +198,185 @@
   </stylesheet>
   <story>
     <para style="terp_default_8">[[ repeatIn(objects,'task') ]]</para>
+    <para style="terp_header">Task [[ task.name ]]</para>
+    <para style="terp_default_8">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="51.0,187.0,61.0,232.0" style="Table1">
+      <tr>
+        <td>
+          <para style="P1">Project:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.project_id.name ]]</para>
+        </td>
+        <td>
+          <para style="P1">Dead Line:</para>
+        </td>
+        <td>
+          <para style="P2">[[ formatLang(task.date_deadline,date='True') ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Assignee:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.user_id.name ]]</para>
+        </td>
+        <td>
+          <para style="P1">Planned Hours:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.planned_hours ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Employees:</para>
+        </td>
+        <td>
+          <para style="P2">[[get_emp_names(task.emp_ids)]]</para>
+        </td>
+        <td>
+          <para style="P1">Spent Hours:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.effective_hours]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Context:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.context_id.name ]]</para>
+        </td>
+        <td>
+          <para style="P1">Timeframe:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.timebox_id.name ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Priority:</para>
+        </td>
+        <td>
+          <para style="P2">[[ get_priority(task.priority) ]]</para>
+        </td>
+        <td>
+          <para style="P1">Date Start</para>
+        </td>
+        <td>
+          <para style="P2">[[ formatLang(task.date_start,date='True') ]]</para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para style="P1">Stage:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.stage_id.name ]]</para>
+        </td>
+        <td>
+          <para style="P1">Date End</para>
+        </td>
+        <td>
+          <para style="P2">[[ formatLang(task.date_end,date='True') ]]</para>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="terp_default_8">
+      <font color="white"> </font>
+    </para>
+    <blockTable colWidths="51.0,479.0" style="Table2">
+      <tr>
+        <td>
+          <para style="P1">Description:</para>
+        </td>
+        <td>
+          <para style="P2">[[ task.description ]]</para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+          <para style="P2">
+            <font color="white"> </font>
+          </para>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="P3">Work Hour</para>
     <section>
-      <para style="terp_header">Task [[ task.name ]]</para>
-      <para style="terp_default_8">
-        <font color="white"> </font>
-      </para>
-      <blockTable colWidths="51.0,187.0,61.0,232.0" style="Table1">
+      <para style="P4">[[repeatIn(task.work_ids,'lines')]]</para>
+      <blockTable colWidths="79.0,268.0,76.0,106.0" style="Table3">
         <tr>
           <td>
-            <para style="P1">Project:</para>
+            <para style="P5">[[lines.date]]</para>
           </td>
           <td>
-            <para style="P2">[[ task.project_id.name ]]</para>
+            <para style="P6">[[lines.name]]</para>
           </td>
           <td>
-            <para style="P1">Dead Line:</para>
+            <para style="P7">[[lines.hours]]</para>
           </td>
           <td>
-            <para style="P2">[[ formatLang(task.date_deadline,date='True') ]]</para>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <para style="P1">Assignee:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.user_id.name ]]</para>
-          </td>
-          <td>
-            <para style="P1">Planned Hours:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.planned_hours ]]</para>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <para style="P1">Employees:</para>
-          </td>
-          <td>
-            <para style="P2">[[get_emp_names(task.emp_ids)]]</para>
-          </td>
-          <td>
-            <para style="P1">Spent Hours:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.effective_hours]]</para>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <para style="P1">Context:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.context_id.name ]]</para>
-          </td>
-          <td>
-            <para style="P1">Timeframe:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.timebox_id.name ]]</para>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <para style="P1">Priority:</para>
-          </td>
-          <td>
-            <para style="P2">[[ get_priority(task.priority) ]]</para>
-          </td>
-          <td>
-            <para style="P1">Date Start</para>
-          </td>
-          <td>
-            <para style="P2">[[ formatLang(task.date_start,date='True') ]]</para>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <para style="P1">Stage:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.stage_id.name ]]</para>
-          </td>
-          <td>
-            <para style="P1">Date End</para>
-          </td>
-          <td>
-            <para style="P2">[[ formatLang(task.date_end,date='True') ]]</para>
+            <para style="terp_default_Right_9">
+              <font face="Helvetica" size="8.0">[[lines.user_id.name]]</font>
+            </para>
           </td>
         </tr>
       </blockTable>
-      <para style="terp_default_8">
-        <font color="white"> </font>
-      </para>
-      <blockTable colWidths="51.0,479.0" style="Table2">
-        <tr>
-          <td>
-            <para style="P1">Description:</para>
-          </td>
-          <td>
-            <para style="P2">[[ task.description ]]</para>
-          </td>
-        </tr>
-      </blockTable>
-      <para style="Standard">
-        <font color="white"> </font>
-      </para>
     </section>
+    <blockTable colWidths="336.0,73.0" repeatRows="1" style="Table4">
+      <tr>
+        <td>
+          <para style="P8">Spent Hours：</para>
+        </td>
+        <td>
+          <para style="P8">[[task.effective_hours.name]]</para>
+        </td>
+      </tr>
+    </blockTable>
+    <blockTable colWidths="336.0,72.0" repeatRows="1" style="Table5">
+      <tr>
+        <td>
+          <para style="P8">Remaining：</para>
+        </td>
+        <td>
+          <para style="P8">[[task.remaining_hours.name]]</para>
+        </td>
+      </tr>
+    </blockTable>
+    <blockTable colWidths="336.0,72.0" repeatRows="1" style="Table6">
+      <tr>
+        <td>
+          <para style="P9">Total：</para>
+        </td>
+        <td>
+          <para style="P8">[[task.total_hours.name]]</para>
+        </td>
+      </tr>
+    </blockTable>
+    <para style="Standard">
+      <font color="white"> </font>
+    </para>
   </story>
 </document>
 
